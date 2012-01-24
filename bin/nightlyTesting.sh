@@ -12,7 +12,7 @@ svn co -q https://svn.nextthought.com/repository/NextThoughtPlatform/trunk/ Next
 
 # install the dictionary file
 
-TEST_DIR=`pwd`/NextThoughtPlatform/src/test/python
+TEST_DIR=`pwd`/NextThoughtPlatform/nti.integrationtests
 PYTHONPATH=`pwd`/NextThoughtPlatform/src/main/python
 mkdir -p $PYTHONPATH/wiktionary/
 cp ~/bin/dict.db $PYTHONPATH/wiktionary/
@@ -31,17 +31,6 @@ export PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin:$PAT
 
 mkdir -p $DATASERVER_DIR
 
-function kill_python_procs()
-{
-	user_id=`whoami`
-	proc_id='Python'
-	for p in `ps -u ${user_id} | grep '/*/'${proc_id} | grep -v grep | awk '{print $2}'` 
-	do
-		echo "killing ${p}"
- 		kill -9 ${p} 
-	done
-}
-
 function stop_daemons()
 {
 	for i in $1/*.zconf.xml; do
@@ -59,16 +48,16 @@ function clean_data()
 date
 export PYTHONPATH
 
-python2.7 $TEST_DIR/ServerTest_v2.py > $LOG 2>&1
+python2.7 $TEST_DIR/src/nti/integrationtests/ServerTest_v2.py > $LOG 2>&1
 stop_daemons $DATASERVER_DIR
 clean_data $DATASERVER_DIR
 
-python2.7 $TEST_DIR/ServerTest_v3_quizzes.py >> $LOG 2>&1
+python2.7 $TEST_DIR/src/nti/integrationtests/ServerTest_v3_quizzes.py >> $LOG 2>&1
 stop_daemons $DATASERVER_DIR
 clean_data $DATASERVER_DIR
 
 # kill_python_procs
-python2.7 $TEST_DIR/run_integration_tests.py --use_coverage >> $LOG 2>&1
+python2.7 $TEST_DIR/src/nti/integrationtests/run_integration_tests.py --use_coverage >> $LOG 2>&1
 stop_daemons $DATASERVER_DIR
 clean_data $DATASERVER_DIR
 

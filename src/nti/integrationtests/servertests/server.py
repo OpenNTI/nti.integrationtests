@@ -25,9 +25,9 @@ __all__ = ['DataserverProcess', 'DataserverClient']
 DEFAULT_USER_PASSWORD = 'temp001'
 
 _COVERAGE_CMD = '/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/coverage'
-_APP_PATH = os.path.dirname( __file__ ) + '/../../../main/python/app.py'
-_APP_PATH_COV = os.path.dirname( __file__ ) + '/../../../main/python/app_coverage.py'
-_COVERAGE_CONF =  os.path.dirname( __file__ ) + '/../../../main/python/_coverage_run.cfg'
+_APP_PATH = os.path.dirname( __file__ ) + '/../../../../../src/main/python/app.py'
+_APP_PATH_COV = os.path.dirname( __file__ ) + '/../../../../../src/main/python/app_coverage.py'
+_COVERAGE_CONF =  os.path.dirname( __file__ ) + '/../../../../../src/main/python/_coverage_run.cfg'
 
 def objectPath(obj):
 	oid = obj
