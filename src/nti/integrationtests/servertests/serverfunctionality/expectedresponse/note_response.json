@@ -1,0 +1,10 @@
+{
+	"MimeType":"application/vnd.nextthought.note", 
+	"setupExpectedResponse":
+								[
+									"a setup note"
+								], 
+	"testExpectedResponse":		[
+									"a test note"
+								]
+}

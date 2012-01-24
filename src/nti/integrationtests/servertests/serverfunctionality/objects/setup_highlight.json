@@ -1,0 +1,9 @@
+{
+	"MimeType": "application/vnd.nextthought.highlight",
+	"ContainerId": "test.user.container.1325697286.2",
+	"Creator": "test.user.1@nextthought.com",
+	"OID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a68:5573657273",
+	"ID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a68:5573657273",
+	"Class": "Highlight",
+	"startHighlightedText": "a setup highlight"
+}

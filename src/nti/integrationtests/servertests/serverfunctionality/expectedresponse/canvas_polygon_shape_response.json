@@ -1,0 +1,5 @@
+{
+	"MimeType":"application/vnd.nextthought.canvaspolygonshape", 
+	"setupExpectedResponse":"1.000 1.000 1.000", 
+	"testExpectedResponse":"0.500 0.500 0.500"
+}
