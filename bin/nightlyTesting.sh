@@ -1,21 +1,23 @@
 #!/bin/bash
 
+. ~/bin/dataserver_vars.sh
 export PATH=/opt/local/bin:$PATH
 export TMPDIR=/tmp
 CHECKOUT_DIR=`mktemp -d -t nightly`
 cd $CHECKOUT_DIR
 
 # checkout the source
+svn up ~/Projects/NextThoughtPlatform
 
-svn co -q https://svn.nextthought.com/repository/AoPS/trunk AoPS
-svn co -q https://svn.nextthought.com/repository/NextThoughtPlatform/trunk/ NextThoughtPlatform
+#svn co -q https://svn.nextthought.com/repository/AoPS/trunk AoPS
+#svn co -q https://svn.nextthought.com/repository/NextThoughtPlatform/trunk/ NextThoughtPlatform
 
 # install the dictionary file
 
-TEST_DIR=`pwd`/NextThoughtPlatform/nti.integrationtests
-PYTHONPATH=`pwd`/NextThoughtPlatform/src/main/python
-mkdir -p $PYTHONPATH/wiktionary/
-cp ~/bin/dict.db $PYTHONPATH/wiktionary/
+#TEST_DIR=`pwd`/NextThoughtPlatform/src/test/python
+#PYTHONPATH=`pwd`/NextThoughtPlatform/src/main/python
+#mkdir -p $PYTHONPATH/wiktionary/
+#cp ~/bin/dict.db $PYTHONPATH/wiktionary/
 
 # setup a location for the dataserver
 
@@ -27,7 +29,7 @@ export TEST_WAIT=10
 export DATASERVER_SYNC_CHANGES=True
 #export DATASERVER_NO_REDIRECT=1
 LOG=~/tmp/lastNightlyTesting.txt
-export PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin:$PATH
+#export PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin:$PATH
 
 mkdir -p $DATASERVER_DIR
 
@@ -48,34 +50,32 @@ function clean_data()
 date
 export PYTHONPATH
 
-python2.7 $TEST_DIR/src/nti/integrationtests/ServerTest_v2.py > $LOG 2>&1
-stop_daemons $DATASERVER_DIR
-clean_data $DATASERVER_DIR
+#python $TEST_DIR/ServerTest_v2.py > $LOG 2>&1
+#stop_daemons $DATASERVER_DIR
+#clean_data $DATASERVER_DIR
 
-python2.7 $TEST_DIR/src/nti/integrationtests/ServerTest_v3_quizzes.py >> $LOG 2>&1
-stop_daemons $DATASERVER_DIR
-clean_data $DATASERVER_DIR
+#python $TEST_DIR/ServerTest_v3_quizzes.py >> $LOG 2>&1
+#stop_daemons $DATASERVER_DIR
+#clean_data $DATASERVER_DIR
 
-# kill_python_procs
-python2.7 $TEST_DIR/src/nti/integrationtests/run_integration_tests.py --use_coverage >> $LOG 2>&1
-stop_daemons $DATASERVER_DIR
-clean_data $DATASERVER_DIR
+#python $TEST_DIR/run_integration_tests.py --use_coverage >> $LOG 2>&1
+#stop_daemons $DATASERVER_DIR
+#clean_data $DATASERVER_DIR
 
 # combine coverage data from integration tests
 
-coverage combine
+#coverage combine
 
 # move file to be combined later
 
-if [ -f $CHECKOUT_DIR/.coverage ]
-then
-	mv $CHECKOUT_DIR/.coverage $PYTHONPATH/.coverage.int
-fi
+#if [ -f $CHECKOUT_DIR/.coverage ]; then
+#	mv $CHECKOUT_DIR/.coverage $PYTHONPATH/.coverage.int
+#fi
 
 # change directory to run nose tests
 
-cd $PYTHONPATH
-
+#cd $PYTHONPATH
+cd ~/Projects/NextThoughtPlatform/nti.dataserver/src
 # running nosetests
 
 COVERDIR=${COVERDIR:-/Library/WebServer/Documents/cover-reports}
@@ -85,8 +85,7 @@ fi
 
 nosetests -d -e pywiki --with-coverage --cover-html $COVEROPT --cover-inclusive --cover-package=nti,socketio,geventwebsocket,wiktionary,context >> $LOG 2>&1
 
-if [ -f $PYTHONPATH/.coverage ]
-then
+if [ -f $PYTHONPATH/.coverage ]; then
 	mv $PYTHONPATH/.coverage $PYTHONPATH/.coverage.nose
 fi
 
