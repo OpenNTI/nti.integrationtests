@@ -11,8 +11,9 @@ Created on Jan 13, 2012
 
 import os
 import json
+import glob
 
-from servertests.serverfunctionality.utils import USERNAME, PASSWORD, URL, DATASERVER
+from servertests.serverfunctionality.utils import USERNAME, PASSWORD, URL, DATASERVER, PATH_TO_TESTS
 from servertests.serverfunctionality.utils.generaterequest import ServerRequest
 from servertests.serverfunctionality.utils.serverdata import Workspace
 from servertests import DataServerTestCase
@@ -41,10 +42,9 @@ def setup():
 def teardown():
 	DataServerTestCase.tearDownClass()
 	
-def open_data_file(responseFileName):
+def open_data_file(file_name):
 	try:
-		tf = os.path.dirname(__file__) + '/../testtypes/' + responseFileName +'.json'
-		with open(tf, "r") as f:
+		with open(PATH_TO_TESTS + file_name + '.json', "r") as f:
 			testContent = json.loads(f.read())
 		return testContent
 	except IOError: return False
@@ -79,6 +79,14 @@ def is_valid_request_data(accept, test):
 	elif accept.find(test) != -1: return True
 	else: return False
 	
+def get_info(test_path):
+	tests = []
+	for test in test_path:
+		test_file = test.strip('../testtype/')
+		test = test_file.split('.json')[0]
+		tests.append(test)
+	return tests
+	
 def run_tests():
 	noFormat = NoFormat()
 	requests = ServerRequest()
@@ -90,19 +98,19 @@ def run_tests():
 	workspace = Workspace.new_from_dict(parsedBody['Items'][0])
 	
 	# the tests that will be ran
-	_tests = ['note', 'highlight', 'friendslist','canvas', 'canvasshape', 'canvascircleshape', 'canvaspolygonshape']
-	
+	test_path = glob.glob(PATH_TO_TESTS + '*')
+	tests = get_info(test_path)
+
 	# massive nested for loops that generate all the tests to be ran
 	for collection in workspace.collections:
 		href = workspace.collections[collection].href
 		for accept in workspace.collections[collection].accepts:
-			for test in _tests:
+			for test in tests:
 				# variables meant to prevent 
 				# bad tests from stopping 
 				# other tests from running
 				badTest = False
 				error = None
-				testFile = test
 				if is_valid_request_data(accept, test): 
 					testValues = open_data_file(test)
 					bodyTester = get_body(test)
@@ -124,7 +132,7 @@ def run_tests():
 											error = testParameter
 									if badTest is True: 
 										badTest = False
-										yield terminate, error, testFile
+										yield terminate, error, test
 									elif testType == 'Post' and testValues['response_types'][responseType]['classification'] == 'NotFound': pass
 									elif testType != 'Post' and testType != 'Put' and \
 										testValues['response_types'][responseType]['classification'] == 'BadData': pass
@@ -133,11 +141,11 @@ def run_tests():
 					# report the failure to run those tests
 					except TypeError: 
 						error = 'objRunner'
-						yield terminate, error, testFile
+						yield terminate, error, test
 			if badTest is True:
 				print 'exicute'
 				badTest = False
-				yield terminate, error, testFile
+				yield terminate, error, test
 
 # reports the error in starting the test
 def terminate(error, test):
