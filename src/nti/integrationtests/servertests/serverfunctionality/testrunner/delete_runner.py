@@ -6,7 +6,7 @@ Created on Jan 12, 2012
 
 import urllib2
 
-from servertests.serverfunctionality.utils.request_generator import ServerValues
+from servertests.serverfunctionality.testrunner import ServerValues
 from servertests.serverfunctionality.utils.response_assert import LastModifiedAssessment
 
 class DeleteObject(ServerValues):
