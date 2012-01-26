@@ -1,5 +1,0 @@
-{
-	"MimeType":"application/vnd.nextthought.canvas", 
-	"setupExpectedResponse":"setUpFriendsList", 
-	"testExpectedResponse":"testFriendsList"
-}
