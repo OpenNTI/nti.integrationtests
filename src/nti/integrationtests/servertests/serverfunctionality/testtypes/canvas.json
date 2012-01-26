@@ -1,0 +1,133 @@
+{
+	"data_type": "canvas",
+	"objects" :
+		{
+			"post_data":
+				{
+					"MimeType": "application/vnd.nextthought.canvas",
+					"ContainerId": "test.user.container.1325696727.28",
+					"Creator": "test.user.1@nextthought.com",
+					"OID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a3d:5573657273",
+					"ID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a3d:5573657273",
+					"shapeList": 
+						[
+							{
+								"strokeRGBAColor": "1.000 1.000 1.000",
+								"MimeType": "application/vnd.nextthought.canvaspolygonshape",
+								"fillRGBAColor": "1.000 1.000 1.000 0.00",
+								"ContainerId": "test.user.container.1325696727.28",
+								"transform":
+									{
+										"a": 0,
+										"c": 0,
+										"b": 0,
+										"d": 0,
+										"tx": 0.25,
+										"ty": 0.25,
+										"Class": "CanvasAffineTransform"
+									},
+								"strokeOpacity": 1.0,
+								"sides": 4,
+								"strokeWidth": "1.000%",
+								"fillColor": "rgb(255.0,255.0,255.0)",
+								"strokeColor": "rgb(255.0,255.0,255.0)",
+								"Class": "CanvasPolygonShape",
+								"fillOpacity": 0.0
+							}
+						],
+					"Class": "Canvas"
+				},
+			"put_data":
+				{
+					"MimeType": "application/vnd.nextthought.canvas",
+					"ContainerId": "test.user.container.1325696727.28", 
+					"Creator": "test.user.1@nextthought.com", 
+					"OID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a3d:5573657273", 
+					"ID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a3d:5573657273", 
+					"shapeList": 
+						[
+							{
+								"strokeRGBAColor": ".500 .500 .500", 
+								"MimeType": "application/vnd.nextthought.canvaspolygonshape", 
+								"fillRGBAColor": ".500 .500 .500 0.00",
+								"ContainerId": "test.user.container.1325696727.28", 
+								"transform": 
+									{
+										"a": 0, 
+										"c": 0, 
+										"b": 0, 
+										"d": 0, 
+										"tx": 0.25, 
+										"ty": 0.25, 
+										"Class": 
+										"CanvasAffineTransform"
+									},
+								"strokeOpacity": 1.0,
+								"sides": 4,
+								"strokeWidth": "1.000%",
+								"fillColor": "rgb(255.0,255.0,255.0)",
+								"strokeColor": "rgb(255.0,255.0,255.0)",
+								"Class": "CanvasPolygonShape",
+								"fillOpacity": 0.0
+							}
+						],
+					"Class": "Canvas"
+				}
+		},
+	"expected_return": 
+		{
+			"MimeType":"application/vnd.nextthought.canvas", 
+			"postExpectedResponse":"1.000 1.000 1.000", 
+			"putExpectedResponse":"0.500 0.500 0.500"
+		},
+	"input_formats" : ["JsonFormat","PlistFormat","NoFormat"],
+	"test_types" : ["Post", "Get", "GetGroup", "Put", "Delete"],
+	"response_types" : 
+		{
+			"Successful": 
+					{
+						"classification": "Successful",
+						"input_info" :{},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					}, 
+			"Unauthorized":
+					{
+						"classification": "Unauthorized",
+						"input_info" :{"password":"incorrect"},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					},
+			"NotFound":
+					{
+						"classification": "NotFound",
+						"input_info" :{"id":"/dataserver2/users/logan.testi%40nextthought.com/Objects/tag%3Anextthought.com%2C2011-10%3Alogan.testi%40nextthought.com-OID-0x03", 
+							"href":"/dataserver2/users/logan.testi%40nextthought.com/doesNotExist"},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					}, 
+			"BadData" :
+					{
+						"classification": "BadData",
+						"input_info" :{"objData":"badData"},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					}
+		}
+}

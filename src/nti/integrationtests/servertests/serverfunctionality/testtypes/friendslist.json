@@ -1,0 +1,102 @@
+{
+	"data_type": "friendslist",
+	"objects" :
+		{
+			"post_data":
+				{
+					"MimeType": "application/vnd.nextthought.friendslist", 
+					"Username": "test.user.1@nextthought.com", 
+					"ContainerId": "FriendsLists", 
+					"Creator": "test.user.1@nextthought.com", 
+					"Last Modified": 1326307573.103522, 
+					"OID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x0961:5573657273", 
+					"avatarURL": "http://www.gravatar.com/avatar/7bece5978d66a78fb79607bb0775f4d9?s=128&d=wavatar", 
+					"NTIID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-MeetingRoom:Group-testfriendslist_1326307573.07@nextthought.com", 
+					"alias": "TestFriendsList-1326307573.07@nextthought.com", 
+					"CreatedTime": 1326307573.103522, 
+					"friends": 
+						[
+							"test.user.1@nextthought.com", 
+							"test.user.2@nextthought.com"
+						], 
+					"Class": "FriendsList", 
+					"realname": "setUpFriendsList"
+				},
+			"put_data":
+				{
+					"MimeType": "application/vnd.nextthought.friendslist", 
+					"Username": "test.user.1@nextthought.com", 
+					"ContainerId": "FriendsLists", 
+					"Creator": "test.user.1@nextthought.com", 
+					"Last Modified": 1326307573.103522, 
+					"OID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x0961:5573657273", 
+					"avatarURL": "http://www.gravatar.com/avatar/7bece5978d66a78fb79607bb0775f4d9?s=128&d=wavatar", 
+					"NTIID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-MeetingRoom:Group-testfriendslist_1326307573.07@nextthought.com", 
+					"alias": "TestFriendsList-1326307573.07@nextthought.com", 
+					"CreatedTime": 1326307573.103522, 
+					"friends": 
+						[
+							"test.user.1@nextthought.com", 
+							"test.user.2@nextthought.com"
+						], 
+					"Class": "FriendsList", 
+					"realname": "testFriendsList"
+				}
+		},
+	"expected_return": 
+		{
+			"MimeType":"application/vnd.nextthought.canvas", 
+			"postExpectedResponse":"setUpFriendsList", 
+			"putExpectedResponse":"testFriendsList"
+		},
+	"input_formats" : ["JsonFormat","PlistFormat","NoFormat"],
+	"test_types" : ["Post", "Get", "GetGroup", "Put", "Delete"],
+	"response_types" : 
+		{
+			"Successful": 
+					{
+						"classification": "Successful",
+						"input_info" :{},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					}, 
+			"Unauthorized":
+					{
+						"classification": "Unauthorized",
+						"input_info" :{"password":"incorrect"},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					},
+			"NotFound":
+					{
+						"classification": "NotFound",
+						"input_info" :{"id":"/dataserver2/users/logan.testi%40nextthought.com/Objects/tag%3Anextthought.com%2C2011-10%3Alogan.testi%40nextthought.com-OID-0x03", 
+							"href":"/dataserver2/users/logan.testi%40nextthought.com/doesNotExist"},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					}, 
+			"BadData" :
+					{
+						"classification": "BadData",
+						"input_info" :{"objData":"badData"},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					}
+		}
+}

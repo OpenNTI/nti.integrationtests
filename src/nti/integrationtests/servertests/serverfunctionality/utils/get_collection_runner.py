@@ -23,14 +23,14 @@ class GetGroupObject(ServerValues):
 			self.tearDown()
 			self.setCollectionModificationTime()
 			self.setModificationTime(parsedBody)
-			assert request.code==self.responseCode.get, \
-				'this method was expecting a %d response, instead received %d' % (self.responseCode.get, request.code)
-			self.objTest.testBody(parsedBody, self.testObjData['MimeType'], self.objResponse['setupExpectedResponse'])
+			assert request.code==self.responseCode['get'], \
+				'this method was expecting a %d response, instead received %d' % (self.responseCode['get'], request.code)
+			self.objTest.testBody(parsedBody, self.postObjData['MimeType'], self.objResponse['postExpectedResponse'])
 			LastModifiedAssessment.unchangedLastModifiedTime(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection,
 														requestTime=self.lastModified)
 		except urllib2.HTTPError, error:
 			self.tearDown()
 			self.setCollectionModificationTime()
-			assert error.code==self.responseCode.get, \
-				'this method was expecting a %d response, instead received %d' % (self.responseCode.get, error.code)
+			assert error.code==self.responseCode['get'], \
+				'this method was expecting a %d response, instead received %d' % (self.responseCode['get'], error.code)
 			LastModifiedAssessment.unchangedLastModifiedTime(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)

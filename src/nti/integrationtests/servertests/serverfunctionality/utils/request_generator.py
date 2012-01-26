@@ -39,21 +39,22 @@ class ServerValues(object):
 	def setValues(self, kwargs):
 		self.requests = ServerRequest()
 		self.format = kwargs.get('format', NoFormat())
-		self.objTest = kwargs['objRunner'].body_tester
+		self.objTest = kwargs['bodyTester']
 		
-		_href = kwargs.get('href', None)
-		_inputInfo = kwargs['responseType'].input_info
+		_href = kwargs['href']
+		_inputInfo = kwargs['responseTypes']
+		_data = kwargs['objRunner']['objects']
 		
-		self.responseCode = kwargs['responseType']
+		self.responseCode = kwargs['responseTypes']
 		self.username = USERNAME
 		self.password = PASSWORD
 		self.testPassword = _inputInfo.get('password', PASSWORD)
-		self.setupObjData = self.format.openObj(kwargs['objRunner'].setup_obj)
-		self.testObjData = _inputInfo.get("objData", self.format.openObj(kwargs['objRunner'].test_obj))
+		self.postObjData = _data['post_data']
+		self.putObjData = _data['put_data']
 		self.href_url = URL + _href
 		self.testHrefUrl = URL + _inputInfo.get('href', _href)
 		self.testObjRef = _inputInfo.get('id', None)
-		self.objResponse = self.format.openResponse(kwargs['objRunner'].response_value)
+		self.objResponse = kwargs['objRunner']['expected_return']
 		
 		self.testArgs = None
 #		self.lastModifiedCollection = 0
@@ -65,7 +66,7 @@ class ServerValues(object):
 			self.testArgs = {'url_id':URL + self.testObjRef, 'id':self.testObjRef}
 		else:
 			url = self.format.formatURL(self.href_url)
-			data = self.format.write(self.setupObjData)
+			data = self.format.write(self.postObjData)
 			request = self.requests.post(url=url, data=data, username=self.username, password=self.password)
 			parsedBody = self.format.read(request)
 			if parsedBody['href'].find('/Objects/') != -1: self.testArgs = {'url_id':URL + parsedBody['href'], 'id':parsedBody['href']}
