@@ -44,10 +44,11 @@ def teardown():
 	
 def open_data_file(file_name):
 	try:
-		with open(PATH_TO_TESTS + file_name + '.json', "r") as f:
-			testContent = json.loads(f.read())
-		return testContent
-	except IOError: return False
+		with open(file_name,"r") as f:
+			content = json.loads(f.read())
+		return content
+	except: 
+		return False
 
 def get_body(testType):
 	if testType == 'note': return NoteBodyTester()
@@ -98,7 +99,7 @@ def run_tests():
 	workspace = Workspace.new_from_dict(parsedBody['Items'][0])
 	
 	# the tests that will be ran
-	test_path = glob.glob(PATH_TO_TESTS + '*')
+	test_path = glob.glob(PATH_TO_TESTS + '/*.json')
 	tests = get_info(test_path)
 
 	# massive nested for loops that generate all the tests to be ran
