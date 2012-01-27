@@ -5,7 +5,7 @@ Created on Dec 21, 2011
 """
 
 import os
-from servertests import DataserverProcess
+from nti.integrationtests.servertests import DataserverProcess
 
 findPort = DataserverProcess()
 

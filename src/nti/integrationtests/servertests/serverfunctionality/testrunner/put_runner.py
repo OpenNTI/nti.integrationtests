@@ -6,8 +6,8 @@ Created on Jan 12, 2012
 
 import urllib2
 
-from servertests.serverfunctionality.utils.request_generator import ServerValues
-from servertests.serverfunctionality.utils.response_assert import LastModifiedAssessment
+from nti.integrationtests.servertests.serverfunctionality.testrunner import ServerValues
+from nti.integrationtests.servertests.serverfunctionality.utils.response_assert import LastModifiedAssessment
 
 class PutObject(ServerValues):	
 	def makeRequest(self, kwargs):

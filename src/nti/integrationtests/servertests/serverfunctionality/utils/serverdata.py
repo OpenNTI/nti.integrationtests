@@ -6,12 +6,6 @@ Created on Jan 17, 2012
 
 import warnings
 
-from servertests.serverfunctionality.utils.post_runner import PostObject
-from servertests.serverfunctionality.utils.get_runner import GetObject
-from servertests.serverfunctionality.utils.get_collection_runner import GetGroupObject
-from servertests.serverfunctionality.utils.put_runner import PutObject
-from servertests.serverfunctionality.utils.delete_runner import DeleteObject
-
 # -----------------------------------
 
 ROOT_ITEM = u'tag:nextthought.com,2011-10:Root'

@@ -9,9 +9,9 @@ import time
 import sys
 import json
 
-from servertests.serverfunctionality.utils.generaterequest import ServerRequest
-from servertests.serverfunctionality.utils.url_formatter import NoFormat
-from servertests.serverfunctionality.utils import USERNAME, PASSWORD, URL
+from nti.integrationtests.servertests.serverfunctionality.utils.generaterequest import ServerRequest
+from nti.integrationtests.servertests.serverfunctionality.utils.url_formatter import NoFormat
+from nti.integrationtests.servertests.serverfunctionality.utils import USERNAME, PASSWORD, URL
 
 def _http_ise_error_logging(f):
 	def to_call( *args, **kwargs ):

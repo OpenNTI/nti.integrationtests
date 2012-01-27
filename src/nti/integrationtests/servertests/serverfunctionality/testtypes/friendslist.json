@@ -1,5 +1,5 @@
 {
-	"data_type": "friendslist",
+	"data_type": "application/vnd.nextthought.friendslist",
 	"objects" :
 		{
 			"post_data":
