@@ -2,7 +2,7 @@ import time
 
 from unittest import defaultTestLoader
 from unittest import TextTestRunner
-from servertests.server import DataserverProcess
+from nti.integrationtests.dataserver.server import DataserverProcess
 
 def runner(path, pattern="test*.py", use_coverage=False, coverage_report=False):
 	
