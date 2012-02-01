@@ -1,4 +1,4 @@
-from nti.integrationtests.generalpurpose.run_tests import run_tests
+from nti.integrationtests.generalpurpose.utils.run_tests import run_tests
 
 def main(args = None):	
 	run_tests()
