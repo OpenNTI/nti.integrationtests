@@ -20,11 +20,11 @@ Copyright (C) 2010 Hiroki Ohtani(liris)
 """
 
 import socket
-from urlparse import urlparse
 import random
 import struct
 import md5
 import logging
+from urlparse import urlparse
 
 logger = logging.getLogger()
 
