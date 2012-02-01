@@ -9,29 +9,21 @@ cd $CHECKOUT_DIR
 # checkout the source
 svn up ~/Projects/NextThoughtPlatform
 
-#svn co -q https://svn.nextthought.com/repository/AoPS/trunk AoPS
-#svn co -q https://svn.nextthought.com/repository/NextThoughtPlatform/trunk/ NextThoughtPlatform
-
-# install the dictionary file
-
-#TEST_DIR=`pwd`/NextThoughtPlatform/src/test/python
-#PYTHONPATH=`pwd`/NextThoughtPlatform/src/main/python
-#mkdir -p $PYTHONPATH/wiktionary/
-#cp ~/bin/dict.db $PYTHONPATH/wiktionary/
+#  make sure all deps are upto date
+python ~/Projects/NextThoughtPlatform/nti.dataserver/setup.py develop
+python ~/Projects/NextThoughtPlatform/nti.integrationtests/setup.py develop
 
 # setup a location for the dataserver
 
 mkdir Data
 export DATASERVER_DIR=`pwd`/Data
 export TEST_WAIT=10
+
 # Make change processing synchronous. If something fails,
 # we know right away, and we don't have to wait for events
-export DATASERVER_SYNC_CHANGES=True
-#export DATASERVER_NO_REDIRECT=1
-LOG=~/tmp/lastNightlyTesting.txt
-#export PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin:$PATH
 
-mkdir -p $DATASERVER_DIR
+export DATASERVER_SYNC_CHANGES=True
+LOG=~/tmp/lastNightlyTesting.txt
 
 function stop_daemons()
 {
@@ -48,9 +40,8 @@ function clean_data()
 
 # let 'er rip!
 date
-export PYTHONPATH
 
-#python $TEST_DIR/ServerTest_v2.py > $LOG 2>&1
+python ServerTest_v2.py > $LOG 2>&1
 #stop_daemons $DATASERVER_DIR
 #clean_data $DATASERVER_DIR
 
