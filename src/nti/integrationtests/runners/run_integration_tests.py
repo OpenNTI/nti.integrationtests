@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 
-from server_tests_runner import runner
+from nti.integrationtests.runners import test_runner
 
 def main(args = None):
 	
@@ -17,9 +17,8 @@ def main(args = None):
 	use_coverage = True if opts.use_coverage else False
 	coverage_report = True if opts.coverage_report else False
 	
-	dirname = os.path.dirname( __file__ )
-	dirname = dirname or '.'
-	runner( path = os.path.join( dirname, "servertests/integration"), use_coverage=use_coverage, coverage_report=coverage_report)
+	dirname = os.path.join(os.path.dirname( __file__ ), '..', 'integration')
+	test_runner( path = dirname, use_coverage=use_coverage, coverage_report=coverage_report)
 
 if __name__ == '__main__':
 	main()
