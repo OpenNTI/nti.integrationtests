@@ -166,10 +166,12 @@ class DataserverProcess(object):
 	terminateServerWithCoverage = terminate_server_with_coverage
 
 	def _terminate_process(self, block_interval_seconds=1, max_wait_secs=30):
-		print 'Terminating dataserver'
-		self.process.terminate()
-		result = self._wait_for_termination(block_interval_seconds, max_wait_secs)
-		self.process = None if result else self.process
+		result = False
+		if self.process:
+			print 'Terminating dataserver'
+			self.process.terminate()
+			result = self._wait_for_termination(block_interval_seconds, max_wait_secs)
+			self.process = None if result else self.process
 		return result
 		
 	def _wait_for_termination(self, block_interval_seconds=1, max_wait_secs=30):
