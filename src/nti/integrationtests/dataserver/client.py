@@ -6,16 +6,16 @@ import warnings
 import collections
 from urlparse import urljoin
 
-from servertests.contenttypes import Note
-from servertests.contenttypes import Canvas
-from servertests.contenttypes import DSObject
-from servertests.contenttypes import Sharable
-from servertests.contenttypes import Provider
-from servertests.contenttypes import Highlight
-from servertests.contenttypes import FriendsList
-from servertests.contenttypes import adapt_ds_object
-from servertests.contenttypes import TranscriptSummary
-from servertests.contenttypes import CanvasPolygonShape
+from nti.integrationtests.contenttypes import Note
+from nti.integrationtests.contenttypes import Canvas
+from nti.integrationtests.contenttypes import DSObject
+from nti.integrationtests.contenttypes import Sharable
+from nti.integrationtests.contenttypes import Provider
+from nti.integrationtests.contenttypes import Highlight
+from nti.integrationtests.contenttypes import FriendsList
+from nti.integrationtests.contenttypes import adapt_ds_object
+from nti.integrationtests.contenttypes import TranscriptSummary
+from nti.integrationtests.contenttypes import CanvasPolygonShape
 
 # -----------------------------------
 

@@ -7,6 +7,8 @@ import datetime
 import subprocess
 import ConfigParser
 
+DEFAULT_USER_PASSWORD = 'temp001'
+
 PORT = int(os.getenv('PORT', '8081'))
 SERVER_HOST = os.getenv('SERVER_HOST', 'localhost')
 DATASERVER_DIR = os.getenv('DATASERVER_DIR', '~/tmp')

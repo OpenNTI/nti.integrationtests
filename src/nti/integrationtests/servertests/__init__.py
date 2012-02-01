@@ -2,10 +2,10 @@ import uuid
 import unittest
 import collections
 
-from server import DataserverProcess
-from server import DEFAULT_USER_PASSWORD
-from client import DataserverClient
-from client import ROOT_ITEM
+from nti.integrationtests.dataserver.server import DataserverProcess
+from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
+from nti.integrationtests.dataserver.client import DataserverClient
+from nti.integrationtests.dataserver.client import ROOT_ITEM
 
 class DataServerTestCase(unittest.TestCase):
 
