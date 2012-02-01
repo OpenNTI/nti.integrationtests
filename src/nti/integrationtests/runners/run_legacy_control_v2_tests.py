@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 
 from nti.integrationtests.runners import test_runner

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from nti.integrationtests.legacy.ServerTest_v3_quizzes import main as run_tests
 from nti.integrationtests.dataserver.server import DataserverProcess
 
