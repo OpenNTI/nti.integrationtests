@@ -17,7 +17,8 @@ from wsgiref import handlers
 from time import mktime
 import ServerControl
 import uuid
-from servertests import DataServerTestCase
+
+from nti.integrationtests import DataServerTestCase
 
 class URL_Default(ServerControl.URLFunctionality):
 
@@ -1473,9 +1474,11 @@ def testStandardDeleteResponseTest():
 def testVariableDeleteResponseTest():
 	return ['test_Server401OtherDeleteResponseTestCase', 'test_Server401IncorrectPasswordDeleteResponseTestCase', 'test_Server404NonExsistantIDDeleteResponseTestCase']
 
-#	fix this test: 'test_Server405PlistFormatNonExsistantQuizPostResponseTestCase'
-
-if __name__ == '__main__':
+def main(args = None):	
 	which_shell_to_run = testAll()
 	unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(map(ServerTestCase, which_shell_to_run)))
+
+if __name__ == '__main__':
+	main()
+
 

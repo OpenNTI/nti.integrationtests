@@ -3,7 +3,7 @@ import time
 import unittest
 
 import ServerControl
-from servertests import DataServerTestCase
+from nti.integrationtests import DataServerTestCase
 
 class URL_Default(ServerControl.URLFunctionality):
 
@@ -2242,6 +2242,11 @@ def testPlistOtherPersonDeleteTest():
 def testPlistNonExsistDeleteTest():
 	return ['test_Server404PlistFormatNonExsistantGroupDeleteTestCase', 'test_Server404PlistFormatNonExsistantIDDeleteTestCase']
 
-if __name__ == '__main__':
+def main(args = None):	
 	which_shell_to_run = testAll()
 	unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(map(ServerTests, which_shell_to_run)))
+
+if __name__ == '__main__':
+	main()
+
+	

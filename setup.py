@@ -3,6 +3,10 @@ from setuptools import setup, find_packages
 entry_points = {
 	'console_scripts': [
 		"chat_client = nti.integrationtests.runners.chat_client",
+		
+		"run_legacy_v2_tests = nti.integrationtests.runners.run_legacy_v2_tests:main",
+		"run_legacy_v2_tests = nti.integrationtests.runners.run_legacy_v3_tests:main",
+		
 		"run_integration_tests = nti.integrationtests.runners.run_integration_tests:main",
 		"run_generalpurpose_tests = nti.integrationtests.runners.run_generalpurpose_tests:main",
 	],
