@@ -1,9 +1,9 @@
 import time
 import uuid
 
-from servertests import DataServerTestCase
-from servertests.integration import container
-from servertests.integration import container_of_length
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.integration import container
+from nti.integrationtests.integration import container_of_length
 
 from hamcrest import assert_that
 

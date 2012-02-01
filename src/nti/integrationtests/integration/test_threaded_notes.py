@@ -1,9 +1,9 @@
 import time
 
-from servertests import DataServerTestCase
+from nti.integrationtests import DataServerTestCase
 
-from servertests.integration import not_shared
-from servertests.integration import only_shared_with
+from nti.integrationtests.integration import not_shared
+from nti.integrationtests.integration import only_shared_with
 
 from hamcrest import is_
 from hamcrest import assert_that

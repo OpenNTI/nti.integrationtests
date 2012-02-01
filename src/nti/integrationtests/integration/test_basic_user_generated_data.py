@@ -1,12 +1,11 @@
 import time
 import unittest
 	
-from servertests import DataServerTestCase
-
-from servertests.integration import contained_in
-from servertests.integration import contains
-from servertests.integration import object_from_container
-from servertests.integration import container_of_length
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.integration import contained_in
+from nti.integrationtests.integration import contains
+from nti.integrationtests.integration import object_from_container
+from nti.integrationtests.integration import container_of_length
 
 from hamcrest import is_not
 from hamcrest import is_

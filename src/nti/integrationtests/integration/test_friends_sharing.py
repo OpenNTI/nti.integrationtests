@@ -1,14 +1,15 @@
 import uuid
 
-from servertests.contenttypes import Note
-from servertests.contenttypes import FriendsList
-from servertests import DataServerTestCase
+from nti.integrationtests import DataServerTestCase
 
-from servertests.integration import has_same_oid_as
-from servertests.integration import shared_with
-from servertests.integration import contained_in
-from servertests.integration import containing_friends
-from servertests.integration import container_of_length
+from nti.integrationtests.contenttypes import Note
+from nti.integrationtests.contenttypes import FriendsList
+
+from nti.integrationtests.integration import has_same_oid_as
+from nti.integrationtests.integration import shared_with
+from nti.integrationtests.integration import contained_in
+from nti.integrationtests.integration import containing_friends
+from nti.integrationtests.integration import container_of_length
 
 from hamcrest import assert_that
 

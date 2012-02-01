@@ -1,11 +1,11 @@
 import time
 import unittest
 
-from servertests import DataServerTestCase
-from servertests.integration import contained_in
-from servertests.integration import shared_with
-from servertests.integration import has_same_oid_as
-from servertests.integration import contains
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.integration import contained_in
+from nti.integrationtests.integration import shared_with
+from nti.integrationtests.integration import has_same_oid_as
+from nti.integrationtests.integration import contains
 
 from hamcrest import assert_that
 from hamcrest import is_not

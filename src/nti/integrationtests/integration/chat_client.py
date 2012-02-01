@@ -391,7 +391,7 @@ def main(args=None):
 			command, _ = parse_and_execute(var, client)
 			client = command.client if command else client
 	else:
-		excute_command_file([0])
+		excute_command_file(args[0])
 		
 
 def inputing(screen):

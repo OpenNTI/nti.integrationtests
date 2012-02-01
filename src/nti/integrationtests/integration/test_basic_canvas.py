@@ -5,10 +5,10 @@ from hamcrest import assert_that
 from hamcrest import is_not
 from hamcrest import is_
 
-from servertests import DataServerTestCase
-from servertests.contenttypes import Canvas
-from servertests.contenttypes import CanvasPolygonShape
-from servertests.contenttypes import CanvasAffineTransform
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.contenttypes import Canvas
+from nti.integrationtests.contenttypes import CanvasPolygonShape
+from nti.integrationtests.contenttypes import CanvasAffineTransform
 
 class TestBasicCanvas(DataServerTestCase):
 	

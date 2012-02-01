@@ -4,9 +4,9 @@ import unittest
 import user_chat_objects
 from user_chat_objects import HostUserChatTest
 
-from servertests.contenttypes import Canvas
-from servertests.contenttypes import CanvasPolygonShape
-from servertests.contenttypes import CanvasAffineTransform
+from nti.integrationtests.contenttypes import Canvas
+from nti.integrationtests.contenttypes import CanvasPolygonShape
+from nti.integrationtests.contenttypes import CanvasAffineTransform
 
 class TestChatSendingObject(HostUserChatTest):
 	

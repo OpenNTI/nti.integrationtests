@@ -1,8 +1,8 @@
 import time
 import unittest
 
-from servertests.contenttypes import Note
-from servertests.contenttypes import TranscriptSummary
+from nti.integrationtests.contenttypes import Note
+from nti.integrationtests.contenttypes import TranscriptSummary
 
 import user_chat_objects
 from user_chat_objects import HostUserChatTest

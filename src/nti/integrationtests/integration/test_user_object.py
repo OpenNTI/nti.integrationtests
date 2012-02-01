@@ -1,8 +1,8 @@
 import time
 import unittest
 	
-from servertests import DataServerTestCase
-from servertests.integration import get_notification_count
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.integration import get_notification_count
 
 from hamcrest import assert_that
 from hamcrest import equal_to 

@@ -5,7 +5,7 @@ import unittest
 import gevent
 import greenlet
 
-from servertests import DataServerTestCase
+from nti.integrationtests import DataServerTestCase
 
 phrases = (	"Yellow brown", "Blue red green render purple?",\
 			"Alpha beta", "Gamma delta epsilon omega.",\

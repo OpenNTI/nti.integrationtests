@@ -4,10 +4,10 @@ import threading
 import collections
 from collections import OrderedDict
 
-from servertests.contenttypes import toExternalObject
-from servertests.wsclient import WebSocketException
-from servertests.wsclient import create_ds_connection
-from servertests.wsclient import ConnectionClosedException
+from nti.integrationtests.contenttypes import toExternalObject
+from nti.integrationtests.wsclient import WebSocketException
+from nti.integrationtests.wsclient import create_ds_connection
+from nti.integrationtests.wsclient import ConnectionClosedException
 
 # -----------------------------
 

@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from servertests import DataServerTestCase
+from nti.integrationtests import DataServerTestCase
 from user_chat_objects import HostUserChatTest
 from websocket_interface import Serverkill
 

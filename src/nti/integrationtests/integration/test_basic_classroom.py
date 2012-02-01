@@ -1,10 +1,10 @@
 import time
 import unittest
 
-from servertests import DataServerTestCase
-from servertests.contenttypes import InstructorInfo
-from servertests.contenttypes import SectionInfo
-from servertests.contenttypes import ClassInfo
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.contenttypes import InstructorInfo
+from nti.integrationtests.contenttypes import SectionInfo
+from nti.integrationtests.contenttypes import ClassInfo
 
 from hamcrest import not_none
 from hamcrest import assert_that

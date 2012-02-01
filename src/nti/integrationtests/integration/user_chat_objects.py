@@ -10,12 +10,13 @@ from websocket_interface import InActiveRoom
 from websocket_interface import CouldNotEnterRoom
 from websocket_interface import NotEnoughOccupants
 
-from servertests.server import DEFAULT_USER_PASSWORD
-from servertests import DataServerTestCase
-from servertests.server import DataserverProcess
+from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.dataserver.server import PORT
+from nti.integrationtests.dataserver.server import SERVER_HOST
 
-SOCKET_IO_HOST	= DataserverProcess.LOCALHOST
-SOCKET_IO_PORT	= DataserverProcess.PORT
+SOCKET_IO_HOST	= SERVER_HOST
+SOCKET_IO_PORT	= PORT
 
 phrases = (	"Yellow brown", "Blue red green render purple?",\
 			"Alpha beta", "Gamma delta epsilon omega.",\

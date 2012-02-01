@@ -1,16 +1,16 @@
 import time
 
-from servertests import DataServerTestCase
-from servertests.integration import container
-from servertests.integration import sortchanges
-from servertests.integration import has_circled_event
-from servertests.integration import of_change_type_shared
-from servertests.integration import of_change_type_modified
-from servertests.integration import objects_from_container
-from servertests.integration import wraps_item
-from servertests.integration import unwrap_object
-from servertests.integration import get_notification_count
-from servertests.integration import contains
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.integration import container
+from nti.integrationtests.integration import sortchanges
+from nti.integrationtests.integration import has_circled_event
+from nti.integrationtests.integration import of_change_type_shared
+from nti.integrationtests.integration import of_change_type_modified
+from nti.integrationtests.integration import objects_from_container
+from nti.integrationtests.integration import wraps_item
+from nti.integrationtests.integration import unwrap_object
+from nti.integrationtests.integration import get_notification_count
+from nti.integrationtests.integration import contains
 
 import unittest
 from hamcrest import (assert_that, has_entry, is_, is_not,

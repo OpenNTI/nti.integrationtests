@@ -1,8 +1,8 @@
 import time
 import unittest
 	
-from servertests import DataServerTestCase
-from servertests.integration import contains
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.integration import contains
 
 from hamcrest import assert_that
 from hamcrest import is_not
