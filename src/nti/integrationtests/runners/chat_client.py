@@ -11,10 +11,10 @@ import argparse
 import threading
 from datetime import datetime
 
-from websocket_interface import Graph
-from websocket_interface import CHANNELS
-from websocket_interface import DEFAULT_CHANNEL
-from websocket_interface import basic_message_ctx
+from nti.integrationtests.integration.websocket_interface import Graph
+from nti.integrationtests.integration.websocket_interface import CHANNELS
+from nti.integrationtests.integration.websocket_interface import DEFAULT_CHANNEL
+from nti.integrationtests.integration.websocket_interface import basic_message_ctx
 
 #########################
 

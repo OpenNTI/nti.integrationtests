@@ -9,7 +9,7 @@ def main(args = None):
 	if not args:
 		args = sys.argv[1:]
 		
-	parser = argparse.ArgumentParser(prog='Intergration Tests')
+	parser = argparse.ArgumentParser(prog='Integration Tests')
 	parser.add_argument('-uc', '--use_coverage', help='use coverage', action='store_true', default = False)
 	parser.add_argument('-cr', '--coverage_report', help='create coverage report', action='store_true', default = False)
 	opts = parser.parse_args(args)
