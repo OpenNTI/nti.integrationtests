@@ -1,7 +1,7 @@
 from url_functionality import URL_Successful_Put_Response
-from servertests.control import URLFunctionality
-from servertests.control import NoFormat
-from servertests.control.v2 import V2TestCase
+from nti.integrationtests.legacy.control import URLFunctionality
+from nti.integrationtests.legacy.control import NoFormat
+from nti.integrationtests.legacy.control.v2 import V2TestCase
 
 class JsonStandardPutTest(V2TestCase):
 	

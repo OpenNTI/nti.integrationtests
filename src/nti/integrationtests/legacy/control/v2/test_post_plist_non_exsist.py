@@ -1,6 +1,6 @@
 from url_functionality import URL_Create
-from servertests.control import URLFunctionality
-from servertests.control.v2 import V2TestCase
+from nti.integrationtests.legacy.control import URLFunctionality
+from nti.integrationtests.legacy.control.v2 import V2TestCase
 
 class PlistNonExsistPostTest(V2TestCase):
 	

@@ -1,7 +1,7 @@
 from url_functionality import URL_Default
-from servertests.control import URLFunctionality
-from servertests.control import VOID_VALUE
-from servertests.control.v3 import V3TestCase
+from nti.integrationtests.legacy.control import URLFunctionality
+from nti.integrationtests.legacy.control import VOID_VALUE
+from nti.integrationtests.legacy.control.v3 import V3TestCase
 
 class VariableErrorGetTests(V3TestCase):
 

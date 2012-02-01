@@ -7,7 +7,7 @@ import collections
 import multiprocessing
 
 from concurrent.futures import ThreadPoolExecutor
-from servertests.loadtests import new_client, post_note, generate_message, ENDPOINT
+from nti.integrationtests.legacy.loadtests import new_client, post_note, generate_message, ENDPOINT
 
 from hamcrest import (assert_that, is_, has_key, has_length)
 

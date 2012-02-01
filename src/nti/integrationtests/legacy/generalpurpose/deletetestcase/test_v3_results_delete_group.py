@@ -4,10 +4,10 @@ Created on Oct 18, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V3Constants_Results
-from servertests.generalpurpose.deletetestcase import DeleteTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV3_results
-from servertests.generalpurpose.utilities.body_data_extracter import URL_Delete_Group
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Results
+from nti.integrationtests.legacy.generalpurpose.deletetestcase import DeleteTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV3_results
+from nti.integrationtests.legacy.generalpurpose.utilities.body_data_extracter import URL_Delete_Group
 
 class V3_ResultsServer405DeleteGroupGetTestCase(DeleteTests):
 

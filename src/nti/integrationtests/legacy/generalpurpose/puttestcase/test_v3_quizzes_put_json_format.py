@@ -4,10 +4,10 @@ Created on Oct 10, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V3Constants_Quizzes
-from servertests.generalpurpose.puttestcase import PutTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV3_quizzes
-from servertests.generalpurpose.utilities.url_formatter import JsonFormat
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Quizzes
+from nti.integrationtests.legacy.generalpurpose.puttestcase import PutTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV3_quizzes
+from nti.integrationtests.legacy.generalpurpose.utilities.url_formatter import JsonFormat
 
 class V3_QuizzesServer200JsonFormatPutTestCase(PutTests):
 

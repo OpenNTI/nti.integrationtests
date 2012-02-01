@@ -4,9 +4,9 @@ Created on Oct 10, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V3Constants_Results
-from servertests.generalpurpose.posttestcase import PostTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV3_results
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Results
+from nti.integrationtests.legacy.generalpurpose.posttestcase import PostTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV3_results
 
 class V3_ResultsServer201StandardPostTestCase(PostTests):
 

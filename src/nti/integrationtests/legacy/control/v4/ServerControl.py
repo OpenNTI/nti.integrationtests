@@ -7,7 +7,6 @@ import cStringIO
 from time import mktime
 from wsgiref import handlers
 from datetime import datetime
-from servertests.control import v4
 
 ##########################
 

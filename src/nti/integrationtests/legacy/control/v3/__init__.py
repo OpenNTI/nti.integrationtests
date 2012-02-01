@@ -1,15 +1,15 @@
 import time
 import uuid
 
-from servertests.control import NoFormat
-from servertests.control import PostTest
-from servertests.control import JsonFormat
-from servertests.control import UserObject
-from servertests.control import PlistFormat
-from servertests.control import DefaultValues
-from servertests.control import ServerController
+from nti.integrationtests.legacy.control import NoFormat
+from nti.integrationtests.legacy.control import PostTest
+from nti.integrationtests.legacy.control import JsonFormat
+from nti.integrationtests.legacy.control import UserObject
+from nti.integrationtests.legacy.control import PlistFormat
+from nti.integrationtests.legacy.control import DefaultValues
+from nti.integrationtests.legacy.control import ServerController
 
-from servertests import DataServerTestCase
+from nti.integrationtests import DataServerTestCase
 
 ##########################
 

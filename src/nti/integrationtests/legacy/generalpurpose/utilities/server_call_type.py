@@ -5,8 +5,8 @@ import urllib2
 from time import mktime
 from wsgiref import handlers
 from datetime import datetime
-from servertests.generalpurpose.utilities.url_formatter import NoFormat
-from servertests.generalpurpose import TestConstants
+from nti.integrationtests.legacy.generalpurpose.utilities.url_formatter import NoFormat
+from nti.integrationtests.legacy.generalpurpose import TestConstants
 
 ##########################
 

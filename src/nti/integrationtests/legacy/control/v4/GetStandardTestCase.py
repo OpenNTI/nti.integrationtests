@@ -4,8 +4,8 @@ Created on Oct 4, 2011
 @author: ltesti
 '''
 
-from servertests.control.v4.StandardBehavorTestCase import StandardTest
-from servertests.control.v4.ServerControl import GetTest
+from nti.integrationtests.legacy.control.v4.StandardBehavorTestCase import StandardTest
+from nti.integrationtests.legacy.control.v4.ServerControl import GetTest
 
 class V2GetTests(StandardTest):
 	

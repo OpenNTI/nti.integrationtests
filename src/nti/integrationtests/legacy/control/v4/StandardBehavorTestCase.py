@@ -3,8 +3,8 @@ Created on Oct 3, 2011
 
 @author: ltesti
 '''
-from servertests.control.v4.ServerStart import ServerStart
-from servertests.control.v4.ServerControl import GetLastModified
+from nti.integrationtests.legacy.control.v4.ServerStart import ServerStart
+from nti.integrationtests.legacy.control.v4.ServerControl import GetLastModified
 
 
 class StandardTest(ServerStart):

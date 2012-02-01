@@ -1,6 +1,6 @@
 from url_functionality import URL_Default
-from servertests.control import URLFunctionality
-from servertests.control.v3 import V3TestCase
+from nti.integrationtests.legacy.control import URLFunctionality
+from nti.integrationtests.legacy.control.v3 import V3TestCase
 
 class UnauthorizedGetTests(V3TestCase):
 

@@ -4,11 +4,10 @@ Created on Oct 4, 2011
 @author: ltesti
 '''
 
-from servertests.control.v4 import ServerControl
-from servertests.control import v4
-from servertests.control.v4 import bodyDataExtracter
-from servertests.control.v4.URLFormatter import PlistFormat
-import time
+from nti.integrationtests.legacy.control.v4 import ServerControl
+from nti.integrationtests.legacy.control import v4
+from nti.integrationtests.legacy.control.v4 import bodyDataExtracter
+from nti.integrationtests.legacy.control.v4.URLFormatter import PlistFormat
 import uuid
 
 class ServerTesting(object):

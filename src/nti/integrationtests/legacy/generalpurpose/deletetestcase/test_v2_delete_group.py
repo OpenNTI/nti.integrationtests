@@ -4,10 +4,10 @@ Created on Oct 18, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V2Constants
-from servertests.generalpurpose.deletetestcase import DeleteTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV2
-from servertests.generalpurpose.utilities.body_data_extracter import URL_Group
+from nti.integrationtests.legacy.generalpurpose import V2Constants
+from nti.integrationtests.legacy.generalpurpose.deletetestcase import DeleteTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV2
+from nti.integrationtests.legacy.generalpurpose.utilities.body_data_extracter import URL_Group
 
 class V2Server405DeleteGroupGetTestCase(DeleteTests):
 

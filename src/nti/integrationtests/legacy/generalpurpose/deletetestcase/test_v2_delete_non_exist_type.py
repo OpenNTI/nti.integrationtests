@@ -4,9 +4,9 @@ Created on Oct 18, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V2Constants
-from servertests.generalpurpose.deletetestcase import DeleteTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV2
+from nti.integrationtests.legacy.generalpurpose import V2Constants
+from nti.integrationtests.legacy.generalpurpose.deletetestcase import DeleteTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV2
 
 class V2Server204NonExistTypeGetTestCase(DeleteTests):
 

@@ -1,6 +1,6 @@
 from url_functionality import URL_Default
 from url_functionality import URLFunctionality
-from servertests.control.v3 import V3TestCase
+from nti.integrationtests.legacy.control.v3 import V3TestCase
 
 class PlistStandardTest(V3TestCase):
 

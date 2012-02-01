@@ -4,9 +4,9 @@ Created on Oct 25, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V2Constants
-from servertests.generalpurpose.puttestcase import PutTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV2
+from nti.integrationtests.legacy.generalpurpose import V2Constants
+from nti.integrationtests.legacy.generalpurpose.puttestcase import PutTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV2
 
 class V2ServerIncrementingIDsTestCase(PutTests):
 

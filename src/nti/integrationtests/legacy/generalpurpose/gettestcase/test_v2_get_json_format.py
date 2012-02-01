@@ -4,10 +4,10 @@ Created on Oct 4, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V2Constants
-from servertests.generalpurpose.gettestcase import GetTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV2
-from servertests.generalpurpose.utilities.url_formatter import JsonFormat
+from nti.integrationtests.legacy.generalpurpose import V2Constants
+from nti.integrationtests.legacy.generalpurpose.gettestcase import GetTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV2
+from nti.integrationtests.legacy.generalpurpose.utilities.url_formatter import JsonFormat
 
 class V2Server200JsonFormatGetTestCase(GetTests):
 

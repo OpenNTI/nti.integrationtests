@@ -4,10 +4,10 @@ Created on Oct 4, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V3Constants_Results
-from servertests.generalpurpose.gettestcase import GetTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV3_results
-from servertests.generalpurpose.utilities.body_data_extracter import URL_DefaultV3_Post
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Results
+from nti.integrationtests.legacy.generalpurpose.gettestcase import GetTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV3_results
+from nti.integrationtests.legacy.generalpurpose.utilities.body_data_extracter import URL_DefaultV3_Post
 
 class V3ResultsServer200GetGroupGetTestCase(GetTests):
 

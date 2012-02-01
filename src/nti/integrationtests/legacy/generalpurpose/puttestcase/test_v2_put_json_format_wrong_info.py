@@ -4,10 +4,10 @@ Created on Oct 10, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V2Constants
-from servertests.generalpurpose.puttestcase import PutTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV2
-from servertests.generalpurpose.utilities.body_data_extracter import URL_DefaultV2
+from nti.integrationtests.legacy.generalpurpose import V2Constants
+from nti.integrationtests.legacy.generalpurpose.puttestcase import PutTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV2
+from nti.integrationtests.legacy.generalpurpose.utilities.body_data_extracter import URL_DefaultV2
 
 class V2Server500JsonFormatWrongInfoPutTestCase(PutTests):
 

@@ -4,7 +4,7 @@ Created on Oct 4, 2011
 @author: ltesti
 '''
 
-from servertests import DataServerTestCase
+from nti.integrationtests import DataServerTestCase
 
 class ServerStart(DataServerTestCase):
 	

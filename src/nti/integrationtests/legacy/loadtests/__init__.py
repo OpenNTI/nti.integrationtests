@@ -1,5 +1,5 @@
 import random
-from servertests.server import DataserverClient
+from nti.integrationtests.dataserver.client import DataserverClient
 
 # --------------------------
 

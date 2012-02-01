@@ -4,9 +4,9 @@ Created on Oct 10, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V3Constants_Quizzes
-from servertests.generalpurpose.posttestcase import PostTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV3_quizzes
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Quizzes
+from nti.integrationtests.legacy.generalpurpose.posttestcase import PostTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV3_quizzes
 
 class V3_QuizzesServer405StandardPostTestCase(PostTests):
 

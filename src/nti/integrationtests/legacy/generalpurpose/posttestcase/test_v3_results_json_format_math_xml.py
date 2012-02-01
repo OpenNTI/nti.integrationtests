@@ -4,11 +4,11 @@ Created on Oct 10, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V3Constants_Results
-from servertests.generalpurpose.posttestcase import PostTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV3_results
-from servertests.generalpurpose.utilities.body_data_extracter import URL_Skipped_Question_Assessment
-from servertests.generalpurpose.utilities.url_formatter import JsonFormat
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Results
+from nti.integrationtests.legacy.generalpurpose.posttestcase import PostTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV3_results
+from nti.integrationtests.legacy.generalpurpose.utilities.body_data_extracter import URL_Skipped_Question_Assessment
+from nti.integrationtests.legacy.generalpurpose.utilities.url_formatter import JsonFormat
 
 class V3_ResultsServer201JsonFormatMathXMLPostTestCase(PostTests):
 

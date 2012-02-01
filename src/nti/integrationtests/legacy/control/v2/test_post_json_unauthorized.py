@@ -1,7 +1,7 @@
 from url_functionality import URL_oldGroup_json
-from servertests.control import URLFunctionality
-from servertests.control import VOID_VALUE
-from servertests.control.v2 import V2TestCase
+from nti.integrationtests.legacy.control import URLFunctionality
+from nti.integrationtests.legacy.control import VOID_VALUE
+from nti.integrationtests.legacy.control.v2 import V2TestCase
 
 class JsonUnAuthorizedPostTest(V2TestCase):
 	

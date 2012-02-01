@@ -4,12 +4,12 @@ Created on Oct 4, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose.utilities.server_call_type import SubTestCalls
-from servertests.generalpurpose import V2Constants
-from servertests.generalpurpose import V3Constants_Quizzes
-from servertests.generalpurpose import V3Constants_Results
-from servertests.generalpurpose.utilities.url_formatter import PlistFormat
-from servertests.generalpurpose.utilities import body_data_extracter
+from nti.integrationtests.legacy.generalpurpose.utilities.server_call_type import SubTestCalls
+from nti.integrationtests.legacy.generalpurpose import V2Constants
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Quizzes
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Results
+from nti.integrationtests.legacy.generalpurpose.utilities.url_formatter import PlistFormat
+from nti.integrationtests.legacy.generalpurpose.utilities import body_data_extracter
 import uuid
 
 class ServerTesting(object):

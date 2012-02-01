@@ -4,10 +4,10 @@ Created on Oct 18, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V3Constants_Quizzes
-from servertests.generalpurpose.deletetestcase import DeleteTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV3_quizzes
-from servertests.generalpurpose.utilities.body_data_extracter import URL_QuizGroup
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Quizzes
+from nti.integrationtests.legacy.generalpurpose.deletetestcase import DeleteTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV3_quizzes
+from nti.integrationtests.legacy.generalpurpose.utilities.body_data_extracter import URL_QuizGroup
 
 class V3_QuizzesServer405DeleteGroupGetTestCase(DeleteTests):
 

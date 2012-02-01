@@ -3,8 +3,8 @@ Created on Oct 3, 2011
 
 @author: ltesti
 '''
-from servertests.generalpurpose.utilities.url_formatter import NoFormat
-from servertests import DataServerTestCase
+from nti.integrationtests.legacy.generalpurpose.utilities.url_formatter import NoFormat
+from nti.integrationtests import DataServerTestCase
 
 class UnitTestController(DataServerTestCase):
 	

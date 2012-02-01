@@ -1,5 +1,5 @@
-from servertests.control import OID_Remover
-from servertests.control import URLFunctionality
+from nti.integrationtests.legacy.control import OID_Remover
+from nti.integrationtests.legacy.control import URLFunctionality
 
 ##########################
 		

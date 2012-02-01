@@ -4,10 +4,10 @@ Created on Oct 18, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose.utilities import RunTest
-from servertests.generalpurpose.utilities.server_call_type import DeleteTest
-from servertests.generalpurpose.utilities.body_data_extracter import URLFunctionality
-from servertests.generalpurpose.utilities.url_formatter import NoFormat
+from nti.integrationtests.legacy.generalpurpose.utilities import RunTest
+from nti.integrationtests.legacy.generalpurpose.utilities.server_call_type import DeleteTest
+from nti.integrationtests.legacy.generalpurpose.utilities.body_data_extracter import URLFunctionality
+from nti.integrationtests.legacy.generalpurpose.utilities.url_formatter import NoFormat
 
 class DeleteTests(RunTest):
 	

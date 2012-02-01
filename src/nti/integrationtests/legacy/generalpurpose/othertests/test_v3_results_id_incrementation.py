@@ -4,9 +4,9 @@ Created on Oct 25, 2011
 @author: ltesti
 '''
 
-from servertests.generalpurpose import V3Constants_Results
-from servertests.generalpurpose.puttestcase import PutTests
-from servertests.generalpurpose.utilities.catagory import ServerTestV3_results
+from nti.integrationtests.legacy.generalpurpose import V3Constants_Results
+from nti.integrationtests.legacy.generalpurpose.puttestcase import PutTests
+from nti.integrationtests.legacy.generalpurpose.utilities.catagory import ServerTestV3_results
 
 class V3ResultsServerIncrementingIDsTestCase(PutTests):
 
