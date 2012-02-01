@@ -75,7 +75,7 @@ class DataserverProcess(object):
 			
 			command = os.path.join(os.path.dirname(sys.executable), 'supervisord')
 			args = [command, '-c', os.path.join(root_dir, 'etc', 'supervisord_dev.conf')]
-			devnull = None #open("/dev/null", 'w') if 'DATASERVER_NO_REDIRECT' not in os.environ else None
+			devnull = open("/dev/null", 'w') if 'DATASERVER_NO_REDIRECT' not in os.environ else None
 			self.process = subprocess.Popen(args, stdin=devnull, stdout=devnull, stderr=devnull)
 			if devnull is not None:
 				devnull.close()
