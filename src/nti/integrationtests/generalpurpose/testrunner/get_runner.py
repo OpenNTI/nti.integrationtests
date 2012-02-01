@@ -1,15 +1,9 @@
-'''
-Created on Jan 12, 2012
-
-@author: ltesti
-'''
-
 import urllib2
 
-from nti.integrationtests.servertests.serverfunctionality.testrunner import ServerValues
-from nti.integrationtests.servertests.serverfunctionality.utils.response_assert import LastModifiedAssessment
+from nti.integrationtests.generalpurpose.testrunner import ServerValues
+from nti.integrationtests.generalpurpose.utils.response_assert import LastModifiedAssessment
 
-class GetGroupObject(ServerValues):	
+class GetObject(ServerValues):	
 #	@ServerValues.http_ise_error_logging
 	def makeRequest(self, kwargs):
 		self.setValues(kwargs)
@@ -20,14 +14,21 @@ class GetGroupObject(ServerValues):
 			if not testArgs: assert False, "Attempted a request on a non object"
 			request = self.requests.get(url=url, username=self.username, password=self.testPassword)
 			parsedBody = self.format.read(request)
+			ifModifiedSinceYes = self.requests.ifModifiedSinceYes(url=testArgs['url_id'], username=self.username, password=self.testPassword)
+			ifModifiedSinceNo = self.requests.ifModifiedSinceNo(url=testArgs['url_id'], username=self.username, password=self.testPassword)
 			self.tearDown()
 			self.setCollectionModificationTime()
 			self.setModificationTime(parsedBody)
 			assert request.code==self.responseCode['get'], \
 				'this method was expecting a %d response, instead received %d' % (self.responseCode['get'], request.code)
+			assert ifModifiedSinceYes==self.responseCode['if_modified_since_yes'], \
+				'this method was expecting a %d response, instead received %d' % (ifModifiedSinceYes, self.responseCode['if_modified_since_yes'])
+			assert ifModifiedSinceNo==self.responseCode['if_modified_since_no'], \
+				'this method was expecting a %d response, instead received %d' % (ifModifiedSinceNo, self.responseCode['if_modified_since_no'])
 			self.objTest.testBody(parsedBody, self.postObjData['MimeType'], self.objResponse['postExpectedResponse'])
 			LastModifiedAssessment.unchangedLastModifiedTime(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection,
 														requestTime=self.lastModified)
+			
 		except urllib2.HTTPError, error:
 			self.tearDown()
 			self.setCollectionModificationTime()

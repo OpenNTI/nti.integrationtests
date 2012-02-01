@@ -1,17 +1,11 @@
-'''
-Created on Jan 12, 2012
-
-@author: ltesti
-'''
-
-import urllib2
-import time
 import sys
 import json
+import time
+import urllib2
 
-from nti.integrationtests.servertests.serverfunctionality.utils.generaterequest import ServerRequest
-from nti.integrationtests.servertests.serverfunctionality.utils.url_formatter import NoFormat
-from nti.integrationtests.servertests.serverfunctionality.utils import USERNAME, PASSWORD, URL
+from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
+from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
+from nti.integrationtests.generalpurpose.utils import USERNAME, PASSWORD, URL
 
 def _http_ise_error_logging(f):
 	def to_call( *args, **kwargs ):
@@ -100,5 +94,3 @@ class ServerValues(object):
 
 	def setTime(self):
 		self.preRequestTime = time.time()
-		
-		

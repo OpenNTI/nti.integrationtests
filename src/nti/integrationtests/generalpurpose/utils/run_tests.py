@@ -1,39 +1,27 @@
-'''
-Created on Jan 25, 2012
-
-@author: ltesti
-'''
-'''
-Created on Jan 13, 2012
-
-@author: ltesti
-'''
-
-import os
-import json
 import glob
+import json
 
-from nti.integrationtests.servertests.serverfunctionality.utils import USERNAME, PASSWORD, URL, DATASERVER, PATH_TO_TESTS
-from nti.integrationtests.servertests.serverfunctionality.utils.generaterequest import ServerRequest
-from nti.integrationtests.servertests.serverfunctionality.utils.serverdata import Workspace
-from nti.integrationtests.servertests import DataServerTestCase
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.generalpurpose.utils import USERNAME, PASSWORD, URL, DATASERVER, PATH_TO_TESTS
+from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
+from nti.integrationtests.generalpurpose.utils.serverdata import Workspace
 
-from nti.integrationtests.servertests.serverfunctionality.utils.url_formatter import NoFormat
-from nti.integrationtests.servertests.serverfunctionality.utils.url_formatter import JsonFormat
-from nti.integrationtests.servertests.serverfunctionality.utils.url_formatter import PlistFormat
+from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
+from nti.integrationtests.generalpurpose.utils.url_formatter import JsonFormat
+from nti.integrationtests.generalpurpose.utils.url_formatter import PlistFormat
 
-from nti.integrationtests.servertests.serverfunctionality.testrunner.post_runner import PostObject
-from nti.integrationtests.servertests.serverfunctionality.testrunner.get_runner import GetObject
-from nti.integrationtests.servertests.serverfunctionality.testrunner.get_collection_runner import GetGroupObject
-from nti.integrationtests.servertests.serverfunctionality.testrunner.put_runner import PutObject
-from nti.integrationtests.servertests.serverfunctionality.testrunner.delete_runner import DeleteObject
+from nti.integrationtests.generalpurpose.testrunner.post_runner import PostObject
+from nti.integrationtests.generalpurpose.testrunner.get_runner import GetObject
+from nti.integrationtests.generalpurpose.testrunner.get_collection_runner import GetGroupObject
+from nti.integrationtests.generalpurpose.testrunner.put_runner import PutObject
+from nti.integrationtests.generalpurpose.testrunner.delete_runner import DeleteObject
 
-from nti.integrationtests.servertests.serverfunctionality.utils.response_assert import NoteBodyTester
-from nti.integrationtests.servertests.serverfunctionality.utils.response_assert import HighlightBodyTester
-from nti.integrationtests.servertests.serverfunctionality.utils.response_assert import FriendsListBodyTester
-from nti.integrationtests.servertests.serverfunctionality.utils.response_assert import CanvasBodyTester
-from nti.integrationtests.servertests.serverfunctionality.utils.response_assert import CanvasShapeBodyTester
-from nti.integrationtests.servertests.serverfunctionality.utils.response_assert import CanvasPolygonShapeBodyTester
+from nti.integrationtests.generalpurpose.utils.response_assert import NoteBodyTester
+from nti.integrationtests.generalpurpose.utils.response_assert import HighlightBodyTester
+from nti.integrationtests.generalpurpose.utils.response_assert import FriendsListBodyTester
+from nti.integrationtests.generalpurpose.utils.response_assert import CanvasBodyTester
+from nti.integrationtests.generalpurpose.utils.response_assert import CanvasShapeBodyTester
+from nti.integrationtests.generalpurpose.utils.response_assert import CanvasPolygonShapeBodyTester
 
 
 def setup():

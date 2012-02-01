@@ -1,13 +1,6 @@
-'''
-Created on Dec 21, 2011
-
-@author: ltesti
-'''
-
 import json
 import plistlib
 import cStringIO
-import os
 
 class FormatFunctionality(object):
 

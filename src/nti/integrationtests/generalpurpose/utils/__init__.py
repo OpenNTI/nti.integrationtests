@@ -1,15 +1,8 @@
-"""
-Created on Dec 21, 2011
-
-@author: ltesti
-"""
-
 import os
-from nti.integrationtests.servertests import DataserverProcess
 
-findPort = DataserverProcess()
+from nti.integrationtests.dataserver.server import PORT as SERVER_PORT
 
-PORT = os.getenv('PORT', str(findPort.PORT))
+PORT = os.getenv('PORT', str(SERVER_PORT))
 URL = os.getenv('URL', "http://localhost:" + PORT)
 ACCEPTS = os.getenv('ACCEPTS', 'application/vnd.nextthought.')
 DATASERVER = os.getenv('DATASERVER', "/dataserver2/")

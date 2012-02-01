@@ -1,8 +1,4 @@
-'''
-Created on Jan 13, 2012
 
-@author: ltesti
-'''
 class NoteBodyTester(object):
 	
 	def testBody(self, parsedBody, mimeType, info):

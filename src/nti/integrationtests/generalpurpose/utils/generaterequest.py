@@ -1,9 +1,3 @@
-'''
-Created on Jan 11, 2012
-
-@author: ltesti
-'''
-
 import urllib2
 from datetime import datetime
 from wsgiref import handlers
