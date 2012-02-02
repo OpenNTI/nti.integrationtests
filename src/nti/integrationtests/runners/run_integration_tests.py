@@ -26,7 +26,7 @@ def main(args = None):
 	
 	dirname = os.path.join(os.path.dirname( __file__ ), '..', 'integration')
 	test_runner(path=dirname, use_coverage=use_coverage, coverage_report=coverage_report,\
-				port=port, root_di=root_dir)
+				port=port, root_dir=root_dir)
 
 if __name__ == '__main__':
 	main()
