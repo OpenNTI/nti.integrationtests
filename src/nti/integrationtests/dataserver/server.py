@@ -22,11 +22,19 @@ class DataserverProcess(object):
 	ENDPOINT2 = 'http://%s:%s/dataserver2' % (SERVER_HOST, PORT)
 	SERVER_DELAY = 3
 
-	def __init__(self):
+	def __init__(self, port=PORT, root_dir=DATASERVER_DIR):
 		self.process = None
+		self.port = port if port else PORT
+		self.endpoint = 'http://%s:%s/dataserver2' % (SERVER_HOST, self.port)
+		self.root_dir = os.path.expanduser(root_dir if root_dir else DATASERVER_DIR)
 
+	def set_server_data(self, target):
+		target.port = self.port
+		target.root_dir = self.root_dir
+		target.endpoint = self.endpoint
+		
 	def is_running(self):
-		return self._send_message(SERVER_HOST, PORT)
+		return self._send_message(SERVER_HOST, self.port)
 	isRunning = is_running
 
 	def _send_message(self, ip=SERVER_HOST, port=PORT, message=None, do_shutdown=True):
@@ -48,12 +56,14 @@ class DataserverProcess(object):
 	# -----------------------------------
 	
 	def start_server(self, block_interval_seconds=1, max_wait_secs=30):
-		self._start_process(block_interval_seconds, max_wait_secs, use_coverage=False)
+		self._start_process(block_interval_seconds, max_wait_secs, use_coverage=False, \
+							root_dir=self.root_dir, port=self.port)
 
 	startServer = start_server
 		
 	def start_server_with_coverage(self, block_interval_seconds=1, max_wait_secs=30):
-		self._start_process(block_interval_seconds, max_wait_secs, use_coverage=True)
+		self._start_process(block_interval_seconds, max_wait_secs, use_coverage=True, \
+							root_dir=self.root_dir, port=self.port)
 
 	startServerWithCoverage = start_server_with_coverage
 	
@@ -63,6 +73,7 @@ class DataserverProcess(object):
 			print 'Dataserver already running.  Won\'t start a new one'
 		else:
 			print 'Starting dataserver'
+			
 			rcfile = kwargs.get('rcfile', COVERAGE_CONFIG)
 			use_coverage = kwargs.get('use_coverage', False)
 			pserve_ini_file = kwargs.get('pserve_ini_file', SERVER_CONFIG)
@@ -93,7 +104,7 @@ class DataserverProcess(object):
 		
 	# -----------------------------------
 	
-	def _rewrite_config(self, config, command_prefix):
+	def _rewrite_supervisor_config(self, config, command_prefix):
 		
 		if not os.path.exists(config):
 			raise OSError('No supervisord file %s' % config)
@@ -117,13 +128,14 @@ class DataserverProcess(object):
 		if not os.path.exists(pserve_ini_file):
 			raise OSError('No ini file %s' % pserve_ini_file)
 		
-		args = [sys.executable, '-m', 'nti.dataserver.config', root_dir, pserve_ini_file]
+		command = os.path.join(os.path.dirname(sys.executable), 'nti_init_env')
+		args = [command, root_dir, pserve_ini_file]
 		if subprocess.call(args) != 0:
 			raise OSError('Error while creating configurations')
 	
 		command_prefix = os.path.dirname(sys.executable) + '/'
 		visord = os.path.join(os.path.expanduser(root_dir), 'etc', 'supervisord_dev.conf')
-		self._rewrite_config(visord, command_prefix)
+		self._rewrite_supervisor_config(visord, command_prefix)
 	
 	def _writer_config_coverage(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG, rcfile=COVERAGE_CONFIG):
 		
@@ -134,7 +146,7 @@ class DataserverProcess(object):
 		visord = os.path.join(os.path.expanduser(root_dir), 'etc', 'supervisord_dev.conf')
 		command_prefix = ' '.join(['coverage', 'run', '--rcfile=%s' % rcfile, ''])
 		command_prefix = os.path.join(os.path.dirname(sys.executable), command_prefix)
-		self._rewrite_config(visord, command_prefix)
+		self._rewrite_supervisor_config(visord, command_prefix)
 	
 	# -----------------------------------
 

@@ -8,8 +8,7 @@ from nti.integrationtests.runners import test_runner
 
 def main(args = None):
 	
-	if not args:
-		args = sys.argv[1:]
+	args = args or sys.argv[1:]
 		
 	parser = argparse.ArgumentParser(prog='Integration Tests')
 	parser.add_argument('-uc', '--use_coverage', help='use coverage', action='store_true', default = False)

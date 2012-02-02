@@ -359,7 +359,7 @@ class ServerTests(DataServerTestCase):
 		ServerTests.test				= ServerControl.PostTest()
 		ServerTests.json_oldGroup		= URL_oldGroup_json()
 		ServerTests.plist_oldGroup		= URL_oldGroup_plist()
-
+		
 		DataServerTestCase.setUpClass()
 
 	@classmethod
@@ -368,7 +368,6 @@ class ServerTests(DataServerTestCase):
 
 	@classmethod
 	def tearDownClass(cls):
-
 		DataServerTestCase.tearDownClass()
 
 	def setUp(self):
@@ -376,6 +375,7 @@ class ServerTests(DataServerTestCase):
 		self.LIST_NAME='TestFriendsList-%s@nextthought.com' % time.time()
 
 #	   a set of puts and deletes that are set before each test
+
 		self.setDefaults(ServerTests.tester)
 		ServerTests.tester.setUpPut(ServerTests.URL_json)
 		ServerTests.tester.setUpPut(ServerTests.URL_plist, format=ServerTests.plist)
@@ -2242,9 +2242,12 @@ def testPlistOtherPersonDeleteTest():
 def testPlistNonExsistDeleteTest():
 	return ['test_Server404PlistFormatNonExsistantGroupDeleteTestCase', 'test_Server404PlistFormatNonExsistantIDDeleteTestCase']
 
-def main(args = None):	
+def test_suite():
 	which_shell_to_run = testAll()
-	unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(map(ServerTests, which_shell_to_run)))
+	return unittest.TestSuite(map(ServerTests, which_shell_to_run))
+
+def main(args = None):
+	unittest.TextTestRunner(verbosity=2).run(test_suite())
 
 if __name__ == '__main__':
 	main()

@@ -1474,9 +1474,12 @@ def testStandardDeleteResponseTest():
 def testVariableDeleteResponseTest():
 	return ['test_Server401OtherDeleteResponseTestCase', 'test_Server401IncorrectPasswordDeleteResponseTestCase', 'test_Server404NonExsistantIDDeleteResponseTestCase']
 
-def main(args = None):	
+def test_suite():
 	which_shell_to_run = testAll()
-	unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(map(ServerTestCase, which_shell_to_run)))
+	return unittest.TestSuite(map(ServerTestCase, which_shell_to_run))
+
+def main(args = None):
+	unittest.TextTestRunner(verbosity=2).run(test_suite())
 
 if __name__ == '__main__':
 	main()

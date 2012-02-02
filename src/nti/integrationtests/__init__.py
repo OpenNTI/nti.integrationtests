@@ -2,6 +2,8 @@ import uuid
 import unittest
 import collections
 
+from nti.integrationtests.dataserver.server import PORT
+from nti.integrationtests.dataserver.server import DATASERVER_DIR
 from nti.integrationtests.dataserver.server import DataserverProcess
 from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
 from nti.integrationtests.dataserver.client import DataserverClient
@@ -9,8 +11,13 @@ from nti.integrationtests.dataserver.client import ROOT_ITEM
 
 class DataServerTestCase(unittest.TestCase):
 
+	port = PORT
+	root_dir = DATASERVER_DIR
+	endpoint = DataserverProcess.ENDPOINT2
+	
 	user_names = []
 	root_item = ROOT_ITEM
+	
 	default_user_password = DEFAULT_USER_PASSWORD
 	
 	# We need to start a dataserver (and stop it)
@@ -18,11 +25,10 @@ class DataServerTestCase(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.start_server()
-		cls.create_users()
 
 	@classmethod
 	def tearDownClass(cls):
-		cls.process.terminateServer()
+		cls.process.terminate_server()
 
 	def setUp(self):
 		endpoint = self.get_endpoint()
@@ -46,14 +52,6 @@ class DataServerTestCase(unittest.TestCase):
 	
 	@classmethod
 	def start_server(cls):
-		cls.process = DataserverProcess()
-		cls.process.startServer()
-		
-	@classmethod
-	def create_users(cls, max_users=10, create_friends_lists=True):		
-		ds = cls.new_client()
-		for x in range(1, max_users):
-			name = 'test.user.%s@nextthought.com' % x
-			cred = (name, DEFAULT_USER_PASSWORD)
-			ds.get_user_generated_data('autocreate', credentials=cred)
+		cls.process = DataserverProcess(port=cls.port, root_dir=cls.root_dir)
+		cls.process.start_server()
 
