@@ -4,6 +4,7 @@ import time
 import shutil
 import socket
 import datetime
+import tempfile
 import subprocess
 import ConfigParser
 
@@ -15,6 +16,15 @@ DATASERVER_DIR = os.getenv('DATASERVER_DIR', '~/tmp')
 SERVER_CONFIG = os.getenv('SERVER_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/development.ini"))
 COVERAGE_CONFIG = os.getenv('COVERAGE_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/coverage_run.cfg"))
 
+def get_open_port():
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	try:
+		s.bind(("",0))
+		s.listen(1)
+		return s.getsockname()[1]
+	finally:
+		s.close()
+		
 class DataserverProcess(object):
 
 	KEY_TEST_WAIT= 'TEST_WAIT'
@@ -72,17 +82,20 @@ class DataserverProcess(object):
 		if self.process or self.is_running():
 			print 'Dataserver already running.  Won\'t start a new one'
 		else:
-			print 'Starting dataserver'
-			
+		
 			rcfile = kwargs.get('rcfile', COVERAGE_CONFIG)
 			use_coverage = kwargs.get('use_coverage', False)
 			pserve_ini_file = kwargs.get('pserve_ini_file', SERVER_CONFIG)
 			root_dir = os.path.expanduser(kwargs.get('root_dir', DATASERVER_DIR))
+			port = int(kwargs.get('port', PORT))
 			
+			print 'Starting dataserver (%s)' % port
+			
+			pserve_ini_file = self._rewrite_pserve_config(pserve_ini_file, port)
 			if use_coverage:
-				self._writer_config_coverage(root_dir, pserve_ini_file, rcfile)
+				self._writer_supervisor_config_coverage(root_dir, pserve_ini_file, rcfile)
 			else:
-				self._write_config(root_dir, pserve_ini_file)
+				self._write_supervisor_config(root_dir, pserve_ini_file)
 			
 			command = os.path.join(os.path.dirname(sys.executable), 'supervisord')
 			args = [command, '-c', os.path.join(root_dir, 'etc', 'supervisord_dev.conf')]
@@ -104,6 +117,26 @@ class DataserverProcess(object):
 		
 	# -----------------------------------
 	
+	def _rewrite_pserve_config(self, config, port=PORT, out_dir="/tmp"):
+		
+		if not os.path.exists(config):
+			raise OSError('No pserve file %s' % config)
+		
+		ini = ConfigParser.SafeConfigParser()
+		ini.read(config)
+		
+		cport = int(ini.get('DEFAULT', 'http_port', PORT))
+		if cport != port:
+			if not os.path.exists(out_dir):
+				os.makedirs(out_dir)
+						
+			ini.set('DEFAULT', 'http_port', str(port))
+			config = tempfile.mktemp(prefix="pserve.", suffix=".ini", dir=out_dir)
+			with open(config, "wb") as fp:
+				ini.write(fp)
+	
+		return config
+			
 	def _rewrite_supervisor_config(self, config, command_prefix):
 		
 		if not os.path.exists(config):
@@ -119,7 +152,7 @@ class DataserverProcess(object):
 		with open(config, "wb") as fp:
 			ini.write(fp)
 				
-	def _write_config(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG):
+	def _write_supervisor_config(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG):
 		
 		root_dir = os.path.expanduser(root_dir)
 		if os.path.exists(root_dir):
@@ -137,7 +170,8 @@ class DataserverProcess(object):
 		visord = os.path.join(os.path.expanduser(root_dir), 'etc', 'supervisord_dev.conf')
 		self._rewrite_supervisor_config(visord, command_prefix)
 	
-	def _writer_config_coverage(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG, rcfile=COVERAGE_CONFIG):
+	def _writer_supervisor_config_coverage(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG,\
+										   rcfile=COVERAGE_CONFIG):
 		
 		if not os.path.exists(rcfile):
 			raise OSError('No coverage file %s' % rcfile)
@@ -200,8 +234,8 @@ class DataserverProcess(object):
 		return True
 			
 if __name__ == '__main__':
-	dc = DataserverProcess()
+	dc = DataserverProcess(port=7777)
 	dc.start_server()
-	time.sleep(10)
+	time.sleep(5)
 	dc.terminate_server()
 	
