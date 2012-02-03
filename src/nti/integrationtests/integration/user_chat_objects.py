@@ -67,10 +67,10 @@ class BasicChatTest(DataServerTestCase):
 		
 		list_name = 'cfl-%s-%s' % (username, str(uuid.uuid4()).split('-')[0])
 		
-		ds = cls.new_client((username, username)) if not ds_client else ds_client
+		ds = cls.new_client((username, password)) if not ds_client else ds_client
 		credentials = ds.get_credentials()
 		try:
-			ds.set_credentials(user=username, password=username)
+			ds.set_credentials(user=username, password=password)
 			ds.createFriendsListWithNameAndFriends(list_name, friends)
 		finally:
 			ds.set_credentials(credentials)
