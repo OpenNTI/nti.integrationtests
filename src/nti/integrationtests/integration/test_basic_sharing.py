@@ -23,7 +23,6 @@ class TestBasicSharing(DataServerTestCase):
 		super(TestBasicSharing, self).setUp()
 
 		self.container = 'test_basic_sharing-container-%s' % time.time()
-		self.container = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.2'
 		self.ds.set_credentials(self.owner)
 
 	def test_basic_sharing(self):
