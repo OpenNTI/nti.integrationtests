@@ -80,5 +80,10 @@ class TestBasicClassRoom(DataServerTestCase):
 		instructors = self.make_collecion(si.instructor.instructors)
 		assert_that(instructors, contains(self.owner[0]))
 		
+	def xtest_create_class(self):
+		provider = 'OU'
+		cz = 'Class.1328310631.04'
+		self.ds.add_class_resource(None, provider, cz)
+		
 if __name__ == '__main__':
 	unittest.main()

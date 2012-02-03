@@ -363,6 +363,12 @@ class DataserverClient(object):
 		result = self._post_to_collection(classinfo, collection, credentials, adapt=adapt)
 		return result
 		
+	def add_class_resource(self, resource, provider, class_name, section_name=None, credentials=None, adapt=True):
+		credentials = self._credentials_to_use(credentials)
+		class_info = self._get_container(class_name, name=provider, workspace='providers', credentials=credentials)
+		class_info = adapt_ds_object(class_info) if isinstance(class_info, dict) else class_info
+		return class_info
+		
 	# --------------
 	
 	def get_user_workspace(self, credentials=None):

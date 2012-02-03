@@ -529,6 +529,12 @@ class ClassInfo(ClassSectionMixin):
 	_fields = {	'sections' : (False, list) }
 	_fields.update(ClassSectionMixin._fields)
 	
+	def get_section(self, section_id):
+		for s in self.sections:
+			if s.ID == section_id:
+				return s
+		return None
+	
 	def __setitem__(self, key, val):
 		if key == 'sections':
 			self._assign_to_list(self._ds_field_mapping[key], val)

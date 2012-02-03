@@ -100,13 +100,19 @@ class Collection(object):
 				continue
 			links.append(Link.new_from_dict(element))
 			
-		items = {}
-		for element in data.get('Items', []):
-			if not isinstance(element, dict): 
-				warnings.warn("Expected a dictionary when parsing an item for a collection item. (%s)" % element)
-				continue
-			item = Item.new_from_dict(element)
-			items[item.ID] = item
+		items = None
+		data_items = data.get('Items', [])
+		if isinstance(data_items, dict): 
+			# this may happen when we have a providers class
+			items = data_items
+		else:
+			items = {}
+			for element in data_items:
+				if not isinstance(element, dict): 
+					warnings.warn("Expected a dictionary when parsing an item for a collection item. (%s)" % element)
+					continue
+				item = Item.new_from_dict(element)
+				items[item.ID] = item
 			
 		collection = Collection(title, href, accepts, links, items)
 		return collection
