@@ -241,6 +241,9 @@ class DataserverClient(object):
 		self.credentials = credentials
 		self.endpoint = _check_url(endpoint)
 
+	def get_credentials(self):
+		return self.credentials
+	
 	def set_credentials(self, credentials=None, user=None, password=None):
 		self.credentials = credentials if credentials else (user, password)
 

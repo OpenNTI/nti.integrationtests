@@ -27,18 +27,23 @@ def get_open_port():
 		
 class DataserverProcess(object):
 
-	KEY_TEST_WAIT= 'TEST_WAIT'
 	ENDPOINT = 'http://%s:%s/dataserver' % (SERVER_HOST, PORT)
 	ENDPOINT2 = 'http://%s:%s/dataserver2' % (SERVER_HOST, PORT)
+	
 	SERVER_DELAY = 3
+	KEY_TEST_WAIT= 'TEST_WAIT'
 
+	@classmethod
+	def resolve_endpoint(cls, host=SERVER_HOST, port=PORT):
+		return 'http://%s:%s/dataserver2' % (host or SERVER_HOST, port or PORT)
+	
 	def __init__(self, port=PORT, root_dir=DATASERVER_DIR):
 		self.process = None
 		self.port = port if port else PORT
-		self.endpoint = 'http://%s:%s/dataserver2' % (SERVER_HOST, self.port)
+		self.endpoint = self.resolve_endpoint(SERVER_HOST, self.port)
 		self.root_dir = os.path.expanduser(root_dir if root_dir else DATASERVER_DIR)
 
-	def set_server_data(self, target):
+	def register_server_data(self, target):
 		target.port = self.port
 		target.root_dir = self.root_dir
 		target.endpoint = self.endpoint

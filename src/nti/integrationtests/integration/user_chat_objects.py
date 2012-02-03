@@ -10,6 +10,7 @@ from websocket_interface import InActiveRoom
 from websocket_interface import CouldNotEnterRoom
 from websocket_interface import NotEnoughOccupants
 
+from nti.integrationtests.dataserver.client import DataserverClient
 from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.dataserver.server import PORT
@@ -29,11 +30,6 @@ phrases = (	"Yellow brown", "Blue red green render purple?",\
 
 class BasicChatTest(DataServerTestCase):
 		
-	@classmethod
-	def setUpClass(cls):
-		cls.start_server()
-		cls.create_users()
-
 	def setUp(self):
 		super(BasicChatTest, self).setUp()
 		self.container = 'test.user.container.%s' % time.time()
@@ -41,7 +37,12 @@ class BasicChatTest(DataServerTestCase):
 	# ======================
 	
 	@classmethod
-	def create_users(cls, max_users=10, create_friends_lists=True):
+	def static_initialization(cls):
+		ds_client = DataserverClient(endpoint = cls.resolve_endpoint(port=cls.port))
+		cls.create_users(ds_client=ds_client)
+	
+	@classmethod
+	def create_users(cls, max_users=10, create_friends_lists=True, ds_client=None):
 		for x in range(1, max_users):
 			name = 'test.user.%s@nextthought.com' % x
 			cls.user_names.append(name)
@@ -50,14 +51,14 @@ class BasicChatTest(DataServerTestCase):
 			for u in cls.user_names:
 				friends = list(cls.user_names)
 				friends.remove(u)
-				cls.register_friends(username=u, friends=friends)
+				cls.register_friends(username=u, friends=friends, ds_client=ds_client)
 		
 	@classmethod
 	def generate_user_name(self):
 		return '%s@nextthought.com' % str(uuid.uuid4()).split('-')[0]
 		
 	@classmethod
-	def register_friends(cls, username, friends, password=DEFAULT_USER_PASSWORD):
+	def register_friends(cls, username, friends, password=DEFAULT_USER_PASSWORD, ds_client=None):
 		
 		if isinstance(friends, basestring) or not isinstance(friends, collections.Iterable):
 			friends = [friends]
@@ -66,8 +67,13 @@ class BasicChatTest(DataServerTestCase):
 		
 		list_name = 'cfl-%s-%s' % (username, str(uuid.uuid4()).split('-')[0])
 		
-		ds = cls.new_client((username, password))
-		ds.createFriendsListWithNameAndFriends(list_name, friends)
+		ds = cls.new_client((username, username)) if not ds_client else ds_client
+		credentials = ds.get_credentials()
+		try:
+			ds.set_credentials(user=username, password=username)
+			ds.createFriendsListWithNameAndFriends(list_name, friends)
+		finally:
+			ds.set_credentials(credentials)
 		
 		return list_name
 	
@@ -266,13 +272,7 @@ class User(OneRoomUser):
 # ---------------------------
 
 class HostUserChatTest(BasicChatTest):
-		
-	@classmethod
-	def setUpClass(cls):
-		BasicChatTest.setUpClass()
-		
-	# ======================
-	
+			
 	def _create_host(self, username, occupants):
 		return Host(username, occupants)
 	

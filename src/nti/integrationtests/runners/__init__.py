@@ -9,8 +9,8 @@ def set_server_data(target, dsprocess):
 	if hasattr(target, "__iter__"):
 		for t in target:
 			set_server_data(t, dsprocess)
-	dsprocess.set_server_data(target)
-	dsprocess.set_server_data(target.__class__)
+	dsprocess.register_server_data(target)
+	dsprocess.register_server_data(target.__class__)
 		
 def run_test_suite(suite, dsprocess, verbosity=2, use_coverage=False, coverage_report=False):
 	try:

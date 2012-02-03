@@ -1,27 +1,29 @@
 import random
 import unittest
 
-from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.dataserver.client import DataserverClient
+
 from user_chat_objects import HostUserChatTest
 from websocket_interface import Serverkill
 
 class TestSimpleChat(HostUserChatTest):
 	
 	@classmethod
-	def setUpClass(cls):
-		DataServerTestCase.setUpClass()
-		cls.create_users(create_friends_lists = False)
+	def static_initialization(cls):
+		
+		ds_client = DataserverClient(endpoint = cls.resolve_endpoint(port=cls.port))
+		cls.create_users(create_friends_lists=False, ds_client=ds_client)
 		
 		cls.user_one = cls.user_names[0]
 		cls.user_two = cls.user_names[1]
 		cls.user_three = cls.user_names[2]
 		
-		cls.register_friends(cls.user_one, [cls.user_two])
-		cls.register_friends(cls.user_two, [cls.user_one])
-		cls.register_friends(cls.user_three, [cls.user_one, cls.user_two])
+		cls.register_friends(cls.user_one, [cls.user_two], ds_client=ds_client)
+		cls.register_friends(cls.user_two, [cls.user_one], ds_client=ds_client)
+		cls.register_friends(cls.user_three, [cls.user_one, cls.user_two], ds_client=ds_client)
 		
 		cls.user_four = cls.user_names[3]
-		cls.register_friends(cls.user_four, [cls.user_one, cls.user_two])
+		cls.register_friends(cls.user_four, [cls.user_one, cls.user_two], ds_client=ds_client)
 		
 		cls.user_five = cls.generate_user_name()
 	

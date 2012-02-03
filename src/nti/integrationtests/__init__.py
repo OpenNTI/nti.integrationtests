@@ -26,6 +26,7 @@ class DataServerTestCase(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.start_server()
+		cls.static_initialization()
 
 	@classmethod
 	def tearDownClass(cls):
@@ -42,6 +43,12 @@ class DataServerTestCase(unittest.TestCase):
 	def get_endpoint(self):
 		return getattr(self, 'endpoint', DataserverProcess.ENDPOINT2)
 	
+	# ======================
+	
+	@classmethod
+	def resolve_endpoint(cls, host=None, port=None):
+		return DataserverProcess.resolve_endpoint(host, port)
+	
 	@classmethod
 	def new_client(cls, credentials=None, endpoint=None):
 		clt = DataserverClient(endpoint or DataserverProcess.ENDPOINT2)
@@ -55,4 +62,8 @@ class DataServerTestCase(unittest.TestCase):
 	def start_server(cls):
 		cls.process = DataserverProcess(port=cls.port, root_dir=cls.root_dir)
 		cls.process.start_server()
+		
+	@classmethod
+	def static_initialization(cls):
+		pass
 
