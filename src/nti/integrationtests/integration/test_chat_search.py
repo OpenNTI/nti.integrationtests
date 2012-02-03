@@ -48,10 +48,10 @@ class TestChatSearch(HostUserChatTest):
 		self.assertEqual(user_3_user_snippet, None, 'A user not involved in the chat found a message he shouldnt have')
 		
 	def _create_host(self, username, occupants):
-		return Host(self.host_messages, username=username, occupants=occupants)
+		return Host(self.host_messages, username=username, occupants=occupants, port=self.port)
 	
 	def _create_user(self, username):
-		return User(self.user_messages, username=username)
+		return User(self.user_messages, username=username, port=self.port)
 	
 	def get_snippet(self, result):
 		latest = 0

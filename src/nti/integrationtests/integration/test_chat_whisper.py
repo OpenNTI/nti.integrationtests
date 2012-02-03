@@ -33,7 +33,7 @@ class TestWhisperChat(test_chat_multi_user.TestMultiUserChat):
 			assert_that(mapping[r], has_item(m.text))
 			
 	def _create_host(self, username, occupants):
-		return Host(username, occupants)
+		return Host(username, occupants, port=self.port)
 		
 # ----------------------------
 

@@ -43,7 +43,7 @@ class TestChatSendingObject(HostUserChatTest):
 				self.assertEqual(content['MimeType'], u'application/vnd.nextthought.canvas')
 	
 	def _create_host(self, username, occupants):
-		return Host(self.host_messages, username=username, occupants=occupants)
+		return Host(self.host_messages, username=username, occupants=occupants, port=self.port)
 	
 # ----------------------------
 	

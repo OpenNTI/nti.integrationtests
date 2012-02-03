@@ -30,7 +30,7 @@ class TestShadowedChat(HostUserChatTest):
 			self.assert_(ghost_msgs.has_key(k), "Ghost %s did not get message with id %s" % (ghost, k))
 
 	def _create_host(self, username, occupants):
-		return Ghost(self.users_to_shadow, username=username, occupants=occupants)
+		return Ghost(self.users_to_shadow, username=username, occupants=occupants, port=self.port)
 	
 # ----------------------------
 			

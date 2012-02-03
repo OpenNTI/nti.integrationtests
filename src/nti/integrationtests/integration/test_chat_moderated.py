@@ -30,7 +30,7 @@ class TestModeratedChat(HostUserChatTest):
 			self.assert_(m not in moderator.moderated_messages, "Moderated message %s was received by a user" % m)
 			
 	def _create_host(self, username, occupants):
-		return Moderator(username=username, occupants=occupants)
+		return Moderator(username=username, occupants=occupants, port=self.port)
 
 # ----------------------------
 			

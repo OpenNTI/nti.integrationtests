@@ -80,14 +80,14 @@ class BasicChatTest(DataServerTestCase):
 # ----------------------------
 
 class BasicUser(Graph):
-	def __init__(self, **kwargs):
+	def __init__(self, *args, **kwargs):
 		if not kwargs.has_key('host'):
 			kwargs['host'] = SOCKET_IO_HOST
 		
 		if not kwargs.has_key('port'):
 			kwargs['port'] = SOCKET_IO_PORT
 			
-		Graph.__init__(self, **kwargs)
+		Graph.__init__(self, *args, **kwargs)
 		self.exception = None
 					
 	def __str__(self):
@@ -134,8 +134,8 @@ class BasicUser(Graph):
 
 class OneRoomUser(BasicUser):
 		
-	def __init__(self, **kwargs):
-		super(OneRoomUser, self).__init__(**kwargs)
+	def __init__(self, *args, **kwargs):
+		super(OneRoomUser, self).__init__(*args, **kwargs)
 		self._room = None
 		
 	# ======================
@@ -185,8 +185,8 @@ class OneRoomUser(BasicUser):
 
 class Host(OneRoomUser):
 		
-	def __init__(self, username, occupants):
-		super(Host, self).__init__(username=username)
+	def __init__(self, username, occupants, *args, **kwargs):
+		super(Host, self).__init__(username=username, **kwargs)
 		self.occupants = occupants
 		self.online = set()
 	
@@ -274,10 +274,10 @@ class User(OneRoomUser):
 class HostUserChatTest(BasicChatTest):
 			
 	def _create_host(self, username, occupants):
-		return Host(username, occupants)
+		return Host(username, occupants, port=self.port)
 	
 	def _create_user(self, username):
-		return User(username=username)
+		return User(username=username, port=self.port)
 	
 	def _run_chat(self, containerId, entries, *denizens, **kwargs):
 		

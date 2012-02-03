@@ -25,10 +25,10 @@ class TestChatUserleavesEarly(HostUserChatTest):
 		
 	def _create_user(self, username):
 		early = username == self.leave_early_user
-		return User(leaves_early=early, username=username)
+		return User(leaves_early=early, username=username, port=self.port)
 	
 	def _create_host(self, username, occupants):
-		return Host(username=username, occupants=occupants)
+		return Host(username=username, occupants=occupants, port=self.port)
 			
 # ----------------------------
 

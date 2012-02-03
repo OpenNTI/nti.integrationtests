@@ -14,7 +14,6 @@ class DataServerTestCase(unittest.TestCase):
 
 	port = PORT
 	root_dir = DATASERVER_DIR
-	endpoint = DataserverProcess.ENDPOINT2
 	
 	user_names = []
 	root_item = ROOT_ITEM
@@ -41,7 +40,9 @@ class DataServerTestCase(unittest.TestCase):
 		return self.ds
 	
 	def get_endpoint(self):
-		return getattr(self, 'endpoint', DataserverProcess.ENDPOINT2)
+		if hasattr(self, 'endpoint'):
+			return self.endpoint
+		return self.resolve_endpoint(port = self.port)
 	
 	# ======================
 	
