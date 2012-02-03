@@ -34,16 +34,18 @@ class TestBasicClassRoom(DataServerTestCase):
 		enrolled = self.make_collecion(enrolled)
 		instructors = self.make_collecion(instructors)
 		ii = InstructorInfo(instructors = instructors)
+		class_name = class_name or 'Class.%s' % time.time()
+
 		sections = []
 		for x in xrange(1, no_sections + 1):
-			si_name = 'Section.%s,%s' % (x, time.time())
+			si_name = '%s.Section.%s' % (class_name, x)
 			si = SectionInfo(ID = si_name,
 							 description = si_name,
 						 	 enrolled = enrolled,
 						 	 instructor = ii)
 			sections.append(si)
 		
-		class_name = class_name or 'Class.%s' % time.time()
+		
 		ci = ClassInfo( ID = class_name,
 						description = class_name,
 						sections = [si],

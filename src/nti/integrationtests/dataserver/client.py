@@ -4,6 +4,7 @@ import time
 import requests
 import warnings
 import collections
+from io import BytesIO
 from urlparse import urljoin
 
 from nti.integrationtests.contenttypes import Note
@@ -291,7 +292,7 @@ class DataserverClient(object):
 	def create_friends_list(self, obj, credentials=None, adapt=True):
 		check_that(isinstance(obj, FriendsList), "must provide a valid DataServer object", obj)
 		collection, _ = self._get_collection(name='FriendsLists', credentials=credentials)
-		return self._post_to_collection(obj, collection, credentials, adapt)
+		return self._post_to_collection(obj, collection, credentials, adapt=adapt)
 	
 	def get_friends_lists(self, credentials=None, adapt=True):
 		
@@ -345,7 +346,7 @@ class DataserverClient(object):
 		check_that(isinstance(obj, DSObject), "must provide a valid DataServer object", obj)
 		check_that(obj.container, "must provide a valid container", obj)
 		pages, _ = self._get_collection(name='Pages', credentials=credentials)
-		return self._post_to_collection(obj, pages, credentials, adapt)
+		return self._post_to_collection(obj, pages, credentials, adapt=adapt)
 	
 	def update_object(self, obj, link=None, credentials=None, adapt=True):
 		
@@ -497,10 +498,10 @@ class DataserverClient(object):
 		provider = Provider(name=name)
 		return provider
 		
-	def create_class(self, classinfo, provider, credentials=None):
+	def create_class(self, classinfo, provider, credentials=None, adapt=True):
 		credentials = self._credentials_to_use(credentials)
 		collection, _ = self._get_collection(name=provider, workspace='providers', credentials=credentials)
-		result = self._post_to_collection(classinfo, collection, credentials)
+		result = self._post_to_collection(classinfo, collection, credentials, adapt=adapt)
 		return result
 		
 	# --------------
@@ -603,6 +604,29 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, collection.href)
 		rp = requests.post(url, auth=auth, data=self.object_to_persist(obj))
 		check_that(rp.status_code == 201, 'invalid status code while posting an object', obj, rp.status_code)
+		posted = json.loads(rp.content)
+		return adapt_ds_object(posted) if adapt else posted
+	
+	def _post_raw_content(self, href, source, content_type, slug=None, credentials=None, adapt=True):
+		
+		auth = self._credentials_to_use(credentials)
+		
+		if hasattr(source, "read"):
+			data = source
+		else:
+			data = BytesIO()
+			data.write(source)
+			data.flush()
+			data.seek(0)
+			
+		headers = {'content-type': content_type}
+		if slug: headers['slug'] = slug
+		
+		files = { slug or 'unknown' : data}
+		url = urljoin(self.endpoint, href)
+		rp = requests.post(url, auth=auth, files=files, headers=headers)
+		check_that(rp.status_code == 201, 'invalid status code while posting raw content', href, rp.status_code)
+		
 		posted = json.loads(rp.content)
 		return adapt_ds_object(posted) if adapt else posted
 	
