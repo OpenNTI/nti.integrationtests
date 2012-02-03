@@ -1,5 +1,6 @@
 import time
 import unittest
+import collections
 
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.contenttypes import InstructorInfo
@@ -24,22 +25,39 @@ class TestBasicClassRoom(DataServerTestCase):
 		self.container = 'Classes'
 		self.ds.set_credentials(self.owner)
 	
-	def test_create_class(self):
-		provider = 'OU'
+	def make_collecion(self, obj):
+		if isinstance(obj, basestring):
+			return [obj]
+		return obj if isinstance(obj, collections.Iterable) else [obj]
 		
-		ii = InstructorInfo(instructors = [self.owner[0]])
-		si_name = 'Section.%s' % time.time()
-		si = SectionInfo(ID = si_name,
-						 description = si_name,
-						 enrolled = self.enrolled,
-						 instructor = ii)
+	def create_class_info(self, instructors, no_sections, enrolled, class_name=None):
+		enrolled = self.make_collecion(enrolled)
+		instructors = self.make_collecion(instructors)
+		ii = InstructorInfo(instructors = instructors)
+		sections = []
+		for x in xrange(1, no_sections + 1):
+			si_name = 'Section.%s,%s' % (x, time.time())
+			si = SectionInfo(ID = si_name,
+							 description = si_name,
+						 	 enrolled = enrolled,
+						 	 instructor = ii)
+			sections.append(si)
 		
-		class_name = 'Class.%s' % time.time()
+		class_name = class_name or 'Class.%s' % time.time()
 		ci = ClassInfo( ID = class_name,
 						description = class_name,
 						sections = [si],
-						container = self.container );
-						
+						container = self.container )
+		return (ci, ii, sections)
+	
+	def test_create_class(self):
+		provider = 'OU'
+		
+		ci, _, sections = self.create_class_info(self.owner[0], 1, self.enrolled)
+		si = sections[0]
+		si_name = si.ID
+		class_name = ci.ID
+		
 		obj = self.ds.create_class(ci, provider)
 		assert_that(obj.ID, is_(class_name))
 		assert_that(obj.creator, is_('OU'))
@@ -57,8 +75,8 @@ class TestBasicClassRoom(DataServerTestCase):
 		assert_that(si.provider, not_none())
 		assert_that(si.instructor, not_none())
 		
-		ii = si.instructor
-		assert_that(ii.instructors, contains(self.owner[0]))
+		instructors = self.make_collecion(si.instructor.instructors)
+		assert_that(instructors, contains(self.owner[0]))
 		
 if __name__ == '__main__':
 	unittest.main()
