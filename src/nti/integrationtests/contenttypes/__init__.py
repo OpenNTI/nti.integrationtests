@@ -142,12 +142,12 @@ class DSObject(object, UserDict.DictMixin):
 		external = {}
 		for key, val in self._data.iteritems():
 			
-			# val may be an array in which case we need to call toDataserverObject
-			# on each value
-			
-			if not val:
+			if not val or not key:
 				continue
 			
+			# val may be an array in which case we need to call toDataserverObject
+			# on each value
+		
 			if isinstance(val, list):
 				val = [v.toDataServerObject() if hasattr(v, 'toDataServerObject') else v for v in val]
 			elif hasattr(val, 'toDataServerObject'):
