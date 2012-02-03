@@ -36,7 +36,7 @@ def run_test_suite(suite, dsprocess, verbosity=2, use_coverage=False, coverage_r
 		else:
 			dsprocess.terminate_server()
 	
-def test_runner(path, pattern="test_chat*.py", use_coverage=False, coverage_report=False, 
+def test_runner(path, pattern="test*.py", use_coverage=False, coverage_report=False, 
 				port=None, root_dir=None):
 	
 	suite = defaultTestLoader.discover(path, pattern)
