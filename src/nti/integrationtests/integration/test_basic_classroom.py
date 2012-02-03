@@ -14,7 +14,6 @@ from hamcrest import contains
 from hamcrest import has_entry
 from hamcrest import greater_than_or_equal_to
 
-@unittest.SkipTest
 class TestBasicClassRoom(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
