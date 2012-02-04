@@ -177,7 +177,7 @@ class DataserverClient(object):
 		rp = requests.get(url, auth=auth)
 		check_that(rp.status_code == 200, 'invalid status code getting friends lists', code=rp.status_code)
 		
-		data = json.loads(rp.content, encoding='UTF-8')
+		data = json.loads(rp.content, encoding=get_encoding(rp))
 		data = data.get('Items', {})
 		return adapt_ds_object(data) if adapt else data
 	
@@ -213,7 +213,7 @@ class DataserverClient(object):
 		rp = requests.get(url, auth=auth)
 		check_that(rp.status_code == 200, "invalid status code getting object with id '%s'" % obj_id, obj_id, rp.status_code)
 		
-		data = json.loads(rp.content, encoding='UTF-8')
+		data = json.loads(rp.content, encoding=get_encoding(rp))
 		return adapt_ds_object(data) if adapt else data
 	
 	def create_object(self, obj, credentials=None, adapt=True, **kwargs):
@@ -233,7 +233,7 @@ class DataserverClient(object):
 		rp = requests.put(url, auth=auth, data=self.object_to_persist(obj))
 		check_that(rp.status_code == 200, 'invalid status code while updating an object', obj, rp.status_code)
 		
-		loaded = json.loads(rp.content, encoding='UTF-8')
+		loaded = json.loads(rp.content, encoding=get_encoding(rp))
 		return adapt_ds_object(loaded) if adapt else loaded
 	
 	def delete_object(self, obj, link=None, credentials=None):
@@ -303,7 +303,7 @@ class DataserverClient(object):
 			rp = requests.get(url, auth=credentials)
 			check_that(rp.status_code == 200, 'invalid status code while getting transcript data', href, rp.status_code)
 			
-			trx = json.loads(rp.content, encoding='UTF-8')
+			trx = json.loads(rp.content, encoding=get_encoding(rp))
 			return adapt_ds_object(trx) if adapt else trx
 		
 		return None
@@ -321,7 +321,7 @@ class DataserverClient(object):
 		rp = requests.get(url, auth=credentials)
 		check_that(rp.status_code == 200, 'invalid status code while searching user data', url, rp.status_code)
 		
-		data = json.loads(rp.content, encoding='UTF-8')
+		data = json.loads(rp.content, encoding=get_encoding(rp))
 		return adapt_ds_object(data) if adapt else data
 	
 	searchUserContent = search_user_content
@@ -346,7 +346,7 @@ class DataserverClient(object):
 		
 		check_that(rp.status_code == 200, 'invalid status code while getting user object(s)', url, rp.status_code)
 		
-		data = json.loads(rp.content, encoding='UTF-8')		
+		data = json.loads(rp.content, encoding=get_encoding(rp))		
 		return adapt_ds_object(data) if adapt else data
 		
 	executeUserSearch = execute_user_search
@@ -480,7 +480,7 @@ class DataserverClient(object):
 		
 		check_that(rp.status_code == 200, "invalid status code getting '%s'" % link_rel, link_rel, rp.status_code)
 		
-		data = json.loads(rp.content, encoding='UTF-8')
+		data = json.loads(rp.content, encoding=get_encoding(rp))
 		return data
 		
 	def _post_to_collection(self, obj, collection, credentials=None, adapt=True):
@@ -488,7 +488,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, collection.href)
 		rp = requests.post(url, auth=auth, data=self.object_to_persist(obj))
 		check_that(rp.status_code == 201, 'invalid status code while posting an object', obj, rp.status_code)
-		posted = json.loads(rp.content, encoding='UTF-8')
+		posted = json.loads(rp.content, encoding=get_encoding(rp))
 		return adapt_ds_object(posted) if adapt else posted
 	
 	def _post_raw_content(self, href, source, content_type, slug=None, credentials=None, adapt=True):
@@ -511,7 +511,7 @@ class DataserverClient(object):
 		rp = requests.post(url, auth=auth, files=files, headers=headers)
 		check_that(rp.status_code == 201, 'invalid status code while posting raw content', href, rp.status_code)
 		
-		posted = json.loads(rp.content, encoding='UTF-8')
+		posted = json.loads(rp.content, encoding=get_encoding(rp))
 		return adapt_ds_object(posted) if adapt else posted
 	
 	def _get_or_parse_user_doc(self, credentials=None):
@@ -526,7 +526,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 		rp = requests.get(url, auth=credentials)
 		check_that(rp.status_code == 200, 'invalid status code while getting collection data', href, rp.status_code)
-		data = json.loads(rp.content, encoding='UTF-8')
+		data = json.loads(rp.content, encoding=get_encoding(rp))
 		return Collection.new_from_dict(data) if data else None
 	
 	def _credentials_to_use(self, credentials):
