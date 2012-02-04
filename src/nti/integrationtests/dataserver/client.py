@@ -7,6 +7,8 @@ import collections
 from io import BytesIO
 from urlparse import urljoin
 
+from requests.models import Response
+
 from nti.integrationtests.contenttypes.servicedoc import Link
 from nti.integrationtests.contenttypes.servicedoc import Item
 from nti.integrationtests.contenttypes.servicedoc import ROOT_ITEM
@@ -58,6 +60,19 @@ def get_link_from_dict(data):
 def get_item_from_dict(data):
 	return Item.new_from_dict(data)
 
+def get_encoding(obj):
+	data = None
+	
+	if isinstance(obj, Response):
+		data = obj.headers.get('content-type', None)
+	elif isinstance(obj, dict):
+		data = obj.get('content-type', None)
+	
+	data = str(data) if data else 'UTF-8'
+	if data.find('charset=') != -1:
+		data = data[data.find('charset=') + 8:]
+	return data
+	
 def get_workspaces(url, username, password='temp001'):
 	"""
 	Return the Workspace objects from the specified url
@@ -66,8 +81,8 @@ def get_workspaces(url, username, password='temp001'):
 	password: User's password
 	"""
 	
-	r = requests.get(url, auth=(username, password))
-	data = json.loads(r.content, encoding='UTF-8')
+	rp = requests.get(url, auth=(username, password))
+	data = json.loads(rp.content, encoding=get_encoding(rp))
 	
 	#import pprint
 	#pprint.pprint(data)
