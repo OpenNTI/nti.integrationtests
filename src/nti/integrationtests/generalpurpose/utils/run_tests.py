@@ -22,6 +22,7 @@ from nti.integrationtests.generalpurpose.utils.response_assert import FriendsLis
 from nti.integrationtests.generalpurpose.utils.response_assert import CanvasBodyTester
 from nti.integrationtests.generalpurpose.utils.response_assert import CanvasShapeBodyTester
 from nti.integrationtests.generalpurpose.utils.response_assert import CanvasPolygonShapeBodyTester
+from nti.integrationtests.generalpurpose.utils.response_assert import QuizTester
 
 
 def setup():
@@ -46,6 +47,7 @@ def get_body_inspector(testType):
 	if testType == 'application/vnd.nextthought.canvasshape': return CanvasShapeBodyTester()
 	if testType == 'application/vnd.nextthought.canvascircleshape': return CanvasShapeBodyTester()
 	if testType == 'application/vnd.nextthought.canvaspolygonshape': return CanvasPolygonShapeBodyTester()
+	if testType == 'application/vnd.nextthought.quiz': return QuizTester()
 	else: return False
 
 def get_request_type(testType):
@@ -82,7 +84,6 @@ def run_tests():
 	
 	# the tests that will be ran
 	test_paths = glob.glob(PATH_TO_TESTS + '*')
-#	tests = get_info(test_path)
 	
 	# massive nested for loops that generate all the tests to be ran
 	for collection in workspace.collections:
@@ -95,8 +96,9 @@ def run_tests():
 				badTest = False
 				error = None
 				testValues = open_data_file(test_path)
-				if accept == testValues['data_type']:
+				if accept == testValues['data_type'] or testValues['data_type'] == 'application/vnd.nextthought.quiz':
 					bodyInspector = get_body_inspector(testValues['data_type'])
+#					bodyInspector = QuizTester()
 					# if the test file doesnt exist, catch that error and continue
 					try:
 						for testType in testValues["test_types"]:

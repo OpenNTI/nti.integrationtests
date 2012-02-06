@@ -37,6 +37,12 @@ class FriendsListBodyTester(object):
 	def testBody(self, parsedBody, mimeType, info):
 		assert parsedBody['MimeType'] == mimeType
 		assert parsedBody['realname'] == info
+		
+class QuizTester(object):
+	
+	def testBody(self, parsedBody, mimeType, info):
+		assert parsedBody['Items']['1']['Text'] == info[0]['1']['Text']
+		assert parsedBody['Items']['1']['Answers'] == info[0]['1']['Answers']
 	
 class LastModifiedAssessment(object):
 	
