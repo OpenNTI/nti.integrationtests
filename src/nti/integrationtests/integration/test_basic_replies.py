@@ -231,7 +231,7 @@ class TestBasicReplying(DataServerTestCase):
 		try:
 			# delete the test
 			self.ds.delete_object(created_reply, credentials=self.target)
-		except AssertionError:
+		except Exception:
 			pass
 		
 		# check that the user can now see it
