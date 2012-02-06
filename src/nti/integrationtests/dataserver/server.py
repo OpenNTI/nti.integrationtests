@@ -131,6 +131,10 @@ class DataserverProcess(object):
 		ini.read(config)
 		
 		cport = int(ini.get('DEFAULT', 'http_port', PORT))
+		sync_changes = bool(ini.get('DEFAULT', 'sync_changes', False))
+		if sync_changes:
+			os.environ['DATASERVER_SYNC_CHANGES'] = 'True'
+			
 		if cport != port:
 			if not os.path.exists(out_dir):
 				os.makedirs(out_dir)
