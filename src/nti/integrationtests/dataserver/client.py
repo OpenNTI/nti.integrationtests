@@ -80,13 +80,18 @@ def get_encoding(obj):
 	
 def do_get(url, auth, trx=True):	
 	rp = requests.get(url, auth=auth)
+	raw_content = rp.content
 	encoding = get_encoding(rp)
 	
 	if DEBUG_GET:
-		dt = json.loads(rp.content, encoding=encoding)
-		d = {'data':dt, 'url':url, 'auth':auth}
+		try:
+			dt = json.loads(raw_content, encoding=encoding) if raw_content else {}
+		except Exception, e:
+			dt = {'Exception': e}
+		d = {'data':dt, 'url':url, 'auth':auth, 'raw': raw_content}
 		pprint.pprint(d)
-	data = json.loads(rp.content, encoding=encoding) if trx else rp.content
+		
+	data = json.loads(raw_content, encoding=encoding) if trx else raw_content
 	return (rp, data, encoding)
 
 def get_workspaces(url, username, password='temp001'):
