@@ -138,11 +138,14 @@ class DSObject(object, UserDict.DictMixin):
 	def keys(self):
 		return self._fields.keys()
 
+	def _valid_value(self, x):
+		return x or isinstance(x, (int, long, float, complex))
+	
 	def toDataServerObject(self):
 		external = {}
 		for key, val in self._data.iteritems():
 			
-			if not val or not key:
+			if not self._valid_value(val) or not key:
 				continue
 			
 			# val may be an array in which case we need to call toDataserverObject
@@ -384,9 +387,9 @@ class CanvasAffineTransform(DSObject):
 	MIME_TYPE = 'application/vnd.nextthought.canvasaffinetransform'
 	
 	_ds_field_mapping = {}
-
+	
 	_fields = {'a' : False, 'b' : False, 'c' : False, 'd' : False, 'tx' : False, 'ty' : False}
-
+	
 # -----------------------------------
 
 class CanvasShape(DSObject):
@@ -397,7 +400,7 @@ class CanvasShape(DSObject):
 	_ds_field_mapping = {}
 	_ds_field_mapping.update(DSObject._ds_field_mapping)
 
-	_fields = {'transform' : CanvasAffineTransform()}
+	_fields = {'transform' : False}
 	_fields.update(DSObject._fields)
 
 # -----------------------------------
