@@ -2,19 +2,13 @@ import glob
 import json
 
 from nti.integrationtests import DataServerTestCase
-from nti.integrationtests.generalpurpose.utils import USERNAME, PASSWORD, URL, DATASERVER, PATH_TO_TESTS
+from nti.integrationtests.generalpurpose import USERNAME, PASSWORD, URL, DATASERVER, PATH_TO_TESTS
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 from nti.integrationtests.generalpurpose.utils.serverdata import Workspace
 
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
 from nti.integrationtests.generalpurpose.utils.url_formatter import JsonFormat
 from nti.integrationtests.generalpurpose.utils.url_formatter import PlistFormat
-
-from nti.integrationtests.generalpurpose.testrunner.post_runner import PostObject
-from nti.integrationtests.generalpurpose.testrunner.get_runner import GetObject
-from nti.integrationtests.generalpurpose.testrunner.get_collection_runner import GetGroupObject
-from nti.integrationtests.generalpurpose.testrunner.put_runner import PutObject
-from nti.integrationtests.generalpurpose.testrunner.delete_runner import DeleteObject
 
 from nti.integrationtests.generalpurpose.utils.response_assert import NoteBodyTester
 from nti.integrationtests.generalpurpose.utils.response_assert import HighlightBodyTester
@@ -39,24 +33,36 @@ def open_data_file(file_path):
 	except: 
 		return False
 
-def get_body_inspector(testType):
-	if testType == 'application/vnd.nextthought.note': return NoteBodyTester()
-	if testType == 'application/vnd.nextthought.highlight': return HighlightBodyTester()
-	if testType == 'application/vnd.nextthought.friendslist': return FriendsListBodyTester()
-	if testType == 'application/vnd.nextthought.canvas': return CanvasBodyTester()
-	if testType == 'application/vnd.nextthought.canvasshape': return CanvasShapeBodyTester()
-	if testType == 'application/vnd.nextthought.canvascircleshape': return CanvasShapeBodyTester()
-	if testType == 'application/vnd.nextthought.canvaspolygonshape': return CanvasPolygonShapeBodyTester()
-	if testType == 'application/vnd.nextthought.quiz': return QuizTester()
-	else: return False
+def get_body_inspector(test_type):
+	if test_type == 'application/vnd.nextthought.note': 
+		return NoteBodyTester()
+	elif test_type == 'application/vnd.nextthought.highlight': 
+		return HighlightBodyTester()
+	elif test_type == 'application/vnd.nextthought.friendslist': 
+		return FriendsListBodyTester()
+	elif test_type == 'application/vnd.nextthought.canvas': 
+		return CanvasBodyTester()
+	elif test_type == 'application/vnd.nextthought.canvasshape':
+		return CanvasShapeBodyTester()
+	elif test_type == 'application/vnd.nextthought.canvascircleshape':
+		return CanvasShapeBodyTester()
+	elif test_type == 'application/vnd.nextthought.canvaspolygonshape':
+		return CanvasPolygonShapeBodyTester()
+	elif test_type == 'application/vnd.nextthought.quiz': 
+		return QuizTester()
+	else: 
+		return False
 
-def get_request_type(testType):
-	if testType == "Post": return PostObject()
-	if testType == "Get": return GetObject()
-	if testType == "GetGroup": return GetGroupObject()
-	if testType == "Put": return PutObject()
-	if testType == "Delete": return DeleteObject()
-	else: return False
+def get_request_type(test_type):
+	try:
+		mod = __import__("nti.integrationtests.generalpurpose.utils")
+	except ImportError:
+		return False
+	
+	local_name = '%sObject' % test_type
+	clazz = mod.__dict__[local_name] if local_name in mod.__dict__ else None
+	
+	return clazz() if clazz else False
 	
 def get_format(formatt):
 	if formatt == "NoFormat": return NoFormat()
@@ -93,50 +99,68 @@ def run_tests():
 				# variables meant to prevent 
 				# bad tests from stopping 
 				# other tests from running
-				badTest = False
 				error = None
-				testValues = open_data_file(test_path)
-				if accept == testValues['data_type'] or testValues['data_type'] == 'application/vnd.nextthought.quiz':
-					bodyInspector = get_body_inspector(testValues['data_type'])
-#					bodyInspector = QuizTester()
+				bad_test = False
+				
+				test_values = open_data_file(test_path)
+				if accept == test_values['data_type'] or test_values['data_type'] == 'application/vnd.nextthought.quiz':
+					body_inspector = get_body_inspector(test_values['data_type'])
 					# if the test file doesnt exist, catch that error and continue
 					try:
-						for testType in testValues["test_types"]:
-							testTypeObj = get_request_type(testType)
-							for responseType in testValues['response_types']:
-								for formatt in testValues['input_formats']:
+						for test_type in test_values["test_types"]:
+							test_type_obj = get_request_type(test_type)
+							for responseType in test_values['response_types']:
+								for formatt in test_values['input_formats']:
 									formatt = get_format(formatt)
-									kwargs = {'href':href, 'objRunner':testValues, 'bodyTester':bodyInspector, 'format':formatt, \
-										'responseTypes':testValues['response_types'][responseType], 'testTypeObj': testTypeObj}
+									kwargs = {	'href' : href,
+												'objRunner' : test_values, 
+												'bodyTester': body_inspector, 
+												'format': formatt, 
+												'responseTypes': test_values['response_types'][responseType],
+												'test_type_obj': test_type_obj }
+									
 									# looks for false values in kwargs. False values come from something being expected
 									# to exist as a testing parameter however does not actually exist. 
 									# This catches it and reports it
-									for testParameter in kwargs:
-										if kwargs[testParameter] is False and badTest is False: 
-											badTest = True
-											error = testParameter
-									if badTest is True: 
-										badTest = False
+									for test_parameter in kwargs:
+										if not kwargs[test_parameter] and not bad_test: 
+											bad_test = True
+											error = test_parameter
+											
+									if bad_test: 
+										bad_test = False
 										yield terminate, error, get_info(test_paths)
-									elif testType == 'Post' and testValues['response_types'][responseType]['classification'] == 'NotFound': pass
-									elif testType != 'Post' and testType != 'Put' and \
-										testValues['response_types'][responseType]['classification'] == 'BadData': pass
-									else: yield testTypeObj.makeRequest, kwargs
+									elif test_type == 'Post' and test_values['response_types'][responseType]['classification'] == 'NotFound':
+										pass
+									elif test_type != 'Post' and test_type != 'Put' and \
+										 test_values['response_types'][responseType]['classification'] == 'BadData':
+										pass
+									else:
+										yield test_type_obj.makeRequest, kwargs
+										
 					# if a TypeError is caught for a nonexistant file, 
 					# report the failure to run those tests
 					except TypeError: 
 						error = 'objRunner'
 						yield terminate, error, get_info(test_paths)
-			if badTest is True:
-				badTest = False
-				yield terminate, error, get_info(test_paths)
+						
+				if bad_test:
+					bad_test = False
+					yield terminate, error, get_info(test_paths)
 
 # reports the error in starting the test
 def terminate(error, test):
 	if error == 'objRunner': message = 'no file avalible to open named %s' % test
 	elif error == 'bodyTester': message = 'wrong test name was received to run %s tests' % test
-	elif error == 'testTypeObj': message = 'unsupported request type was received to run %s tests' % test
+	elif error == 'test_type_obj': message = 'unsupported request type was received to run %s tests' % test
 	elif error == 'format': message = 'unsupported format was received to run %s tests' % test
 	else: message = None
 	assert False, message
+	
+def main(args=None):
+	import nose
+	nose.run()
+	
+if __name__ == '__main__':
+	main()
 		
