@@ -65,11 +65,41 @@ def get_item_from_dict(data):
 
 DEBUG_REQUESTS = False
 
+class _Response(object):
+	def __init__(self, code, headers=None, data=None):
+		self.code = code
+		self.headers = headers or {}
+		self._data = data if data else BytesIO()
+	
+	@property
+	def status_code(self):
+		return self.code
+	
+	@property
+	def encoding(self):
+		return get_encoding(self.headers)
+	
+	@property
+	def content(self):
+		if not hasattr(self,'_content'):
+			self._content = self._data.read()
+		return self._content
+	
+	@property
+	def data(self):
+		return json.loads(self.content, encoding=self.encoding)
+	
 def _http_ise_error_logging(f):
 	def to_call( *args, **kwargs ):
 		try:
-			return f( *args, **kwargs )
+			rp = f( *args, **kwargs )
+			return _Response(rp.code, rp.headers.dict, rp)
 		except urllib2.HTTPError as http:
+			
+			# handle 404s differently
+			if http.code == 404:
+				return _Response(404)
+			
 			# If the server sent us anything,
 			# try to use it
 			_, _, tb = sys.exc_info()
@@ -100,33 +130,10 @@ def get_encoding(obj):
 		data = data[data.find('charset=') + 8:]
 	return data
 
-class _Reponse(object):
-	def __init__(self, rp):
-		self.rp = rp
-	
-	@property
-	def status_code(self):
-		return self.rp.getcode()
-	
-	@property
-	def headers(self):
-		return self.rp.headers.dict
-	
-	@property
-	def encoding(self):
-		return get_encoding(self.rp)
-	
-	@property
-	def content(self):
-		if not hasattr(self,'_content'):
-			self._content = self.rp.read()
-		return self._content
-	
-	@property
-	def data(self):
-		return json.loads(self.content, encoding=self.encoding)
-	
 @_http_ise_error_logging
+def _do_request(request):
+	return urllib2.urlopen(request)
+
 def do_get(url, credentials):
 	request = urllib2.Request(url=url)
 	auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -134,7 +141,7 @@ def do_get(url, credentials):
 	authendicated = urllib2.HTTPBasicAuthHandler(auth)
 	opener = urllib2.build_opener(authendicated)
 	urllib2.install_opener(opener)
-	rp = _Reponse(urllib2.urlopen(request))
+	rp = _do_request(request)
 	
 	if DEBUG_REQUESTS:
 		raw_content = rp.content
@@ -147,7 +154,6 @@ def do_get(url, credentials):
 		
 	return rp
 
-@_http_ise_error_logging
 def do_post(url, credentials, data):
 	request = urllib2.Request(url, data)
 	auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -155,7 +161,7 @@ def do_post(url, credentials, data):
 	authendicated = urllib2.HTTPBasicAuthHandler(auth)
 	opener = urllib2.build_opener(authendicated)
 	urllib2.install_opener(opener)
-	rp = _Reponse(urllib2.urlopen(request))
+	rp = _do_request(request)
 	
 	if DEBUG_REQUESTS:
 		raw_content = rp.content
@@ -168,7 +174,6 @@ def do_post(url, credentials, data):
 		
 	return rp
 
-@_http_ise_error_logging
 def do_put(url, credentials, data):
 	request = urllib2.Request(url, data)
 	auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -177,7 +182,7 @@ def do_put(url, credentials, data):
 	opener = urllib2.build_opener(authendicated)
 	urllib2.install_opener(opener)
 	request.get_method = lambda: 'PUT'
-	rp = _Reponse(urllib2.urlopen(request))
+	rp = _do_request(request)
 	
 	if DEBUG_REQUESTS:
 		raw_content = rp.content
@@ -190,7 +195,6 @@ def do_put(url, credentials, data):
 		
 	return rp
 
-@_http_ise_error_logging
 def do_delete(url, credentials):
 	request = urllib2.Request(url)
 	auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -199,7 +203,7 @@ def do_delete(url, credentials):
 	opener = urllib2.build_opener(authendicated)
 	urllib2.install_opener(opener)
 	request.get_method = lambda: 'DELETE'
-	rp = _Reponse(urllib2.urlopen(request))
+	rp = _do_request(request)
 	
 	if DEBUG_REQUESTS:
 		raw_content = rp.content
