@@ -167,7 +167,7 @@ class TestBasicSharing(DataServerTestCase):
 		# do the actual sharing
 		try:
 			shared_obj1 = self.ds.share_object(created_obj, self.target[0], adapt=True)
-		except AssertionError: 
+		except Exception: 
 			pass
 
 		# check that the user can now see it
@@ -184,7 +184,7 @@ class TestBasicSharing(DataServerTestCase):
 		
 		try:
 			shared_obj = self.ds.share_object(created_obj, self.unauthorized_target[0], credentials=self.unauthorized_target, adapt=True)
-		except AssertionError:
+		except Exception:
 			pass
 		
 		# check that the user can not see it
@@ -213,7 +213,7 @@ class TestBasicSharing(DataServerTestCase):
 		ugd = None
 		try:
 			ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
-		except AssertionError:
+		except Exception:
 			pass
 
 		#asserts that the shared object contains none.
