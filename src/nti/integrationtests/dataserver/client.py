@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import pprint
 import requests
 import warnings
 import collections
@@ -27,6 +28,10 @@ from nti.integrationtests.contenttypes import FriendsList
 from nti.integrationtests.contenttypes import adapt_ds_object
 from nti.integrationtests.contenttypes import TranscriptSummary
 from nti.integrationtests.contenttypes import CanvasPolygonShape
+
+# -----------------------------------
+
+DEBUG_GET = False
 
 # -----------------------------------
 
@@ -73,6 +78,17 @@ def get_encoding(obj):
 		data = data[data.find('charset=') + 8:]
 	return data
 	
+def do_get(url, auth, trx=True):	
+	rp = requests.get(url, auth=auth)
+	encoding = get_encoding(rp)
+	
+	if DEBUG_GET:
+		dt = json.loads(rp.content, encoding=encoding)
+		d = {'data':dt, 'url':url, 'auth':auth}
+		pprint.pprint(d)
+	data = json.loads(rp.content, encoding=encoding) if trx else rp.content
+	return (rp, data, encoding)
+
 def get_workspaces(url, username, password='temp001'):
 	"""
 	Return the Workspace objects from the specified url
@@ -81,8 +97,7 @@ def get_workspaces(url, username, password='temp001'):
 	password: User's password
 	"""
 	
-	rp = requests.get(url, auth=(username, password))
-	data = json.loads(rp.content, encoding=get_encoding(rp))
+	_, data, _ = do_get(url, auth=(username, password))
 	
 	#import pprint
 	#pprint.pprint(data)
@@ -174,10 +189,10 @@ class DataserverClient(object):
 		
 		auth = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, collection.href)
-		rp = requests.get(url, auth=auth)
-		check_that(rp.status_code == 200, 'invalid status code getting friends lists', code=rp.status_code)
 		
-		data = json.loads(rp.content, encoding=get_encoding(rp))
+		rp, data, encoding = do_get(url, auth, False)
+		check_that(rp.status_code == 200, 'invalid status code getting friends lists', code=rp.status_code)
+		data = json.loads(data, encoding=encoding)
 		data = data.get('Items', {})
 		return adapt_ds_object(data) if adapt else data
 	
@@ -210,10 +225,9 @@ class DataserverClient(object):
 		collection, _ = self._get_collection(name='Objects', workspace='Global', credentials=credentials)
 		auth = self._credentials_to_use(credentials)
 		url = _check_url(urljoin(self.endpoint, collection.href)) + obj_id
-		rp = requests.get(url, auth=auth)
+		rp, data, encoding = do_get(url, auth, False)
 		check_that(rp.status_code == 200, "invalid status code getting object with id '%s'" % obj_id, obj_id, rp.status_code)
-		
-		data = json.loads(rp.content, encoding=get_encoding(rp))
+		data = json.loads(data, encoding=encoding)
 		return adapt_ds_object(data) if adapt else data
 	
 	def create_object(self, obj, credentials=None, adapt=True, **kwargs):
@@ -300,10 +314,10 @@ class DataserverClient(object):
 			check_that( href, 'could not find a transcript link for %s' % room_id, room_id)
 			
 			url = urljoin(self.endpoint, href)
-			rp = requests.get(url, auth=credentials)
+			rp, data, encoding = do_get(url, credentials, False)
 			check_that(rp.status_code == 200, 'invalid status code while getting transcript data', href, rp.status_code)
 			
-			trx = json.loads(rp.content, encoding=get_encoding(rp))
+			trx = json.loads(data, encoding=encoding)
 			return adapt_ds_object(trx) if adapt else trx
 		
 		return None
@@ -318,10 +332,11 @@ class DataserverClient(object):
 		
 		link = collection.get_link('UGDSearch')
 		url = _check_url(urljoin(self.endpoint, link.href)) + query
-		rp = requests.get(url, auth=credentials)
+		
+		rp, data, encoding = do_get(url, credentials, False)
 		check_that(rp.status_code == 200, 'invalid status code while searching user data', url, rp.status_code)
 		
-		data = json.loads(rp.content, encoding=get_encoding(rp))
+		data = json.loads(data, encoding=encoding)
 		return adapt_ds_object(data) if adapt else data
 	
 	searchUserContent = search_user_content
@@ -340,13 +355,13 @@ class DataserverClient(object):
 		link, _ = self. _get_user_search_link(credentials=credentials)
 		url = _check_url(urljoin(self.endpoint, link.href)) + search
 		
-		rp = requests.get(url, auth=credentials)
+		rp, data, encoding = do_get(url, credentials, False)
 		if rp.status_code == 404:
 			return EMPTY_CONTAINER_ARRAY
 		
 		check_that(rp.status_code == 200, 'invalid status code while getting user object(s)', url, rp.status_code)
 		
-		data = json.loads(rp.content, encoding=get_encoding(rp))		
+		data = json.loads(data, encoding=encoding)		
 		return adapt_ds_object(data) if adapt else data
 		
 	executeUserSearch = execute_user_search
@@ -472,7 +487,7 @@ class DataserverClient(object):
 			return EMPTY_CONTAINER_DICT
 		
 		url = urljoin(self.endpoint, link.href)
-		rp = requests.get(url, auth=credentials)
+		rp, data, encoding = do_get(url, credentials, False)
 		
 		# check for empty reply from the server
 		if rp.status_code == 404:
@@ -480,7 +495,7 @@ class DataserverClient(object):
 		
 		check_that(rp.status_code == 200, "invalid status code getting '%s'" % link_rel, link_rel, rp.status_code)
 		
-		data = json.loads(rp.content, encoding=get_encoding(rp))
+		data = json.loads(data, encoding=encoding)
 		return data
 		
 	def _post_to_collection(self, obj, collection, credentials=None, adapt=True):
@@ -524,9 +539,9 @@ class DataserverClient(object):
 	def _parse_collection_data(self, href, credentials=None):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
-		rp = requests.get(url, auth=credentials)
+		rp, data, encoding = do_get(url, credentials, False)
 		check_that(rp.status_code == 200, 'invalid status code while getting collection data', href, rp.status_code)
-		data = json.loads(rp.content, encoding=get_encoding(rp))
+		data = json.loads(data, encoding=encoding)
 		return Collection.new_from_dict(data) if data else None
 	
 	def _credentials_to_use(self, credentials):
