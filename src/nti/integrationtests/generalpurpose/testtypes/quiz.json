@@ -1,0 +1,140 @@
+{
+	"data_type": "application/vnd.nextthought.quiz",
+	"objects" :
+		{
+			"post_data":
+				{
+					"MimeType":"application/vnd.nextthought.quiz", 
+					"ContainerId": "test.user.container.1324420216.04", 
+					"Class": "Quiz", 
+					"ID": "mathcounts-2011-0", 
+					"Items": 
+						{
+							"1" : 
+								{ 
+									"Class": "QuizQuestion",
+									"Answers": 
+										[
+											"True", 
+											"1", 
+											"1.0"
+										],  
+									"MimeType": "application/vnd.nextthought.quizquestion",
+									"ID": "1", 
+									"Text": "This is a quiz"
+								}
+						}
+				},
+			"put_data":
+				{
+					"MimeType":"application/vnd.nextthought.quiz", 
+					"ContainerId": "test.user.container.1324420216.04", 
+					"Class": "Quiz", 
+					"ID": "mathcounts-2011-0", 
+					"Items": 
+						{
+							"1" : 
+								{ 
+									"Class": "QuizQuestion",
+									"Answers": 
+										[
+											"False", 
+											"0", 
+											"0.0"
+										],  
+									"MimeType": "application/vnd.nextthought.quizquestion",
+									"ID": "1", 
+									"Text": "This is not a quiz"
+								}
+						}
+				}
+		},
+	"expected_return": 
+		{
+			"MimeType":"application/vnd.nextthought.quiz", 
+			"postExpectedResponse":
+				[
+					{
+						"1": 
+							{
+								"Text": "This is a quiz", 
+								"Class": "QuizQuestion", 
+								"Answers": 
+									[
+										"True", 
+										"1", 
+										"1.0"
+									], 
+								"ID": "1"
+							}
+					}
+				], 
+			"putExpectedResponse":		
+				[
+					{
+						"1": 
+							{
+								"Text": "This is not a quiz", 
+								"Class": "QuizQuestion", 
+								"Answers": 
+									[
+										"False", 
+										"0", 
+										"0.0"
+									], 
+								"ID": "1"
+							}
+					}
+				]
+		},
+	"input_formats" : ["JsonFormat", "PlistFormat", "NoFormat"],
+	"test_types" : ["Post"],
+	"response_types" : 
+		{
+			"Successful": 
+					{
+						"classification": "Successful",
+						"input_info" :{},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					}, 
+			"Unauthorized":
+					{
+						"classification": "Unauthorized",
+						"input_info" :{"password":"incorrect"},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					},
+			"NotFound":
+					{
+						"classification": "NotFound",
+						"input_info" :{"id":"/dataserver2/users/logan.testi%40nextthought.com/Objects/tag%3Anextthought.com%2C2011-10%3Alogan.testi%40nextthought.com-OID-0x03", 
+							"href":"/dataserver2/users/logan.testi%40nextthought.com/doesNotExist"},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					}, 
+			"BadData" :
+					{
+						"classification": "BadData",
+						"input_info" :{"objData":"badData"},
+						"if_modified_since_no" : 304,
+						"if_modified_since_yes" : 200,
+						"get": 200,
+						"post": 201,
+						"put": 200,
+						"delete": 204
+					}
+		}
+}
