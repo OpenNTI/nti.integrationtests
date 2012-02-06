@@ -108,9 +108,12 @@ def _http_ise_error_logging(f):
 				body = http.read()
 				# The last 20 or so lines
 				http.msg += ' Body: ' + str( body )[-1600:]
-			except (AttributeError, IOError): pass
+			except (AttributeError, IOError):
+				pass
+			
 			http.msg += '\n Args: ' + str(args)
 			http.msg += '\n KWArgs: ' + str(kwargs)
+			
 			# re-raise the original exception object
 			# with the original traceback
 			raise http, None, tb
