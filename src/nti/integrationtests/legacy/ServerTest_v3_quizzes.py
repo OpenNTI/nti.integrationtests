@@ -159,17 +159,19 @@ class OID_Remover(object):
 
 class ServerTestCase_v3_quizzes_constants(object):
 
-	def constants(self):
-		self.URL					= 'http://localhost:8081/dataserver'
-		self.URL_POST			    = 'http://localhost:8081/dataserver/quizzes'
-		self.URL_NO_FORMAT		    = 'http://localhost:8081/dataserver/quizzes/First_quiz'
-		self.URL_MATH_XML           = 'http://localhost:8081/dataserver/quizzes/XML'
-		self.URL_JSON			    = 'http://localhost:8081/dataserver/quizzes/First_quiz?format=json'
-		self.URL_PLIST			    = 'http://localhost:8081/dataserver/quizzes/First_quiz?format=plist'
-		self.URL_RESP_POST		    = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/quizresults/First_quiz'
-		self.URL_RESPONSE_NO_FORMAT = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/quizresults/First_quiz'
-		self.URL_RESP_MATH_XML      = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/quizresults/XML'
-		self.URL_RESP_OTHER		    = 'http://localhost:8081/dataserver/users/sjohnson@nextthought.com/quizresults/First_quiz'
+	def constants(self, port=8081):
+		
+		endpoint					= 'http://localhost:%s' % port
+		self.URL					= endpoint + '/dataserver'
+		self.URL_POST			    = endpoint + '/dataserver/quizzes'
+		self.URL_NO_FORMAT		    = endpoint + '/dataserver/quizzes/First_quiz'
+		self.URL_MATH_XML           = endpoint + '/dataserver/quizzes/XML'
+		self.URL_JSON			    = endpoint + '/dataserver/quizzes/First_quiz?format=json'
+		self.URL_PLIST			    = endpoint + '/dataserver/quizzes/First_quiz?format=plist'
+		self.URL_RESP_POST		    = endpoint + '/dataserver/users/ltesti@nextthought.com/quizresults/First_quiz'
+		self.URL_RESPONSE_NO_FORMAT = endpoint + '/dataserver/users/ltesti@nextthought.com/quizresults/First_quiz'
+		self.URL_RESP_MATH_XML      = endpoint + '/dataserver/users/ltesti@nextthought.com/quizresults/XML'
+		self.URL_RESP_OTHER		    = endpoint + '/dataserver/users/sjohnson@nextthought.com/quizresults/First_quiz'
 		self.DEFAULT_QUESTIONS	    = {"Items": { "1" : {"Text": "Question 1", "Answers": ["\(Default\)"], 'Class':'QuizQuestion'},
 														"2" : {"Text": "Question 2", "Answers": ["\(Question\)", "\(question\)"], 'Class':'QuizQuestion'} } }
 		self.DEFAULT_ANSWER		    = { "1" : {"Text": "Question 1", "ID":"1", "Answers": ["\(Default\)"], 'Class':'QuizQuestion'},
@@ -225,7 +227,7 @@ class Set_sjohnson_ID(object):
 	def getID(self):
 		return Set_sjohnson_ID.ID
 
-class ServerTestCase(unittest.TestCase):
+class ServerTestCase(DataServerTestCase):
 
 	def __init__(self, *args):
 		unittest.TestCase.__init__(self, *args)
@@ -234,9 +236,10 @@ class ServerTestCase(unittest.TestCase):
 		Logger.propagate = False
 
 	@classmethod
-	def setUpClass(cls):
+	def static_initialization(cls):
+		
 		Constants							 = ServerTestCase_v3_quizzes_constants()
-		Constants.constants()
+		Constants.constants(cls.port)
 		ServerTestCase.URL					 = Constants.URL
 		ServerTestCase.URL_post			     = Constants.URL_POST
 		ServerTestCase.URL_NoFormat		     = Constants.URL_NO_FORMAT
@@ -298,13 +301,6 @@ class ServerTestCase(unittest.TestCase):
 		ServerTestCase.json				     = ServerControl.JsonFormat()
 		ServerTestCase.plist				 = ServerControl.PlistFormat()
 		ServerTestCase.test				     = ServerControl.PostTest()
-
-		DataServerTestCase.setUpClass()
-
-	@classmethod
-	def tearDownClass(cls):
-#	   Stops the server
-		DataServerTestCase.tearDownClass()
 
 	def setUp(self):
 		self.defaultSetterQuiz(ServerTestCase.tester)
