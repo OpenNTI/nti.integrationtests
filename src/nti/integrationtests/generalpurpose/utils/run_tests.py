@@ -53,7 +53,7 @@ class TestClass(object):
 	def get_request_type(self, test_type):
 		module_name = "nti.integrationtests.generalpurpose.utils"
 		try:
-			__import__(module_name)
+			__import__(module_name, globals(), locals(), [], -1)
 			mod = sys.modules[module_name]
 		except ImportError:
 			return False
