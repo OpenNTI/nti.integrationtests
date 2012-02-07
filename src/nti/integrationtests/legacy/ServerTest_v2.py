@@ -3,6 +3,7 @@ import time
 import unittest
 
 import ServerControl
+
 from nti.integrationtests import DataServerTestCase
 
 class URL_Default(ServerControl.URLFunctionality):
@@ -272,8 +273,8 @@ class OID_Remover(object):
 
 class ServerTests_v2(object):
 
-	def constants(self):
-		self.URL				  = "http://localhost:8081"
+	def constants(self, port=8081):
+		self.URL				  = "http://localhost:%s" % port
 		self.URL_DS				  = self.URL 	+ '/dataserver'
 		self.URL_TYPE             = self.URL_DS + '/users/ltesti@nextthought.com/TestType'
 		self.URL_POST			  = self.URL_DS + '/users/ltesti@nextthought.com/TestType/TestGroup'
@@ -297,14 +298,10 @@ class ServerTests_v2(object):
 class ServerTests(DataServerTestCase):
 
 	@classmethod
-	def setUpClass(cls):
-
-#		******************************
-#		*** Default inputs Section ***
-#		******************************
+	def static_initialization(cls):
 
 		constants						= ServerTests_v2()
-		constants.constants()
+		constants.constants(cls.port)
 
 		ServerTests.URL_type			= constants.URL_TYPE
 		ServerTests.URL_post		    = constants.URL_POST
@@ -360,15 +357,9 @@ class ServerTests(DataServerTestCase):
 		ServerTests.json_oldGroup		= URL_oldGroup_json()
 		ServerTests.plist_oldGroup		= URL_oldGroup_plist()
 		
-		DataServerTestCase.setUpClass()
-
 	@classmethod
 	def controller(cls):
 		return cls.tester
-
-	@classmethod
-	def tearDownClass(cls):
-		DataServerTestCase.tearDownClass()
 
 	def setUp(self):
 		super(ServerTests, self).setUp()
@@ -381,17 +372,18 @@ class ServerTests(DataServerTestCase):
 		ServerTests.tester.setUpPut(ServerTests.URL_plist, format=ServerTests.plist)
 		ServerTests.tester.setUpPut(ServerTests.URL_other_put, username=ServerTests.otherUser, format=ServerTests.json)
 
-		ServerTests.NoTypeGroup	  = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/' + str(uuid.uuid4()) + '/TestGroup'
-		ServerTests.NoTypeWithID	  = ServerTests.NoTypeGroup + '/TestID'
-		ServerTests.NoGroupGroup	  = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/TestType/' + str(uuid.uuid4())
-		ServerTests.NoGroupWithID  =	ServerTests.NoGroupGroup + '/TestID'
-		ServerTests.NoID			  = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/TestType/TestGroup/' + str(uuid.uuid4())
-		ServerTests.NoTypeNoID	  = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/' + str(uuid.uuid4()) + '/TestGroup'
-		ServerTests.NoGroupNoID	  = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/TestType/' + str(uuid.uuid4())
-		ServerTests.TypeGroupURL = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/TestType1/TestGroup1/'
-		ServerTests.SetUpPostID    = ServerTests.tester.setUpPost(ServerTests.TypeGroupURL, format=ServerTests.json)
-		ServerTests.JunkGroupIDURL = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/' + str(uuid.uuid4()) + '/TestGroup1/' + ServerTests.SetUpPostID
-		ServerTests.TypeGroupIDURL = 'http://localhost:8081/dataserver/users/ltesti@nextthought.com/TestType1/TestGroup1/' + ServerTests.SetUpPostID
+		ds_url	= "http://localhost:%s" % self.port
+		ServerTests.NoTypeGroup		= ds_url + '/dataserver/users/ltesti@nextthought.com/' + str(uuid.uuid4()) + '/TestGroup'
+		ServerTests.NoTypeWithID	= ServerTests.NoTypeGroup + '/TestID'
+		ServerTests.NoGroupGroup	= ds_url + '/dataserver/users/ltesti@nextthought.com/TestType/' + str(uuid.uuid4())
+		ServerTests.NoGroupWithID	= ServerTests.NoGroupGroup + '/TestID'
+		ServerTests.NoID			= ds_url + '/dataserver/users/ltesti@nextthought.com/TestType/TestGroup/' + str(uuid.uuid4())
+		ServerTests.NoTypeNoID		= ds_url + '/dataserver/users/ltesti@nextthought.com/' + str(uuid.uuid4()) + '/TestGroup'
+		ServerTests.NoGroupNoID		= ds_url + '/dataserver/users/ltesti@nextthought.com/TestType/' + str(uuid.uuid4())
+		ServerTests.TypeGroupURL	= ds_url + '/dataserver/users/ltesti@nextthought.com/TestType1/TestGroup1/'
+		ServerTests.SetUpPostID		= ServerTests.tester.setUpPost(ServerTests.TypeGroupURL, format=ServerTests.json)
+		ServerTests.JunkGroupIDUR	= ds_url + '/dataserver/users/ltesti@nextthought.com/' + str(uuid.uuid4()) + '/TestGroup1/' + ServerTests.SetUpPostID
+		ServerTests.TypeGroupIDURL	= ds_url + '/dataserver/users/ltesti@nextthought.com/TestType1/TestGroup1/' + ServerTests.SetUpPostID
 
 	def tearDown(self):
 		ServerTests.tester.tearDownDelete(ServerTests.URL_json)
