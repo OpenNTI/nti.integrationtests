@@ -137,15 +137,12 @@ class DSObject(object, UserDict.DictMixin):
 
 	def keys(self):
 		return self._fields.keys()
-
-	def _valid_value(self, x):
-		return x or isinstance(x, (int, long, float, complex))
 	
 	def toDataServerObject(self):
 		external = {}
 		for key, val in self._data.iteritems():
 			
-			if not self._valid_value(val) or not key:
+			if val is None or key is None:
 				continue
 			
 			# val may be an array in which case we need to call toDataserverObject
