@@ -55,7 +55,7 @@ class ServerValues(object):
 		self.preRequestTime = 0
 	
 	@_http_ise_error_logging
-	def setUp(self):
+	def obj_setUp(self):
 		if self.testObjRef: 
 			self.testArgs = {'url_id':URL + self.testObjRef, 'id':self.testObjRef}
 		else:
@@ -65,10 +65,9 @@ class ServerValues(object):
 			parsedBody = self.format.read(request)
 			if parsedBody['href'].find('/Objects/') != -1: self.testArgs = {'url_id':URL + parsedBody['href'], 'id':parsedBody['href']}
 			else: self.testArgs = None
-
 		return self.testArgs
 	
-	def tearDown(self, objref=None):
+	def obj_tearDown(self, objref=None):
 		try:
 			if objref:
 				self.requests.delete(url=URL+objref, username=self.username, password=self.password)

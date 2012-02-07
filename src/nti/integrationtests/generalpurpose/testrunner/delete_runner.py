@@ -7,7 +7,7 @@ class DeleteObject(ServerValues):
 #	@ServerValues.http_ise_error_logging
 	def makeRequest(self, kwargs):
 		self.setValues(kwargs)
-		testArgs = self.setUp()
+		testArgs = self.obj_setUp()
 		url = self.format.formatURL(testArgs['url_id'])
 		self.setTime()
 		try:
@@ -20,7 +20,7 @@ class DeleteObject(ServerValues):
 		except urllib2.HTTPError, error:
 			if error.code != 404:
 				parsedBody = self.format.read(self.requests.get(url=url, username=self.username, password=self.password))
-				self.tearDown()
+				self.obj_tearDown()
 				self.setCollectionModificationTime()
 				self.setModificationTime(parsedBody)
 				self.objTest.testBody(parsedBody, self.postObjData['MimeType'], self.objResponse['postExpectedResponse'])

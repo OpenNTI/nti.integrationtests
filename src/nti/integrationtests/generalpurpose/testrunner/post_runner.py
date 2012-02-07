@@ -13,7 +13,7 @@ class PostObject(ServerValues):
 		try:
 			request = self.requests.post(url=url, data=data, username=self.username, password=self.testPassword)
 			parsedBody = self.format.read(request)
-			self.tearDown(parsedBody['href'])
+			self.obj_tearDown(parsedBody['href'])
 			self.setCollectionModificationTime()
 			self.setModificationTime(parsedBody)
 			assert request.code==self.responseCode['post'], \
