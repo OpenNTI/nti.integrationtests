@@ -5,7 +5,7 @@ import urllib2
 
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
-from nti.integrationtests.generalpurpose.utils import USERNAME, PASSWORD, URL
+from nti.integrationtests.generalpurpose import USERNAME, PASSWORD, URL
 
 def _http_ise_error_logging(f):
 	def to_call( *args, **kwargs ):
