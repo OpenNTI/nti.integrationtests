@@ -11,9 +11,10 @@ from nti.integrationtests.integration import wraps_item
 from nti.integrationtests.integration import unwrap_object
 from nti.integrationtests.integration import get_notification_count
 from nti.integrationtests.integration import contains
+from nti.integrationtests.integration import has_same_oid_as
 
 import unittest
-from hamcrest import (assert_that, has_entry, is_, is_not,
+from hamcrest import (assert_that, has_entry, is_, is_not, less_than_or_equal_to,
 					  not_none, greater_than_or_equal_to, has_length)
 
 class TestBasicStream(DataServerTestCase):
@@ -228,9 +229,10 @@ class TestBasicStream(DataServerTestCase):
 
 	def test_bounded_server_stream(self):
 
-		FIRST_SHARE = 0
 		notes_array = []
-		NUMBER_OF_SHARES = 50
+		MAX_SHARES = 50
+		MAX_SHARES_P1 = MAX_SHARES + 1
+		NUMBER_OF_SHARES = 65
 
 		notes = 0
 		while notes < NUMBER_OF_SHARES:
@@ -251,11 +253,16 @@ class TestBasicStream(DataServerTestCase):
 
 		initial_stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
 		initial_sortedchanges = sortchanges(objects_from_container(initial_stream))
-
+		
+		assert_that(initial_stream, is_(container()))
+		initial_sortedchanges = [c for c in initial_sortedchanges if c.changeType != 'Circled']
+		assert_that( initial_sortedchanges, has_length( less_than_or_equal_to( NUMBER_OF_SHARES ) ) )
+		assert_that( initial_sortedchanges, has_length( less_than_or_equal_to( MAX_SHARES_P1 ) ) )
+		
 		# create the object to share
 		created_obj =  self.ds.create_note('Note number %s' % notes, self.container, adapt=True)
 
-		#appends the newly created note to the array
+		# appends the newly created note to the array
 		notes_array.append(created_obj)
 
 		# do the actual sharing
@@ -265,24 +272,13 @@ class TestBasicStream(DataServerTestCase):
 
 		final_stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
 		final_sortedchanges = sortchanges(objects_from_container(final_stream))
-
-		#cleanup
-		while notes >= FIRST_SHARE:
-
-			#deletes the object at the index
-			self.ds.delete_object(notes_array[notes])
-
-			#decrements the value from nates
-			notes -= 1
-
-		assert_that(initial_stream, is_(container()))
-		assert_that( initial_sortedchanges, has_length( greater_than_or_equal_to( NUMBER_OF_SHARES ) ) )
-		assert_that(initial_sortedchanges[NUMBER_OF_SHARES-1], wraps_item(notes_array[0]))
-		assert_that(initial_sortedchanges[FIRST_SHARE], wraps_item(notes_array[NUMBER_OF_SHARES - 1]))
+		
 		assert_that(final_stream, is_(container()))
-		assert_that(final_sortedchanges[NUMBER_OF_SHARES], is_not(wraps_item(notes_array[0])))
-		assert_that(final_sortedchanges[NUMBER_OF_SHARES], (wraps_item(notes_array[1])))
-		assert_that(final_sortedchanges[FIRST_SHARE+1], wraps_item(notes_array[NUMBER_OF_SHARES]))
+		final_sortedchanges = [c for c in final_sortedchanges if c.changeType != 'Circled']
+		assert_that( final_sortedchanges, has_length( less_than_or_equal_to( NUMBER_OF_SHARES ) ) )
+		assert_that( final_sortedchanges, has_length( less_than_or_equal_to( MAX_SHARES_P1 ) ) )
+		
+		assert_that(final_sortedchanges[1], has_same_oid_as( initial_sortedchanges[0] ) ) 
 
 if __name__ == '__main__':
 	unittest.main()
