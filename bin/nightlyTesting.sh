@@ -34,8 +34,8 @@ date
 echo "Running legacy version tests"
 run_legacy_v2_tests > $LOG 2>&1
 
-echo "Running legacy version tests quizzes"
-run_legacy_v3_tests > $LOG 2>&1
+#echo "Running legacy version tests quizzes"
+#run_legacy_v3_tests > $LOG 2>&1
 
 echo "Running integration tests"
 run_integration_tests --use_coverage >> $LOG 2>&1
