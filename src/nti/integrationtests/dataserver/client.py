@@ -10,6 +10,8 @@ import collections
 from io import BytesIO
 from urlparse import urljoin
 
+from webob import Response
+
 from nti.integrationtests.contenttypes.servicedoc import Link
 from nti.integrationtests.contenttypes.servicedoc import Item
 from nti.integrationtests.contenttypes.servicedoc import ROOT_ITEM
@@ -65,40 +67,40 @@ def get_item_from_dict(data):
 
 DEBUG_REQUESTS = False
 
-class _Response(object):
-	def __init__(self, code, headers=None, data=None):
-		self.code = code
-		self.headers = headers or {}
-		self._data = data if data else BytesIO()
+def get_encoding(obj):
+	data = None
 	
-	@property
-	def status_code(self):
-		return self.code
+	if isinstance(obj, httplib.HTTPMessage):
+		data = obj.headers.dict.get('content-type', None)
+	elif isinstance(obj, dict):
+		data = obj.get('content-type', None)
 	
-	@property
-	def encoding(self):
-		return get_encoding(self.headers)
+	data = str(data) if data else 'UTF-8'
+	if data.find('charset=') != -1:
+		data = data[data.find('charset=') + 8:]
+	return data
+
+def create_response(code=None, rp=None):
+	status = rp.code if rp else code
+	body = rp.read() if rp else u''
+	headers = rp.headers.dict if rp else {}
+	headerlist = [(k,v) for k,v in headers.items()]
+	charset = get_encoding(headers)
+	return Response(body=body, status=status, headerlist=headerlist, charset=charset)
 	
-	@property
-	def content(self):
-		if not hasattr(self,'_content'):
-			self._content = self._data.read()
-		return self._content
-	
-	@property
-	def data(self):
-		return json.loads(self.content, encoding=self.encoding)
+def decode(rp, use_json=True):
+	return json.loads(rp.body, encoding=rp.charset)
 	
 def _http_ise_error_logging(f):
 	def to_call( *args, **kwargs ):
 		try:
 			rp = f( *args, **kwargs )
-			return _Response(rp.code, rp.headers.dict, rp)
+			return create_response(rp=rp)
 		except urllib2.HTTPError as http:
 			
 			# handle 404s differently
 			if http.code == 404:
-				return _Response(404)
+				return create_response(code=404)
 			
 			# If the server sent us anything,
 			# try to use it
@@ -120,19 +122,6 @@ def _http_ise_error_logging(f):
 		
 	return to_call
 
-def get_encoding(obj):
-	data = None
-	
-	if isinstance(obj, httplib.HTTPMessage):
-		data = obj.headers.dict.get('content-type', None)
-	elif isinstance(obj, dict):
-		data = obj.get('content-type', None)
-	
-	data = str(data) if data else 'UTF-8'
-	if data.find('charset=') != -1:
-		data = data[data.find('charset=') + 8:]
-	return data
-
 @_http_ise_error_logging
 def _do_request(request):
 	return urllib2.urlopen(request)
@@ -147,9 +136,9 @@ def do_get(url, credentials):
 	rp = _do_request(request)
 	
 	if DEBUG_REQUESTS:
-		raw_content = rp.content
+		raw_content = rp.body
 		try:
-			dt = rp.data if raw_content else {}
+			dt = decode(rp) if raw_content else {}
 		except Exception, e:
 			dt = {'Exception': e}
 		d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
@@ -167,9 +156,9 @@ def do_post(url, credentials, data):
 	rp = _do_request(request)
 	
 	if DEBUG_REQUESTS:
-		raw_content = rp.content
+		raw_content = rp.body
 		try:
-			dt = rp.data if raw_content else {}
+			dt = decode(rp) if raw_content else {}
 		except Exception, e:
 			dt = {'Exception': e}
 		d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
@@ -188,9 +177,9 @@ def do_put(url, credentials, data):
 	rp = _do_request(request)
 	
 	if DEBUG_REQUESTS:
-		raw_content = rp.content
+		raw_content = rp.body
 		try:
-			dt = rp.data if raw_content else {}
+			dt = decode(rp) if raw_content else {}
 		except Exception, e:
 			dt = {'Exception': e}
 		d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
@@ -209,9 +198,9 @@ def do_delete(url, credentials):
 	rp = _do_request(request)
 	
 	if DEBUG_REQUESTS:
-		raw_content = rp.content
+		raw_content = rp.body
 		try:
-			dt = rp.data if raw_content else {}
+			dt = decode(rp) if raw_content else {}
 		except Exception, e:
 			dt = {'Exception': e}
 		d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
@@ -228,7 +217,7 @@ def get_workspaces(url, username, password='temp001'):
 	"""
 	
 	rp = do_get(url, credentials=(username, password))
-	data = rp.data
+	data = decode(rp)
 
 	result = []
 	for item in data.get('Items', []):
@@ -319,9 +308,10 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, collection.href)
 		
 		rp = do_get(url, credentials)
-		check_that(rp.status_code == 200, 'invalid status code getting friends lists', code=rp.status_code)
+		check_that(rp.status_int == 200, 'invalid status code getting friends lists', code=rp.status_int)
 		
-		data = rp.data.get('Items', {})
+		data = decode(rp)
+		data = data.get('Items', {})
 		return adapt_ds_object(data) if adapt else data
 	
 	createFriendsListWithNameAndFriends = create_friends_list_with_name_and_friends
@@ -354,8 +344,8 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = _check_url(urljoin(self.endpoint, collection.href)) + obj_id
 		rp = do_get(url, credentials)
-		check_that(rp.status_code == 200, "invalid status code getting object with id '%s'" % obj_id, obj_id, rp.status_code)
-		data = rp.data
+		check_that(rp.status_int == 200, "invalid status code getting object with id '%s'" % obj_id, obj_id, rp.status_int)
+		data = decode(rp)
 		return adapt_ds_object(data) if adapt else data
 	
 	def create_object(self, obj, credentials=None, adapt=True, **kwargs):
@@ -373,10 +363,9 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
 		rp = do_put(url, credentials=credentials, data=self.object_to_persist(obj))
-		check_that(rp.status_code == 200, 'invalid status code while updating an object', obj, rp.status_code)
-		
-		loaded = rp.data
-		return adapt_ds_object(loaded) if adapt else loaded
+		check_that(rp.status_int == 200, 'invalid status code while updating an object', obj, rp.status_int)
+		data = decode(rp)
+		return adapt_ds_object(data) if adapt else data
 	
 	def delete_object(self, obj, link=None, credentials=None):
 		
@@ -389,7 +378,7 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
 		rp = do_delete(url, credentials=credentials)
-		check_that(rp.status_code == 204, 'invalid status code while deleting an object', obj, rp.status_code)
+		check_that(rp.status_int == 204, 'invalid status code while deleting an object', obj, rp.status_int)
 		
 		return None
 	
@@ -443,8 +432,9 @@ class DataserverClient(object):
 			
 			url = urljoin(self.endpoint, href)
 			rp = do_get(url, credentials)
-			check_that(rp.status_code == 200, 'invalid status code while getting transcript data', href, rp.status_code)
-			data = rp.data
+			check_that(rp.status_int == 200, 'invalid status code while getting transcript data', href, rp.status_int)
+			
+			data = decode(rp)
 			return adapt_ds_object(data) if adapt else data
 		
 		return None
@@ -461,8 +451,9 @@ class DataserverClient(object):
 		url = _check_url(urljoin(self.endpoint, link.href)) + query
 		
 		rp = do_get(url, credentials)
-		check_that(rp.status_code == 200, 'invalid status code while searching user data', url, rp.status_code)
-		data = rp.data
+		check_that(rp.status_int == 200, 'invalid status code while searching user data', url, rp.status_int)
+		
+		data = decode(rp)
 		return adapt_ds_object(data) if adapt else data
 	
 	searchUserContent = search_user_content
@@ -482,12 +473,12 @@ class DataserverClient(object):
 		url = _check_url(urljoin(self.endpoint, link.href)) + search
 		
 		rp = do_get(url, credentials)
-		if rp.status_code == 404:
+		if rp.status_int == 404:
 			return EMPTY_CONTAINER_ARRAY
 		
-		check_that(rp.status_code == 200, 'invalid status code while getting user object(s)', url, rp.status_code)
+		check_that(rp.status_int == 200, 'invalid status code while getting user object(s)', url, rp.status_int)
 		
-		data = rp.data	
+		data = decode(rp)	
 		return adapt_ds_object(data) if adapt else data
 		
 	executeUserSearch = execute_user_search
@@ -616,20 +607,20 @@ class DataserverClient(object):
 		rp = do_get(url, credentials)
 		
 		# check for empty reply from the server
-		if rp.status_code == 404:
+		if rp.status_int == 404:
 			return EMPTY_CONTAINER_DICT
 		
-		check_that(rp.status_code == 200, "invalid status code getting '%s'" % link_rel, link_rel, rp.status_code)
+		check_that(rp.status_int == 200, "invalid status code getting '%s'" % link_rel, link_rel, rp.status_int)
 		
-		return rp.data
+		return decode(rp)
 		
 	def _post_to_collection(self, obj, collection, credentials=None, adapt=True):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, collection.href)
 		rp = do_post(url, credentials=credentials, data=self.object_to_persist(obj))
-		check_that(rp.status_code == 201, 'invalid status code while posting an object', obj, rp.status_code)
-		posted = rp.data
-		return adapt_ds_object(posted) if adapt else posted
+		check_that(rp.status_int == 201, 'invalid status code while posting an object', obj, rp.status_int)
+		data = decode(rp)
+		return adapt_ds_object(data) if adapt else data
 	
 	def _post_raw_content(self, href, source, content_type, slug=None, credentials=None, adapt=True):
 		
@@ -649,8 +640,8 @@ class DataserverClient(object):
 		files = { slug or 'unknown' : data}
 		url = urljoin(self.endpoint, href)
 		rp = do_post(url, credentials=credentials, files=files, headers=headers)
-		check_that(rp.status_code == 201, 'invalid status code while posting raw content', href, rp.status_code)
-		posted = rp.data
+		check_that(rp.status_int == 201, 'invalid status code while posting raw content', href, rp.status_int)
+		posted = decode(rp)
 		return adapt_ds_object(posted) if adapt else posted
 	
 	def _get_or_parse_user_doc(self, credentials=None):
@@ -664,8 +655,8 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
 		rp = do_get(url, credentials)
-		check_that(rp.status_code == 200, 'invalid status code while getting collection data', href, rp.status_code)
-		data = rp.data
+		check_that(rp.status_int == 200, 'invalid status code while getting collection data', href, rp.status_int)
+		data = decode(rp)
 		return Collection.new_from_dict(data) if data else None
 	
 	def _credentials_to_use(self, credentials):
