@@ -2,9 +2,9 @@ import os
 import sys
 import glob
 import json
+import time
 
-from nose.tools import with_setup
-
+from nti.integrationtests.dataserver.server import DataserverProcess
 from nti.integrationtests.contenttypes.servicedoc import Workspace
 
 from nti.integrationtests.generalpurpose import PATH_TO_TESTS
@@ -13,7 +13,6 @@ from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequ
 
 # ----------------------------
 
-test_global_data = {}
 formatter_module = None
 request_type_module = None
 
@@ -23,14 +22,24 @@ def import_module(module_name):
 
 request_type_module = import_module("nti.integrationtests.generalpurpose.utils")
 formatter_module = import_module("nti.integrationtests.generalpurpose.utils.url_formatter")
+
+dataserver = None
+host = os.environ.get('host', 'localhost')
+port = int(os.environ.get('port', '8081'))
+endpoint = "http://%s:%s/dataserver2" % (host, port)
+username =  os.environ.get('username', 'test.user.1@nextthought.com')
+password =  os.environ.get('password', 'temp001')
 	
 # ----------------------------
 
-def setup_func():
-	pass
+def setup():
+	global dataserver, port
+	dataserver = DataserverProcess(port = port)
+	dataserver.start_server()
 
-def teardown_func():
-	pass
+def teardown():
+	global dataserver
+	dataserver.terminate_server()
 
 # ----------------------------
 
@@ -55,22 +64,19 @@ def get_body_inspector(test_type):
 	clazz = MIME_TYPE_REGISTRY[test_type]
 	return clazz()
 		
-def get_workspaces(url, username, password):
+def get_workspaces(url, username, password):	
 	formatter = get_format('NoFormat')
 	document = ServerRequest().get(url=url, username=username, password=password)
-	parsedBody = formatter.read(document)
-	workspace = Workspace.new_from_dict(parsedBody['Items'][0])
+	parsed_body = formatter.read(document)
+	workspace = Workspace.new_from_dict(parsed_body['Items'][0])
 	return workspace
 	
-@with_setup(setup_func, teardown_func)
 def test_generator():
 	
-	host = os.environ.get('host', 'localhost')
-	port = int(os.environ.get('port', '8081'))
-	endpoint = "http://%s:%s/dataserver2" % (host, port)
-	
-	username =  os.environ.get('username', 'test.user.1@nextthought.com')
-	password =  os.environ.get('password', 'temp001')
+	global dataserver
+	if not dataserver.is_running():
+		print "Waiting for server to come-up"
+		time.sleep(5)
 	
 	workspace = get_workspaces(endpoint, username, password)
 	
@@ -80,10 +86,11 @@ def test_generator():
 
 	# massive nested for loops that generate all the tests to be ran
 		
-	for collection in workspace.collections:
-		href = workspace.collections[collection].href
-		for accept in workspace.collections[collection].accepts:
-			for test_path in test_paths:
+	for test_path in test_paths:
+		for collection in workspace.collections:
+			href = workspace.collections[collection].href
+			for accept in workspace.collections[collection].accepts:
+				
 				# variables meant to prevent 
 				# bad tests from stopping 
 				# other tests from running
@@ -93,6 +100,7 @@ def test_generator():
 				test_values = open_data_file(test_path)
 
 				if accept == test_values['data_type'] or test_values['data_type'] == 'application/vnd.nextthought.quiz':
+					
 					body_inspector = get_body_inspector(test_values['data_type'])
 					
 					# if the test file doesnt exist, catch that error and continue
@@ -102,12 +110,15 @@ def test_generator():
 							for responseType in test_values['response_types']:
 								for input_formatt in test_values['input_formats']:
 									input_formatt = get_format(input_formatt)
-									kwargs = {	'href' : href,
-												'objRunner' : test_values, 
-												'bodyTester': body_inspector, 
-												'format': input_formatt, 
-												'responseTypes': test_values['response_types'][responseType],
-												'test_type_obj': test_type_obj }
+									kwargs = {	'endpoint'		: endpoint,
+												'username'		: username,
+												'password'		: password,
+												'href' 			: href,
+												'objRunner'		: test_values, 
+												'bodyTester'	: body_inspector, 
+												'format'		: input_formatt, 
+												'responseTypes'	: test_values['response_types'][responseType],
+												'test_type_obj'	: test_type_obj }
 								
 									# looks for false values in kwargs. False values come from something being expected
 									# to exist as a testing parameter however does not actually exist. 
@@ -147,7 +158,7 @@ def terminate(error, test):
 	else: 
 		message = None
 	assert False, message
-		
-if __name__ == '__main__':	
-	for v in test_generator():
-		print v
+
+if __name__ == '__main__':
+	import nose
+	nose.run()

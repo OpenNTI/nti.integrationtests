@@ -1,10 +1,10 @@
 import urllib2
 
-from nti.integrationtests.generalpurpose.testrunner import ServerValues
+from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
 from nti.integrationtests.generalpurpose.utils.response_assert import LastModifiedAssessment
 
-class PostObject(ServerValues):
-#	@ServerValues.http_ise_error_logging
+class PostObject(BasicSeverOperation):
+	
 	def makeRequest(self, kwargs):
 		self.setValues(kwargs)
 		url = self.format.formatURL(self.testHrefUrl)

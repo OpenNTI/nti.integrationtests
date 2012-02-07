@@ -85,8 +85,11 @@ class LastModifiedAssessment(object):
 		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
 		lastModifiedTime = kwargs.get('requestTime', None)
 		preRequestTime = kwargs['preRequestTime']
-		if lastModifiedTimeCollection:pass
-#			assert lastModifiedTimeCollection <= preRequestTime
+		
+		#TODO: What do we need to do here?
+		if lastModifiedTimeCollection:
+			pass
+
 		if lastModifiedTime:
 			assert lastModifiedTime <= preRequestTime
 			

@@ -1,33 +1,44 @@
 import urllib2
 
-from nti.integrationtests.generalpurpose.testrunner import ServerValues
+from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
 from nti.integrationtests.generalpurpose.utils.response_assert import LastModifiedAssessment
 
-class DeleteObject(ServerValues):
-#	@ServerValues.http_ise_error_logging
-	def makeRequest(self, kwargs):
+class DeleteObject(BasicSeverOperation):
+
+	def makeRequest(self, kwargs):	
+			
 		self.setValues(kwargs)
-		testArgs = self.obj_setUp()
-		url = self.format.formatURL(testArgs['url_id'])
-		self.setTime()
-		try:
-			if not testArgs: assert False, "Attempted a request on a non object"
+
+		test_args = self.obj_setUp()
+		assert test_args, "Invalid operation set up arguments"
+		
+		self.set_time()
+		url = self.format.formatURL(test_args['url_id'])
+		try:			
 			request = self.requests.delete(url=url, username=self.username, password=self.testPassword)
 			self.setCollectionModificationTime()
-			assert request.code==self.responseCode['delete'], \
-				'this method was expecting a %d response, instead received %d' % (self.responseCode['delete'], request.code)
+			
+			assert 	request.code == self.responseCode['delete'], \
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['delete'], request.code)
+					
 			LastModifiedAssessment.changedLastModifiedTime(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)
+			
 		except urllib2.HTTPError, error:
+			
 			if error.code != 404:
-				parsedBody = self.format.read(self.requests.get(url=url, username=self.username, password=self.password))
+				parsed_body = self.format.read(self.requests.get(url=url, username=self.username, password=self.password))
 				self.obj_tearDown()
-				self.setCollectionModificationTime()
-				self.setModificationTime(parsedBody)
-				self.objTest.testBody(parsedBody, self.postObjData['MimeType'], self.objResponse['postExpectedResponse'])
-				LastModifiedAssessment.unchangedLastModifiedTime(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection,
-														requestTime=self.lastModified)
+				
+				self.set_collection_modification_time()
+				self.set_modification_time(parsed_body)
+				self.objTest.testBody(parsed_body, self.postObjData['MimeType'], self.objResponse['postExpectedResponse'])
+				
+				LastModifiedAssessment.unchangedLastModifiedTime(preRequestTime = self.preRequestTime,
+																 collectionTime = self.lastModifiedCollection,
+																 requestTime = self.lastModified)
 			else: 
-				self.setCollectionModificationTime()
+				self.set_collection_modification_time()
 				LastModifiedAssessment.unchangedLastModifiedTime(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)
-			assert error.code==self.responseCode['delete'], \
-				'this method was expecting a %d response, instead received %d' % (self.responseCode['delete'], error.code)
+			
+			assert	error.code == self.responseCode['delete'], \
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['delete'], error.code)
