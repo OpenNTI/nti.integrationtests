@@ -1,3 +1,4 @@
+import sys
 import glob
 import json
 from nose.tools import eq_
@@ -50,14 +51,15 @@ class TestClass(object):
 			return False
 
 	def get_request_type(self, test_type):
+		module_name = "nti.integrationtests.generalpurpose.utils"
 		try:
-			mod = __import__("nti.integrationtests.generalpurpose.utils")
+			__import__(module_name)
+			mod = sys.modules[module_name]
 		except ImportError:
 			return False
 	
 		local_name = '%sObject' % test_type
 		clazz = mod.__dict__[local_name] if local_name in mod.__dict__ else None
-	
 		return clazz() if clazz else False
 	
 	def get_format(self, formatt):
@@ -167,3 +169,5 @@ class TestClass(object):
 		eq_(self.called, expect)
 
 
+if __name__ == '__main__':	
+	TestClass().get_request_type('Post')
