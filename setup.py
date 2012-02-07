@@ -23,8 +23,7 @@ setup(
 		],
 
 	install_requires = [ 'nti.dataserver',
-						 'coverage',
-						 'webtest'
+						 'coverage'
 						],
 	
 	packages = find_packages('src'),
