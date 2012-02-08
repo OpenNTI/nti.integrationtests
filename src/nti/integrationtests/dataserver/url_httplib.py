@@ -36,47 +36,50 @@ class URLHttpLib(object):
         charset = cls._get_encoding(headers)
         return Response(body=body, status=status, headerlist=headerlist, charset=charset)
     
-    @classmethod
-    def _http_ise_error_logging(cls, f):
-        def to_call( *args, **kwargs ):
-            try:
-                rp = f( *args, **kwargs )
-                return cls._create_response(rp=rp)
-            except urllib2.HTTPError as http:
-                
-                # handle 404s differently
-                if http.code == 404:
-                    return cls._create_response(code=404)
-                
-                # If the server sent us anything,
-                # try to use it
-                _, _, tb = sys.exc_info()
-                try:
-                    http.msg += ' URL: ' + http.geturl()
-                    body = http.read()
-                    # The last 20 or so lines
-                    http.msg += ' Body: ' + str( body )[-1600:]
-                except (AttributeError, IOError):
-                    pass
-                
-                http.msg += '\n Args: ' + str(args)
-                http.msg += '\n KWArgs: ' + str(kwargs)
-                
-                # re-raise the original exception object
-                # with the original traceback
-                raise http, None, tb
+    # -----------------------------------
+    
+    def _create_request(self, credentials, url, data=None):
+        request = urllib2.Request(url=url, data=data)
+        auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        auth.add_password(None, url, credentials[0], credentials[1])
+        authendicated = urllib2.HTTPBasicAuthHandler(auth)
+        opener = urllib2.build_opener(authendicated)
+        urllib2.install_opener(opener)
+        return request
+    
+    def _do_request(self, request, *args, **kwargs):
+        try:
+            rp = urllib2.urlopen(request)
+            return self._create_response(rp=rp)
+        except urllib2.HTTPError as http:
             
-        return to_call
-
-    @_http_ise_error_logging
-    def _do_request(self, request):
-        return urllib2.urlopen(request)
-
+            # handle 404s differently
+            if http.code == 404:
+                return URLHttpLib._create_response(code=404)
+            
+            # If the server sent us anything,
+            # try to use it
+            _, _, tb = sys.exc_info()
+            try:
+                http.msg += ' URL: ' + http.geturl()
+                body = http.read()
+                # The last 20 or so lines
+                http.msg += ' Body: ' + str( body )[-1600:]
+            except (AttributeError, IOError):
+                pass
+            
+            http.msg += '\n Args: ' + str(args)
+            http.msg += '\n KWArgs: ' + str(kwargs)
+            
+            # re-raise the original exception object
+            # with the original traceback
+            raise http, None, tb
+     
     def _do_debug(self, url, rp, credentials):
         if self.debug:
             raw_content = rp.body
             try:
-                dt = json.loads(rp.body, encoding=rp.charset) if raw_content else {}
+                dt = self.deserialize(rp) if raw_content else {}
             except Exception, e:
                 dt = {'Exception': e}
             d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
@@ -84,48 +87,31 @@ class URLHttpLib(object):
             
     # -----------------------------------
     
+    def deserialize(self, rp):
+        return json.loads(rp.body, encoding=rp.charset)
+    
     def do_get(self, url, credentials, *args, **kwargs):
-        request = urllib2.Request(url=url)
-        auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        auth.add_password(None, url, credentials[0], credentials[1])
-        authendicated = urllib2.HTTPBasicAuthHandler(auth)
-        opener = urllib2.build_opener(authendicated)
-        urllib2.install_opener(opener)
-        rp = self._do_request(request)
+        request = self._create_request(credentials, url)
+        rp = self._do_request(request, *locals())
         self._do_debug(url, rp, credentials)
         return rp
 
     def do_post(self, url, credentials, data, *args, **kwargs):
-        request = urllib2.Request(url, data)
-        auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        auth.add_password(None, url, credentials[0], credentials[1])
-        authendicated = urllib2.HTTPBasicAuthHandler(auth)
-        opener = urllib2.build_opener(authendicated)
-        urllib2.install_opener(opener)
-        rp = self._do_request(request)
+        request = self._create_request(credentials, url, data)
+        rp = self._do_request(request, *locals())
         self._do_debug(url, rp, credentials)
         return rp
 
     def do_put(self, url, credentials, data, *args, **kwargs):
-        request = urllib2.Request(url, data)
-        auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        auth.add_password(None, url, credentials[0], credentials[1])
-        authendicated = urllib2.HTTPBasicAuthHandler(auth)
-        opener = urllib2.build_opener(authendicated)
-        urllib2.install_opener(opener)
+        request = self._create_request(credentials, url, data)
         request.get_method = lambda: 'PUT'
-        rp = self._do_request(request)
+        rp = self._do_request(request, *locals())
         self._do_debug(url, rp, credentials)
         return rp
 
     def do_delete(self, url, credentials, *args, **kwargs):
-        request = urllib2.Request(url)
-        auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        auth.add_password(None, url, credentials[0], credentials[1])
-        authendicated = urllib2.HTTPBasicAuthHandler(auth)
-        opener = urllib2.build_opener(authendicated)
-        urllib2.install_opener(opener)
+        request = self._create_request(credentials, url)
         request.get_method = lambda: 'DELETE'
-        rp = self._do_request(request)
+        rp = self._do_request(request, *locals())
         self._do_debug(url, rp, credentials)
         return rp

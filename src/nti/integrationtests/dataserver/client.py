@@ -1,16 +1,10 @@
 import os
-import sys
 import json
 import time
-import pprint
-import httplib
-import urllib2
 import warnings
 import collections
 from io import BytesIO
 from urlparse import urljoin
-
-from webob import Response
 
 from nti.integrationtests.contenttypes.servicedoc import Link
 from nti.integrationtests.contenttypes.servicedoc import Item
@@ -30,6 +24,8 @@ from nti.integrationtests.contenttypes import FriendsList
 from nti.integrationtests.contenttypes import adapt_ds_object
 from nti.integrationtests.contenttypes import TranscriptSummary
 from nti.integrationtests.contenttypes import CanvasPolygonShape
+
+from url_httplib import URLHttpLib
 
 # -----------------------------------
 
@@ -65,149 +61,6 @@ def get_item_from_dict(data):
 
 # -----------------------------------
 
-DEBUG_REQUESTS = False
-
-def get_encoding(obj):
-	data = None
-	
-	if isinstance(obj, httplib.HTTPMessage):
-		data = obj.headers.dict.get('content-type', None)
-	elif isinstance(obj, dict):
-		data = obj.get('content-type', None)
-	
-	data = str(data) if data else 'UTF-8'
-	if data.find('charset=') != -1:
-		data = data[data.find('charset=') + 8:]
-	return data
-
-def create_response(code=None, rp=None):
-	status = rp.code if rp else code
-	body = rp.read() if rp else u''
-	headers = rp.headers.dict if rp else {}
-	headerlist = [(k,v) for k,v in headers.items()]
-	charset = get_encoding(headers)
-	return Response(body=body, status=status, headerlist=headerlist, charset=charset)
-	
-def decode(rp, use_json=True):
-	return json.loads(rp.body, encoding=rp.charset)
-	
-def _http_ise_error_logging(f):
-	def to_call( *args, **kwargs ):
-		try:
-			rp = f( *args, **kwargs )
-			return create_response(rp=rp)
-		except urllib2.HTTPError as http:
-			
-			# handle 404s differently
-			if http.code == 404:
-				return create_response(code=404)
-			
-			# If the server sent us anything,
-			# try to use it
-			_, _, tb = sys.exc_info()
-			try:
-				http.msg += ' URL: ' + http.geturl()
-				body = http.read()
-				# The last 20 or so lines
-				http.msg += ' Body: ' + str( body )[-1600:]
-			except (AttributeError, IOError):
-				pass
-			
-			http.msg += '\n Args: ' + str(args)
-			http.msg += '\n KWArgs: ' + str(kwargs)
-			
-			# re-raise the original exception object
-			# with the original traceback
-			raise http, None, tb
-		
-	return to_call
-
-@_http_ise_error_logging
-def _do_request(request):
-	return urllib2.urlopen(request)
-
-def do_get(url, credentials):
-	request = urllib2.Request(url=url)
-	auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
-	auth.add_password(None, url, credentials[0], credentials[1])
-	authendicated = urllib2.HTTPBasicAuthHandler(auth)
-	opener = urllib2.build_opener(authendicated)
-	urllib2.install_opener(opener)
-	rp = _do_request(request)
-	
-	if DEBUG_REQUESTS:
-		raw_content = rp.body
-		try:
-			dt = decode(rp) if raw_content else {}
-		except Exception, e:
-			dt = {'Exception': e}
-		d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
-		pprint.pprint(d)
-		
-	return rp
-
-def do_post(url, credentials, data):
-	request = urllib2.Request(url, data)
-	auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
-	auth.add_password(None, url, credentials[0], credentials[1])
-	authendicated = urllib2.HTTPBasicAuthHandler(auth)
-	opener = urllib2.build_opener(authendicated)
-	urllib2.install_opener(opener)
-	rp = _do_request(request)
-	
-	if DEBUG_REQUESTS:
-		raw_content = rp.body
-		try:
-			dt = decode(rp) if raw_content else {}
-		except Exception, e:
-			dt = {'Exception': e}
-		d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
-		pprint.pprint(d)
-		
-	return rp
-
-def do_put(url, credentials, data):
-	request = urllib2.Request(url, data)
-	auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
-	auth.add_password(None, url, credentials[0], credentials[1])
-	authendicated = urllib2.HTTPBasicAuthHandler(auth)
-	opener = urllib2.build_opener(authendicated)
-	urllib2.install_opener(opener)
-	request.get_method = lambda: 'PUT'
-	rp = _do_request(request)
-	
-	if DEBUG_REQUESTS:
-		raw_content = rp.body
-		try:
-			dt = decode(rp) if raw_content else {}
-		except Exception, e:
-			dt = {'Exception': e}
-		d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
-		pprint.pprint(d)
-		
-	return rp
-
-def do_delete(url, credentials):
-	request = urllib2.Request(url)
-	auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
-	auth.add_password(None, url, credentials[0], credentials[1])
-	authendicated = urllib2.HTTPBasicAuthHandler(auth)
-	opener = urllib2.build_opener(authendicated)
-	urllib2.install_opener(opener)
-	request.get_method = lambda: 'DELETE'
-	rp = _do_request(request)
-	
-	if DEBUG_REQUESTS:
-		raw_content = rp.body
-		try:
-			dt = decode(rp) if raw_content else {}
-		except Exception, e:
-			dt = {'Exception': e}
-		d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
-		pprint.pprint(d)
-		
-	return rp
-
 def get_workspaces(url, username, password='temp001'):
 	"""
 	Return the Workspace objects from the specified url
@@ -216,8 +69,9 @@ def get_workspaces(url, username, password='temp001'):
 	password: User's password
 	"""
 	
-	rp = do_get(url, credentials=(username, password))
-	data = decode(rp)
+	httplib = URLHttpLib()
+	rp = httplib.do_get(url, credentials=(username, password))
+	data = httplib.deserialize(rp)
 
 	result = []
 	for item in data.get('Items', []):
@@ -243,10 +97,11 @@ def _check_url(url):
 
 class DataserverClient(object):
 
-	def __init__(self, endpoint, credentials=None):
+	def __init__(self, endpoint, credentials=None, httplib=None):
 		self.users_ws = {}
 		self.credentials = credentials
 		self.endpoint = _check_url(endpoint)
+		self.httplib = httplib or URLHttpLib() 
 
 	def get_credentials(self):
 		return self.credentials
@@ -307,10 +162,10 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, collection.href)
 		
-		rp = do_get(url, credentials)
+		rp = self.httplib.do_get(url, credentials)
 		check_that(rp.status_int == 200, 'invalid status code getting friends lists', code=rp.status_int)
 		
-		data = decode(rp)
+		data = self.httplib.deserialize(rp)
 		data = data.get('Items', {})
 		return adapt_ds_object(data) if adapt else data
 	
@@ -343,9 +198,9 @@ class DataserverClient(object):
 		collection, _ = self._get_collection(name='Objects', workspace='Global', credentials=credentials)
 		credentials = self._credentials_to_use(credentials)
 		url = _check_url(urljoin(self.endpoint, collection.href)) + obj_id
-		rp = do_get(url, credentials)
+		rp = self.httplib.do_get(url, credentials)
 		check_that(rp.status_int == 200, "invalid status code getting object with id '%s'" % obj_id, obj_id, rp.status_int)
-		data = decode(rp)
+		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 	
 	def create_object(self, obj, credentials=None, adapt=True, **kwargs):
@@ -362,9 +217,9 @@ class DataserverClient(object):
 		href = link or obj.get_edit_link()
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
-		rp = do_put(url, credentials=credentials, data=self.object_to_persist(obj))
+		rp = self.httplib.do_put(url, credentials=credentials, data=self.object_to_persist(obj))
 		check_that(rp.status_int == 200, 'invalid status code while updating an object', obj, rp.status_int)
-		data = decode(rp)
+		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 	
 	def delete_object(self, obj, link=None, credentials=None):
@@ -377,7 +232,7 @@ class DataserverClient(object):
 		
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
-		rp = do_delete(url, credentials=credentials)
+		rp = self.httplib.do_delete(url, credentials=credentials)
 		check_that(rp.status_int == 204, 'invalid status code while deleting an object', obj, rp.status_int)
 		
 		return None
@@ -431,10 +286,10 @@ class DataserverClient(object):
 			check_that( href, 'could not find a transcript link for %s' % room_id, room_id)
 			
 			url = urljoin(self.endpoint, href)
-			rp = do_get(url, credentials)
+			rp = self.httplib.do_get(url, credentials)
 			check_that(rp.status_int == 200, 'invalid status code while getting transcript data', href, rp.status_int)
 			
-			data = decode(rp)
+			data = self.httplib.deserialize(rp)
 			return adapt_ds_object(data) if adapt else data
 		
 		return None
@@ -450,10 +305,10 @@ class DataserverClient(object):
 		link = collection.get_link('UGDSearch')
 		url = _check_url(urljoin(self.endpoint, link.href)) + query
 		
-		rp = do_get(url, credentials)
+		rp = self.httplib.do_get(url, credentials)
 		check_that(rp.status_int == 200, 'invalid status code while searching user data', url, rp.status_int)
 		
-		data = decode(rp)
+		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 	
 	searchUserContent = search_user_content
@@ -472,13 +327,13 @@ class DataserverClient(object):
 		link, _ = self. _get_user_search_link(credentials=credentials)
 		url = _check_url(urljoin(self.endpoint, link.href)) + search
 		
-		rp = do_get(url, credentials)
+		rp = self.httplib.do_get(url, credentials)
 		if rp.status_int == 404:
 			return EMPTY_CONTAINER_ARRAY
 		
 		check_that(rp.status_int == 200, 'invalid status code while getting user object(s)', url, rp.status_int)
 		
-		data = decode(rp)	
+		data = self.httplib.deserialize(rp)	
 		return adapt_ds_object(data) if adapt else data
 		
 	executeUserSearch = execute_user_search
@@ -604,7 +459,7 @@ class DataserverClient(object):
 			return EMPTY_CONTAINER_DICT
 		
 		url = urljoin(self.endpoint, link.href)
-		rp = do_get(url, credentials)
+		rp = self.httplib.do_get(url, credentials)
 		
 		# check for empty reply from the server
 		if rp.status_int == 404:
@@ -612,14 +467,14 @@ class DataserverClient(object):
 		
 		check_that(rp.status_int == 200, "invalid status code getting '%s'" % link_rel, link_rel, rp.status_int)
 		
-		return decode(rp)
+		return self.httplib.deserialize(rp)
 		
 	def _post_to_collection(self, obj, collection, credentials=None, adapt=True):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, collection.href)
-		rp = do_post(url, credentials=credentials, data=self.object_to_persist(obj))
+		rp = self.httplib.do_post(url, credentials=credentials, data=self.object_to_persist(obj))
 		check_that(rp.status_int == 201, 'invalid status code while posting an object', obj, rp.status_int)
-		data = decode(rp)
+		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 	
 	def _post_raw_content(self, href, source, content_type, slug=None, credentials=None, adapt=True):
@@ -639,9 +494,9 @@ class DataserverClient(object):
 		
 		files = { slug or 'unknown' : data}
 		url = urljoin(self.endpoint, href)
-		rp = do_post(url, credentials=credentials, files=files, headers=headers)
+		rp = self.httplib.do_post(url, credentials=credentials, files=files, headers=headers)
 		check_that(rp.status_int == 201, 'invalid status code while posting raw content', href, rp.status_int)
-		posted = decode(rp)
+		posted = self.httplib.deserialize(rp)
 		return adapt_ds_object(posted) if adapt else posted
 	
 	def _get_or_parse_user_doc(self, credentials=None):
@@ -654,9 +509,9 @@ class DataserverClient(object):
 	def _parse_collection_data(self, href, credentials=None):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
-		rp = do_get(url, credentials)
+		rp = self.httplib.do_get(url, credentials)
 		check_that(rp.status_int == 200, 'invalid status code while getting collection data', href, rp.status_int)
-		data = decode(rp)
+		data = self.httplib.deserialize(rp)
 		return Collection.new_from_dict(data) if data else None
 	
 	def _credentials_to_use(self, credentials):
