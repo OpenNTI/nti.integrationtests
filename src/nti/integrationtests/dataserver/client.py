@@ -381,8 +381,8 @@ class DataserverClient(object):
 			check_that(section, "could not find a section with name %s" % section_name, section_name)
 			href = section.href
 			
-		res_obj, slug = self._post_raw_content(href, source_file, content_type, slug=slug)
-		return res_obj
+		_, slug = self._post_raw_content(href, source_file, content_type, slug=slug)
+		return slug
 		
 	# --------------
 	
@@ -493,10 +493,9 @@ class DataserverClient(object):
 		rp = self.httplib.do_upload_resource(url, credentials=credentials, source_file=source,
 											 content_type=content_type, headers=headers)
 		check_that(rp.status_int == 201, 'invalid status code while posting raw content', href, rp.status_int)
-		posted = self.httplib.deserialize(rp)
-		
-		adapted = adapt_ds_object(posted) if adapt else posted
-		return (adapted, headers['slug'])
+		# posted = self.httplib.deserialize(rp)
+		# adapted = adapt_ds_object(posted) if adapt else posted
+		return (None, headers['slug'])
 	
 	def _get_or_parse_user_doc(self, credentials=None):
 		credentials = self._credentials_to_use(credentials)

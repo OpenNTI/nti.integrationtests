@@ -55,7 +55,7 @@ class TestBasicClassRoom(DataServerTestCase):
 						container = self.container )
 		return (ci, ii, sections)
 	
-	def xtest_create_class(self):
+	def test_create_class(self):
 		provider = 'OU'
 		
 		ci, _, sections = self.create_class_info(self.owner[0], 1, self.enrolled)
