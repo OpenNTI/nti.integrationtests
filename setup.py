@@ -3,8 +3,8 @@ from setuptools import setup, find_packages
 entry_points = {
 			
 	'console_scripts': [
-		"chat_client = nti.integrationtests.runners.chat_client:main",
-		"run_integration_tests = nti.integrationtests.runners.run_integration_tests:main",
+		"nti_chat_client = nti.integrationtests.runners.chat_client:main",
+		"nti_run_integration_tests = nti.integrationtests.runners.run_integration_tests:main"
 	],
 }
 
