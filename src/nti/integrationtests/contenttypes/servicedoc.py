@@ -6,23 +6,24 @@ EMPTY_CONTAINER_ARRAY = { u'Last Modified': 0, u'Items': []}
 
 class Link(object):
 	
-	def __init__(self, href, rel, type_=None):
+	def __init__(self, href, rel, type_=None, ntiid=None):
 		self.rel = rel
 		self.href = href
 		self.type = type_
+		self.ntiid = ntiid
 	
 	def __str__( self ):
 		return self.href
 
 	def __repr__( self ):
-		return "(%s, %s, %s)" % (self.href, self.type, self.rel)
+		return "(%s, %s, %s, %s)" % (self.href, self.ntiid, self.type, self.rel)
 	
 	@classmethod
 	def new_from_dict(cls, data):
-		rel = data.get('rel', None)
-		href = data.get('href', None)
-		type_ = data.get('type', None)
-		link = Link(href, rel, type_)
+		link = Link(href = data.get('href', None),
+					rel = data.get('rel', None),
+					type_ = data.get('type', None),
+					ntiid = data.get('ntiid', None))
 		return link
 	
 class Item(object):

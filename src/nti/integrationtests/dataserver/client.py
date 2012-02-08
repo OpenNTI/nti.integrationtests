@@ -3,7 +3,6 @@ import json
 import time
 import warnings
 import collections
-from io import BytesIO
 from urlparse import urljoin
 
 from nti.integrationtests.contenttypes.servicedoc import Link
@@ -174,18 +173,18 @@ class DataserverClient(object):
 	# --------------
 	
 	def get_user_generated_data(self, container, workspace=None, credentials=None, adapt=True):
-		data = self._get_container_raw_item_data(container=container, link_rel='UserGeneratedData', workspace=workspace,
+		data = self._get_container_item_data(container=container, link_rel='UserGeneratedData', workspace=workspace,
 												 credentials=credentials, validate=True)
 		return adapt_ds_object(data) if adapt else data
 
 	def get_recursive_stream_data(self, container, workspace=None, credentials=None, adapt=True):
-		data = self._get_container_raw_item_data(container=container, link_rel='RecursiveStream', workspace=workspace,
+		data = self._get_container_item_data(container=container, link_rel='RecursiveStream', workspace=workspace,
 												 credentials=credentials, validate=True)
 		return adapt_ds_object(data) if adapt else data
 	
 	
 	def get_recursive_user_generated_data(self, container, workspace=None, credentials=None, adapt=True):
-		data = self._get_container_raw_item_data(container=container, link_rel='RecursiveUserGeneratedData', workspace=workspace,
+		data = self._get_container_item_data(container=container, link_rel='RecursiveUserGeneratedData', workspace=workspace,
 												 credentials=credentials, validate=True)
 		return adapt_ds_object(data) if adapt else data
 	
@@ -367,13 +366,23 @@ class DataserverClient(object):
 		
 	def get_class(self, provider, class_name, credentials=None, adapt=True):
 		credentials = self._credentials_to_use(credentials)
-		class_info = self._get_container(class_name, name=provider, workspace='providers', credentials=credentials)
+		class_info = self._get_container(class_name, name=provider, workspace='providers', 
+										 credentials=credentials, always_new=True)
 		return adapt_ds_object(class_info) if isinstance(class_info, dict) and adapt else class_info
 		
-	def add_class_resource(self, resource, provider, class_name, section_name=None, credentials=None, adapt=True):
+	def add_class_resource(	self, source_file, provider, class_name, section_name=None, 
+							content_type=None, credentials=None, slug=None, adapt=True):
 		credentials = self._credentials_to_use(credentials)
 		class_info = self.get_class(provider, class_name, credentials=credentials, adapt=True)
-		return class_info
+		check_that(class_info, "could not find a class with name %s" % class_name, class_name)
+		href = class_info.href
+		if section_name:
+			section = class_info.get_section(section_name)
+			check_that(section, "could not find a section with name %s" % section_name, section_name)
+			href = section.href
+			
+		res_obj, slug = self._post_raw_content(href, source_file, content_type, slug=slug)
+		return res_obj
 		
 	# --------------
 	
@@ -414,7 +423,7 @@ class DataserverClient(object):
 	
 		return (collection, ws)
 		
-	def _get_container(self, container, name='Pages', workspace=None, credentials=None, validate=True):
+	def _get_container(self, container, name='Pages', workspace=None, credentials=None, validate=True, always_new=False):
 		"""
 		return Item object associated withe specified workspace/collection
 		container: Item container id
@@ -426,14 +435,14 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		collection, _ = self._get_collection(name=name, workspace=workspace, 
 											 credentials=credentials, validate=validate)
-		if not collection.has_item(container):
+		if not collection.has_item(container) or always_new:
 			collection = self.get_collection_data(name=name, workspace=workspace,
 												  credentials=credentials, validate=validate)
 		
 		item = collection.get_item(container)
 		return item
 	
-	def _get_container_raw_item_data(self, container, link_rel, name='Pages', workspace=None, credentials=None, validate=True):
+	def _get_container_item_data(self, container, link_rel, name='Pages', workspace=None, credentials=None, validate=True):
 		"""
 		return raw data (dict) associated withe specified workspace/collection for the specified container using
 		the specified link rel
@@ -477,27 +486,17 @@ class DataserverClient(object):
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 	
-	def _post_raw_content(self, href, source, content_type, slug=None, credentials=None, adapt=True):
-		
+	def _post_raw_content(self, href, source, content_type=None, slug=None, credentials=None, adapt=True):
 		credentials = self._credentials_to_use(credentials)
-		
-		if hasattr(source, "read"):
-			data = source
-		else:
-			data = BytesIO()
-			data.write(source)
-			data.flush()
-			data.seek(0)
-			
-		headers = {'content-type': content_type}
-		if slug: headers['slug'] = slug
-		
-		files = { slug or 'unknown' : data}
-		url = urljoin(self.endpoint, href)
-		rp = self.httplib.do_post(url, credentials=credentials, files=files, headers=headers)
+		headers = {'slug' : slug or os.path.basename(source) }
+		url = urljoin(self.endpoint, href) 
+		rp = self.httplib.do_upload_resource(url, credentials=credentials, source_file=source,
+											 content_type=content_type, headers=headers)
 		check_that(rp.status_int == 201, 'invalid status code while posting raw content', href, rp.status_int)
 		posted = self.httplib.deserialize(rp)
-		return adapt_ds_object(posted) if adapt else posted
+		
+		adapted = adapt_ds_object(posted) if adapt else posted
+		return (adapted, headers['slug'])
 	
 	def _get_or_parse_user_doc(self, credentials=None):
 		credentials = self._credentials_to_use(credentials)

@@ -190,13 +190,16 @@ class DSObject(object, UserDict.DictMixin):
 	def get_delete_link(self):
 		return self.get_edit_link()
 	
-	def get_link(self, type_link = None):
-		if type_link and hasattr(self, 'links'):
+	def get_link(self, link_type = None):
+		if link_type and hasattr(self, 'links'):
 			links = self.links or []
 			for link in links:
-				if link.get('rel', None) == type_link:
+				if link.get('rel', None) == link_type:
 					return link.get('href', None)
 		return None
+	
+	def get_links(self):
+		return getattr(self, 'links', [])
 	
 	@classmethod
 	def fields(cls):
@@ -476,10 +479,10 @@ class ClassSectionMixin(DSObject):
 	
 	DEFAULT_ACCEPTS = ['image/*', 'application/pdf', 'application/vnd.nextthought.classscript']
 	
-	_ds_field_mapping = {'description':'Description', 'ID':'ID', 'ntiid': 'NTIID', 'accepts':'accepts'}
+	_ds_field_mapping = {'description':'Description', 'ID':'ID', 'ntiid': 'NTIID', 'accepts':'accepts', 'href':'href'}
 	_ds_field_mapping.update(DSObject._ds_field_mapping)
 
-	_fields = {	'description': False, 'ID':False, 'ntiid': True, 'accepts': (False, list)}
+	_fields = {	'description': False, 'ID':False, 'ntiid': True, 'accepts': (False, list), 'href':False}
 	_fields.update(DSObject._fields)
 
 	def __getitem__(self, key):

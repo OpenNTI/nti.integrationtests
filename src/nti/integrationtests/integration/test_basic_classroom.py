@@ -1,4 +1,6 @@
+import os
 import time
+import random
 import unittest
 import collections
 
@@ -6,6 +8,7 @@ from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.contenttypes import InstructorInfo
 from nti.integrationtests.contenttypes import SectionInfo
 from nti.integrationtests.contenttypes import ClassInfo
+from nti.integrationtests.contenttypes.servicedoc import Link
 
 from hamcrest import not_none
 from hamcrest import assert_that
@@ -80,10 +83,24 @@ class TestBasicClassRoom(DataServerTestCase):
 		instructors = self.make_collecion(si.instructor.instructors)
 		assert_that(instructors, contains(self.owner[0]))
 		
-	def xtest_create_class(self):
+	def test_create_class_and_resources(self):
 		provider = 'OU'
-		cz = 'Class.1328310631.04'
-		self.ds.add_class_resource(None, provider, cz)
+		ci, _, _ = self.create_class_info(self.owner[0], 2, self.enrolled)
+		ci = self.ds.create_class(ci, provider)
+		
+		source = os.path.join(os.path.dirname(__file__), "_class_image.jpg")
+		entries = random.randint(3, 5)
+		for x in xrange(1, entries +1):
+			slug = 'class_image_%s' % x			
+			self.ds.add_class_resource(source, provider, class_name=ci.ID, slug=slug)
+		
+		ci = self.ds.get_class(provider=provider, class_name=ci.ID)
+		enclosures = 0 
+		for d in ci.get_links():
+			link = Link.new_from_dict(d)
+			if link.rel == 'enclosure':
+				enclosures = enclosures +1
+		assert_that(entries, enclosures)
 		
 if __name__ == '__main__':
 	unittest.main()
