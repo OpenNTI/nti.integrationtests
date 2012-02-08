@@ -1,31 +1,39 @@
 import urllib2
 
 from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
-from nti.integrationtests.generalpurpose.utils.response_assert import LastModifiedAssessment
 
 class PutObject(BasicSeverOperation):	
 	
 	def makeRequest(self, kwargs):
 		self.setValues(kwargs)
-		testArgs = self.obj_setUp()
-		url = self.format.formatURL(testArgs['url_id'])
+		
+		test_args = self.obj_setUp()
+		assert test_args, "Invalid operation set up arguments"
+		
+		url = self.format.formatURL(test_args['url_id'])
 		data = self.format.write(self.putObjData)
-		self.setTime()
+		
+		self.set_time()
 		try:
-			if not testArgs: assert False, "Attempted a request on a non object"
 			request = self.requests.put(url=url, data=data, username=self.username, password=self.testPassword)
-			parsedBody = self.format.read(request)
+			parsed_body = self.format.read(request)
+			
 			self.obj_tearDown()
-			self.setCollectionModificationTime()
-			self.setModificationTime(parsedBody)
-			assert request.code==self.responseCode['put'], \
-				'this method was expecting a %d response, instead received %d' % (self.responseCode['put'], request.code)
-			self.objTest.testBody(parsedBody, self.putObjData['MimeType'], self.objResponse['putExpectedResponse'])
-			LastModifiedAssessment.changedLastModifiedTime(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection,
-														requestTime=self.lastModified)
+			self.set_collection_modification_time()
+			self.set_modification_time(parsed_body)
+			
+			assert	request.code==self.responseCode['put'], \
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['put'], request.code)
+					
+			self.objTest.testBody(parsed_body, self.putObjData['MimeType'], self.objResponse['putExpectedResponse'])
+			
+			self.check_changed_last_modified_time(	preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection,
+													requestTime=self.lastModified)
 		except urllib2.HTTPError, error:
 			self.obj_tearDown()
-			self.setCollectionModificationTime()
-			assert error.code==self.responseCode['put'], \
-				'this method was expecting a %d response, instead received %d' % (self.responseCode['put'], error.code)
-			LastModifiedAssessment.unchangedLastModifiedTime(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)
+			self.set_collection_modification_time()
+			
+			assert 	error.code==self.responseCode['put'], \
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['put'], error.code)
+					
+			self.check_unchanged_last_modified_time(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)

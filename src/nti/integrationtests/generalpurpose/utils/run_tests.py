@@ -22,17 +22,24 @@ endpoint = "http://%s:%s/dataserver2" % (host, port)
 username = os.environ.get('username', 'test.user.1@nextthought.com')
 password = os.environ.get('password', 'temp001')
 root_dir = os.environ.get('root_dir', tempfile.mktemp(prefix="ds.data.gpt.", dir="/tmp"))
+use_coverage = bool(os.environ.get('use_coverage', 'False'))
 
 # ----------------------------
 
 def setup():
 	global dataserver, port
-	dataserver = DataserverProcess(port = port, root_dir=root_dir)
-	dataserver.start_server()
+	dataserver = DataserverProcess(port=port, root_dir=root_dir)
+	if use_coverage:
+		dataserver.start_server_with_coverage()
+	else:
+		dataserver.start_server()
 
 def teardown():
 	global dataserver
-	dataserver.terminate_server()
+	if use_coverage:
+		dataserver.terminate_server_with_coverage()
+	else:
+		dataserver.terminate_server()
 
 # ----------------------------
 
@@ -151,8 +158,32 @@ def terminate(error, test):
 		message = None
 	assert False, message
 
+
+def main(args = None):
+	import sys
+	import nose
+	import argparse
+		
+	args = args or sys.argv[1:]
+		
+	parser = argparse.ArgumentParser(prog='General Purpose Tests')
+	parser.add_argument('-uc', '--use_coverage', help='use coverage', action='store_true', default = False)
+	parser.add_argument('-cr', '--coverage_report', help='create coverage report', action='store_true', default = False)
+	parser.add_argument('-rd', '--root_dir', help='root directory', required=False)
+	parser.add_argument('-p', '--port', help='server port', type=int, required=False, default=None)
+	opts = parser.parse_args(args)
+
+	root_dir = opts.root_dir if opts.root_dir else tempfile.mktemp(prefix="ds.data.gpt.", dir="/tmp")
+	
+	os.environ['use_coverage'] = str(opts.use_coverage)
+	os.environ['root_dir'] = os.path.expanduser(root_dir)
+	os.environ['port'] = str(opts.port if opts.port else get_open_port())
+	
+	nose.run()
+	
 if __name__ == '__main__':
 	os.environ['port'] = '8081'
+	os.environ['use_coverage'] = 'True'
 	os.environ['root_dir'] = os.path.expanduser('~/tmp')
 	import nose
 	nose.run()

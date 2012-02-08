@@ -68,33 +68,6 @@ class QuizTester(BodyTester):
 	
 # -----------------------------------
 
-class LastModifiedAssessment(object):
-	
-	@classmethod	
-	def changedLastModifiedTime(self, **kwargs):
-		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
-		lastModifiedTime = kwargs.get('requestTime', None)
-		preRequestTime = kwargs['preRequestTime']
-		if lastModifiedTimeCollection:
-			assert lastModifiedTimeCollection >= preRequestTime
-		if lastModifiedTime:
-			assert lastModifiedTime >= preRequestTime
-	
-	@classmethod	
-	def unchangedLastModifiedTime(self, **kwargs):
-		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
-		lastModifiedTime = kwargs.get('requestTime', None)
-		preRequestTime = kwargs['preRequestTime']
-		
-		#TODO: What do we need to do here?
-		if lastModifiedTimeCollection:
-			pass
-
-		if lastModifiedTime:
-			assert lastModifiedTime <= preRequestTime
-			
-# -----------------------------------
-
 MIME_TYPE_REGISTRY = {}
 
 for v in dict(locals()).itervalues():
