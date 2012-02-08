@@ -185,7 +185,7 @@ class DataserverProcess(object):
 		if not os.path.exists(rcfile):
 			raise OSError('No coverage file %s' % rcfile)
 		
-		self._write_config(root_dir, pserve_ini_file)
+		self._write_supervisor_config(root_dir, pserve_ini_file)
 		visord = os.path.join(os.path.expanduser(root_dir), 'etc', 'supervisord_dev.conf')
 		command_prefix = ' '.join(['coverage', 'run', '--rcfile=%s' % rcfile, ''])
 		command_prefix = os.path.join(os.path.dirname(sys.executable), command_prefix)
