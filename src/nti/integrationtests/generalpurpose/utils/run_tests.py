@@ -27,7 +27,7 @@ root_dir = os.environ.get('root_dir', tempfile.mktemp(prefix="ds.data.gpt.", dir
 
 def setup():
 	global dataserver, port
-	dataserver = DataserverProcess(port = port)
+	dataserver = DataserverProcess(port = port, root_dir=root_dir)
 	dataserver.start_server()
 
 def teardown():
