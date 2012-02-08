@@ -2,8 +2,10 @@ import os
 import glob
 import json
 import time
+import tempfile
 
 from nose.util import resolve_name
+from nti.integrationtests.dataserver.server import get_open_port
 from nti.integrationtests.dataserver.server import DataserverProcess
 from nti.integrationtests.contenttypes.servicedoc import Workspace
 
@@ -15,11 +17,12 @@ from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequ
 
 dataserver = None
 host = os.environ.get('host', 'localhost')
-port = int(os.environ.get('port', '8081'))
+port = int(os.environ.get('port', get_open_port()))
 endpoint = "http://%s:%s/dataserver2" % (host, port)
-username =  os.environ.get('username', 'test.user.1@nextthought.com')
-password =  os.environ.get('password', 'temp001')
-	
+username = os.environ.get('username', 'test.user.1@nextthought.com')
+password = os.environ.get('password', 'temp001')
+root_dir = os.environ.get('root_dir', tempfile.mktemp(prefix="ds.data.gpt.", dir="/tmp"))
+
 # ----------------------------
 
 def setup():
@@ -149,5 +152,7 @@ def terminate(error, test):
 	assert False, message
 
 if __name__ == '__main__':
+	os.environ['port'] = '8081'
+	os.environ['root_dir'] = os.path.expanduser('~/tmp')
 	import nose
 	nose.run()
