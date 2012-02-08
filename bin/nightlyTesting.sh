@@ -21,21 +21,17 @@ python setup.py develop >> $LOG 2>&1
 cd ~/Projects/NextThoughtPlatform/nti.integrationtests
 python setup.py develop >> $LOG 2>&1
 
-# change the directoy where tmp files will be placed 
-
-cd $TMPDIR
-
 # Make change processing synchronous. If something fails,
 # we know right away, and we don't have to wait for events
 
 # let 'er rip!
 date
 
-echo "Running legacy version tests"
-run_legacy_v2_tests > $LOG 2>&1
+echo "Running general purpose tests"
+cd ~/Projects/NextThoughtPlatform/nti.integrationtests/src/nti/integrationtests/generalpurpose/utils
+nosetests -s -d run_tests.py >> $LOG 2>&1
 
-#echo "Running legacy version tests quizzes"
-#run_legacy_v3_tests > $LOG 2>&1
+cd $TMPDIR
 
 echo "Running integration tests"
 run_integration_tests --use_coverage >> $LOG 2>&1
