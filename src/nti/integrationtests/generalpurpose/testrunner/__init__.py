@@ -4,7 +4,6 @@ import time
 import urllib2
 from urlparse import urljoin
 
-from nti.integrationtests.generalpurpose import USERNAME, PASSWORD, URL
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
 
@@ -101,7 +100,7 @@ class BasicSeverOperation(object):
 	
 	def set_collection_modification_time(self):
 		try:
-			request = self.requests.get(self.href_url, USERNAME, PASSWORD)
+			request = self.requests.get(self.href_url, self.username, self.password)
 			parsed_body = json.loads(request.read())
 			self.lastModifiedCollection = parsed_body['Last Modified']
 		except urllib2.HTTPError or KeyError: 
