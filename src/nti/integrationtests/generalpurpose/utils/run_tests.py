@@ -1,9 +1,9 @@
 import os
-import sys
 import glob
 import json
 import time
 
+from nose.util import resolve_name
 from nti.integrationtests.dataserver.server import DataserverProcess
 from nti.integrationtests.contenttypes.servicedoc import Workspace
 
@@ -12,16 +12,6 @@ from nti.integrationtests.generalpurpose.utils.response_assert import MIME_TYPE_
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 
 # ----------------------------
-
-formatter_module = None
-request_type_module = None
-
-def import_module(module_name):
-	__import__(module_name, globals(), locals(), [], -1)
-	return sys.modules[module_name]
-
-request_type_module = import_module("nti.integrationtests.generalpurpose.utils")
-formatter_module = import_module("nti.integrationtests.generalpurpose.utils.url_formatter")
 
 dataserver = None
 host = os.environ.get('host', 'localhost')
@@ -49,12 +39,11 @@ def open_data_file(file_path):
 	return content
 	
 def get_request_type(test_type):
-	local_name = '%sObject' % test_type
-	clazz = request_type_module.__dict__[local_name]
+	clazz = resolve_name("nti.integrationtests.generalpurpose.utils.%sObject" % test_type)
 	return clazz()
 
 def get_format(format_type):
-	clazz = formatter_module.__dict__[format_type]
+	clazz = resolve_name("nti.integrationtests.generalpurpose.utils.url_formatter.%s" % format_type)
 	return clazz()
 	
 def get_json_files(test_path=PATH_TO_TESTS):
