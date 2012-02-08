@@ -62,6 +62,8 @@ class BasicSeverOperation(object):
 		self.preRequestTime = 0
 		# self.lastModifiedCollection = 0
 	
+	# -----------------------------------
+	
 	@_http_ise_error_logging
 	def obj_setUp(self):
 		if self.testObjRef: 
@@ -87,6 +89,8 @@ class BasicSeverOperation(object):
 		except urllib2.HTTPError: 
 			pass
 	
+	# -----------------------------------
+	
 	@classmethod
 	def http_ise_error_logging(cls, f):
 		_http_ise_error_logging(f)
@@ -110,4 +114,32 @@ class BasicSeverOperation(object):
 	def set_time(self):
 		self.preRequestTime = time.time()
 	setTime = set_time
+	
+	# -----------------------------------
+		
+	def check_changed_last_modified_time(self, **kwargs):
+		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
+		lastModifiedTime = kwargs.get('requestTime', None)
+		preRequestTime = kwargs['preRequestTime']
+		if lastModifiedTimeCollection:
+			assert lastModifiedTimeCollection >= preRequestTime
+		if lastModifiedTime:
+			assert lastModifiedTime >= preRequestTime
+	
+	changedLastModifiedTime = check_changed_last_modified_time
+		
+	def check_unchanged_last_modified_time(self, **kwargs):
+		
+		preRequestTime = kwargs['preRequestTime']
+		lastModifiedTime = kwargs.get('requestTime', None)
+		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
+		
+		# TODO: What do we need to do here?
+		if lastModifiedTimeCollection:
+			pass
+
+		if lastModifiedTime:
+			assert lastModifiedTime <= preRequestTime
+			
+	unchangedLastModifiedTime = check_unchanged_last_modified_time
 	

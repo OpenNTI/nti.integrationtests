@@ -33,12 +33,12 @@ class DeleteObject(BasicSeverOperation):
 				self.set_modification_time(parsed_body)
 				self.objTest.testBody(parsed_body, self.postObjData['MimeType'], self.objResponse['postExpectedResponse'])
 				
-				LastModifiedAssessment.unchangedLastModifiedTime(preRequestTime = self.preRequestTime,
-																 collectionTime = self.lastModifiedCollection,
-																 requestTime = self.lastModified)
+				self.check_unchanged_last_modified_time(preRequestTime = self.preRequestTime,
+														collectionTime = self.lastModifiedCollection,
+														requestTime = self.lastModified)
 			else: 
 				self.set_collection_modification_time()
-				LastModifiedAssessment.unchangedLastModifiedTime(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)
+				self.check_unchanged_last_modified_time(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)
 			
 			assert	error.code == self.responseCode['delete'], \
 					'this method was expecting a %d response, instead received %d' % (self.responseCode['delete'], error.code)
