@@ -95,12 +95,12 @@ class BasicSeverOperation(object):
 	def http_ise_error_logging(cls, f):
 		_http_ise_error_logging(f)
 	
-	def set_mmodification_time(self, parsed_body):
+	def set_modification_time(self, parsed_body):
 		try:
 			self.lastModified = parsed_body['LastModified']
 		except KeyError:
 			self.lastModified = None
-	setModificationTime = set_mmodification_time
+	setModificationTime = set_modification_time
 	
 	def set_collection_modification_time(self):
 		try:
