@@ -1,14 +1,11 @@
 #!/usr/bin/env python
+import os
+import sys
+import nti.integrationtests.generalpurpose.utils.run_tests as runner
 
-from nti.integrationtests.generalpurpose.utils.run_tests import run_tests
-from nti.integrationtests.dataserver.server import DataserverProcess
-
-def main(args = None):	
-	dsprocess = DataserverProcess()
-	try:
-		run_tests()
-	finally:
-		dsprocess.terminateServer()
+def main(args = None):
+	os.chdir(os.path.dirname(runner.__file__))
+	runner.main(args)
 
 if __name__ == '__main__':
-	main()
+	main(sys.argv[1:])
