@@ -3,10 +3,10 @@ import sys
 import time
 import shutil
 import socket
-import datetime
 import tempfile
 import subprocess
 import ConfigParser
+from datetime import datetime
 
 DEFAULT_USER_PASSWORD = 'temp001'
 
@@ -208,9 +208,9 @@ class DataserverProcess(object):
 				result = subprocess.call(args) == 0 
 			
 			if result and report:
-				dt = datetime.now()
-				s = "ds." + dt.strftime("%Y%m%d.%H%M")
 				try:
+					dt = datetime.now()
+					s = "ds." + dt.strftime("%Y%m%d.%H%M")
 					out_path = s + ".html"
 					args = ['coverage', 'html', "--directory=%s" % out_path, "--rcfile=%s" % rcfile]
 					subprocess.call(args)
