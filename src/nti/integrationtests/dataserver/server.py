@@ -90,13 +90,17 @@ class DataserverProcess(object):
 		
 			rcfile = kwargs.get('rcfile', COVERAGE_CONFIG)
 			use_coverage = kwargs.get('use_coverage', False)
+			use_profile = kwargs.get('use_profile', False)
 			pserve_ini_file = kwargs.get('pserve_ini_file', SERVER_CONFIG)
 			root_dir = os.path.expanduser(kwargs.get('root_dir', DATASERVER_DIR))
 			port = int(kwargs.get('port', PORT))
 			
-			print 'Starting dataserver (%s)' % port
+			print 'Starting dataserver (%s,%s)' % (port, root_dir)
 			
-			pserve_ini_file = self._rewrite_pserve_config(pserve_ini_file, port)
+			pserve_ini_file = self._rewrite_pserve_config(	config=pserve_ini_file, 
+															root_dir=root_dir, 
+															port=port,
+															use_profile=use_profile)
 			if use_coverage:
 				self._writer_supervisor_config_coverage(root_dir, pserve_ini_file, rcfile)
 			else:
@@ -122,7 +126,7 @@ class DataserverProcess(object):
 		
 	# -----------------------------------
 	
-	def _rewrite_pserve_config(self, config, port=PORT, out_dir="/tmp"):
+	def _rewrite_pserve_config(self, config, root_dir=DATASERVER_DIR, port=PORT, use_profile=True, out_dir="/tmp"):
 		
 		if not os.path.exists(config):
 			raise OSError('No pserve file %s' % config)
@@ -135,11 +139,34 @@ class DataserverProcess(object):
 		if sync_changes:
 			os.environ['DATASERVER_SYNC_CHANGES'] = 'True'
 			
-		if cport != port:
+		rewrite = use_profile or cport != port
+		if cport != port:			
+			ini.set('DEFAULT', 'http_port', str(port))
+			rewrite = True
+		
+		if use_profile:
+			log_file = os.path.join(root_dir, 'dataserver.profile.log')
+			cache_grind = os.path.join(root_dir, 'dataserver.out.cachegrind')
+			if 'filter:profile' not in ini.sections():
+				ini.add_section('filter:profile')
+			ini.set('filter:profile', 'use', 'egg:repoze.profile#profile')
+			ini.set('filter:profile', 'log_filename', log_file)
+			ini.set('filter:profile', 'cachegrind_filename', cache_grind)
+			ini.set('filter:profile', 'discard_first_request', 'false')
+			ini.set('filter:profile', 'flush_at_shutdown', 'false')
+			
+			line = ini.get('pipeline:main', 'pipeline')
+			if 'profile' not in line:
+				lst = [''] +  line.split()
+				idx = lst.index('dataserver')
+				lst = lst[0:idx]  + ['profile'] + lst[idx:]
+				line = '\n'.join(lst)
+				ini.set('pipeline:main', 'pipeline', line)
+			
+		if rewrite:
 			if not os.path.exists(out_dir):
 				os.makedirs(out_dir)
-						
-			ini.set('DEFAULT', 'http_port', str(port))
+				
 			config = tempfile.mktemp(prefix="pserve.", suffix=".ini", dir=out_dir)
 			with open(config, "wb") as fp:
 				ini.write(fp)
