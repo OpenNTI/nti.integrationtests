@@ -179,6 +179,11 @@ def main(args = None):
 	os.environ['root_dir'] = os.path.expanduser(root_dir)
 	os.environ['port'] = str(opts.port if opts.port else get_open_port())
 	
+	print "Running options...."
+	print "\tServer port = %s" % os.environ['port']
+	print "\tUsing coverage = %s" % opts.use_coverage
+	print "\tRoot dir = %s\n" % root_dir
+	
 	nose.run()
 	
 if __name__ == '__main__':
