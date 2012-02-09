@@ -15,19 +15,33 @@ from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequ
 
 # ----------------------------
 
+host = None
+port = None
+endpoint = None
+username = None
+password = None
+root_dir = None
 dataserver = None
-host = os.environ.get('host', 'localhost')
-port = int(os.environ.get('port', get_open_port()))
-endpoint = "http://%s:%s/dataserver2" % (host, port)
-username = os.environ.get('username', 'test.user.1@nextthought.com')
-password = os.environ.get('password', 'temp001')
-root_dir = os.environ.get('root_dir', tempfile.mktemp(prefix="ds.data.gpt.", dir="/tmp"))
-use_coverage = bool(os.environ.get('use_coverage', 'False'))
+use_coverage = None
 
 # ----------------------------
 
+def get_env_vars():
+	global host, port, endpoint, username, password, root_dir, use_coverage
+	
+	host = os.environ.get('host', 'localhost')
+	port = int(os.environ.get('port', get_open_port()))
+	endpoint = "http://%s:%s/dataserver2" % (host, port)
+	username = os.environ.get('username', 'test.user.1@nextthought.com')
+	password = os.environ.get('password', 'temp001')
+	root_dir = os.environ.get('root_dir', tempfile.mktemp(prefix="ds.data.gpt.", dir="/tmp"))
+	use_coverage = os.environ.get('use_coverage', 'False').lower() == 'true'
+	
 def setup():
 	global dataserver, port
+	
+	get_env_vars()
+	
 	dataserver = DataserverProcess(port=port, root_dir=root_dir)
 	if use_coverage:
 		dataserver.start_server_with_coverage()
@@ -175,8 +189,8 @@ def main(args = None):
 
 	root_dir = opts.root_dir if opts.root_dir else tempfile.mktemp(prefix="ds.data.gpt.", dir="/tmp")
 	
-	os.environ['use_coverage'] = str(opts.use_coverage)
 	os.environ['root_dir'] = os.path.expanduser(root_dir)
+	os.environ['use_coverage'] = 'True' if opts.use_coverage else 'False'
 	os.environ['port'] = str(opts.port if opts.port else get_open_port())
 	
 	print "Running options...."
@@ -187,8 +201,4 @@ def main(args = None):
 	nose.run()
 	
 if __name__ == '__main__':
-	os.environ['port'] = '8081'
-	os.environ['use_coverage'] = 'True'
-	os.environ['root_dir'] = os.path.expanduser('~/tmp')
-	import nose
-	nose.run()
+	main()
