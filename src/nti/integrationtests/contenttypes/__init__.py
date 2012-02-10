@@ -61,6 +61,7 @@ class MetaDSObject(type):
 # -----------------------------------
 
 link_types = ('edit', )
+	
 
 class DSObject(object, UserDict.DictMixin):
 
@@ -456,6 +457,40 @@ class TranscriptSummary(DSObject):
 			self._assign_to_list(self._ds_field_mapping[key], val)
 		else:
 			super(TranscriptSummary, self).__setitem__(key, val)
+	
+	
+# -----------------------------------
+
+class QuizQuestion(DSObject):
+
+	DATASERVER_CLASS = 'QuizQuestion'
+	MIME_TYPE = 'application/vnd.nextthought.quizquestion'
+	
+	_ds_field_mapping = {'ID': 'ID', 'answers':'Answers', 'text':'Text'}
+	_ds_field_mapping.update(DSObject._ds_field_mapping)
+
+	_fields = {'ID': True, 'answers': (False, list), 'text':False}
+	_fields.update(DSObject._fields)
+	
+class Quiz(DSObject):
+
+	DATASERVER_CLASS = 'Quiz'
+	MIME_TYPE = 'application/vnd.nextthought.quiz'
+	
+	_ds_field_mapping = {'ID': 'ID', 'questions':'Items'}
+	_ds_field_mapping.update(DSObject._ds_field_mapping)
+
+	_fields = {'ID': True, 'questions': (False, dict)}
+	_fields.update(DSObject._fields)
+
+	def get_question( self, qid ):
+		questions = self.questions
+		return questions.get( qid, None )
+	
+	def add_question(self, question):
+		assert isinstance(question, QuizQuestion)
+		questions = self.questions
+		questions[question.ID] = question
 	
 # -----------------------------------
 
