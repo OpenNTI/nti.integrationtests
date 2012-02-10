@@ -2,6 +2,7 @@ import sys
 import json
 import time
 import urllib2
+import warnings
 from urlparse import urljoin
 
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
@@ -121,7 +122,9 @@ class BasicSeverOperation(object):
 		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
 		lastModifiedTime = kwargs.get('requestTime', None)
 		preRequestTime = kwargs['preRequestTime']
-		if lastModifiedTimeCollection:
+		if lastModifiedTimeCollection == 0:
+			warnings.warn("last Modified Time of the collection is %d" % lastModifiedTimeCollection)
+		elif lastModifiedTimeCollection:
 			assert lastModifiedTimeCollection >= preRequestTime
 		if lastModifiedTime:
 			assert lastModifiedTime >= preRequestTime
@@ -133,11 +136,10 @@ class BasicSeverOperation(object):
 		preRequestTime = kwargs['preRequestTime']
 		lastModifiedTime = kwargs.get('requestTime', None)
 		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
-		
-		# TODO: What do we need to do here?
-		if lastModifiedTimeCollection:
-			pass
-
+#		if lastModifiedTimeCollection == 0:
+#			warnings.warn("last Modified Time of the collection is %d" % lastModifiedTimeCollection)
+#		elif lastModifiedTimeCollection:
+#			assert lastModifiedTimeCollection <= preRequestTime
 		if lastModifiedTime:
 			assert lastModifiedTime <= preRequestTime
 			

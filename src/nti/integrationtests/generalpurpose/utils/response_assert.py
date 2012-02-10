@@ -1,4 +1,5 @@
 import inspect
+import warnings
 
 class BodyTester(object):
 	def testBody(self, parsedBody, mimeType, info):
