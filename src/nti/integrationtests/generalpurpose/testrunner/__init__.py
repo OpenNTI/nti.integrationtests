@@ -132,7 +132,6 @@ class BasicSeverOperation(object):
 	changedLastModifiedTime = check_changed_last_modified_time
 		
 	def check_unchanged_last_modified_time(self, **kwargs):
-		
 		preRequestTime = kwargs['preRequestTime']
 		lastModifiedTime = kwargs.get('requestTime', None)
 		if lastModifiedTime:
