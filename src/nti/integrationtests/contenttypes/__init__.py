@@ -142,20 +142,25 @@ class DSObject(object, UserDict.DictMixin):
 	
 	def toDataServerObject(self):
 		external = {}
-		for key, val in self._data.iteritems():
+		
+		def recall( obj ):
+			if isinstance(obj, list):
+				result = [recall(v) for v in val]
+			elif hasattr(obj , 'toDataServerObject'):
+				result = obj.toDataServerObject()
+			elif isinstance(obj, dict):
+				result = {}
+				for key, value in obj.iteritems():
+					result[key] = recall( value )
+			else:
+				result = obj
+			return result
 			
+		for key, val in self._data.iteritems():
 			if val is None or key is None:
 				continue
+			external[key] = recall(val)
 			
-			# val may be an array in which case we need to call toDataserverObject
-			# on each value
-		
-			if isinstance(val, list):
-				val = [v.toDataServerObject() if hasattr(v, 'toDataServerObject') else v for v in val]
-			elif hasattr(val, 'toDataServerObject'):
-				val = val.toDataServerObject()
-
-			external[key] = val
 		return external
 
 	to_data_server_object = toDataServerObject
@@ -165,7 +170,7 @@ class DSObject(object, UserDict.DictMixin):
 	updateFromDataServerObject = update_from_data_server_obbject
 	
 	def pprint(self, stream=None):
-		data = self.to_data_server_object()
+		data = self.toDataServerObject()
 		pprint.pprint(data, stream=stream)
 		
 	def _assign_to_list(self, mapkey, val, defType=list):
@@ -460,7 +465,7 @@ class TranscriptSummary(DSObject):
 	
 	
 # -----------------------------------
-
+	
 class QuizQuestion(DSObject):
 
 	DATASERVER_CLASS = 'QuizQuestion'
@@ -477,19 +482,22 @@ class Quiz(DSObject):
 	DATASERVER_CLASS = 'Quiz'
 	MIME_TYPE = 'application/vnd.nextthought.quiz'
 	
-	_ds_field_mapping = {'ID': 'ID', 'questions':'Items'}
+	_ds_field_mapping = {'ID': 'ID', 'questions':'Items', 'href':'href'}
 	_ds_field_mapping.update(DSObject._ds_field_mapping)
 
-	_fields = {'ID': True, 'questions': (False, dict)}
+	_fields = {'ID': True, 'questions': (False, dict), 'href': True}
 	_fields.update(DSObject._fields)
 
 	def get_question( self, qid ):
 		questions = self.questions
-		return questions.get( qid, None )
+		return questions.get( qid, None ) if questions else None
 	
 	def add_question(self, question):
 		assert isinstance(question, QuizQuestion)
 		questions = self.questions
+		if questions is None:
+			questions = {}
+			self.__setitem__('questions', questions)
 		questions[question.ID] = question
 	
 # -----------------------------------
