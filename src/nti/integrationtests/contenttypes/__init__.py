@@ -67,12 +67,13 @@ class DSObject(object, UserDict.DictMixin):
 	__metaclass__ = MetaDSObject
 
 	# defines a mapping from testing framework fields -> internal dataserver fields
-	_ds_field_mapping = {'id' : 'OID', 'container': 'ContainerId', 'creator': 'Creator', \
-						 'lastModified': 'Last Modified', 'links':'Links', 'mimeType': 'MimeType'}
+	_ds_field_mapping = {'id' : 'OID', 'container': 'ContainerId', 'creator': 'Creator', 
+						 'lastModified': 'Last Modified', 'links':'Links', 'mimeType': 'MimeType',
+						 'ntiid': 'NTIID'}
 
 	# mapping of fields we expose to readonly
 	_fields = {	'container': True, 'id' : True, 'creator' : True, 'lastModified' : True, 
-				'links' : True, 'mimeType': True}
+				'links' : True, 'mimeType': True, 'ntiid': True}
 
 	def __init__(self, data=None, **kwargs):
 		self._data = data or {}
