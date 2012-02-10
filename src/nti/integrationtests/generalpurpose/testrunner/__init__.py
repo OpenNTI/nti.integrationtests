@@ -135,11 +135,6 @@ class BasicSeverOperation(object):
 		
 		preRequestTime = kwargs['preRequestTime']
 		lastModifiedTime = kwargs.get('requestTime', None)
-		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
-#		if lastModifiedTimeCollection == 0:
-#			warnings.warn("last Modified Time of the collection is %d" % lastModifiedTimeCollection)
-#		elif lastModifiedTimeCollection:
-#			assert lastModifiedTimeCollection <= preRequestTime
 		if lastModifiedTime:
 			assert lastModifiedTime <= preRequestTime
 			
