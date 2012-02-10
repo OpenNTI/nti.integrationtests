@@ -126,7 +126,7 @@ class DataserverProcess(object):
 		
 	# -----------------------------------
 	
-	def _rewrite_pserve_config(self, config, root_dir=DATASERVER_DIR, port=PORT, use_profile=True, out_dir="/tmp"):
+	def _rewrite_pserve_config(self, config, root_dir=DATASERVER_DIR, port=PORT, use_profile=False, out_dir="/tmp"):
 		
 		if not os.path.exists(config):
 			raise OSError('No pserve file %s' % config)
