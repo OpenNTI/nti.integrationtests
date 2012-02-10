@@ -198,6 +198,8 @@ def main(args = None):
 	print "\tUsing coverage = %s" % opts.use_coverage
 	print "\tRoot dir = %s\n" % root_dir
 	
+	# simply ignore the nose parameters
+	sys.argv = [sys.argv[1]]
 	nose.run()
 	
 if __name__ == '__main__':
