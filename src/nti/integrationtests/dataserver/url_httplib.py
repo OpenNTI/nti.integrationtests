@@ -1,12 +1,12 @@
 import os
 import sys
 import json
+import base64
 import pprint
 import httplib
 import urllib2
 import mimetools
 import mimetypes
-from io import BytesIO
 from cStringIO import StringIO
 
 from webob import Response
@@ -141,10 +141,9 @@ class URLHttpLib(object):
 		for k, v in headers.items():
 			request.add_unredirected_header(k, v)
 		
-		# read data								
-		buf = BytesIO()
+		buf = StringIO()
 		with open(source_file, "rb") as fd:
-			buf.write(fd.read())	
+			base64.encode(fd, buf)
 		data = buf.getvalue()
 		
 		# add and execure request
