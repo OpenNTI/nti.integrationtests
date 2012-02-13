@@ -21,6 +21,11 @@ nti_render prealgebra.tex xhtml
 
 gcp -dpR prealgebra/* /Library/WebServer/Documents/prealgebra/
 
+
+cd ../MathCounts
+nti_render mathcounts.tex xhtml
+gcp -dpR mathcounts/* /Library/WebServer/Documents/mathcounts/
+
 # Cleanup
 cd ~
 rm -rf $CHECKOUT_DIR
