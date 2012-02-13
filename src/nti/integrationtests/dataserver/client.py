@@ -202,10 +202,10 @@ class DataserverClient(object):
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 	
-	def create_object(self, obj, credentials=None, adapt=True, **kwargs):
+	def create_object(self, obj, credentials=None, name='Pages', workspace=None, adapt=True, **kwargs):
 		check_that(isinstance(obj, DSObject), "must provide a valid DataServer object", obj)
 		check_that(obj.container, "must provide a valid container", obj)
-		pages, _ = self._get_collection(name='Pages', credentials=credentials)
+		pages, _ = self._get_collection(name=name, workspace=workspace, credentials=credentials)
 		return self._post_to_collection(obj, pages, credentials, adapt=adapt)
 	
 	def update_object(self, obj, link=None, credentials=None, adapt=True):

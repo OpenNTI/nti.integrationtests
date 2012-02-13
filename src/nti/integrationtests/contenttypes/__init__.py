@@ -151,7 +151,8 @@ class DSObject(object, UserDict.DictMixin):
 			elif isinstance(obj, dict):
 				result = {}
 				for key, value in obj.iteritems():
-					result[key] = recall( value )
+					result[key] = recall( value )					
+				result = None if not result else result
 			else:
 				result = obj
 			return result
@@ -159,7 +160,9 @@ class DSObject(object, UserDict.DictMixin):
 		for key, val in self._data.iteritems():
 			if val is None or key is None:
 				continue
-			external[key] = recall(val)
+			new_val = recall(val)
+			if new_val is not None:
+				external[key] = new_val
 			
 		return external
 
@@ -499,6 +502,41 @@ class Quiz(DSObject):
 			questions = {}
 			self.__setitem__('questions', questions)
 		questions[question.ID] = question
+	
+	
+class QuizQuestionResponse(DSObject):
+
+	DATASERVER_CLASS = 'QuizQuestionResponse'
+	
+	_ds_field_mapping = {'assessment': 'Assessment', 'question':'Question', 'response':'Response'}
+	_ds_field_mapping.update(DSObject._ds_field_mapping)
+
+	_fields = {'assessment': True, 'question': True, 'response': False}
+	_fields.update(DSObject._fields)
+	
+	
+class QuizResult(DSObject):
+
+	DATASERVER_CLASS = 'QuizResult'
+	MIME_TYPE = 'application/vnd.nextthought.quizresult'
+	
+	_ds_field_mapping = {'ID': 'ID', 'answers':'Items', 'href':'href', 'quizid':'QuizID'}
+	_ds_field_mapping.update(DSObject._ds_field_mapping)
+
+	_fields = {'ID': True, 'answers': (False, dict), 'href': True, 'quizid':True}
+	_fields.update(DSObject._fields)
+	
+	def get_answer( self, qid ):
+		answers = self.answers
+		return answers.get( qid, None ) if answers else None
+	
+	def add_answer(self, qid, response):
+		assert isinstance(response, QuizQuestionResponse)
+		answers = self.answers
+		if answers is None:
+			answers = {}
+			self.__setitem__('answers', answers)
+		answers[qid] = response
 	
 # -----------------------------------
 
