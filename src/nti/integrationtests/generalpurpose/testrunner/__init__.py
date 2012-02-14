@@ -3,12 +3,19 @@ import json
 import time
 import urllib2
 import warnings
+import logging
 from urlparse import urljoin
 
 from hamcrest import assert_that, is_, greater_than_or_equal_to, less_than_or_equal_to
 
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
+
+# ----------------------------
+
+logging.basicConfig(level=logging.DEBUG)
+
+# ----------------------------
 
 def _http_ise_error_logging(f):
 	def to_call( *args, **kwargs ):
@@ -82,7 +89,7 @@ class BasicSeverOperation(object):
 
 		self.testArgs = None
 		self.preRequestTime = 0
-		# self.lastModifiedCollection = 0
+		self.logger = logging.basicConfig(format=self.format)
 
 
 	@_http_ise_error_logging
@@ -139,7 +146,7 @@ class BasicSeverOperation(object):
 		lastModifiedTime = kwargs.get('requestTime', None)
 		preRequestTime = kwargs['preRequestTime']
 		if lastModifiedTimeCollection == 0:
-			warnings.warn("last Modified Time of the collection is %d" % lastModifiedTimeCollection)
+			logging.warn("collection modification time is %d" % lastModifiedTimeCollection)
 		elif lastModifiedTimeCollection:
 			assert_that( lastModifiedTimeCollection, is_( greater_than_or_equal_to( preRequestTime ) ) )
 
@@ -150,8 +157,13 @@ class BasicSeverOperation(object):
 	changedLastModifiedTime = check_changed_last_modified_time
 
 	def check_unchanged_last_modified_time(self, **kwargs):
+		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
 		preRequestTime = kwargs['preRequestTime']
 		lastModifiedTime = kwargs.get('requestTime', None)
+		if lastModifiedTimeCollection == 0:
+			logging.warn("collection modification time is %d" % lastModifiedTimeCollection)
+		elif lastModifiedTimeCollection:
+			assert lastModifiedTimeCollection <= preRequestTime
 		if lastModifiedTime:
 			assert_that( lastModifiedTime, is_( less_than_or_equal_to( preRequestTime ) ) )
 
