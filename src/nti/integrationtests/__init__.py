@@ -1,5 +1,8 @@
+import time
 import uuid
+import random
 import unittest
+import datetime
 import collections
 
 from nti.integrationtests.dataserver.server import PORT
@@ -67,4 +70,13 @@ class DataServerTestCase(unittest.TestCase):
 	@classmethod
 	def static_initialization(cls):
 		pass
-
+	
+	@classmethod
+	def generate_ntiid(cls, provider='nti', nttype=None, specific=None):
+		provider = provider or 'nti'
+		alphabet = [chr(n) for n in xrange(ord('a'), ord('z') + 1)]
+		date_string = datetime.date( *time.gmtime(time.time())[0:3] ).isoformat()
+		nttype = nttype or ''.join(random.sample(alphabet, 5))
+		specific = specific or str(time.clock())
+		result = 'tag:nextthought.com,%s:%s-%s-%s' % (date_string, provider, nttype, specific )
+		return result
