@@ -12,7 +12,7 @@ WORKON_HOME=~/VirtualEnvs/
 LOG=~/tmp/lastNightlyTesting.txt
 
 # checkout the source
-svn up ~/Projects/NextThoughtPlatform
+svn up ~/Projects/NextThoughtPlatform > $LOG 2>&1
 
 #  make sure all deps are upto date
 cd ~/Projects/NextThoughtPlatform/nti.dataserver
@@ -25,20 +25,20 @@ python setup.py develop >> $LOG 2>&1
 # we know right away, and we don't have to wait for events
 
 # let 'er rip!
-date
+date >> $LOG 2>&1
 
-echo "Running general purpose tests"
+echo "Running general purpose tests" >> $LOG 2>&1
 cd ~/Projects/NextThoughtPlatform/nti.integrationtests/src/nti/integrationtests/generalpurpose/utils
 nosetests -s -d run_tests.py >> $LOG 2>&1
 
 cd $TMPDIR
 
-echo "Running integration tests"
+echo "Running integration tests" >> $LOG 2>&1
 nti_run_integration_tests --use_coverage >> $LOG 2>&1
 
 # combine coverage data from integration tests
 
-coverage combine
+coverage combine >> $LOG 2>&1
 
 # move file to be combined later
 
@@ -58,7 +58,7 @@ if [ -d $COVERDIR ]; then
 	COVEROPT="--cover-html-dir=$COVERDIR"
 fi
 
-echo "Running nose tests"
+echo "Running nose tests" >> $LOG 2>&1
 nosetests -d -e pywiki --with-coverage --cover-html $COVEROPT --cover-inclusive --cover-package=nti,socketio,geventwebsocket,wiktionary,context >> $LOG 2>&1
 
 if [ -f .coverage ]; then
@@ -69,12 +69,12 @@ fi
 # combine all results integration and nosetests
 
 cd $TMPDIR
-coverage combine
+coverage combine >> $LOG 2>&1
 
 # produce html report
 
 if [ -d $COVERDIR ]; then
-	coverage html -i --directory=$COVERDIR --omit="*/test/*,*/tests/*"
+	coverage html -i --directory=$COVERDIR --omit="*/test/*,*/tests/*" >> $LOG 2>&1
 fi
 
 cat $LOG
@@ -85,4 +85,4 @@ fi
 # Cleanup
 cd ~
 rm -rf $TMPDIR
-date
+

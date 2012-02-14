@@ -1,6 +1,6 @@
 #!/bin/bash
 . ~/bin/dataserver_vars.sh
-export PATH=/opt/local/bin:$PATH
+export PATH=~/bin/:/opt/local/bin:$PATH
 export TMPDIR=/tmp
 CHECKOUT_DIR=`mktemp -d -t nightly`
 cd $CHECKOUT_DIR
