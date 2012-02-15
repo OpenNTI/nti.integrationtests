@@ -36,7 +36,6 @@ class TestQuizzes(DataServerTestCase):
 		assert_that(qq.text, is_('Is true?'))
 		assert_that(qq.answers, is_(['True', '1.0', '1']))
 		
-	@unittest.expectedFailure
 	def test_creating_a_quizz_and_result(self):
 
 		qq  = QuizQuestion(ID='q1', text='Area of an 8x8 square?', answers=['64', '64.0'])
@@ -50,10 +49,12 @@ class TestQuizzes(DataServerTestCase):
 		qqr = QuizQuestionResponse(question="q1", response="64")
 		qr = QuizResult(quizid=quizid, container=self.container)
 		qr.add_answer('q1', qqr)
-		qr.pprint()
+		
 		obj = self.ds.create_object(qr)
 		assert_that(obj, is_not(None))
 		
+		qqr = obj.get_answer('q1')
+		assert_that(qqr, is_not(None))
 	
 if __name__ == '__main__':
 	unittest.main()

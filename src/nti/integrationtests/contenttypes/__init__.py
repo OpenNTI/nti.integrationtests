@@ -527,16 +527,28 @@ class QuizResult(DSObject):
 	_fields.update(DSObject._fields)
 	
 	def get_answer( self, qid ):
-		answers = self.answers
-		return answers.get( qid, None ) if answers else None
+		answers = getattr(self, 'answers', None)
+		if answers is not None:
+			if isinstance(answers, list):
+				for qqr in answers:
+					q = qqr.question
+					if q.ID == qid:
+						return qqr
+			else:
+				answers.get( qid, None ) 
+		return None
 	
 	def add_answer(self, qid, response):
 		assert isinstance(response, QuizQuestionResponse)
-		answers = self.answers
+		answers = getattr(self, 'answers', None)
 		if answers is None:
 			answers = {}
 			self.__setitem__('answers', answers)
-		answers[qid] = response
+			
+		if isinstance(answers, list):
+			answers.append(response)
+		else:
+			answers[qid] = response
 	
 # -----------------------------------
 
