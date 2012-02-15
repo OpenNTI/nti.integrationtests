@@ -7,16 +7,10 @@ from urlparse import urljoin
 import logging
 logger = logging.getLogger(__name__)
 
-from hamcrest import assert_that, is_, greater_than_or_equal_to, less_than_or_equal_to, has_entry
+from hamcrest import assert_that, greater_than_or_equal_to, less_than_or_equal_to, has_entry
 
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
-
-# ----------------------------
-
-logging.basicConfig(level=logging.DEBUG)
-
-# ----------------------------
 
 def _http_ise_error_logging(f):
 	def to_call( *args, **kwargs ):
