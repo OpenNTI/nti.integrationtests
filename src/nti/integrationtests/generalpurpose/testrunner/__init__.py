@@ -2,11 +2,12 @@ import sys
 import json
 import time
 import urllib2
-import warnings
-import logging
 from urlparse import urljoin
 
-from hamcrest import assert_that, is_, greater_than_or_equal_to, less_than_or_equal_to
+import logging
+logger = logging.getLogger(__name__)
+
+from hamcrest import assert_that, is_, greater_than_or_equal_to, less_than_or_equal_to, has_entry
 
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
@@ -89,7 +90,6 @@ class BasicSeverOperation(object):
 
 		self.testArgs = None
 		self.preRequestTime = 0
-		self.logger = logging.basicConfig(format=self.format)
 
 
 	@_http_ise_error_logging
@@ -146,12 +146,13 @@ class BasicSeverOperation(object):
 		lastModifiedTime = kwargs.get('requestTime', None)
 		preRequestTime = kwargs['preRequestTime']
 		if lastModifiedTimeCollection == 0:
-			logging.warn("collection modification time is %d" % lastModifiedTimeCollection)
+			logger.warn("collection modification time is %d", lastModifiedTimeCollection)
 		elif lastModifiedTimeCollection:
-			assert_that( lastModifiedTimeCollection, is_( greater_than_or_equal_to( preRequestTime ) ) )
+			assert_that( kwargs, has_entry( 'collectionTime', greater_than_or_equal_to( preRequestTime ) ) )
 
 		if lastModifiedTime:
-			assert_that( lastModifiedTime, is_( greater_than_or_equal_to( preRequestTime ) ) )
+			assert_that( kwargs, has_entry( 'requestTime', greater_than_or_equal_to( preRequestTime ) ) )
+
 
 
 	changedLastModifiedTime = check_changed_last_modified_time
@@ -161,11 +162,12 @@ class BasicSeverOperation(object):
 		preRequestTime = kwargs['preRequestTime']
 		lastModifiedTime = kwargs.get('requestTime', None)
 		if lastModifiedTimeCollection == 0:
-			logging.warn("collection modification time is %d" % lastModifiedTimeCollection)
+			logger.warn("collection modification time is %d", lastModifiedTimeCollection)
 		elif lastModifiedTimeCollection:
-			assert lastModifiedTimeCollection <= preRequestTime
+			assert_that( kwargs, has_entry( 'collectionTime', less_than_or_equal_to( preRequestTime ) ) )
+
 		if lastModifiedTime:
-			assert_that( lastModifiedTime, is_( less_than_or_equal_to( preRequestTime ) ) )
+			assert_that( kwargs, has_entry( 'requestTime', less_than_or_equal_to( preRequestTime ) ) )
 
 
 	unchangedLastModifiedTime = check_unchanged_last_modified_time
