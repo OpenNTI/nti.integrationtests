@@ -1,6 +1,7 @@
 import time
 import uuid
 import random
+import numbers
 import unittest
 import datetime
 import collections
@@ -15,6 +16,30 @@ from nti.integrationtests.dataserver.client import ROOT_ITEM
 
 class DataServerTestCase(unittest.TestCase):
 
+	# well-known IDs
+	
+	DATE = "2011-10"
+	ROOT = "tag:nextthought.com,2011-10:Root"
+	
+	TYPE_OID = 'OID'
+	
+	TYPE_ROOM = 'MeetingRoom'
+	TYPE_MEETINGROOM = TYPE_ROOM
+	
+	TYPE_HTML = 'HTML'
+	TYPE_QUIZ = 'Quiz'
+	
+	TYPE_CLASS = 'Class'
+	TYPE_CLASS_SECTION = 'ClassSection'
+	
+	TYPE_MEETINGROOM_GROUP = TYPE_ROOM + ':Group'
+	TYPE_MEETINGROOM_CLASS = TYPE_ROOM + ':Class'
+	TYPE_MEETINGROOM_SECT  = TYPE_ROOM + ':ClassSection'
+	TYPE_TRANSCRIPT = 'Transcript'
+	TYPE_TRANSCRIPT_SUMMARY = 'TranscriptSummary'
+
+	# class vars
+	
 	port = PORT
 	root_dir = DATASERVER_DIR
 	
@@ -72,11 +97,20 @@ class DataServerTestCase(unittest.TestCase):
 		pass
 	
 	@classmethod
-	def generate_ntiid(cls, provider='nti', nttype=None, specific=None):
-		provider = provider or 'nti'
-		alphabet = [chr(n) for n in xrange(ord('a'), ord('z') + 1)]
-		date_string = datetime.date( *time.gmtime(time.time())[0:3] ).isoformat()
-		nttype = nttype or ''.join(random.sample(alphabet, 5))
-		specific = specific or str(time.clock())
-		result = 'tag:nextthought.com,%s:%s-%s-%s' % (date_string, provider, nttype, specific )
+	def generate_ntiid(cls, date=None, provider='nti', nttype=None, specific=None):
+		
+		def escape_provider( provider ):
+			return provider.replace( ' ', '_' ).replace( '-', '_' )
+	
+		if not nttype:
+			raise ValueError( 'Must supply type' )
+	
+		date_seconds = date if isinstance( date, numbers.Real ) and date > 0 else time.time()
+		date = datetime.date( *time.gmtime(date_seconds)[0:3] )
+		date_string = date.isoformat()
+		
+		provider = escape_provider( str(provider) ) + '-'
+		specific = '-' + specific if specific else '-' + str(time.clock())
+		
+		result = 'tag:nextthought.com,%s:%s%s%s' % (date_string, provider, nttype, specific )
 		return result

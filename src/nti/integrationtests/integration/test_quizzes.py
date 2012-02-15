@@ -1,4 +1,3 @@
-import time
 import unittest
 	
 from hamcrest import assert_that
@@ -18,20 +17,18 @@ class TestQuizzes(DataServerTestCase):
 	def setUp(self):
 		super(TestQuizzes, self).setUp()
 		
-		#self.container = 'tag:nextthought.com,2012-02-14:OU-Quiz-OU.cont'
-		self.container = self.generate_ntiid(provider='OU')
+		self.container = self.generate_ntiid(provider=self.owner[0], nttype=self.TYPE_HTML)
 		self.ds.set_credentials(self.owner)
 		
 	def test_creating_a_quizz(self):
 		
-		quizid = self.generate_ntiid()
 		qq  = QuizQuestion(ID='Question.1', text='Is true?', answers=['True', '1.0', '1'])
-		q = Quiz(ID=quizid, container=self.container)
+		q = Quiz(container=self.container)
 		q.add_question(qq)
 		obj = self.ds.create_object(q)
 		
 		assert_that(obj, is_not(None))
-		assert_that(obj.ID, is_(quizid))
+		assert_that(obj.ID, is_not(None))
 		assert_that(obj.href, is_not(None))
 		
 		qq = obj.get_question('Question.1')
@@ -42,18 +39,18 @@ class TestQuizzes(DataServerTestCase):
 	@unittest.expectedFailure
 	def test_creating_a_quizz_and_result(self):
 
-		specific = "OU.%s" % time.clock()
-		quizid = self.generate_ntiid(provider='OU', nttype='Quiz', specific=specific)
-		
 		qq  = QuizQuestion(ID='q1', text='Area of an 8x8 square?', answers=['64', '64.0'])
-		q = Quiz(ID=quizid, container=self.container)
+		q = Quiz(container=self.container)
 		q.add_question(qq)
-		self.ds.create_object(q)
+		q = self.ds.create_object(q)
 		
+		quizid = q.ID
+		assert_that(qq, is_not(None))
+			
 		qqr = QuizQuestionResponse(question="q1", response="64")
 		qr = QuizResult(quizid=quizid, container=self.container)
 		qr.add_answer('q1', qqr)
-		
+		qr.pprint()
 		obj = self.ds.create_object(qr)
 		assert_that(obj, is_not(None))
 		
