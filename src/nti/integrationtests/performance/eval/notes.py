@@ -8,7 +8,7 @@ def create_notes(notes, delay=0):
 	context = create_notes.__context__
 	client = new_client(context)
 	for _ in xrange(notes +1):
-		client.create_note(generate_message(1,1), container=generate_ntiid)
+		client.create_note(generate_message(1,1), container=generate_ntiid())
 		if delay:
 			time.sleep(delay)
 			

@@ -17,7 +17,7 @@ class RunnerGroup(multiprocessing.Process):
 		
 		self.queue = queue
 		self.rampup = rampup
-		self.target = target
+		self._target = target
 		self.run_time = run_time
 		self.group_name = group_name
 		self.start_time = start_time
@@ -30,16 +30,16 @@ class RunnerGroup(multiprocessing.Process):
 		return self.group_name
 	
 	def __repr__(self):
-		return "(%s, %s, %s, %s)" % (self.group_name, self.num_runners, self.run_time, self.ramup)
+		return "(%s, %s, %s, %s)" % (self.group_name, self.num_runners, self.run_time, self.rampup)
 	
 	def run(self):
 		runners = []
 		for i in xrange(self.num_runners):
 			spacing = float(self.rampup) / float(self.num_runners)
-			if i > 0:
+			if i > 0 and spacing:
 				time.sleep(spacing)
 				
-			target = TargetRunner(	runner_num=i, run_time=self.run_time, target=self.target,
+			target = TargetRunner(	runner_num=i, run_time=self.run_time, target=self._target,
 									target_args=self.target_args, queue=self.queue, 
 									group_name=self.group_name, start_time=self.start_time)
 			

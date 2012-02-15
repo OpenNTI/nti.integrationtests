@@ -1,22 +1,54 @@
 import os
 import time
+import UserDict
 import ConfigParser
 
 from zope.dottedname.resolve import resolve
 
 from nti.integrationtests.performance import RunnerGroup
 
-def get_option(config, section=ConfigParser.DEFAULTSECT, name, default=None):
+# ====================
+
+class Context(object, UserDict.DictMixin):
+
+	def __init__(self, data=None):
+		self._data = {}
+		self._data.update(data or {})
+
+	def __contains__( self, key ):
+		return key in self._data
+
+	def __getitem__(self, key):
+		return self._data[key] if key in self._data else None
+
+	def __setitem__(self, key, val):
+		self._data[key] = val
+
+	def __delitem__(self, key):
+		self._data.pop(key)
+
+	def keys(self):
+		return self._data.keys()
+	
+	def __str__( self ):
+		return "%s(%s)" % (self.__class__.__name__,self._data)
+
+	def __repr__( self ):
+		return self.__str__()
+
+# ====================
+
+def get_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
 	try:
 		return config.get(section, name)
 	except:
 		return default
 
-def get_bool_option(config, section=ConfigParser.DEFAULTSECT, name):
+def get_bool_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=False):
 	try:
 		return config.getboolean(section, name)
 	except:
-		return False
+		return default
 	
 def eval_args(args):
 	result = []
@@ -33,13 +65,16 @@ def read_config(config_file):
 	
 	# save all properties in a context object
 	
-	context = object()
+	context = Context()
 	for k, v in config.items(ConfigParser.DEFAULTSECT):
+		if k.endswith('_args'):
+			v = eval(v)
+			k = k[:-5]
 		setattr(context, k, v)
 	
 	context.serialize = get_bool_option(config, name="serialize")
-	context.output_dir = get_option(config, name="output_dir", '/tmp')
-	context.test_name = get_option(config, name="test_name", 'unknown-%s' + time.time())
+	context.output_dir = get_option(config, name="output_dir", default='/tmp')
+	context.test_name = get_option(config, name="test_name", default='unknown-%s' % time.time())
 	
 	def noop(): pass
 	context.setup = resolve(context.setup) if  hasattr(context, "setup") else noop 
@@ -48,24 +83,25 @@ def read_config(config_file):
 	# read running groups
 	
 	default_run_time = get_option(config, name="run_time")
-	default_rampup = int(get_option(config, name="rampup", 0))
+	default_rampup = int(get_option(config, name="rampup", default=0))
 	default_use_threads = get_bool_option(config, name="use_threads")
-	default_call_wait_time = int(get_option(config, name="call_wait_time", 0))
+	default_call_wait_time = int(get_option(config, name="call_wait_time", default=0))
 	
 	for section in config.sections():
 		group_name = get_option(config, section, 'group_name', section)
 		run_time = int(get_option(config, section, 'run_time', default_run_time))
 		rampup = int(get_option(config, section, 'rampup', default_rampup))
-		runners = int(config.get(section, 'runners'))
+		
+		runners = config.getint(section, 'runners')
 		target = config.get(section, 'target')
 		target_args = get_option(config, section, 'target_args', None)
-		use_threads = get_option(config, name="use_threads", str(default_use_threads)) == 'True'
-		call_wait_time = get_option(config, name="call_wait_time", default_call_wait_time)
+		
+		use_threads = get_bool_option(config, section, "use_threads", default_use_threads)
+		call_wait_time = get_option(config, section, "call_wait_time", default_call_wait_time)
 		
 		# get target and params
 		target = resolve(target)
 		target_args = eval(target_args) if target_args else ()
-		target_args = eval_args(target_args)
 		
 		# save the context
 		target.__context__ = context

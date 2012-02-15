@@ -17,7 +17,7 @@ class ResultsWriter(threading.Thread):
 		with open(self.output_file, 'w') as f:
 			while True:
 				try:
-					result = self.queue.get_nowait(False)
+					result = self.queue.get_nowait()
 					if not result:
 						break
 					
@@ -41,7 +41,7 @@ def run_groups(context, groups):
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)
 			
-	name = '%s_%s.csv' % (context.test_name, time.strftime('%Y.%m.%d_%H.%M.%S/', run_localtime))
+	name = '%s_%s.csv' % (context.test_name, time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime))
 	output_file = os.path.join(output_dir, name)
 	
 	queue = multiprocessing.Queue()
