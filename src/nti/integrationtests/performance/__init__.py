@@ -1,20 +1,29 @@
 import time
+import inspect
 import threading
 import multiprocessing
 
 class RunnerGroup(multiprocessing.Process):
 	def __init__(self, run_time, num_runners, target, target_args=(), rampup=0, call_wait_time=None,
 				 queue=None, group_name=None, start_time=None, use_threads=False, *args, **kwargs):
+		
 		super(RunnerGroup, self).__init__(*args, **kwargs)
+		
+		assert run_time > 0, "must specify a valid run time in secs"
+		assert num_runners > 0, "must specify a valid number of runners"
+		assert inspect.isfunction(target) or callable(target), "must specify a valid target"
+		assert tuple(target_args or ()),  "must specify a valid target arguments"
+		assert group_name,  "must specify a valid runner group name"
+		
 		self.queue = queue
 		self.rampup = rampup
 		self.target = target
 		self.run_time = run_time
+		self.group_name = group_name
 		self.start_time = start_time
 		self.num_runners = num_runners
-		self.target_args = target_args
 		self.use_threads = use_threads
-		self.group_name = group_name or ''
+		self.target_args = target_args or ()
 		self.call_wait_time = call_wait_time
 		
 	def __str__(self):
@@ -44,7 +53,9 @@ class RunnerGroup(multiprocessing.Process):
 			
 		for runner in runners:
 			runner.join()
-			
+
+# ==================
+
 class TargetRunner(object):
 	def __init__(self, runner_num, run_time, target, target_args=(), queue=None, 
 				 group_name=None, start_time=None, call_wait_time=None):
@@ -69,6 +80,7 @@ class TargetRunner(object):
 		
 	def run(self):
 		elapsed = 0
+		iterations = 0
 		while elapsed < self.run_time:
 			result = None
 			exception = None
@@ -78,6 +90,7 @@ class TargetRunner(object):
 			except Exception, e:
 				exception = e
 		
+			iterations = iterations + 1
 			run_time = time.time() - start
 			
 			if self.call_wait_time:
@@ -86,16 +99,41 @@ class TargetRunner(object):
 			elapsed = time.time() - self.start_time
 			
 			if self.queue:
-				self.queue.put(RunnerResult(self.runner_num, run_time, result, exception, self.group_name))
+				self.queue.put(RunnerResult(group_name = self.group_name,
+											runner_num = self.runner_num, 
+											run_time = run_time,
+											elapsed = elapsed,
+											iteration = iterations,
+											result = result,
+											exception = exception))
 				
 class RunnerResult(object):
-	def __init__(self, runner_num, run_time, result, exception=None, group_name=None):
+	def __init__(self, group_name, runner_num, run_time, elapsed, iteration, result=None, exception=None):
 		self.result = result
+		self.elapsed = elapsed
 		self.run_time = run_time
 		self.exception = exception
+		self.iteration = iteration
 		self.runner_num = runner_num
-		self.group_name = group_name or ''
+		self.group_name = group_name
 		self.epoch = time.mktime(time.localtime())
+	
+	def key(self):
+		return "%s-%s" % (self.runner_num, self.iteration)
+	
+	def __str__(self):
+		return self.__repr__()
+	
+	def __repr__(self):
+		return "(%s, %s, %s, %s)" % (self.group_name, self.runner_num, self.iteration, self.run_time)
+	
+	@property
+	def error(self):
+		return str(self.exception) if self.exception else ''
+	
+	@property
+	def output(self):
+		return repr(self.result) if self.result else ''
 	
 	@classmethod
 	def sort(self, array):

@@ -39,7 +39,7 @@ class DataserverProcess(object):
 	
 	def __init__(self, port=PORT, root_dir=DATASERVER_DIR):
 		self.process = None
-		self.port = port if port else PORT
+		self.port = int(port) if port else PORT
 		self.endpoint = self.resolve_endpoint(SERVER_HOST, self.port)
 		self.root_dir = os.path.expanduser(root_dir if root_dir else DATASERVER_DIR)
 

@@ -14,6 +14,28 @@ from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
 from nti.integrationtests.dataserver.client import DataserverClient
 from nti.integrationtests.dataserver.client import ROOT_ITEM
 
+# ====================
+
+def generate_ntiid(cls, date=None, provider='nti', nttype=None, specific=None):
+	
+	def escape_provider( provider ):
+		return provider.replace( ' ', '_' ).replace( '-', '_' )
+
+	if not nttype:
+		raise ValueError( 'Must supply type' )
+
+	date_seconds = date if isinstance( date, numbers.Real ) and date > 0 else time.time()
+	date = datetime.date( *time.gmtime(date_seconds)[0:3] )
+	date_string = date.isoformat()
+	
+	provider = escape_provider( str(provider) ) + '-'
+	specific = '-' + specific if specific else '-' + str(time.clock())
+	
+	result = 'tag:nextthought.com,%s:%s%s%s' % (date_string, provider, nttype, specific )
+	return result
+	
+# ====================
+
 class DataServerTestCase(unittest.TestCase):
 
 	# well-known IDs
@@ -98,19 +120,4 @@ class DataServerTestCase(unittest.TestCase):
 	
 	@classmethod
 	def generate_ntiid(cls, date=None, provider='nti', nttype=None, specific=None):
-		
-		def escape_provider( provider ):
-			return provider.replace( ' ', '_' ).replace( '-', '_' )
-	
-		if not nttype:
-			raise ValueError( 'Must supply type' )
-	
-		date_seconds = date if isinstance( date, numbers.Real ) and date > 0 else time.time()
-		date = datetime.date( *time.gmtime(date_seconds)[0:3] )
-		date_string = date.isoformat()
-		
-		provider = escape_provider( str(provider) ) + '-'
-		specific = '-' + specific if specific else '-' + str(time.clock())
-		
-		result = 'tag:nextthought.com,%s:%s%s%s' % (date_string, provider, nttype, specific )
-		return result
+		return generate_ntiid(date=date, provider=provider, nttype=nttype, specific=specific)
