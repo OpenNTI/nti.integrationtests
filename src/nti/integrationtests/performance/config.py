@@ -67,6 +67,10 @@ def read_config(config_file):
 	
 	context = Context()
 	for k, v in config.items(ConfigParser.DEFAULTSECT):
+		if k.endswith('_env'):
+			k = k[:-4]
+			v = os.environ.get(v)
+			
 		if k.endswith('_args'):
 			v = eval(v)
 			k = k[:-5]

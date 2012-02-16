@@ -2,8 +2,8 @@ from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.performance.eval import generate_message
 
-def create_notes():
-	context = create_notes.__context__
+def create_note():
+	context = create_note.__context__
 	client = new_client(context)
 	result = client.create_note(generate_message(1,1), container=generate_ntiid(nttype='test'))
 	return result
