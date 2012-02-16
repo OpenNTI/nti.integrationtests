@@ -1,6 +1,7 @@
 import os
 import time
 import Queue
+import shutil
 import threading
 import multiprocessing
 
@@ -37,23 +38,25 @@ class ResultsWriter(threading.Thread):
 					time.sleep(.05)
 					pass
 
-def run_groups(context, groups):
+def run(config_file):
 		
+	context, groups = read_config (config_file)
+	
 	run_localtime = time.localtime()
 	output_dir = os.path.expanduser(context.output_dir)
-	if not os.path.exists(output_dir):
-		os.makedirs(output_dir)
-			
-	name = '%s_%s.csv' % (context.test_name, time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime))
-	output_file = os.path.join(output_dir, name)
 	
+	base_output_dir = os.path.join(output_dir, context.test_name)
+	result_output_dir = os.path.join(base_output_dir, time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime))
+	if not os.path.exists(result_output_dir):
+		os.makedirs(result_output_dir)
+	output_file = os.path.join(result_output_dir, 'results.csv')
+
 	queue = multiprocessing.Queue()
 	writer = ResultsWriter(queue, output_file)
 	writer.daemon = True
 	writer.start()
-	
-	if hasattr(context,'setup'):
-		context.setup(context=context)
+		
+	context.setup(context=context)
 	try:
 		now = time.time()
 		
@@ -68,15 +71,14 @@ def run_groups(context, groups):
 			for group in groups:
 				group.join()
 		
-		return time.time() - now
+		result = time.time() - now
+			
+		copy_cfg_file = os.path.join(result_output_dir, os.path.basename(config_file))
+		shutil.copy(config_file, copy_cfg_file)
+		
+		return result
 	finally:
 		time.sleep(2)
 		queue.put_nowait(None)
-		if hasattr(context,'teardown'):
-			context.teardown(context=context)
-		
-def run(config_file):
-	context, groups = read_config (config_file)
-	return run_groups(context, groups)
-
+		context.teardown(context=context)
 	
