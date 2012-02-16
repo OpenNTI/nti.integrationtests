@@ -73,7 +73,12 @@ def get_int_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=
 
 def get_float_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
 	return _get_option(config.getfloat, section, name, default)
-			
+		
+def is_default_value(config, section, name):
+	def_val = config.defaults()[name] if name in config.defaults() else None
+	sec_val = get_option(config, section, name)
+	return def_val == sec_val
+		
 def read_config(config_file):
 	
 	group_runners = []
@@ -116,9 +121,13 @@ def read_config(config_file):
 		parse_items(delegate, config, section)
 		
 		delegate.group_name = get_option(config, section, 'group_name', section)
-		delegate.run_time = get_int_option(config, section, 'run_time')
-		delegate.max_iterations = get_int_option(config, section, 'max_iterations')
 		delegate.rampup = get_int_option(config, section, 'rampup', context.rampup)
+			
+		delegate.run_time = get_int_option(config, section, 'run_time') \
+							if not is_default_value(config, section, 'run_time') else None
+
+		delegate.max_iterations = 	get_int_option(config, section, 'max_iterations') \
+									if not is_default_value(config, section, 'max_iterations') else None
 		
 		if delegate.run_time:
 			delegate.max_iterations = None
