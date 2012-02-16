@@ -52,6 +52,8 @@ def run_groups(context, groups):
 	writer.daemon = True
 	writer.start()
 	
+	if hasattr(context,'setup'):
+		context.setup(context=context)
 	try:
 		now = time.time()
 		
@@ -70,6 +72,8 @@ def run_groups(context, groups):
 	finally:
 		time.sleep(2)
 		queue.put_nowait(None)
+		if hasattr(context,'teardown'):
+			context.teardown(context=context)
 		
 def run(config_file):
 	context, groups = read_config (config_file)

@@ -1,5 +1,6 @@
 import os
 import random
+import tempfile
 
 from nti.integrationtests import generate_ntiid
 from nti.integrationtests.dataserver.client import DataserverClient
@@ -18,13 +19,20 @@ phrases = (	"Shoot To Kill",
 			"Sit Upon the Frozen Heavens", 
 			"Call forth the Twilight")
 
+boolean_states = {	'1': True, 'yes': True, 'true': True, 'on': True,
+					'0': False, 'no': False, 'false': False, 'off': False}
+
 def init_server(context):
 	port = int(getattr(context, "port", get_open_port()))
-	root_dir = os.path.expanduser(getattr(context, "root_dir", '/tmp'))
-	use_coverage = getattr(context, "use_coverage", 'False') == 'True'
+	
+	tmp_dir = tempfile.mktemp(prefix="ds.data.", dir="/tmp")
+	root_dir = os.path.expanduser(getattr(context, "root_dir", tmp_dir))
+	
+	use_coverage = getattr(context, "use_coverage", 'False')
+	use_coverage = boolean_states.get(use_coverage.lower(), False)
 	
 	ds = DataserverProcess(port=port, root_dir=root_dir)
-	context.__ds__ = ds
+	context.__dataserver__ = ds
 	context.endpoint = ds.endpoint
 	
 	if not use_coverage:
@@ -33,8 +41,10 @@ def init_server(context):
 		ds.start_server_with_coverage()
 
 def stop_server(context):
-	ds = getattr(context, "__ds__", None)
-	use_coverage = getattr(context, "use_coverage", 'False') == 'True'
+	ds = getattr(context, "__dataserver__", None)
+	use_coverage = getattr(context, "use_coverage", 'False')
+	use_coverage = boolean_states.get(use_coverage.lower(), False)
+	
 	if ds:
 		if not use_coverage:
 			ds.terminate_server()
@@ -49,3 +59,9 @@ def new_client(context):
 
 def generate_message(a_min=1, a_max=4):
 	return " ".join(random.sample(phrases, random.randint(a_min, a_max)))
+
+def generate_random_text(a_max=5):
+	word = []
+	for _ in xrange(a_max+1):
+		word.append(chr(random.randint(ord('a'), ord('z'))))
+	return "".join(word)

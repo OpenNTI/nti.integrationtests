@@ -49,7 +49,11 @@ class DelegateContext(Context):
 
 	def __init__(self, context):
 		super(DelegateContext, self).__init__(context._data)
+		self.__dict__['delegate'] = context
 			
+	def __getattr__(self, name):
+		return getattr(self.__dict__['delegate'],name)
+	
 	def __setattr__(self, name, value):
 		if name not in read_only_attributes:
 			self.__dict__[name] = value
@@ -103,7 +107,7 @@ def read_config(config_file):
 	context.output_dir = get_option(config, name="output_dir", default='/tmp')
 	context.test_name = get_option(config, name="test_name", default='unknown-%s' % time.time())
 	
-	def noop(): pass
+	def noop(*args, **kwargs): pass
 	context.setup = resolve(context.setup) if  hasattr(context, "setup") else noop 
 	context.teardown = resolve(context.teardown) if  hasattr(context, "teardown") else noop 
 	

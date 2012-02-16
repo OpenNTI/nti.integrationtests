@@ -1,12 +1,14 @@
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.performance.eval import generate_message
+from nti.integrationtests.performance.eval import generate_random_text
 
 def create_note():
 	context = create_note.__context__
 	client = new_client(context)
-	result = client.create_note(generate_message(1,4), container=generate_ntiid(nttype='test'))
-	return result
+	nttype = generate_random_text()
+	result = client.create_note(generate_message(1,4), container=generate_ntiid(nttype=nttype))
+	assert result, 'could  not create note'
 
 if __name__ == '__main__':
 	import os
