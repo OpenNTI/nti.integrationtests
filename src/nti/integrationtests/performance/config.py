@@ -85,19 +85,30 @@ def read_config(config_file):
 	default_run_time = get_option(config, name="run_time")
 	default_rampup = int(get_option(config, name="rampup", default=0))
 	default_use_threads = get_bool_option(config, name="use_threads")
-	default_call_wait_time = int(get_option(config, name="call_wait_time", default=0))
+	default_call_wait_time = float(get_option(config, name="call_wait_time", default=0))
+	default_max_iterations = get_option(config, name="max_iterations")
 	
 	for section in config.sections():
 		group_name = get_option(config, section, 'group_name', section)
-		run_time = int(get_option(config, section, 'run_time', default_run_time))
+		run_time = int(get_option(config, section, 'run_time', 0))
+		max_iterations = int(get_option(config, section, 'max_iterations', 0))
 		rampup = int(get_option(config, section, 'rampup', default_rampup))
 		
+		if run_time:
+			max_iterations = None
+		elif max_iterations:
+			run_time = None
+			
+		if not run_time and not max_iterations:
+			run_time = default_run_time
+			max_iterations = default_max_iterations
+			
 		runners = config.getint(section, 'runners')
 		target = config.get(section, 'target')
 		target_args = get_option(config, section, 'target_args', None)
 		
 		use_threads = get_bool_option(config, section, "use_threads", default_use_threads)
-		call_wait_time = get_option(config, section, "call_wait_time", default_call_wait_time)
+		call_wait_time = float(get_option(config, section, "call_wait_time", default_call_wait_time))
 		
 		# get target and params
 		target = resolve(target)
@@ -108,6 +119,7 @@ def read_config(config_file):
 		
 		runner = RunnerGroup(group_name = group_name,
 							 run_time = run_time,
+							 max_iterations = max_iterations,
 							 target = target,
 							 target_args =target_args,
 							 num_runners = runners,

@@ -4,15 +4,24 @@ import threading
 import multiprocessing
 
 class RunnerGroup(multiprocessing.Process):
-	def __init__(self, run_time, num_runners, target, target_args=(), rampup=0, call_wait_time=None,
-				 queue=None, group_name=None, start_time=None, use_threads=False, *args, **kwargs):
+	def __init__(self, num_runners, target, target_args=(), run_time=None, max_iterations=None, rampup=0, 
+				 call_wait_time=None, queue=None, group_name=None, start_time=None, use_threads=False, *args, **kwargs):
 		
 		super(RunnerGroup, self).__init__(*args, **kwargs)
 		
-		assert run_time > 0, "must specify a valid run time in secs"
+		assert run_time or max_iterations, "must specify a valid run time in secs or max number of iterations"
+		if run_time:
+			assert run_time > 0, "must specify a valid run time in secs"
+			
+		if max_iterations:
+			assert max_iterations > 0, "must specify a valid number of max iterations"
+			
 		assert num_runners > 0, "must specify a valid number of runners"
 		assert inspect.isfunction(target) or callable(target), "must specify a valid target"
-		assert tuple(target_args or ()),  "must specify a valid target arguments"
+		
+		if target_args:
+			assert tuple(target_args),  "must specify a valid target arguments"
+			
 		assert group_name,  "must specify a valid runner group name"
 		
 		self.queue = queue
@@ -24,6 +33,7 @@ class RunnerGroup(multiprocessing.Process):
 		self.num_runners = num_runners
 		self.use_threads = use_threads
 		self.target_args = target_args or ()
+		self.max_iterations = max_iterations
 		self.call_wait_time = call_wait_time
 		
 	def __str__(self):
@@ -39,9 +49,14 @@ class RunnerGroup(multiprocessing.Process):
 			if i > 0 and spacing:
 				time.sleep(spacing)
 				
-			target = TargetRunner(	runner_num=i, run_time=self.run_time, target=self._target,
-									target_args=self.target_args, queue=self.queue, 
-									group_name=self.group_name, start_time=self.start_time)
+			target = TargetRunner(	runner_num=i, 
+									target=self._target,
+									target_args=self.target_args,
+									run_time=self.run_time, 
+									max_iterations=self.max_iterations, 
+									queue=self.queue, 
+									group_name=self.group_name,
+									start_time=self.start_time)
 			
 			if self.use_threads:
 				runner = threading.Thread(target=target, args=())
@@ -57,8 +72,8 @@ class RunnerGroup(multiprocessing.Process):
 # ==================
 
 class TargetRunner(object):
-	def __init__(self, runner_num, run_time, target, target_args=(), queue=None, 
-				 group_name=None, start_time=None, call_wait_time=None):
+	def __init__(self, runner_num, target, target_args=(), run_time=None, max_iterations=None, 
+				 queue=None, group_name=None, start_time=None, call_wait_time=None):
 		self.queue = queue
 		self.target = target
 		self.exception = None
@@ -66,6 +81,7 @@ class TargetRunner(object):
 		self.group_name = group_name
 		self.runner_num = runner_num
 		self.target_args = target_args
+		self.max_iterations = max_iterations
 		self.call_wait_time = call_wait_time
 		self.start_time = start_time or time.time()
 		
@@ -81,7 +97,9 @@ class TargetRunner(object):
 	def run(self):
 		elapsed = 0
 		iterations = 0
-		while elapsed < self.run_time:
+		while 	(self.run_time and elapsed < self.run_time) or \
+				(self.max_iterations and iterations < self.max_iterations):
+			
 			result = None
 			exception = None
 			start = time.time()

@@ -16,7 +16,7 @@ from nti.integrationtests.dataserver.client import ROOT_ITEM
 
 # ====================
 
-def generate_ntiid(cls, date=None, provider='nti', nttype=None, specific=None):
+def generate_ntiid(date=None, provider='nti', nttype=None, specific=None):
 	
 	def escape_provider( provider ):
 		return provider.replace( ' ', '_' ).replace( '-', '_' )
