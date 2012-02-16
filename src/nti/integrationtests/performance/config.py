@@ -9,11 +9,19 @@ from nti.integrationtests.performance import RunnerGroup
 
 # ====================
 
+read_only_attributes = ('setup', 'teardown' )
+
+default_attributes = (	'rampup', 'run_time','test_name', 'output_dir', 'serialize','use_threads',
+					'max_iterations', 'call_wait_time') + read_only_attributes
+
+group_attributes = ('runners', 'target', 'target_args')
+
+# ====================
+
 class Context(object, UserDict.DictMixin):
 
 	def __init__(self, data=None):
-		self._data = {}
-		self._data.update(data or {})
+		self._data = data or {}
 
 	def __contains__( self, key ):
 		return key in self._data
@@ -36,45 +44,55 @@ class Context(object, UserDict.DictMixin):
 	def __repr__( self ):
 		return self.__str__()
 
+
+class DelegateContext(Context):
+
+	def __init__(self, context):
+		super(DelegateContext, self).__init__(context._data)
+			
+	def __setattr__(self, name, value):
+		if name not in read_only_attributes:
+			self.__dict__[name] = value
+
 # ====================
 
-def get_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
+def _get_option(method, section, name, default):
 	try:
-		return config.get(section, name)
-	except:
-		return default
-
-def get_bool_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=False):
-	try:
-		return config.getboolean(section, name)
+		return method(section, name)
 	except:
 		return default
 	
-def eval_args(args):
-	result = []
-	for arg in args or []:
-		if isinstance(arg, basestring) and arg.startswith("$"):
-			key = args[1:]
-			arg = os.environ.get(key, '')
-		result.append(arg)
+def get_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
+	return _get_option(config.get, section, name, default)
+
+def get_bool_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=False):
+	return _get_option(config.getboolean, section, name, default)
+
+def get_int_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
+	return _get_option(config.getint, section, name, default)
+
+def get_float_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
+	return _get_option(config.getfloat, section, name, default)
 			
 def read_config(config_file):
+	
 	group_runners = []
 	config = ConfigParser.ConfigParser()
 	config.read(config_file)
 	
-	# save all properties in a context object
+	def parse_items(context, config, section=ConfigParser.DEFAULTSECT):
+		for k, v in config.items(section):
+			if k.endswith('_env'):
+				k = k[:-4]
+				v = os.environ.get(v)
+				
+			if k.endswith('_args'):
+				v = eval(v)
+				k = k[:-5]
+			setattr(context, k, v)
 	
 	context = Context()
-	for k, v in config.items(ConfigParser.DEFAULTSECT):
-		if k.endswith('_env'):
-			k = k[:-4]
-			v = os.environ.get(v)
-			
-		if k.endswith('_args'):
-			v = eval(v)
-			k = k[:-5]
-		setattr(context, k, v)
+	parse_items(context, config)
 	
 	context.serialize = get_bool_option(config, name="serialize")
 	context.output_dir = get_option(config, name="output_dir", default='/tmp')
@@ -86,52 +104,56 @@ def read_config(config_file):
 	
 	# read running groups
 	
-	default_run_time = get_option(config, name="run_time")
-	default_rampup = int(get_option(config, name="rampup", default=0))
-	default_use_threads = get_bool_option(config, name="use_threads")
-	default_call_wait_time = float(get_option(config, name="call_wait_time", default=0))
-	default_max_iterations = get_option(config, name="max_iterations")
+	context.run_time = get_int_option(config, name="run_time")
+	context.rampup = get_int_option(config, name="rampup", default=0)
+	context.use_threads = get_bool_option(config, name="use_threads")
+	context.call_wait_time = get_float_option(config, name="call_wait_time", default=0)
+	context.max_iterations = get_int_option(config, name="max_iterations")
 	
 	for section in config.sections():
-		group_name = get_option(config, section, 'group_name', section)
-		run_time = int(get_option(config, section, 'run_time', 0))
-		max_iterations = int(get_option(config, section, 'max_iterations', 0))
-		rampup = int(get_option(config, section, 'rampup', default_rampup))
 		
-		if run_time:
-			max_iterations = None
-		elif max_iterations:
-			run_time = None
-			
-		if not run_time and not max_iterations:
-			run_time = default_run_time
-			max_iterations = default_max_iterations
-			
-		runners = config.getint(section, 'runners')
-		target = config.get(section, 'target')
-		target_args = get_option(config, section, 'target_args', None)
+		delegate = DelegateContext(context)
+		parse_items(delegate, config, section)
 		
-		use_threads = get_bool_option(config, section, "use_threads", default_use_threads)
-		call_wait_time = float(get_option(config, section, "call_wait_time", default_call_wait_time))
+		delegate.group_name = get_option(config, section, 'group_name', section)
+		delegate.run_time = get_int_option(config, section, 'run_time')
+		delegate.max_iterations = get_int_option(config, section, 'max_iterations')
+		delegate.rampup = get_int_option(config, section, 'rampup', context.rampup)
+		
+		if delegate.run_time:
+			delegate.max_iterations = None
+		elif delegate.max_iterations:
+			delegate.run_time = None
+			
+		if not delegate.run_time and not delegate.max_iterations:
+			delegate.run_time = context.run_time
+			delegate.max_iterations = context.max_iterations
+			
+		delegate.runners = config.getint(section, 'runners')
+		delegate.target = config.get(section, 'target')
+		delegate.target_args = get_option(config, section, 'target_args', None)
+		
+		delegate.use_threads = get_bool_option(config, section, "use_threads", context.use_threads)
+		delegate.call_wait_time = get_float_option(config, section, "call_wait_time", context.call_wait_time)
 		
 		# get target and params
-		target = resolve(target)
-		target_args = eval(target_args) if target_args else ()
+		delegate.target = resolve(delegate.target)
+		delegate.target_args = eval(delegate.target_args) if delegate.target_args else ()
 		
 		# save the context
-		target.__context__ = context
+		delegate.target.__context__ = delegate
 		
-		runner = RunnerGroup(group_name = group_name,
-							 run_time = run_time,
-							 max_iterations = max_iterations,
-							 target = target,
-							 target_args =target_args,
-							 num_runners = runners,
-							 rampup = rampup,
-							 use_threads = use_threads,
-							 call_wait_time = call_wait_time)
+		runner = RunnerGroup(group_name = delegate.group_name,
+							 run_time = delegate.run_time,
+							 max_iterations = delegate.max_iterations,
+							 target = delegate.target,
+							 target_args = delegate.target_args,
+							 num_runners = delegate.runners,
+							 rampup = delegate.rampup,
+							 use_threads = delegate.use_threads,
+							 call_wait_time = delegate.call_wait_time)
 		
-		runner.__context__ = context
+		runner.__context__ = delegate
 		
 		group_runners.append(runner)
 	
