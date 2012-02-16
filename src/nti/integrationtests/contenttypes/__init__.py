@@ -3,6 +3,7 @@ import pprint
 import inspect
 import UserDict
 import collections
+from persistent import Persistent
 
 #########################
 
@@ -63,7 +64,7 @@ class MetaDSObject(type):
 link_types = ('edit', )
 	
 
-class DSObject(object, UserDict.DictMixin):
+class DSObject(Persistent, UserDict.DictMixin):
 
 	__metaclass__ = MetaDSObject
 
@@ -697,3 +698,5 @@ def adapt_ds_object(dsobject):
 	return adapted_object
 
 adaptDSObject = adapt_ds_object
+
+	
