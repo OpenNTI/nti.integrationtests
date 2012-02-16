@@ -8,13 +8,14 @@ from nti.integrationtests.performance.config import read_config
 
 class ResultsWriter(threading.Thread):
 	def __init__(self, queue, output_file):
-		super(ResultsWriter, self).__init__()
+		super(ResultsWriter, self).__init__(name="resultwriter")
 		self.queue = queue
 		self.output_file = output_file
 			
 	def run(self):
 		counter = 0
 		with open(self.output_file, 'w') as f:
+			f.write("counter,group_name,iteration,epoch,target_run_time,elapsed,error,output\n")
 			while True:
 				try:
 					result = self.queue.get_nowait()
@@ -22,13 +23,15 @@ class ResultsWriter(threading.Thread):
 						break
 					
 					counter = counter + 1
-					f.write('%i,%.3f,%i,%s,%f,%s,%s\n' % (counter, 
-														  result.elapsed, 
-														  result.epoch,
-														  result.group_name,
-														  result.run_time,
-														  result.error,
-														  result.output))
+					f.write('%i,%s,%i,%i,%f,%.3f,%s,%s\n' % (counter, 
+												 			 result.group_name,
+												 			 result.iteration,
+												 			 result.epoch,	
+												 			 result.run_time,
+															 result.elapsed, 
+															 result.error,
+															 result.output))
+					
 					f.flush()
 				except Queue.Empty:
 					time.sleep(.05)
