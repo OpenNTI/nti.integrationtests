@@ -4,9 +4,6 @@ import time
 import urllib2
 from urlparse import urljoin
 
-import logging
-logger = logging.getLogger(__name__)
-
 from hamcrest import assert_that, greater_than_or_equal_to, less_than_or_equal_to, has_entry
 
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
@@ -139,9 +136,7 @@ class BasicSeverOperation(object):
 		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
 		lastModifiedTime = kwargs.get('requestTime', None)
 		preRequestTime = kwargs['preRequestTime']
-		if lastModifiedTimeCollection == 0:
-			logger.warn("collection modification time is %d", lastModifiedTimeCollection)
-		elif lastModifiedTimeCollection:
+		if lastModifiedTimeCollection:
 			assert_that( kwargs, has_entry( 'collectionTime', greater_than_or_equal_to( preRequestTime ) ) )
 
 		if lastModifiedTime:
@@ -155,9 +150,7 @@ class BasicSeverOperation(object):
 		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
 		preRequestTime = kwargs['preRequestTime']
 		lastModifiedTime = kwargs.get('requestTime', None)
-		if lastModifiedTimeCollection == 0:
-			logger.warn("collection modification time is %d", lastModifiedTimeCollection)
-		elif lastModifiedTimeCollection:
+		if lastModifiedTimeCollection:
 			assert_that( kwargs, has_entry( 'collectionTime', less_than_or_equal_to( preRequestTime ) ) )
 
 		if lastModifiedTime:
