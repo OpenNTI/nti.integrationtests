@@ -156,6 +156,10 @@ class OID_Remover(object):
 			del body["Creator"]
 		except (KeyError, TypeError):
 			pass
+		try:
+			del body["NTIID"]
+		except (KeyError, TypeError):
+			pass
 
 class ServerTestCase_v3_quizzes_constants(object):
 
