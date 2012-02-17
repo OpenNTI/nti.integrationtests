@@ -15,11 +15,8 @@ class ResultsWriter(threading.Thread):
 			
 	def run(self):
 		counter = 0
-		headers = ('counter','group_name','iteration','epoch','target_run_time','elapsed','error','output')
 		formats = '\t'.join(('%i','%s','%i','%i','%f','%.3f','%s','%s'))
 		with open(self.output_file, 'w') as f:
-			f.write('\t'.join(headers))
-			f.write('\n')
 			while True:
 				try:
 					result = self.queue.get_nowait()

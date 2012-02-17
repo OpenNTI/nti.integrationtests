@@ -16,13 +16,14 @@ group_attributes = ('runners', 'target', 'target_args', 'setup', 'teardown')
 # ====================
 
 def noop(*args, **kwargs): pass
-	
+IGNORE_RESULT = object()
+
 # ====================
 
 class Context(object, UserDict.DictMixin):
 
 	def __init__(self, data=None):
-		self._data = data or {}
+		self._data = data if data is not None else {}
 
 	def __contains__( self, key ):
 		return key in self._data
@@ -248,18 +249,21 @@ class TargetRunner(object):
 			
 			elapsed = time.time() - start_time
 			
-			runner_result = RunnerResult(group_name = self.group_name,
-										 runner_num = self.runner_num, 
-										 run_time = run_time,
-										 elapsed = elapsed,
-										 iteration = iterations,
-										 result = result,
-										 exception = exception)
-			if self.queue:
-				self.queue.put(runner_result)
+			if IGNORE_RESULT != result:
 				
-			if self.hold_results:
-				self._results.append(runner_result)
+				runner_result = RunnerResult(group_name = self.group_name,
+											 runner_num = self.runner_num, 
+											 run_time = run_time,
+											 elapsed = elapsed,
+											 iteration = iterations,
+											 result = result,
+											 exception = exception)
+				
+				if self.queue:
+					self.queue.put(runner_result)
+					
+				if self.hold_results:
+					self._results.append(runner_result)
 			
 # ==================
 	
