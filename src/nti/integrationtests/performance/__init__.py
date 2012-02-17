@@ -9,10 +9,13 @@ import multiprocessing
 
 read_only_attributes = ('script_setup', 'script_teardown')
 
-default_attributes = ('rampup', 'run_time','test_name', 'output_dir', 'serialize','use_threads',
-					'max_iterations', 'call_wait_time') + read_only_attributes
+default_attributes = (	'rampup', 'run_time','test_name', 'output_dir', 'serialize','use_threads',
+						'max_iterations', 'call_wait_time') + read_only_attributes
 
 group_attributes = ('runners', 'target', 'target_args', 'setup', 'teardown')
+
+result_headers = (	'counter','group_name', 'runner_num', 'iteration', 'epoch', 'run_time', 
+					'elapsed','error','output', 'timers')
 
 # ====================
 
@@ -120,9 +123,9 @@ def validate_context(context):
 # ==================
 
 class RunnerGroup(multiprocessing.Process):
-	def __init__(self, context, queue=None, *args, **kwargs):
+	def __init__(self, context, queue=None, validate=True, *args, **kwargs):
 		super(RunnerGroup, self).__init__(*args, **kwargs)
-		validate_context(context)
+		if validate: validate_context(context)
 		self.context = context
 		self.queue = queue
 		if self.hold_results: self._results = []
@@ -185,7 +188,7 @@ class RunnerGroup(multiprocessing.Process):
 				if i > 0 and spacing:
 					time.sleep(spacing)
 					
-				target = TargetRunner(runner_num=i, context=self.context, queue=self.queue)			
+				target = TargetRunner(runner_num=i+1, context=self.context, queue=self.queue)			
 				if self.use_threads:
 					runner = threading.Thread(target=target, args=())
 				else:
@@ -307,7 +310,7 @@ class TargetRunner(object):
 	
 class RunnerResult(object):
 	def __init__(self, group_name, runner_num, run_time, elapsed, iteration, 
-				 result=None, exception=None, custom_timers={}):
+				 result=None, exception=None, epoch=None, custom_timers={}):
 		self.result = result
 		self.elapsed = elapsed
 		self.run_time = run_time
@@ -316,7 +319,7 @@ class RunnerResult(object):
 		self.runner_num = runner_num
 		self.group_name = group_name
 		self.custom_timers = custom_timers or {}
-		self.epoch = time.mktime(time.localtime())
+		self.epoch = epoch or time.mktime(time.localtime())
 	
 	def __str__(self):
 		return self.__repr__()

@@ -5,6 +5,7 @@ import shutil
 import threading
 import multiprocessing
 
+from nti.integrationtests.performance import result_headers as headers
 from nti.integrationtests.performance.config import read_config
 
 class ResultsWriter(threading.Thread):
@@ -15,8 +16,7 @@ class ResultsWriter(threading.Thread):
 			
 	def run(self):
 		counter = 0
-		headers = ('counter','group_name','iteration','epoch','target_run_time','elapsed','error','output', 'timers')
-		formats = '\t'.join(('%i','%s','%i','%i','%f','%.3f','%s','%s','%s'))
+		formats = '\t'.join(('%i', '%s', '%i', '%i', '%i', '%f', '%.3f', '%s', '%s', '%s'))
 		with open(self.output_file, 'w') as f:
 			f.write('\t'.join(headers))
 			f.write('\n')
@@ -29,6 +29,7 @@ class ResultsWriter(threading.Thread):
 					counter = counter + 1
 					f.write(formats % (	counter, 
 										result.group_name,
+										result.runner_num,
 										result.iteration,
 										result.epoch,	
 										result.run_time,
@@ -80,7 +81,7 @@ def run(config_file):
 		
 		result = time.time() - now
 			
-		copy_cfg_file = os.path.join(result_output_dir, os.path.basename(config_file))
+		copy_cfg_file = os.path.join(result_output_dir, 'results.cfg')
 		shutil.copy(config_file, copy_cfg_file)
 		
 		return result

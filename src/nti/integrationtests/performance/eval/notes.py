@@ -35,7 +35,7 @@ def create_note(save_in_queue=False):
 	result = TimerResultMixin()
 	
 	now = time.time()
-	note = client.create_note(message, container=container, adapt=False)
+	note = client.create_note(message, container=container)
 	result.set_timer('ds.op', time.time() - now)
 	
 	# check and save
@@ -57,7 +57,7 @@ def update_note(save_in_queue=False):
 	result = TimerResultMixin()
 	
 	now = time.time()
-	note = client.update_object(note, adapt=False)
+	note = client.update_object(note)
 	result.set_timer('ds.op', time.time() - now)
 	
 	# check and save

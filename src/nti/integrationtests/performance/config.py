@@ -34,32 +34,37 @@ def is_default_value(config, section, name):
 	sec_val = get_option(config, section, name)
 	return def_val == sec_val
 		
-def read_config(config_file):
+def read_config(config_file, process_args=True):
 	
 	group_runners = []
 	config = ConfigParser.ConfigParser()
 	config.read(config_file)
+
+	# --------------
 	
-	def parse_items(context, config, section=ConfigParser.DEFAULTSECT):
+	def parse_items(context, config, process_args, section=ConfigParser.DEFAULTSECT):
 		for k, v in config.items(section):
 			if k.endswith('_env'):
 				k = k[:-4]
-				v = os.environ.get(v)
+				v = os.environ.get(v) if process_args else v
 				
 			if k.endswith('_args'):
-				v = eval(v)
+				v = eval(v) if process_args else v
 				k = k[:-5]
 			setattr(context, k, v)
 	
+	# --------------
+	
 	context = Context()
-	parse_items(context, config)
+	parse_items(context, config, process_args)
 	
 	context.serialize = get_bool_option(config, name="serialize")
 	context.output_dir = get_option(config, name="output_dir", default='/tmp')
 	context.test_name = get_option(config, name="test_name", default='unknown-%s' % time.time())
 	
-	context.script_setup = resolve(context.script_setup) if hasattr(context, "script_setup") else noop 
-	context.script_teardown = resolve(context.script_teardown) if hasattr(context, "script_teardown") else noop 
+	if process_args:
+		context.script_setup = resolve(context.script_setup) if hasattr(context, "script_setup") else noop 
+		context.script_teardown = resolve(context.script_teardown) if hasattr(context, "script_teardown") else noop 
 	
 	# read running groups
 	
@@ -71,7 +76,7 @@ def read_config(config_file):
 	
 	for section in config.sections():
 		delegate = DelegateContext(context)
-		parse_items(delegate, config, section)
+		parse_items(delegate, config, process_args, section)
 		
 		delegate.group_name = get_option(config, section, 'group_name', section)
 		delegate.rampup = get_int_option(config, section, 'rampup', context.rampup)
@@ -99,16 +104,20 @@ def read_config(config_file):
 		delegate.call_wait_time = get_float_option(config, section, "call_wait_time", context.call_wait_time)
 		
 		# get target and params
-		delegate.target = resolve(delegate.target)
-		delegate.target_args = eval(delegate.target_args) if delegate.target_args else ()
-		
+		if process_args:
+			delegate.target = resolve(delegate.target)
+			delegate.target_args = eval(delegate.target_args) if delegate.target_args else delegate.target_args
+			delegate.target.__context__ = delegate
+			
 		# resolve setup/teardown
-		delegate.setup = resolve(context.setup) if hasattr(context, "setup") else noop 
-		delegate.teardown = resolve(context.teardown) if hasattr(context, "teardown") else noop 
+		if process_args:
+			delegate.setup = resolve(context.setup) if hasattr(context, "setup") else noop 
+			delegate.teardown = resolve(context.teardown) if hasattr(context, "teardown") else noop 
 	
-		# save the context
-		delegate.target.__context__ = delegate
-		runner = RunnerGroup(delegate)
+		runner = RunnerGroup(delegate, validate=process_args)
 		group_runners.append(runner)
 	
+	if not process_args:
+		context['config'] = config
+		
 	return (context, group_runners)
