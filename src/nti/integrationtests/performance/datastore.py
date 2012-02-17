@@ -4,7 +4,11 @@ from threading import local
 from ZODB import DB
 from ZODB import FileStorage
 from BTrees.OOBTree import OOBTree
-#from persistent.mapping import PersistentMapping
+from persistent.list import PersistentList
+from persistent.mapping import PersistentMapping
+
+from nti.integrationtests.performance import RunnerResult
+from nti.integrationtests.performance.loader import process_record
 
 # =====================
 
@@ -87,8 +91,28 @@ class DataStore():
 	def root(self):
 		return _ContextManager.get().conn.root()
 	
+	@property	
+	def results(self):
+		return self.root['results']
+	
 	def close(self):
 		self.db.close()
+
+# =====================
+
+def add_result(store, timestamp, result):
+	if isinstance(result, basestring):
+		result = process_record(result)
+	assert isinstance(result, RunnerResult)
+	
+	with store.dbTrans():
+		if timestamp not in store.results:
+			lst = PersistentList()
+			store.results[timestamp] = lst
+		else:
+			lst = store.results[timestamp]
+			
+		pass
 
 if __name__ == '__main__':
 	ds = DataStore("/tmp/test.fs")

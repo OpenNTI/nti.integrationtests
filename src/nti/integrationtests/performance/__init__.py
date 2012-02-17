@@ -353,11 +353,17 @@ class RunnerResult(object):
 	def timers_to_string(self, delim='\t'):
 		lst = ['%s:%f' % (k,v) for k,v in self.custom_timers.iteritems()]
 		return delim.join(lst)
-			
-	@classmethod
-	def sort(self, array):
-		def sorting(x):
-			s = '%s-%03d' % (x.group_name, x.runner_num)
-			return s.lower()
-		return sorted(array, key=sorting)
+	
+	def to_external_object(self):
+		external = {}
+		external['epoch'] = self.epoch
+		external['result'] = self.result
+		external['elapsed'] = self.elapsed
+		external['run_time'] = self.run_time
+		external['exception'] = self.exception
+		external['iteration'] = self.iteration
+		external['runner_num'] = self.runner_num
+		external['group_name'] = self.group_name
+		external['custom_timers'] = dict(self.custom_timers)
+		return external
 			
