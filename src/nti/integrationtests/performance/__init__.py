@@ -15,6 +15,10 @@ group_attributes = ('runners', 'target', 'target_args', 'setup', 'teardown')
 
 # ====================
 
+def noop(*args, **kwargs): pass
+	
+# ====================
+
 class Context(object, UserDict.DictMixin):
 
 	def __init__(self, data=None):

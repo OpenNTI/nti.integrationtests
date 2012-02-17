@@ -4,6 +4,7 @@ import ConfigParser
 
 from zope.dottedname.resolve import resolve
 
+from nti.integrationtests.performance import noop
 from nti.integrationtests.performance import Context
 from nti.integrationtests.performance import RunnerGroup
 from nti.integrationtests.performance import DelegateContext
@@ -57,7 +58,6 @@ def read_config(config_file):
 	context.output_dir = get_option(config, name="output_dir", default='/tmp')
 	context.test_name = get_option(config, name="test_name", default='unknown-%s' % time.time())
 	
-	def noop(*args, **kwargs): pass
 	context.script_setup = resolve(context.script_setup) if hasattr(context, "script_setup") else noop 
 	context.script_teardown = resolve(context.script_teardown) if hasattr(context, "script_teardown") else noop 
 	
