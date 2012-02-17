@@ -1,29 +1,39 @@
 import time
-import Queue
-import multiprocessing
 
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.performance import TimerResultMixin 
+from nti.integrationtests.performance.eval import init_server
+from nti.integrationtests.performance.eval import stop_server
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.performance.eval import generate_message
 from nti.integrationtests.performance.eval import generate_random_text
 
-def set_in_queue(context, result, queue_name='notes'):
-	if not queue_name in context:
-		context[queue_name] = multiprocessing.Queue()
-	context[queue_name].put_nowait(result)
+def script_setup(context):
+	init_server(context)
+	context['list.lock'] = context.manager.Lock()
+	context['created_notes'] = context.manager.list()
+	context['updated_notes'] = context.manager.list()
 	
-def get_from_queue(context, queue_name='notes'):
-	try:
-		if queue_name in context:
-			return context[queue_name].get_nowait()
-	except Queue.Empty:
-		pass
-	return None
+def script_teardown(context):
+	stop_server(context)
+	del context['list.lock']
+	del context['created_notes']
+	del context['updated_notes']
 	
-def create_note(save_in_queue=False):
-	context = create_note.__context__
+def add_in_queue(context, result, queue_name='created_notes'):
+	lock = context['list.lock']
+	with lock:
+		context['created_notes'].append(result)
+
+def pop_queue(context, queue_name='created_notes'):
+	lock = context['list.lock']
+	with lock:
+		lst = context['created_notes']
+		return lst.pop() if lst else None
+			
+def create_note(*args, **kwargs):
+	context = kwargs['__context__']
 	
 	# create a ds client
 	client = new_client(context)
@@ -40,15 +50,15 @@ def create_note(save_in_queue=False):
 	
 	# check and save
 	assert note, 'could  not create note'
-	if save_in_queue: set_in_queue(context, note, 'created_notes')
+	add_in_queue(context, note, 'created_notes')
 	
 	return result
 
-def update_note(save_in_queue=False):
-	context = update_note.__context__
-		
-	# update the note
-	note = get_from_queue(context, 'created_notes')
+def update_note(*args, **kwargs):
+	context = kwargs['__context__']
+	
+	# get created note
+	note = pop_queue(context, 'created_notes')
 	if not note: return IGNORE_RESULT
 	
 	# update note
@@ -61,17 +71,17 @@ def update_note(save_in_queue=False):
 	result.set_timer('ds.op', time.time() - now)
 	
 	# check and save
-	assert note, 'could  not update note'
-	if save_in_queue: set_in_queue(context, note, 'updated_notes')
+	assert note, 'could not update note'
+	add_in_queue(context, note, 'updated_notes')
 	
 	return result
 	
-def delete_note():
-	context = delete_note.__context__
-		
-	# update the note
-	note = get_from_queue(context, 'updated_notes')
-	if not note: return IGNORE_RESULT
+def delete_note(*args, **kwargs):
+	context = kwargs['__context__']
+	
+	# get updated note
+	note = pop_queue(context, 'updated_notes')
+	if not note: return 'shit'
 	
 	# delete note
 	client = new_client(context)

@@ -76,7 +76,9 @@ class TimerResultMixin(DataMixin):
 # ====================
 
 class Context(DataMixin):
-
+	
+	manager = multiprocessing.Manager()
+	
 	def __getitem__(self, key):
 		return self._data[key] if key in self._data else None
 
@@ -258,12 +260,18 @@ class TargetRunner(object):
 	@property
 	def group_name(self):
 		return self.context.group_name
-						
+	
+	@property
+	def allow_context(self):
+		spec = inspect.getargspec(self.target)
+		return (spec.args and spec.args[-1] == '__context__') or spec.keywords
+		
 	def run(self):
 		elapsed = 0
 		iterations = 0
 		start_time = self.start_time
 		
+		can_bind_context = self.allow_context
 		while 	(self.run_time and elapsed < self.run_time) or \
 				(self.max_iterations and iterations < self.max_iterations):
 			
@@ -271,7 +279,10 @@ class TargetRunner(object):
 			exception = None
 			start = time.time()
 			try:
-				result = self.target(*self.target_args)
+				if can_bind_context:
+					result = self.target(*self.target_args, __context__=self.context)
+				else:
+					result = self.target(*self.target_args)
 			except Exception, e:
 				exception = e
 		

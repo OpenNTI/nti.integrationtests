@@ -107,7 +107,6 @@ def read_config(config_file, process_args=True):
 		if process_args:
 			delegate.target = resolve(delegate.target)
 			delegate.target_args = eval(delegate.target_args) if delegate.target_args else delegate.target_args
-			delegate.target.__context__ = delegate
 			
 		# resolve setup/teardown
 		if process_args:

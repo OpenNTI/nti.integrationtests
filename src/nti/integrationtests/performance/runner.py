@@ -8,43 +8,68 @@ import multiprocessing
 from nti.integrationtests.performance import result_headers as headers
 from nti.integrationtests.performance.config import read_config
 
-class ResultsWriter(threading.Thread):
-	def __init__(self, queue, output_file):
-		super(ResultsWriter, self).__init__(name="resultwriter")
+class ResultEventNotifier(threading.Thread):
+	def __init__(self, queue, subscribers=[]):
+		super(ResultEventNotifier, self).__init__(name="ResultEventNotifier")
 		self.queue = queue
-		self.output_file = output_file
+		self.subscribers = subscribers
 			
 	def run(self):
-		counter = 0
-		formats = '\t'.join(('%i', '%s', '%i', '%i', '%i', '%f', '%.3f', '%s', '%s', '%s'))
-		with open(self.output_file, 'w') as f:
-			f.write('\t'.join(headers))
-			f.write('\n')
-			while True:
-				try:
-					result = self.queue.get_nowait()
-					if not result:
-						break
+		while True:
+			try:
+				result = self.queue.get_nowait()
+				if not result: break
+				
+				for subscriber in self.subscribers:
+					subscriber(result)
 					
-					counter = counter + 1
-					f.write(formats % (	counter, 
-										result.group_name,
-										result.runner_num,
-										result.iteration,
-										result.epoch,	
-										result.run_time,
-										result.elapsed, 
-										result.error,
-										result.output,
-										result.timers_to_string()))
-					f.write('\n')
-					f.flush()
-				except Queue.Empty:
-					time.sleep(.05)
-					pass
+			except Queue.Empty:
+				time.sleep(.05)
 
-def run(config_file):
+# ==================
+
+class ResultFileWriter(object):
+	
+	def __init__(self, output_file):
+		super(ResultFileWriter, self).__init__()
+		self.counter = 0
+		self.output_file = output_file
+		self.formats = '\t'.join(('%i', '%s', '%i', '%i', '%i', '%f', '%.3f', '%s', '%s', '%s'))
+		self.stream = self.prepare_stream()
 		
+	def prepare_stream(self):
+		stream = open(self.output_file, 'w')
+		stream.write('\t'.join(headers))
+		stream.write('\n')
+		return stream
+	
+	def close(self):
+		self.stream.close()
+		
+	def __call__(self, result):
+		self.counter = self.counter + 1
+		self.stream.write(self.formats % (	self.counter, 
+											result.group_name,
+											result.runner_num,
+											result.iteration,
+											result.epoch,	
+											result.run_time,
+											result.elapsed, 
+											result.error,
+											result.output,
+											result.timers_to_string()))
+		self.stream.write('\n')
+		self.stream.flush()
+		
+# ==================
+		
+def close_subscribers(subscribers):
+	for s in subscribers:
+		if hasattr(s, 'close'):
+			s.close()
+			
+def run(config_file):
+	
 	context, groups = read_config (config_file)
 	
 	run_localtime = time.localtime()
@@ -56,10 +81,13 @@ def run(config_file):
 		os.makedirs(result_output_dir)
 	output_file = os.path.join(result_output_dir, 'results.txt')
 
+	# set subscribers
+	subscribers = [ResultFileWriter(output_file)]
+	
 	queue = multiprocessing.Queue()
-	writer = ResultsWriter(queue, output_file)
-	writer.daemon = True
-	writer.start()
+	notifier = ResultEventNotifier(queue, subscribers)
+	notifier.daemon = True
+	notifier.start()
 		
 	context.script_setup(context=context)
 	try:
@@ -88,6 +116,7 @@ def run(config_file):
 	finally:
 		time.sleep(2)
 		queue.put_nowait(None)
+		close_subscribers(subscribers)
 		context.script_teardown(context=context)
 		queue.close()
 	
