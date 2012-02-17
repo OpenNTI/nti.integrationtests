@@ -9,6 +9,7 @@ def create_note():
 	nttype = generate_random_text()
 	result = client.create_note(generate_message(1,4), container=generate_ntiid(nttype=nttype))
 	assert result, 'could  not create note'
+	return result
 
 if __name__ == '__main__':
 	import os

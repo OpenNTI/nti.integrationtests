@@ -15,8 +15,11 @@ class ResultsWriter(threading.Thread):
 			
 	def run(self):
 		counter = 0
+		headers = ('counter','group_name','iteration','epoch','target_run_time','elapsed','error','output')
+		formats = '\t'.join(('%i','%s','%i','%i','%f','%.3f','%s','%s'))
 		with open(self.output_file, 'w') as f:
-			f.write("counter,group_name,iteration,epoch,target_run_time,elapsed,error,output\n")
+			f.write('\t'.join(headers))
+			f.write('\n')
 			while True:
 				try:
 					result = self.queue.get_nowait()
@@ -24,15 +27,15 @@ class ResultsWriter(threading.Thread):
 						break
 					
 					counter = counter + 1
-					f.write('%i,%s,%i,%i,%f,%.3f,%s,%s\n' % (counter, 
-												 			 result.group_name,
-												 			 result.iteration,
-												 			 result.epoch,	
-												 			 result.run_time,
-															 result.elapsed, 
-															 result.error,
-															 result.output))
-					
+					f.write(formats % (	counter, 
+										result.group_name,
+										result.iteration,
+										result.epoch,	
+										result.run_time,
+										result.elapsed, 
+										result.error,
+										result.output))
+					f.write('\n')
 					f.flush()
 				except Queue.Empty:
 					time.sleep(.05)
@@ -49,14 +52,14 @@ def run(config_file):
 	result_output_dir = os.path.join(base_output_dir, time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime))
 	if not os.path.exists(result_output_dir):
 		os.makedirs(result_output_dir)
-	output_file = os.path.join(result_output_dir, 'results.csv')
+	output_file = os.path.join(result_output_dir, 'results.txt')
 
 	queue = multiprocessing.Queue()
 	writer = ResultsWriter(queue, output_file)
 	writer.daemon = True
 	writer.start()
 		
-	context.setup(context=context)
+	context.script_setup(context=context)
 	try:
 		now = time.time()
 		
@@ -66,6 +69,9 @@ def run(config_file):
 				group.start()
 			else:
 				group.run()
+			
+			# get a hold of results
+			context[group.group_name] = group.results
 			
 		if not context.serialize:
 			for group in groups:
@@ -80,5 +86,5 @@ def run(config_file):
 	finally:
 		time.sleep(2)
 		queue.put_nowait(None)
-		context.teardown(context=context)
+		context.script_teardown(context=context)
 	
