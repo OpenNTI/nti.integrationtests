@@ -86,5 +86,5 @@ def delete_note():
 if __name__ == '__main__':
 	import os
 	from nti.integrationtests.performance.runner import run
-	config_file = os.path.join(os.path.dirname(__file__), "notes_config.cfg")
+	config_file = os.path.join(os.path.dirname(__file__), "notes.cfg")
 	run(config_file)
