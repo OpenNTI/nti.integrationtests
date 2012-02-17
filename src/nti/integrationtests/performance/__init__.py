@@ -1,5 +1,6 @@
 import time
 import inspect
+import numbers
 import UserDict
 import threading
 import multiprocessing
@@ -20,8 +21,7 @@ IGNORE_RESULT = object()
 
 # ====================
 
-class Context(object, UserDict.DictMixin):
-
+class DataMixin(object, UserDict.DictMixin):
 	def __init__(self, data=None):
 		self._data = data if data is not None else {}
 
@@ -29,7 +29,7 @@ class Context(object, UserDict.DictMixin):
 		return key in self._data
 
 	def __getitem__(self, key):
-		return self._data[key] if key in self._data else None
+		return self._data[key]
 
 	def __setitem__(self, key, val):
 		self._data[key] = val
@@ -45,6 +45,37 @@ class Context(object, UserDict.DictMixin):
 
 	def __repr__( self ):
 		return self.__str__()
+	
+# ====================
+
+class TimerResultMixin(DataMixin):
+	def __init__(self, data=None, result=None):
+		super(TimerResultMixin, self).__init__(data=data)
+		self.result = result
+
+	def __getitem__(self, key):
+		return self._data[key] if key in self._data else None
+	
+	def __setitem__(self, key, val):
+		assert isinstance(val, numbers.Real)
+		super(TimerResultMixin, self).__setitem__(key, val)
+		
+	def get_timer(self, key):
+		return self.__getitem__(key)
+		
+	def set_timer(self, key, val):
+		self.__setitem__(key, val)
+	
+	@property
+	def timers(self):
+		return self._data
+	
+# ====================
+
+class Context(DataMixin):
+
+	def __getitem__(self, key):
+		return self._data[key] if key in self._data else None
 
 class DelegateContext(Context):
 
@@ -251,13 +282,20 @@ class TargetRunner(object):
 			
 			if IGNORE_RESULT != result:
 				
+				if isinstance(result, TimerResultMixin):
+					custom_timers = result.timers
+					result = result.result
+				else:
+					custom_timers = None
+					
 				runner_result = RunnerResult(group_name = self.group_name,
 											 runner_num = self.runner_num, 
 											 run_time = run_time,
 											 elapsed = elapsed,
 											 iteration = iterations,
 											 result = result,
-											 exception = exception)
+											 exception = exception,
+											 custom_timers = custom_timers)
 				
 				if self.queue:
 					self.queue.put(runner_result)
@@ -268,7 +306,8 @@ class TargetRunner(object):
 # ==================
 	
 class RunnerResult(object):
-	def __init__(self, group_name, runner_num, run_time, elapsed, iteration, result=None, exception=None):
+	def __init__(self, group_name, runner_num, run_time, elapsed, iteration, 
+				 result=None, exception=None, custom_timers={}):
 		self.result = result
 		self.elapsed = elapsed
 		self.run_time = run_time
@@ -276,10 +315,8 @@ class RunnerResult(object):
 		self.iteration = iteration
 		self.runner_num = runner_num
 		self.group_name = group_name
+		self.custom_timers = custom_timers or {}
 		self.epoch = time.mktime(time.localtime())
-	
-	def key(self):
-		return "%s-%s" % (self.runner_num, self.iteration)
 	
 	def __str__(self):
 		return self.__repr__()
@@ -295,6 +332,14 @@ class RunnerResult(object):
 	def output(self):
 		return repr(self.result) if self.result else ''
 	
+	@property
+	def timers(self):
+		return self.custom_timers
+	
+	def timers_to_string(self, delim='\t'):
+		lst = ['%s:%f' % (k,v) for k,v in self.custom_timers.iteritems()]
+		return delim.join(lst)
+			
 	@classmethod
 	def sort(self, array):
 		def sorting(x):

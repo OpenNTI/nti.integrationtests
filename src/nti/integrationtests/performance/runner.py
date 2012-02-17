@@ -15,8 +15,11 @@ class ResultsWriter(threading.Thread):
 			
 	def run(self):
 		counter = 0
-		formats = '\t'.join(('%i','%s','%i','%i','%f','%.3f','%s','%s'))
+		headers = ('counter','group_name','iteration','epoch','target_run_time','elapsed','error','output', 'timers')
+		formats = '\t'.join(('%i','%s','%i','%i','%f','%.3f','%s','%s','%s'))
 		with open(self.output_file, 'w') as f:
+			f.write('\t'.join(headers))
+			f.write('\n')
 			while True:
 				try:
 					result = self.queue.get_nowait()
@@ -31,7 +34,8 @@ class ResultsWriter(threading.Thread):
 										result.run_time,
 										result.elapsed, 
 										result.error,
-										result.output))
+										result.output,
+										result.timers_to_string()))
 					f.write('\n')
 					f.flush()
 				except Queue.Empty:
@@ -84,4 +88,5 @@ def run(config_file):
 		time.sleep(2)
 		queue.put_nowait(None)
 		context.script_teardown(context=context)
+		queue.close()
 	
