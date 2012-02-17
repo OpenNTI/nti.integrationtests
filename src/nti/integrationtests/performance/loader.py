@@ -1,4 +1,5 @@
 import os
+import warnings
 
 from nti.integrationtests.performance import RunnerResult
 from nti.integrationtests.performance.config import read_config
@@ -24,6 +25,7 @@ def process_record(line):
 		
 		return record
 	except:
+		warnings.warn("error processing record '%s'" % line)
 		return None
 			
 def load_results(result_file, on_record=None):
@@ -44,15 +46,15 @@ def load_results(result_file, on_record=None):
 			in_record=True
 	return records
 
-def read_config_and_results(path):
+def read_config_and_results(path, on_record=None):
 	path = os.path.expanduser(path)
 	results_file = os.path.join(path, 'results.txt')
 	config_file = os.path.join(path, 'results.cfg')
 	
-	load_results(results_file)
+	results = load_results(results_file, on_record)
 	context, groups = read_config(config_file, False)
 	
-	return context, groups
+	return context, groups, results
 
 if __name__ == '__main__':
 	read_config_and_results('/Users/csanchez/Downloads/test')
