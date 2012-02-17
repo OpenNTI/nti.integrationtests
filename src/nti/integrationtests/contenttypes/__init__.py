@@ -356,11 +356,11 @@ class Note(Sharable, Threadable):
 	DATASERVER_CLASS = "Note"
 	MIME_TYPE = 'application/vnd.nextthought.note'
 
-	_ds_field_mapping = {}
+	_ds_field_mapping = {'href':'href'}
 	_ds_field_mapping.update(Sharable._ds_field_mapping)
 	_ds_field_mapping.update(Threadable._ds_field_mapping)
 
-	_fields = {'text': False, 'body': False}
+	_fields = {'text': False, 'body': False, 'href':True}
 	_fields.update(Sharable._fields)
 	_fields.update(Threadable._fields)
 
