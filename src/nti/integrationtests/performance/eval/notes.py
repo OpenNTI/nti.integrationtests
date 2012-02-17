@@ -36,7 +36,7 @@ def create_note(save_in_queue=False):
 	
 	now = time.time()
 	note = client.create_note(message, container=container, adapt=False)
-	result.set_timer('ds.io', time.time() - now)
+	result.set_timer('ds.op', time.time() - now)
 	
 	# check and save
 	assert note, 'could  not create note'
@@ -58,7 +58,7 @@ def update_note(save_in_queue=False):
 	
 	now = time.time()
 	note = client.update_object(note, adapt=False)
-	result.set_timer('ds.io', time.time() - now)
+	result.set_timer('ds.op', time.time() - now)
 	
 	# check and save
 	assert note, 'could  not update note'
@@ -79,7 +79,7 @@ def delete_note():
 	
 	now = time.time()
 	client.delete_object(note)
-	result.set_timer('ds.io', time.time() - now)
+	result.set_timer('ds.op', time.time() - now)
 	
 	return result
 
