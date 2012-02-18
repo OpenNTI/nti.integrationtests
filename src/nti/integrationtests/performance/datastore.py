@@ -111,8 +111,12 @@ def add_result(store, timestamp, result):
 			store.results[timestamp] = lst
 		else:
 			lst = store.results[timestamp]
-			
-		pass
+	
+		external = result.to_external_object()
+		timers = external.pop('custom_timers')
+		p_map = PersistentMapping(external)
+		p_map.update(timers)
+		lst.append(p_map)
 
 if __name__ == '__main__':
 	ds = DataStore("/tmp/test.fs")
