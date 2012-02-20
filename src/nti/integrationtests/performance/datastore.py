@@ -172,7 +172,3 @@ class ResultDbWriter(object):
 		add_context(self.store, timestamp, group.context)
 		add_result(self.store, timestamp, result)
 
-		
-if __name__ == '__main__':
-	ds = DataStore("/tmp/test.fs")
-	ds.close()
