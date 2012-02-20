@@ -7,12 +7,14 @@ import multiprocessing
 
 # ====================
 
-read_only_attributes = ('script_setup', 'script_teardown')
+read_only_attributes = ('script_setup', 'script_teardown', 'output_dir', 'database_file')
 
 default_attributes = (	'rampup', 'run_time','test_name', 'output_dir', 'serialize','use_threads',
 						'max_iterations', 'call_wait_time') + read_only_attributes
 
 group_attributes = ('runners', 'target', 'target_args', 'setup', 'teardown')
+
+all_attributes = default_attributes +  group_attributes
 
 result_headers = (	'counter','group_name', 'runner_num', 'iteration', 'epoch', 'run_time', 
 					'elapsed','error','output', 'timers')
@@ -63,12 +65,6 @@ class TimerResultMixin(DataMixin):
 		assert isinstance(val, numbers.Real)
 		super(TimerResultMixin, self).__setitem__(key, val)
 		
-	def get_timer(self, key):
-		return self.__getitem__(key)
-		
-	def set_timer(self, key, val):
-		self.__setitem__(key, val)
-	
 	@property
 	def timers(self):
 		return self._data
@@ -99,6 +95,21 @@ class DelegateContext(Context):
 	def __setattr__(self, name, value):
 		if name not in read_only_attributes:
 			self.__dict__[name] = value
+			
+	def to_external_object(self):
+		external = {}
+		for k, v in self.__dict__.items():
+			if k.startswith("_"):
+				continue
+			
+			if isinstance(v, numbers.Real) or isinstance(v, basestring):
+				external[k] = v
+			elif inspect.isfunction(v):
+				external[k] = '%s.%s' % (v.__module__, v.__name__)
+			elif isinstance(v, (list, tuple, dict)):
+				external[k] = repr(v)
+				
+		return external
 			
 #  ----------------------
 

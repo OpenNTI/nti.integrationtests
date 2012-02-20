@@ -7,12 +7,15 @@ import multiprocessing
 
 from nti.integrationtests.performance import result_headers as headers
 from nti.integrationtests.performance.config import read_config
+from nti.integrationtests.performance.datastore import ResultDbWriter
 
 class ResultEventNotifier(threading.Thread):
-	def __init__(self, queue, subscribers=[]):
+	def __init__(self, queue, timestamp, groups, subscribers=[]):
 		super(ResultEventNotifier, self).__init__(name="ResultEventNotifier")
 		self.queue = queue
+		self.timestamp = timestamp
 		self.subscribers = subscribers
+		self.groups = { g.group_name: g for g in groups }
 			
 	def run(self):
 		while True:
@@ -21,7 +24,7 @@ class ResultEventNotifier(threading.Thread):
 				if not result: break
 				
 				for subscriber in self.subscribers:
-					subscriber(result)
+					subscriber(self.timestamp, self.groups[result.group_name], result)
 					
 			except Queue.Empty:
 				time.sleep(.05)
@@ -46,7 +49,7 @@ class ResultFileWriter(object):
 	def close(self):
 		self.stream.close()
 		
-	def __call__(self, result):
+	def __call__(self, timestamp, group, result):
 		self.counter = self.counter + 1
 		self.stream.write(self.formats % (	self.counter, 
 											result.group_name,
@@ -73,19 +76,28 @@ def run(config_file):
 	context, groups = read_config (config_file)
 	
 	run_localtime = time.localtime()
-	output_dir = os.path.expanduser(context.output_dir)
+	timestamp = time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime)
+	subscribers = []
 	
-	base_output_dir = os.path.join(output_dir, context.test_name)
-	result_output_dir = os.path.join(base_output_dir, time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime))
-	if not os.path.exists(result_output_dir):
-		os.makedirs(result_output_dir)
-	output_file = os.path.join(result_output_dir, 'results.txt')
+	output_dir = context.output_dir
+	if output_dir:
+		output_dir = os.path.expanduser(context.output_dir)
+		base_output_dir = os.path.join(output_dir, context.test_name)
+	
+		result_output_dir = os.path.join(base_output_dir, timestamp)
+		if not os.path.exists(result_output_dir):
+			os.makedirs(result_output_dir)
+		output_file = os.path.join(result_output_dir, 'results.txt')
 
-	# set subscribers
-	subscribers = [ResultFileWriter(output_file)]
-	
+		subscribers.append(ResultFileWriter(output_file))
+		
+		db_file = context.database_file
+		if db_file:
+			db_path = os.path.join(base_output_dir, db_file)
+			subscribers.append(ResultDbWriter(db_path))
+			
 	queue = multiprocessing.Queue()
-	notifier = ResultEventNotifier(queue, subscribers)
+	notifier = ResultEventNotifier(queue, timestamp, groups, subscribers)
 	notifier.daemon = True
 	notifier.start()
 		

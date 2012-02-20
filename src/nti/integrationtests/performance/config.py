@@ -59,8 +59,9 @@ def read_config(config_file, process_args=True):
 	parse_items(context, config, process_args)
 	
 	context.serialize = get_bool_option(config, name="serialize")
-	context.output_dir = get_option(config, name="output_dir", default='/tmp')
+	context.output_dir = get_option(config, name="output_dir", default=None)
 	context.test_name = get_option(config, name="test_name", default='unknown-%s' % time.time())
+	context.database_file = get_option(config, name="database_file", default=None)
 	
 	if process_args:
 		context.script_setup = resolve(context.script_setup) if hasattr(context, "script_setup") else noop 

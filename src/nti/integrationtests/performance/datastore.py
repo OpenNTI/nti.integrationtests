@@ -8,6 +8,7 @@ from persistent.list import PersistentList
 from persistent.mapping import PersistentMapping
 
 from nti.integrationtests.performance import RunnerResult
+from nti.integrationtests.performance import DelegateContext
 from nti.integrationtests.performance.loader import process_record
 
 # =====================
@@ -95,29 +96,67 @@ class DataStore():
 	def results(self):
 		return self.root['results']
 	
+	@property	
+	def contexts(self):
+		return self.root['contexts']
+	
 	def close(self):
 		self.db.close()
 
 # =====================
 
+def _add_timestamp_stores(store, timestamp):
+	with store.dbTrans():
+		if timestamp not in store.results:
+			store.results[timestamp] = PersistentList()
+		
+		if timestamp not in store.contexts:
+			store.contexts[timestamp] = PersistentMapping()
+			
 def add_result(store, timestamp, result):
 	if isinstance(result, basestring):
 		result = process_record(result)
 	assert isinstance(result, RunnerResult)
 	
-	with store.dbTrans():
-		if timestamp not in store.results:
-			lst = PersistentList()
-			store.results[timestamp] = lst
-		else:
-			lst = store.results[timestamp]
-	
+	_add_timestamp_stores(store, timestamp)
+	with store.dbTrans():	
 		external = result.to_external_object()
 		timers = external.pop('custom_timers')
 		p_map = PersistentMapping(external)
 		p_map.update(timers)
-		lst.append(p_map)
+		store.results[timestamp].append(p_map)
 
+def add_context(store, timestamp, context):
+
+	assert isinstance(context, DelegateContext)
+	
+	_add_timestamp_stores(store, timestamp)
+	
+	with store.dbTrans():
+		ts_map = store.contexts[timestamp]
+		if context.group_name not in ts_map:
+			external = context.to_external_object()
+			p_map = PersistentMapping(external)
+			ts_map[context.group_name] = p_map
+		
+
+class ResultDbWriter(object):
+	
+	def __init__(self, db_file):
+		super(ResultDbWriter, self).__init__()
+		self.store = DataStore(db_file)
+		self.db_file = db_file
+		self.counter = 0
+		
+	def close(self):
+		self.store.close()
+		
+	def __call__(self, timestamp, group, result):
+		self.counter = self.counter + 1
+		add_context(self.store, timestamp, group.context)
+		add_result(self.store, timestamp, result)
+
+		
 if __name__ == '__main__':
 	ds = DataStore("/tmp/test.fs")
 	ds.close()
