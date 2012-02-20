@@ -1,3 +1,4 @@
+import numbers
 import transaction
 from threading import local
 
@@ -5,6 +6,7 @@ from ZODB import DB
 from ZODB import FileStorage
 from BTrees.OOBTree import OOBTree
 from persistent.list import PersistentList
+from persistent.interfaces import IPersistent
 from persistent.mapping import PersistentMapping
 
 from nti.integrationtests.performance import RunnerResult
@@ -113,14 +115,28 @@ def _add_timestamp_stores(store, timestamp):
 		if timestamp not in store.contexts:
 			store.contexts[timestamp] = PersistentMapping()
 			
-def add_result(store, timestamp, result):
-	if isinstance(result, basestring):
-		result = process_record(result)
-	assert isinstance(result, RunnerResult)
+def add_result(store, timestamp, record):
+	if isinstance(record, basestring):
+		record = process_record(record)
+	assert isinstance(record, RunnerResult)
 	
 	_add_timestamp_stores(store, timestamp)
 	with store.dbTrans():	
-		external = result.to_external_object()
+		external = record.to_external_object()
+		result = external.get('result', None)
+		
+		try:
+			if 	result is None or \
+				isinstance(result, basestring) or \
+				isinstance(result, numbers.Real) or \
+				IPersistent.implementedBy(result.__class__):
+				
+				external['result'] = result
+			else:
+				external['result'] = repr(result)
+		except:
+			external['result'] = repr(result)
+			
 		timers = external.pop('custom_timers')
 		p_map = PersistentMapping(external)
 		p_map.update(timers)
