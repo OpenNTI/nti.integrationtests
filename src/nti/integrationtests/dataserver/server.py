@@ -8,6 +8,11 @@ import subprocess
 import ConfigParser
 from datetime import datetime
 
+from nti.integrationtests.utils import get_int_option
+from nti.integrationtests.utils import get_bool_option
+
+# -----------------------------------
+
 DEFAULT_USER_PASSWORD = 'temp001'
 
 PORT = int(os.getenv('PORT', '8081'))
@@ -16,14 +21,7 @@ DATASERVER_DIR = os.getenv('DATASERVER_DIR', '~/tmp')
 SERVER_CONFIG = os.getenv('SERVER_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/development.ini"))
 COVERAGE_CONFIG = os.getenv('COVERAGE_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/coverage_run.cfg"))
 
-def get_open_port():
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	try:
-		s.bind(("",0))
-		s.listen(1)
-		return s.getsockname()[1]
-	finally:
-		s.close()
+# -----------------------------------
 		
 class DataserverProcess(object):
 
@@ -70,15 +68,15 @@ class DataserverProcess(object):
 		
 	# -----------------------------------
 	
-	def start_server(self, block_interval_seconds=1, max_wait_secs=30):
+	def start_server(self, block_interval_seconds=1, max_wait_secs=30, *arg, **kwargs):
 		self._start_process(block_interval_seconds, max_wait_secs, use_coverage=False, \
-							root_dir=self.root_dir, port=self.port)
+							root_dir=self.root_dir, port=self.port, **kwargs)
 
 	startServer = start_server
 		
-	def start_server_with_coverage(self, block_interval_seconds=1, max_wait_secs=30):
+	def start_server_with_coverage(self, block_interval_seconds=1, max_wait_secs=30, *arg, **kwargs):
 		self._start_process(block_interval_seconds, max_wait_secs, use_coverage=True, \
-							root_dir=self.root_dir, port=self.port)
+							root_dir=self.root_dir, port=self.port, *arg, **kwargs)
 
 	startServerWithCoverage = start_server_with_coverage
 	
@@ -94,13 +92,15 @@ class DataserverProcess(object):
 			pserve_ini_file = kwargs.get('pserve_ini_file', SERVER_CONFIG)
 			root_dir = os.path.expanduser(kwargs.get('root_dir', DATASERVER_DIR))
 			port = int(kwargs.get('port', PORT))
+			sync_changes = kwargs.get('sync_changes', None)
 			
 			print 'Starting dataserver (%s,%s)' % (port, root_dir)
 			
-			pserve_ini_file = self._rewrite_pserve_config(	config=pserve_ini_file, 
-															root_dir=root_dir, 
-															port=port,
-															use_profile=use_profile)
+			pserve_ini_file = self._rewrite_pserve_config(	config = pserve_ini_file, 
+															root_dir = root_dir, 
+															port = port,
+															sync_changes = sync_changes,
+															use_profile = use_profile)
 			if use_coverage:
 				self._writer_supervisor_config_coverage(root_dir, pserve_ini_file, rcfile)
 			else:
@@ -126,7 +126,13 @@ class DataserverProcess(object):
 		
 	# -----------------------------------
 	
-	def _rewrite_pserve_config(self, config, root_dir=DATASERVER_DIR, port=PORT, use_profile=False, out_dir="/tmp"):
+	def _rewrite_pserve_config(	self,
+								config,
+								root_dir = DATASERVER_DIR,
+								port = PORT,
+								sync_changes = None,
+								use_profile = False, 
+								out_dir = "/tmp"):
 		
 		if not os.path.exists(config):
 			raise OSError('No pserve file %s' % config)
@@ -134,21 +140,24 @@ class DataserverProcess(object):
 		ini = ConfigParser.SafeConfigParser()
 		ini.read(config)
 		
-		cport = int(ini.get('DEFAULT', 'http_port', PORT))
-		sync_changes = bool(ini.get('DEFAULT', 'sync_changes', False))
-		if sync_changes:
-			os.environ['DATASERVER_SYNC_CHANGES'] = 'True'
+		config_port = get_int_option(ini, name='http_port', default=PORT)
+		config_sync_changes = get_bool_option(ini, name='sync_changes', default=True)
+		sync_changes = config_sync_changes if sync_changes is None else sync_changes
 			
-		rewrite = use_profile or cport != port
-		if cport != port:			
+		rewrite = use_profile or config_port != port or sync_changes != config_sync_changes
+		if config_port != port:			
 			ini.set('DEFAULT', 'http_port', str(port))
-			rewrite = True
 		
+		if sync_changes != config_sync_changes:
+			ini.set('DEFAULT', 'sync_changes', str(sync_changes))
+			
 		if use_profile:
 			log_file = os.path.join(root_dir, 'dataserver.profile.log')
 			cache_grind = os.path.join(root_dir, 'dataserver.out.cachegrind')
+			
 			if 'filter:profile' not in ini.sections():
 				ini.add_section('filter:profile')
+			
 			ini.set('filter:profile', 'use', 'egg:repoze.profile#profile')
 			ini.set('filter:profile', 'log_filename', log_file)
 			ini.set('filter:profile', 'cachegrind_filename', cache_grind)
@@ -171,6 +180,9 @@ class DataserverProcess(object):
 			with open(config, "wb") as fp:
 				ini.write(fp)
 	
+		if sync_changes:
+			os.environ['DATASERVER_SYNC_CHANGES'] = 'True'
+			
 		return config
 			
 	def _rewrite_supervisor_config(self, config, command_prefix):

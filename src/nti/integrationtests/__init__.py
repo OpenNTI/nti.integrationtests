@@ -6,9 +6,9 @@ import unittest
 import datetime
 import collections
 
+from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.dataserver.server import PORT
 from nti.integrationtests.dataserver.server import DATASERVER_DIR
-from nti.integrationtests.dataserver.server import get_open_port
 from nti.integrationtests.dataserver.server import DataserverProcess
 from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
 from nti.integrationtests.dataserver.client import DataserverClient

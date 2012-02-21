@@ -5,7 +5,7 @@ import sys
 import tempfile 
 import argparse
 
-from nti.integrationtests.dataserver.server import get_open_port
+from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.runners import test_runner
 
 def main(args = None):

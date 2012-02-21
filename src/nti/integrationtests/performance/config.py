@@ -5,6 +5,11 @@ import multiprocessing
 
 from zope.dottedname.resolve import resolve
 
+from nti.integrationtests.utils import get_option
+from nti.integrationtests.utils import get_bool_option
+from nti.integrationtests.utils import get_int_option
+from nti.integrationtests.utils import get_float_option
+
 from nti.integrationtests.performance import noop
 from nti.integrationtests.performance import Context
 from nti.integrationtests.performance import RunnerGroup

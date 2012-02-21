@@ -5,7 +5,7 @@ import time
 import tempfile
 
 from nose.util import resolve_name
-from nti.integrationtests.dataserver.server import get_open_port
+from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.dataserver.server import DataserverProcess
 from nti.integrationtests.contenttypes.servicedoc import Workspace
 

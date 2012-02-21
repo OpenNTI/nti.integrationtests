@@ -3,8 +3,9 @@ import random
 import tempfile
 
 from nti.integrationtests import generate_ntiid
+from nti.integrationtests.utils import get_open_port
+from nti.integrationtests.utils import boolean_states
 from nti.integrationtests.dataserver.client import DataserverClient
-from nti.integrationtests.dataserver.server import get_open_port
 from nti.integrationtests.dataserver.server import DataserverProcess
 
 phrases = (	"Shoot To Kill",
@@ -19,9 +20,6 @@ phrases = (	"Shoot To Kill",
 			"Sit Upon the Frozen Heavens", 
 			"Call forth the Twilight")
 
-boolean_states = {	'1': True, 'yes': True, 'true': True, 'on': True,
-					'0': False, 'no': False, 'false': False, 'off': False}
-
 def init_server(context):
 	port = int(getattr(context, "port", get_open_port()))
 	
@@ -31,14 +29,17 @@ def init_server(context):
 	use_coverage = getattr(context, "use_coverage", 'False')
 	use_coverage = boolean_states.get(use_coverage.lower(), False)
 	
+	sync_changes = getattr(context, "sync_changes", None)
+	sync_changes = boolean_states.get(sync_changes.lower(), None) if sync_changes is not None else None
+	
 	ds = DataserverProcess(port=port, root_dir=root_dir)
 	context.__dataserver__ = ds
 	context.endpoint = ds.endpoint
 	
 	if not use_coverage:
-		ds.start_server()
+		ds.start_server(sync_changes=sync_changes)
 	else:
-		ds.start_server_with_coverage()
+		ds.start_server_with_coverage(sync_changes=sync_changes)
 
 def stop_server(context):
 	ds = getattr(context, "__dataserver__", None)
