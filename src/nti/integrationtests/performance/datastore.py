@@ -13,6 +13,9 @@ from nti.integrationtests.performance import RunnerResult
 from nti.integrationtests.performance import DelegateContext
 from nti.integrationtests.performance.loader import process_record
 
+import logging
+logger = logging.getLogger(__name__)
+
 # =====================
 
 class _ContextManager(object):	
@@ -163,6 +166,7 @@ class ResultDbWriter(object):
 		self.store = DataStore(db_file)
 		self.db_file = db_file
 		self.counter = 0
+		logger.info("saving results to database '%s'", self.db_file)
 		
 	def close(self):
 		self.store.close()

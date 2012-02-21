@@ -5,6 +5,9 @@ import UserDict
 import threading
 import multiprocessing
 
+import logging
+logger = logging.getLogger(__name__)
+
 # ====================
 
 read_only_attributes = ('script_setup', 'script_teardown', 'output_dir', 'database_file')
@@ -195,6 +198,9 @@ class RunnerGroup(multiprocessing.Process):
 		targets = []
 
 		self.setup(self.context)
+		logging.info("group '%s' started", self.group_name)
+		
+		t = time.time()		
 		try:
 			for i in xrange(self.runners):
 				spacing = float(self.rampup) / float(self.runners)
@@ -215,6 +221,8 @@ class RunnerGroup(multiprocessing.Process):
 				self._add_result(runner)
 		finally:
 			self.teardown(self.context)
+			elapsed = time.time() - t
+			logging.info("group '%s' completed in (%.3f)s", self.group_name, elapsed)
 
 # ==================
 

@@ -1,8 +1,10 @@
 import os
-import warnings
 
 from nti.integrationtests.performance import RunnerResult
 from nti.integrationtests.performance.config import read_config
+
+import logging
+logger = logging.getLogger(__name__)
 
 def process_record(line):
 	tokens = line.split('\t') if line else []
@@ -25,7 +27,7 @@ def process_record(line):
 		
 		return record
 	except:
-		warnings.warn("error processing record '%s'" % line)
+		logging.warn("error processing record '%s'", line)
 		return None
 			
 def load_results(result_file, on_record=None):

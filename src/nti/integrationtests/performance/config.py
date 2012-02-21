@@ -1,6 +1,7 @@
 import os
 import time
 import ConfigParser
+import multiprocessing
 
 from zope.dottedname.resolve import resolve
 
@@ -8,6 +9,9 @@ from nti.integrationtests.performance import noop
 from nti.integrationtests.performance import Context
 from nti.integrationtests.performance import RunnerGroup
 from nti.integrationtests.performance import DelegateContext
+
+import logging
+logger = logging.getLogger(__name__)
 
 # ====================
 
@@ -35,6 +39,8 @@ def is_default_value(config, section, name):
 	return def_val == sec_val
 		
 def read_config(config_file, process_args=True):
+	
+	logger.info("processing '%s'", config_file)
 	
 	group_runners = []
 	config = ConfigParser.ConfigParser()
@@ -98,6 +104,10 @@ def read_config(config_file, process_args=True):
 			delegate.max_iterations = context.max_iterations
 			
 		delegate.runners = config.getint(section, 'runners')
+		if delegate.runners > multiprocessing.cpu_count():
+			logger.warn("number of runners for group '%s' is %s. CPU count (%s) exceeded",
+						 delegate.group_name, delegate.runners, multiprocessing.cpu_count())
+			
 		delegate.target = config.get(section, 'target')
 		delegate.target_args = get_option(config, section, 'target_args', None)
 		

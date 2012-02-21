@@ -9,6 +9,9 @@ from nti.integrationtests.performance import result_headers as headers
 from nti.integrationtests.performance.config import read_config
 from nti.integrationtests.performance.datastore import ResultDbWriter
 
+import logging
+logger = logging.getLogger(__name__)
+
 class ResultEventNotifier(threading.Thread):
 	def __init__(self, queue, timestamp, groups, subscribers=[]):
 		super(ResultEventNotifier, self).__init__(name="ResultEventNotifier")
@@ -39,6 +42,7 @@ class ResultFileWriter(object):
 		self.output_file = output_file
 		self.formats = '\t'.join(('%i', '%s', '%i', '%i', '%i', '%f', '%.3f', '%s', '%s', '%s'))
 		self.stream = self.prepare_stream()
+		logger.info("saving results to '%s'", self.output_file)
 		
 	def prepare_stream(self):
 		stream = open(self.output_file, 'w')
