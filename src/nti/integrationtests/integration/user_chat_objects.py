@@ -43,6 +43,9 @@ phrases = (	"Yellow brown",
 			"Sit Upon the Frozen Heavens", 
 			"Call forth the Twilight")
 
+def generate_message(a_min=1, a_max=4):
+	return " ".join(random.sample(phrases, random.randint(a_min, a_max)))
+	
 # ----------------------------
 
 class BasicChatTest(DataServerTestCase):
@@ -137,7 +140,7 @@ class BasicUser(Graph):
 	# ======================
 		
 	def generate_message(self, aMin=1, aMax=4):
-		return " ".join(random.sample(phrases, random.randint(aMin, aMax)))
+		return generate_message(aMin, aMax)
 	
 	def post_random_messages(self, room_id, entries=None, a_min=3, a_max=10, delay=None):
 		entries = entries or random.randint(a_min, a_max)
