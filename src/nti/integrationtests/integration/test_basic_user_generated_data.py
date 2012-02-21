@@ -6,11 +6,14 @@ from nti.integrationtests.integration import contained_in
 from nti.integrationtests.integration import contains
 from nti.integrationtests.integration import object_from_container
 from nti.integrationtests.integration import container_of_length
+from nti.integrationtests.integration.user_chat_objects import generate_message
 
 from hamcrest import is_not
 from hamcrest import is_
 from hamcrest import has_entry
 from hamcrest import assert_that
+from hamcrest import greater_than_or_equal_to
+from hamcrest import has_length
 
 class TestBasicUserGeneratedData(DataServerTestCase):
 
@@ -78,6 +81,15 @@ class TestBasicUserGeneratedData(DataServerTestCase):
 		# cleanup
 		self.ds.delete_object(self.created_note)
 		self.ds.delete_object(self.created_highlight)
+		
+	def test_created_75_show_in_ugd(self):
+		for _ in xrange(75):
+			message = generate_message(1, 4)
+			self.created_note = self.ds.create_note(message, self.container)
+		
+		ugd = self.ds.get_user_generated_data(self.container)
+		items = ugd['Items']
+		assert_that(items, has_length(greater_than_or_equal_to(75)))
 
 if __name__ == '__main__':
 	unittest.main()
