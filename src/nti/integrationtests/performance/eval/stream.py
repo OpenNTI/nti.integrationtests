@@ -41,4 +41,4 @@ def prepare_user_stream(endpoint, user, notes=100):
 	return user, container
 
 if __name__ == '__main__':
-	prepare_streams(endpoint = 'http://localhost:8081/dataserver2')
+	prepare_streams(endpoint = 'http://csanchez.local:8081/dataserver2')
