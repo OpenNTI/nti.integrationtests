@@ -1,3 +1,5 @@
+import time
+
 from concurrent.futures import ProcessPoolExecutor
 
 from nti.integrationtests.dataserver.client import DataserverClient
@@ -28,24 +30,6 @@ def script_teardown(context):
 
 # -----------------------------------
 
-def prepare_containers(context):
-	result = {}
-	user = 'test.user.1@nextthought.com'
-	endpoint = context.endpoint
-	
-	logger.debug("Preparing containers")
-	with ProcessPoolExecutor() as executor:
-		futures = []
-		for n in [50, 100, 200, 300, 500, 1000]:
-			futures.append(executor.submit(prepare_container, endpoint, user, n))
-			
-		for future in futures:
-			user, container = future.result()
-			result[n] = container
-
-	logger.debug("Containers has been filled")			
-	context['containers'] = result
-
 def prepare_container(endpoint, user, notes):
 	credentials = (user, 'temp001')
 	container = generate_ntiid(provider=user, nttype=generate_random_text())
@@ -55,15 +39,36 @@ def prepare_container(endpoint, user, notes):
 		client.create_note(message, container=container, credentials=credentials)
 	return container
 
+def prepare_containers(context):
+	result = {}
+	user = 'test.user.1@nextthought.com'
+	endpoint = context.endpoint
+	containers_sizes = getattr(context, 'containers_sizes', (50,)) 
+	
+	t = time.time()
+	logger.info("Preparing containers")
+	with ProcessPoolExecutor() as executor:
+		futures = []
+		for n in containers_sizes:
+			futures.append(executor.submit(prepare_container, endpoint, user, n))
+			
+		for future in futures:
+			container = future.result()
+			result[n] = container
+
+	elapsed = time.time() - t
+	logger.info("Containers has been filled. (%.3f)s", elapsed)			
+	context['containers'] = result
+	
 # -----------------------------------
 
-def get_ugd(container_id, **kwargs):
+def get_ugd(container_size, **kwargs):
 	context = kwargs['__context__']
 	containers = context['containers']
 	if not containers: 
 		return IGNORE_RESULT
 	
-	container = containers[container_id]
+	container = containers[container_size]
 	if not container: 
 		return IGNORE_RESULT
 	
@@ -71,7 +76,7 @@ def get_ugd(container_id, **kwargs):
 	client = new_client(context)
 	
 	ugd = client.get_user_generated_data(container)
-	assert_that(ugd['Items'], has_length(greater_than_or_equal_to(75)))
+	assert_that(ugd['Items'], has_length(greater_than_or_equal_to(container_size)))
 	
 if __name__ == '__main__':
 	logger = logging.getLogger('')

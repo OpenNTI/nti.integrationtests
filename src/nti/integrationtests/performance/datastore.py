@@ -11,12 +11,26 @@ from persistent.mapping import PersistentMapping
 
 from nti.integrationtests.performance import RunnerResult
 from nti.integrationtests.performance import DelegateContext
+
+from nti.integrationtests.performance.config import read_config
+from nti.integrationtests.performance.loader import load_results
 from nti.integrationtests.performance.loader import process_record
 
 import logging
 logger = logging.getLogger(__name__)
 
-# =====================
+
+# -----------------------------------
+
+class _NoOpCM(object):	
+	
+	def __enter__(self):
+		pass
+		
+	def __exit__(self, t, v, tb):
+		pass
+	
+# -----------------------------------
 
 class _ContextManager(object):	
 	local = local()
@@ -73,6 +87,10 @@ class _ContextManager(object):
 	@classmethod
 	def get(cls):
 		return cls.local.cm
+	
+	@classmethod
+	def safe_get(cls):
+		return getattr(cls.local,'cm', None)
 
 # =====================
 
@@ -108,23 +126,27 @@ class DataStore():
 	def close(self):
 		self.db.close()
 
-# =====================
+# -----------------------------------
 
-def _add_timestamp_stores(store, timestamp):
-	with store.dbTrans():
+def _get_context_manager(store, use_trx=True):
+	return store.dbTrans() if use_trx else _NoOpCM()
+
+def _add_timestamp_stores(store, timestamp, use_trx=True):
+	with  _get_context_manager(store, use_trx):
 		if timestamp not in store.results:
 			store.results[timestamp] = PersistentList()
 		
 		if timestamp not in store.contexts:
 			store.contexts[timestamp] = PersistentMapping()
 			
-def add_result(store, timestamp, record):
+def add_result(store, timestamp, record, use_trx=True):
 	if isinstance(record, basestring):
 		record = process_record(record)
 	assert isinstance(record, RunnerResult)
 	
-	_add_timestamp_stores(store, timestamp)
-	with store.dbTrans():	
+	_add_timestamp_stores(store, timestamp, use_trx)
+	
+	with _get_context_manager(store, use_trx):	
 		external = record.to_external_object()
 		result = external.get('result', None)
 		
@@ -145,27 +167,28 @@ def add_result(store, timestamp, record):
 		p_map.update(timers)
 		store.results[timestamp].append(p_map)
 
-def add_context(store, timestamp, context):
+def add_context(store, timestamp, context, use_trx=True):
 
 	assert isinstance(context, DelegateContext)
 	
-	_add_timestamp_stores(store, timestamp)
+	_add_timestamp_stores(store, timestamp, use_trx)
 	
-	with store.dbTrans():
+	with _get_context_manager(store, use_trx):
 		ts_map = store.contexts[timestamp]
 		if context.group_name not in ts_map:
 			external = context.to_external_object()
 			p_map = PersistentMapping(external)
 			ts_map[context.group_name] = p_map
-		
+	
+# -----------------------------------
 
 class ResultDbWriter(object):
 	
 	def __init__(self, db_file):
 		super(ResultDbWriter, self).__init__()
-		self.store = DataStore(db_file)
-		self.db_file = db_file
 		self.counter = 0
+		self.db_file = db_file
+		self.store = DataStore(db_file)
 		logger.info("saving results to database '%s'", self.db_file)
 		
 	def close(self):
@@ -176,3 +199,31 @@ class ResultDbWriter(object):
 		add_context(self.store, timestamp, group.context)
 		add_result(self.store, timestamp, result)
 
+class ResultBatchDbLoader(ResultDbWriter):
+	
+	def __init__(self, db_file, timestamp, groups, results_file):
+		super(ResultBatchDbLoader, self).__init__(db_file)
+		self.groups = groups
+		self.timestamp = timestamp
+		self.results_file = results_file
+		
+	def close(self):
+		try:
+			self.do_batch_load()
+		finally:
+			super(ResultBatchDbLoader, self).close()
+		
+	def __call__(self, *args, **kwargs):
+		self.counter = self.counter + 1
+
+	def do_batch_load(self):
+		groups = self.groups.values() if isinstance(self.groups, dict) else self.groups
+		for group in groups:
+			add_context(self.store, self.timestamp, group.context)
+			
+		def inserter(record):
+			add_result(self.store, self.timestamp, record, False)
+			
+		with self.store.dbTrans():
+			load_results(self.results_file, inserter)
+	

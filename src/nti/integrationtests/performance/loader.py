@@ -12,8 +12,9 @@ def process_record(line):
 	try:
 		timers = {}
 		for s in tokens[9:]:
-			splits = s.split(":")
-			timers[splits[0]] = float(splits[1])
+			if s:
+				splits = s.split(":")
+				timers[splits[0]] = float(splits[1])
 		
 		record = RunnerResult(group_name = tokens[1],
 							  runner_num = int(tokens[2]),
@@ -36,7 +37,7 @@ def load_results(result_file, on_record=None):
 		counter = 0
 		in_record=False
 		for line in f.readlines():
-			line = line.rstrip()
+			line = line.rstrip('\n\r')
 			if in_record:
 				record = process_record(line)
 				if record:

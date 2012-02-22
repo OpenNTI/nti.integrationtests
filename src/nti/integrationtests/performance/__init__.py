@@ -290,6 +290,9 @@ class TargetRunner(object):
 		iterations = 0
 		start_time = self.start_time
 		
+		logging.info("runner '%s' started. Run time=%s, Max iterations=%s", 
+					 self.runner_num, self.run_time, self.max_iterations)
+		
 		can_bind_context = self.allow_context
 		while 	(self.run_time and elapsed < self.run_time) or \
 				(self.max_iterations and iterations < self.max_iterations):
@@ -336,6 +339,8 @@ class TargetRunner(object):
 				if self.hold_results:
 					self._results.append(runner_result)
 			
+		logging.info("runner '%s' completed. Time=%s, iterations=%s", self.runner_num, elapsed, iterations)
+		
 # ==================
 	
 class RunnerResult(object):

@@ -8,9 +8,12 @@ import multiprocessing
 from nti.integrationtests.performance import result_headers as headers
 from nti.integrationtests.performance.config import read_config
 from nti.integrationtests.performance.datastore import ResultDbWriter
+from nti.integrationtests.performance.datastore import ResultBatchDbLoader
 
 import logging
 logger = logging.getLogger(__name__)
+
+# -----------------------------------
 
 class ResultEventNotifier(threading.Thread):
 	def __init__(self, queue, timestamp, groups, subscribers=[]):
@@ -32,7 +35,7 @@ class ResultEventNotifier(threading.Thread):
 			except Queue.Empty:
 				time.sleep(.05)
 
-# ==================
+# -----------------------------------
 
 class ResultFileWriter(object):
 	
@@ -68,12 +71,16 @@ class ResultFileWriter(object):
 		self.stream.write('\n')
 		self.stream.flush()
 		
-# ==================
+# -----------------------------------
 		
 def close_subscribers(subscribers):
 	for s in subscribers:
 		if hasattr(s, 'close'):
-			s.close()
+			try:
+				s.close()
+			except Exception, e:
+				logger.exception(e)
+	
 			
 def run(config_file):
 	
@@ -98,7 +105,8 @@ def run(config_file):
 		db_file = context.database_file
 		if db_file:
 			db_path = os.path.join(base_output_dir, db_file)
-			subscribers.append(ResultDbWriter(db_path))
+			writer = ResultBatchDbLoader(db_path, timestamp, groups, output_file) if True else ResultDbWriter(db_path)
+			subscribers.append(writer)
 			
 	queue = multiprocessing.Queue()
 	notifier = ResultEventNotifier(queue, timestamp, groups, subscribers)
