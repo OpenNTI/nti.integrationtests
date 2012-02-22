@@ -1,5 +1,4 @@
 import os
-import time
 import ConfigParser
 import multiprocessing
 
@@ -51,6 +50,7 @@ def read_config(config_file, process_args=True):
 	config = ConfigParser.ConfigParser()
 	config.read(config_file)
 	config_dir = os.path.dirname(config_file)
+	config_name, _ = os.path.splitext(os.path.basename(config_file))
 	
 	# --------------
 	
@@ -71,7 +71,7 @@ def read_config(config_file, process_args=True):
 	parse_items(context, config, process_args)
 	
 	context.serialize = get_bool_option(config, name="serialize")
-	context.test_name = get_option(config, name="test_name", default='unknown-%s' % time.time())
+	context.test_name = get_option(config, name="test_name", default=config_name)
 	
 	context.base_path = os.path.expanduser(get_option(config, name="base_path", default=config_dir))
 	context.output_dir = get_option(config, name="output_dir", default=None)
@@ -133,8 +133,8 @@ def read_config(config_file, process_args=True):
 			
 		# resolve setup/teardown
 		if process_args:
-			delegate.setup = resolve(context.setup) if hasattr(context, "setup") else noop 
-			delegate.teardown = resolve(context.teardown) if hasattr(context, "teardown") else noop 
+			delegate.setup = resolve(delegate.setup) if hasattr(delegate, "setup") else noop 
+			delegate.teardown = resolve(delegate.teardown) if hasattr(delegate, "teardown") else noop 
 	
 		runner = RunnerGroup(delegate, validate=process_args)
 		group_runners.append(runner)

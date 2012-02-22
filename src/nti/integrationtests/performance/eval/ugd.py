@@ -77,16 +77,5 @@ def get_ugd(container_size, **kwargs):
 	
 	ugd = client.get_user_generated_data(container)
 	assert_that(ugd['Items'], has_length(greater_than_or_equal_to(container_size)))
-	
-if __name__ == '__main__':
-	logger = logging.getLogger('')
-	
-	logging.basicConfig(level=logging.INFO,
-						format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
 
-	
-	import os
-	from nti.integrationtests.performance.runner import run
-	config_file = os.path.join(os.path.dirname(__file__), "ugd.cfg")
-	run(config_file)
 
