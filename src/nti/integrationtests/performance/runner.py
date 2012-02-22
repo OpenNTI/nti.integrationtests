@@ -5,6 +5,7 @@ import shutil
 import threading
 import multiprocessing
 
+from nti.integrationtests.performance import Subscriber
 from nti.integrationtests.performance import result_headers as headers
 from nti.integrationtests.performance.config import read_config
 from nti.integrationtests.performance.datastore import ResultDbWriter
@@ -37,7 +38,7 @@ class ResultEventNotifier(threading.Thread):
 
 # -----------------------------------
 
-class ResultFileWriter(object):
+class ResultFileWriter(Subscriber):
 	
 	def __init__(self, output_file):
 		super(ResultFileWriter, self).__init__()
@@ -53,8 +54,12 @@ class ResultFileWriter(object):
 		stream.write('\n')
 		return stream
 	
+	def teardown(self):
+		self.close()
+		
 	def close(self):
-		self.stream.close()
+		if not self.stream.closed:
+			self.stream.close()
 		
 	def __call__(self, timestamp, group, result):
 		self.counter = self.counter + 1
@@ -72,16 +77,25 @@ class ResultFileWriter(object):
 		self.stream.flush()
 		
 # -----------------------------------
-		
-def close_subscribers(subscribers):
+
+def _call_subscribers_method(subscribers, method_name):
 	for s in subscribers:
-		if hasattr(s, 'close'):
+		method = getattr(s, method_name, None)
+		if method:
 			try:
-				s.close()
+				method()
 			except Exception, e:
 				logger.exception(e)
 	
-			
+def setup_subscribers(subscribers):
+	_call_subscribers_method(subscribers, 'setup')
+	
+def teardown_subscribers(subscribers):
+	_call_subscribers_method(subscribers, 'teardown')
+					
+def close_subscribers(subscribers):
+	_call_subscribers_method(subscribers, 'close')
+	
 def run(config_file):
 	
 	context, groups = read_config (config_file)
@@ -105,7 +119,10 @@ def run(config_file):
 		db_file = context.database_file
 		if db_file:
 			db_path = os.path.join(base_output_dir, db_file)
-			writer = ResultBatchDbLoader(db_path, timestamp, groups, output_file) if True else ResultDbWriter(db_path)
+			if context.db_batch:
+				writer = ResultBatchDbLoader(db_path, timestamp, groups, output_file)
+			else:
+				writer = ResultDbWriter(db_path)
 			subscribers.append(writer)
 			
 	queue = multiprocessing.Queue()
@@ -115,6 +132,7 @@ def run(config_file):
 		
 	context.script_setup(context=context)
 	try:
+		setup_subscribers(subscribers)
 		now = time.time()
 		
 		for group in groups:
@@ -140,6 +158,7 @@ def run(config_file):
 	finally:
 		time.sleep(2)
 		queue.put_nowait(None)
+		teardown_subscribers(subscribers)
 		close_subscribers(subscribers)
 		context.script_teardown(context=context)
 		queue.close()

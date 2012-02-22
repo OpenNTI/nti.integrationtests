@@ -9,16 +9,15 @@ from persistent.list import PersistentList
 from persistent.interfaces import IPersistent
 from persistent.mapping import PersistentMapping
 
+from nti.integrationtests.performance import Subscriber
 from nti.integrationtests.performance import RunnerResult
 from nti.integrationtests.performance import DelegateContext
 
-from nti.integrationtests.performance.config import read_config
 from nti.integrationtests.performance.loader import load_results
 from nti.integrationtests.performance.loader import process_record
 
 import logging
 logger = logging.getLogger(__name__)
-
 
 # -----------------------------------
 
@@ -180,6 +179,19 @@ def add_context(store, timestamp, context, use_trx=True):
 			p_map = PersistentMapping(external)
 			ts_map[context.group_name] = p_map
 	
+def batch_load(store, results_file, timestamp=None, groups=None):
+
+	if groups:
+		groups = groups.values() if isinstance(groups, dict) else groups
+		for group in groups:
+			add_context(store, timestamp, group.context)
+			
+	def inserter(record):
+		add_result(store, timestamp, record, False)
+			
+	with store.dbTrans():
+		load_results(results_file, inserter)
+			
 # -----------------------------------
 
 class ResultDbWriter(object):
@@ -199,7 +211,7 @@ class ResultDbWriter(object):
 		add_context(self.store, timestamp, group.context)
 		add_result(self.store, timestamp, result)
 
-class ResultBatchDbLoader(ResultDbWriter):
+class ResultBatchDbLoader(Subscriber, ResultDbWriter):
 	
 	def __init__(self, db_file, timestamp, groups, results_file):
 		super(ResultBatchDbLoader, self).__init__(db_file)
@@ -209,21 +221,13 @@ class ResultBatchDbLoader(ResultDbWriter):
 		
 	def close(self):
 		try:
-			self.do_batch_load()
+			self._do_batch_load()
 		finally:
 			super(ResultBatchDbLoader, self).close()
 		
-	def __call__(self, *args, **kwargs):
+	def __call__(self, timestamp, group, result):
 		self.counter = self.counter + 1
 
-	def do_batch_load(self):
-		groups = self.groups.values() if isinstance(self.groups, dict) else self.groups
-		for group in groups:
-			add_context(self.store, self.timestamp, group.context)
-			
-		def inserter(record):
-			add_result(self.store, self.timestamp, record, False)
-			
-		with self.store.dbTrans():
-			load_results(self.results_file, inserter)
+	def _do_batch_load(self):
+		batch_load(self.store, self.results_file, self.timestamp, self.groups)
 	

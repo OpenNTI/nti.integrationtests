@@ -8,9 +8,10 @@ import multiprocessing
 import logging
 logger = logging.getLogger(__name__)
 
-# ====================
+# -----------------------------------
 
-read_only_attributes = ('script_setup', 'script_teardown', 'output_dir', 'database_file')
+read_only_attributes = ('script_setup', 'script_teardown', 'output_dir',
+						 'database_file', 'db_batch')
 
 default_attributes = (	'rampup', 'run_time','test_name', 'output_dir', 'serialize','use_threads',
 						'max_iterations', 'call_wait_time') + read_only_attributes
@@ -22,12 +23,12 @@ all_attributes = default_attributes +  group_attributes
 result_headers = (	'counter','group_name', 'runner_num', 'iteration', 'epoch', 'run_time', 
 					'elapsed','error','output', 'timers')
 
-# ====================
+# -----------------------------------
 
 def noop(*args, **kwargs): pass
 IGNORE_RESULT = object()
 
-# ====================
+# -----------------------------------
 
 class DataMixin(object, UserDict.DictMixin):
 	def __init__(self, data=None):
@@ -54,7 +55,7 @@ class DataMixin(object, UserDict.DictMixin):
 	def __repr__( self ):
 		return self.__str__()
 	
-# ====================
+# -----------------------------------
 
 class TimerResultMixin(DataMixin):
 	def __init__(self, data=None, result=None):
@@ -72,7 +73,7 @@ class TimerResultMixin(DataMixin):
 	def timers(self):
 		return self._data
 	
-# ====================
+# -----------------------------------
 
 class Context(DataMixin):
 	
@@ -114,7 +115,7 @@ class DelegateContext(Context):
 				
 		return external
 			
-#  ----------------------
+# -----------------------------------
 
 def validate_context(context):
 	
@@ -136,7 +137,7 @@ def validate_context(context):
 			
 	assert context.group_name,  "must specify a valid runner group name"
 
-# ==================
+# -----------------------------------
 
 class RunnerGroup(multiprocessing.Process):
 	def __init__(self, context, queue=None, validate=True, *args, **kwargs):
@@ -224,7 +225,7 @@ class RunnerGroup(multiprocessing.Process):
 			elapsed = time.time() - t
 			logging.info("group '%s' completed in (%.3f)s", self.group_name, elapsed)
 
-# ==================
+# -----------------------------------
 
 class TargetRunner(object):
 	def __init__(self, runner_num, context, queue=None):
@@ -341,9 +342,10 @@ class TargetRunner(object):
 			
 		logging.info("runner '%s' completed. Time=%s, iterations=%s", self.runner_num, elapsed, iterations)
 		
-# ==================
+# -----------------------------------
 	
 class RunnerResult(object):
+	
 	def __init__(self, group_name, runner_num, run_time, elapsed, iteration, 
 				 result=None, exception=None, epoch=None, custom_timers={}):
 		self.result = result
@@ -391,3 +393,18 @@ class RunnerResult(object):
 		external['custom_timers'] = dict(self.custom_timers)
 		return external
 			
+# -----------------------------------
+
+class Subscriber(object):
+	
+	def setup(self):
+		pass
+	
+	def __call__(self, *args, **kwargs):
+		pass
+
+	def teardown(self):
+		pass
+	
+	def close(self):
+		pass
