@@ -28,13 +28,18 @@ class ResultEventNotifier(threading.Thread):
 		while True:
 			try:
 				result = self.queue.get_nowait()
-				if not result: break
+				if result:
+					for subscriber in self.subscribers:
+						subscriber(self.timestamp, self.groups[result.group_name], result)
 				
-				for subscriber in self.subscribers:
-					subscriber(self.timestamp, self.groups[result.group_name], result)
-					
+				self.queue.task_done()
+				if not result: break
 			except Queue.Empty:
 				time.sleep(.05)
+			except Exception, e:
+				self.queue.task_done()
+				logger.error(e)
+				
 
 # -----------------------------------
 
@@ -53,13 +58,9 @@ class ResultFileWriter(Subscriber):
 		stream.write('\t'.join(headers))
 		stream.write('\n')
 		return stream
-	
-	def teardown(self):
-		self.close()
 		
 	def close(self):
-		if not self.stream.closed:
-			self.stream.close()
+		self.stream.close()
 		
 	def __call__(self, timestamp, group, result):
 		self.counter = self.counter + 1
@@ -89,12 +90,14 @@ def _call_subscribers_method(subscribers, method_name):
 	
 def setup_subscribers(subscribers):
 	_call_subscribers_method(subscribers, 'setup')
-	
-def teardown_subscribers(subscribers):
-	_call_subscribers_method(subscribers, 'teardown')
 					
 def close_subscribers(subscribers):
 	_call_subscribers_method(subscribers, 'close')
+	
+def close_queue(queue):
+	time.sleep(2)
+	queue.put_nowait(None)
+	queue.join()
 	
 def run(config_file):
 	
@@ -104,28 +107,31 @@ def run(config_file):
 	timestamp = time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime)
 	subscribers = []
 	
+	batch_loader = None
 	output_dir = context.output_dir
 	if output_dir:
 		output_dir = os.path.expanduser(context.output_dir)
 		base_output_dir = os.path.join(output_dir, context.test_name)
 	
+		# set result file
 		result_output_dir = os.path.join(base_output_dir, timestamp)
 		if not os.path.exists(result_output_dir):
 			os.makedirs(result_output_dir)
 		output_file = os.path.join(result_output_dir, 'results.txt')
 
+		# add csv data subscriber
 		subscribers.append(ResultFileWriter(output_file))
 		
+		# set database subscriber/loader
 		db_file = context.database_file
 		if db_file:
 			db_path = os.path.join(base_output_dir, db_file)
 			if context.db_batch:
-				writer = ResultBatchDbLoader(db_path, timestamp, groups, output_file)
+				batch_loader = ResultBatchDbLoader(db_path)
 			else:
-				writer = ResultDbWriter(db_path)
-			subscribers.append(writer)
+				subscribers.append(ResultDbWriter(db_path))
 			
-	queue = multiprocessing.Queue()
+	queue = multiprocessing.JoinableQueue()
 	notifier = ResultEventNotifier(queue, timestamp, groups, subscribers)
 	notifier.daemon = True
 	notifier.start()
@@ -156,10 +162,8 @@ def run(config_file):
 		
 		return result
 	finally:
-		time.sleep(2)
-		queue.put_nowait(None)
-		teardown_subscribers(subscribers)
+		close_queue(queue)
 		close_subscribers(subscribers)
 		context.script_teardown(context=context)
-		queue.close()
+		if batch_loader: batch_loader.do_batch_load(output_file, timestamp, groups)
 	

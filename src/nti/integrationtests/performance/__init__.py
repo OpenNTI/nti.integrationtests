@@ -403,8 +403,5 @@ class Subscriber(object):
 	def __call__(self, *args, **kwargs):
 		pass
 
-	def teardown(self):
-		pass
-	
 	def close(self):
 		pass

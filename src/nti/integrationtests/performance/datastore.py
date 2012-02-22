@@ -212,22 +212,13 @@ class ResultDbWriter(object):
 		add_result(self.store, timestamp, result)
 
 class ResultBatchDbLoader(Subscriber, ResultDbWriter):
-	
-	def __init__(self, db_file, timestamp, groups, results_file):
-		super(ResultBatchDbLoader, self).__init__(db_file)
-		self.groups = groups
-		self.timestamp = timestamp
-		self.results_file = results_file
-		
-	def close(self):
-		try:
-			self._do_batch_load()
-		finally:
-			super(ResultBatchDbLoader, self).close()
 		
 	def __call__(self, timestamp, group, result):
 		self.counter = self.counter + 1
 
-	def _do_batch_load(self):
-		batch_load(self.store, self.results_file, self.timestamp, self.groups)
+	def do_batch_load(self, results_file, timestamp, groups=None):
+		try:
+			batch_load(self.store, results_file, timestamp, groups)
+		except Exception ,e:
+			logger.exception(e)
 	
