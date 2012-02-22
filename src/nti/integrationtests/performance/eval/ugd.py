@@ -37,7 +37,7 @@ def prepare_container(endpoint, user, notes):
 	for _ in xrange(notes):
 		message = generate_message(3,3)
 		client.create_note(message, container=container, credentials=credentials)
-	return container
+	return notes, container
 
 def prepare_containers(context):
 	result = {}
@@ -53,7 +53,7 @@ def prepare_containers(context):
 			futures.append(executor.submit(prepare_container, endpoint, user, n))
 			
 		for future in futures:
-			container = future.result()
+			n, container = future.result()
 			result[n] = container
 
 	elapsed = time.time() - t
