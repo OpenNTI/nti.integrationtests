@@ -28,7 +28,7 @@ def process_record(line):
 		
 		return record
 	except:
-		logging.warn("error processing record '%s'", line)
+		logging.debug("error processing record '%s'", line)
 		return None
 			
 def load_results(result_file, on_record=None):
