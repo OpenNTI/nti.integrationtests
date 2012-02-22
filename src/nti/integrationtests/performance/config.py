@@ -50,7 +50,8 @@ def read_config(config_file, process_args=True):
 	group_runners = []
 	config = ConfigParser.ConfigParser()
 	config.read(config_file)
-
+	config_dir = os.path.dirname(config_file)
+	
 	# --------------
 	
 	def parse_items(context, config, process_args, section=ConfigParser.DEFAULTSECT):
@@ -70,8 +71,13 @@ def read_config(config_file, process_args=True):
 	parse_items(context, config, process_args)
 	
 	context.serialize = get_bool_option(config, name="serialize")
-	context.output_dir = get_option(config, name="output_dir", default=None)
 	context.test_name = get_option(config, name="test_name", default='unknown-%s' % time.time())
+	
+	context.base_path = os.path.expanduser(get_option(config, name="base_path", default=config_dir))
+	context.output_dir = get_option(config, name="output_dir", default=None)
+	if context.output_dir:
+		context.output_dir = os.path.join(context.base_path, context.output_dir)
+
 	context.database_file = get_option(config, name="database_file", default=None)
 	context.db_batch = get_bool_option(config, name="db_batch", default=False)
 	

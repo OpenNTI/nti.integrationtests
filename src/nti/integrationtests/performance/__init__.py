@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # -----------------------------------
 
 read_only_attributes = ('script_setup', 'script_teardown', 'output_dir',
-						 'database_file', 'db_batch')
+						 'database_file', 'db_batch', 'base_path')
 
 default_attributes = (	'rampup', 'run_time','test_name', 'output_dir', 'serialize','use_threads',
 						'max_iterations', 'call_wait_time') + read_only_attributes

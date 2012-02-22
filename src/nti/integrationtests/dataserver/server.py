@@ -90,9 +90,9 @@ class DataserverProcess(object):
 			sync_changes = kwargs.get('sync_changes', None)
 			use_coverage = kwargs.get('use_coverage', False)
 			coverage_rcfile = kwargs.get('rcfile', COVERAGE_CONFIG)
-			pserve_ini_file = kwargs.get('pserve_ini_file', SERVER_CONFIG)
 			root_dir = os.path.expanduser(kwargs.get('root_dir', DATASERVER_DIR))
-			
+			pserve_ini_file = kwargs.get('pserve_ini_file', None) or SERVER_CONFIG
+						
 			print 'Starting dataserver (%s,%s)' % (port, root_dir)
 			
 			pserve_ini_file = self._rewrite_pserve_config(	config = pserve_ini_file, 

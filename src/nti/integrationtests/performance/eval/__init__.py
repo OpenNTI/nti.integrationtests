@@ -22,24 +22,32 @@ phrases = (	"Shoot To Kill",
 
 def init_server(context):
 	port = int(getattr(context, "port", get_open_port()))
+	base_path = getattr(context, "base_path", None)
 	
 	tmp_dir = tempfile.mktemp(prefix="ds.data.", dir="/tmp")
 	root_dir = os.path.expanduser(getattr(context, "root_dir", tmp_dir))
-	
+	if base_path:
+		root_dir = os.path.join(base_path, root_dir)
+		
 	use_coverage = getattr(context, "use_coverage", 'False')
 	use_coverage = boolean_states.get(use_coverage.lower(), False)
 	
 	sync_changes = getattr(context, "sync_changes", None)
 	sync_changes = boolean_states.get(sync_changes.lower(), None) if sync_changes is not None else None
 	
+	pserve_ini_file = getattr(context, "pserve_ini_file", None)
+	if base_path and pserve_ini_file:
+		pserve_ini_file = os.path.join(base_path, pserve_ini_file)
+		pserve_ini_file = os.path.expanduser(pserve_ini_file)
+	
 	ds = DataserverProcess(port=port, root_dir=root_dir)
 	context.__dataserver__ = ds
 	context.endpoint = ds.endpoint
 	
 	if not use_coverage:
-		ds.start_server(sync_changes=sync_changes)
+		ds.start_server(sync_changes=sync_changes, pserve_ini_file=pserve_ini_file)
 	else:
-		ds.start_server_with_coverage(sync_changes=sync_changes)
+		ds.start_server_with_coverage(sync_changes=sync_changes, pserve_ini_file=pserve_ini_file)
 
 def stop_server(context):
 	ds = getattr(context, "__dataserver__", None)
