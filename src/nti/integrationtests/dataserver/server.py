@@ -86,23 +86,21 @@ class DataserverProcess(object):
 			print 'Dataserver already running.  Won\'t start a new one'
 		else:
 		
-			rcfile = kwargs.get('rcfile', COVERAGE_CONFIG)
-			use_coverage = kwargs.get('use_coverage', False)
-			use_profile = kwargs.get('use_profile', False)
-			pserve_ini_file = kwargs.get('pserve_ini_file', SERVER_CONFIG)
-			root_dir = os.path.expanduser(kwargs.get('root_dir', DATASERVER_DIR))
 			port = int(kwargs.get('port', PORT))
 			sync_changes = kwargs.get('sync_changes', None)
+			use_coverage = kwargs.get('use_coverage', False)
+			coverage_rcfile = kwargs.get('rcfile', COVERAGE_CONFIG)
+			pserve_ini_file = kwargs.get('pserve_ini_file', SERVER_CONFIG)
+			root_dir = os.path.expanduser(kwargs.get('root_dir', DATASERVER_DIR))
 			
 			print 'Starting dataserver (%s,%s)' % (port, root_dir)
 			
 			pserve_ini_file = self._rewrite_pserve_config(	config = pserve_ini_file, 
 															root_dir = root_dir, 
 															port = port,
-															sync_changes = sync_changes,
-															use_profile = use_profile)
+															sync_changes = sync_changes)
 			if use_coverage:
-				self._writer_supervisor_config_coverage(root_dir, pserve_ini_file, rcfile)
+				self._writer_supervisor_config_coverage(root_dir, pserve_ini_file, coverage_rcfile)
 			else:
 				self._write_supervisor_config(root_dir, pserve_ini_file)
 			
@@ -130,8 +128,7 @@ class DataserverProcess(object):
 								config,
 								root_dir = DATASERVER_DIR,
 								port = PORT,
-								sync_changes = None,
-								use_profile = False, 
+								sync_changes = None, 
 								out_dir = "/tmp"):
 		
 		if not os.path.exists(config):
@@ -144,33 +141,12 @@ class DataserverProcess(object):
 		config_sync_changes = get_bool_option(ini, name='sync_changes', default=True)
 		sync_changes = config_sync_changes if sync_changes is None else sync_changes
 			
-		rewrite = use_profile or config_port != port or sync_changes != config_sync_changes
+		rewrite = config_port != port or sync_changes != config_sync_changes
 		if config_port != port:			
 			ini.set('DEFAULT', 'http_port', str(port))
 		
 		if sync_changes != config_sync_changes:
 			ini.set('DEFAULT', 'sync_changes', str(sync_changes))
-			
-		if use_profile:
-			log_file = os.path.join(root_dir, 'dataserver.profile.log')
-			cache_grind = os.path.join(root_dir, 'dataserver.out.cachegrind')
-			
-			if 'filter:profile' not in ini.sections():
-				ini.add_section('filter:profile')
-			
-			ini.set('filter:profile', 'use', 'egg:repoze.profile#profile')
-			ini.set('filter:profile', 'log_filename', log_file)
-			ini.set('filter:profile', 'cachegrind_filename', cache_grind)
-			ini.set('filter:profile', 'discard_first_request', 'false')
-			ini.set('filter:profile', 'flush_at_shutdown', 'false')
-			
-			line = ini.get('pipeline:main', 'pipeline')
-			if 'profile' not in line:
-				lst = [''] +  line.split()
-				idx = lst.index('dataserver')
-				lst = lst[0:idx]  + ['profile'] + lst[idx:]
-				line = '\n'.join(lst)
-				ini.set('pipeline:main', 'pipeline', line)
 			
 		if rewrite:
 			if not os.path.exists(out_dir):
@@ -280,10 +256,5 @@ class DataserverProcess(object):
 			return False
 
 		return True
-			
-if __name__ == '__main__':
-	dc = DataserverProcess(port=7777)
-	dc.start_server()
-	time.sleep(5)
-	dc.terminate_server()
+
 	

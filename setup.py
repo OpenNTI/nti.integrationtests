@@ -22,8 +22,7 @@ setup(
 		],
 
 	install_requires = [ 'nti.dataserver',
-						 'coverage',
-						 'repoze.profile'
+						 'coverage'
 						],
 	
 	packages = find_packages('src'),
