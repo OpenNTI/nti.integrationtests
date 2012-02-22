@@ -88,13 +88,13 @@ def _call_subscribers_method(subscribers, method_name):
 			except Exception, e:
 				logger.exception(e)
 	
-def setup_subscribers(subscribers):
+def _setup_subscribers(subscribers):
 	_call_subscribers_method(subscribers, 'setup')
 					
-def close_subscribers(subscribers):
+def _close_subscribers(subscribers):
 	_call_subscribers_method(subscribers, 'close')
 	
-def close_queue(queue):
+def _close_queue(queue):
 	time.sleep(2)
 	queue.put_nowait(None)
 	queue.join()
@@ -107,7 +107,6 @@ def run(config_file):
 	timestamp = time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime)
 	subscribers = []
 	
-	batch_loader = None
 	output_dir = context.output_dir
 	if output_dir:
 		output_dir = os.path.expanduser(context.output_dir)
@@ -127,7 +126,7 @@ def run(config_file):
 		if db_file:
 			db_path = os.path.join(base_output_dir, db_file)
 			if context.db_batch:
-				batch_loader = ResultBatchDbLoader(db_path)
+				subscribers.append(ResultBatchDbLoader(db_path, timestamp, groups, output_file))
 			else:
 				subscribers.append(ResultDbWriter(db_path))
 			
@@ -138,7 +137,7 @@ def run(config_file):
 		
 	context.script_setup(context=context)
 	try:
-		setup_subscribers(subscribers)
+		_setup_subscribers(subscribers)
 		now = time.time()
 		
 		for group in groups:
@@ -162,8 +161,8 @@ def run(config_file):
 		
 		return result
 	finally:
-		close_queue(queue)
-		close_subscribers(subscribers)
+		_close_queue(queue)
+		_close_subscribers(subscribers)
 		context.script_teardown(context=context)
-		if batch_loader: batch_loader.do_batch_load(output_file, timestamp, groups)
+
 	

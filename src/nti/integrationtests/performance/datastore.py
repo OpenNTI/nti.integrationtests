@@ -187,11 +187,15 @@ def batch_load(store, results_file, timestamp=None, groups=None):
 			add_context(store, timestamp, group.context)
 			
 	def inserter(record):
+		inserter.counter = inserter.counter + 1
 		add_result(store, timestamp, record, False)
-			
+	inserter.counter = 0
+		
 	with store.dbTrans():
 		load_results(results_file, inserter)
-			
+	
+	return inserter.counter
+
 # -----------------------------------
 
 class ResultDbWriter(object):
@@ -211,14 +215,26 @@ class ResultDbWriter(object):
 		add_context(self.store, timestamp, group.context)
 		add_result(self.store, timestamp, result)
 
-class ResultBatchDbLoader(Subscriber, ResultDbWriter):
+class ResultBatchDbLoader(ResultDbWriter, Subscriber):
 		
+	def __init__(self, db_file, timestamp, groups, results_file):
+		super(ResultBatchDbLoader, self).__init__(db_file)
+		self.groups = groups
+		self.timestamp = timestamp
+		self.results_file = results_file
+		
+	def close(self):
+		try:
+			self.do_batch_load()
+		finally:
+			super(ResultBatchDbLoader, self).close()
+			
 	def __call__(self, timestamp, group, result):
 		self.counter = self.counter + 1
 
-	def do_batch_load(self, results_file, timestamp, groups=None):
+	def do_batch_load(self):
 		try:
-			batch_load(self.store, results_file, timestamp, groups)
+			batch_load(self.store, self.results_file, self.timestamp, self.groups)
 		except Exception ,e:
 			logger.exception(e)
 	
