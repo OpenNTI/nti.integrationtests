@@ -69,7 +69,7 @@ class StatSubscriber(SimpleStatSubscriber):
 		try:
 			with open(out_file, "w") as f:
 				for group in self.summary.keys():
-					f.write("%s\t%s\%s", group, self.get_max_iterations(group), self.get_avg_run_time(group))
+					f.write("%s\t%s\t%s" % (group, self.get_max_iterations(group), self.get_avg_run_time(group)))
 					f.write('\n')
 					f.flush()
 		finally:
