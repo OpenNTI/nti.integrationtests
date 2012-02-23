@@ -3,6 +3,7 @@ import random
 import tempfile
 
 from nti.integrationtests import generate_ntiid
+from nti.integrationtests.performance import Subscriber
 from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.utils import boolean_states
 from nti.integrationtests.dataserver.client import DataserverClient
@@ -19,6 +20,8 @@ phrases = (	"Shoot To Kill",
 			"Reduce All Creation to Ash",
 			"Sit Upon the Frozen Heavens", 
 			"Call forth the Twilight")
+
+# -----------------------------------
 
 def init_server(context):
 	port = int(getattr(context, "port", get_open_port()))
@@ -49,6 +52,8 @@ def init_server(context):
 	else:
 		ds.start_server_with_coverage(sync_changes=sync_changes, pserve_ini_file=pserve_ini_file)
 
+# -----------------------------------
+
 def stop_server(context):
 	ds = getattr(context, "__dataserver__", None)
 	use_coverage = getattr(context, "use_coverage", 'False')
@@ -59,6 +64,8 @@ def stop_server(context):
 			ds.terminate_server()
 		else:
 			ds.terminate_server_with_coverage()
+
+# -----------------------------------
 			
 def new_client(context):
 	endpoint = getattr(context, "endpoint")
@@ -66,11 +73,43 @@ def new_client(context):
 	client = DataserverClient(endpoint=endpoint, credentials=credentials)
 	return client
 
+# -----------------------------------
+
 def generate_message(a_min=1, a_max=4):
 	return " ".join(random.sample(phrases, random.randint(a_min, a_max)))
+
+# -----------------------------------
 
 def generate_random_text(a_max=5):
 	word = []
 	for _ in xrange(a_max+1):
 		word.append(chr(random.randint(ord('a'), ord('z'))))
 	return "".join(word)
+
+# -----------------------------------
+
+class SimpleStatSubscriber(Subscriber):
+	def __init__(self, *args, **kwargs):
+		Subscriber.__init__(self, *args, **kwargs)
+		self.summary = {}
+	
+	def __call__(self, timestamp, group, result):
+		name = group.group_name
+		record = self.summary.get(name, None)
+		if not record:
+			# iteration, accum rum_time, average_run_time
+			record = [0, 0, 0]
+			self.summary[name] = record
+			
+		record[0] = record[0] + 1
+		record[1] = record[1] + result.run_time
+		record[2] = record[1] / record[0]
+	
+	def get_avg_run_time(self, group):
+		record = self.summary.get(group, None)
+		return record[2] if record else None
+	
+	def get_max_iterations(self, group):
+		record = self.summary.get(group, None)
+		return record[0] if record else None
+	

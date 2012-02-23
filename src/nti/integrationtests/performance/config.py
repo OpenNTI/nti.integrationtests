@@ -84,7 +84,8 @@ def read_config(config_file, process_args=True):
 	if process_args:
 		context.script_setup = resolve(context.script_setup) if hasattr(context, "script_setup") else noop 
 		context.script_teardown = resolve(context.script_teardown) if hasattr(context, "script_teardown") else noop 
-	
+		context.script_subscriber = resolve(context.script_subscriber) if hasattr(context, "script_subscriber") else None 
+		
 	# read running groups
 	
 	context.run_time = get_int_option(config, name="run_time")

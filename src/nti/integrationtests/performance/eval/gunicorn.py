@@ -9,6 +9,7 @@ from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.performance.eval import generate_message
 from nti.integrationtests.performance.eval import generate_random_text
+from nti.integrationtests.performance.eval import SimpleStatSubscriber
 
 import logging
 logger = logging.getLogger(__name__)
@@ -48,6 +49,31 @@ def setup(context):
 	
 def teardown(context):
 	stop_server(context)
+	
+# ----------------------------------
+
+class StatSubscriber(SimpleStatSubscriber):
+	def __init__(self, context):
+		super(StatSubscriber, self).__init__()
+		
+		if hasattr(context, 'test_name'):
+			self.stat_file = context.test_name + '_'
+		else:
+			self.stat_file = ''
+			
+		self.stat_file = self.stat_file + 'stats.txt'
+		self.output_dir = getattr(context, 'result_output_dir', '/tmp')
+	
+	def close(self):
+		out_file = os.path.join(self.output_dir, self.stat_file)
+		try:
+			with open(out_file, "w") as f:
+				for group in self.summary.keys():
+					f.write("%s\t%s\%s", group, self.get_max_iterations(group), self.get_avg_run_time(group))
+					f.write('\n')
+					f.flush()
+		finally:
+			super(StatSubscriber, self).close()
 	
 # -----------------------------------
 

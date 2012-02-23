@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # -----------------------------------
 
 read_only_attributes = ('script_setup', 'script_teardown', 'output_dir',
-						 'database_file', 'db_batch', 'base_path')
+						'database_file', 'db_batch', 'base_path', 'script_subscriber')
 
 default_attributes = (	'rampup', 'run_time','test_name', 'output_dir', 'serialize','use_threads',
 						'max_iterations', 'call_wait_time') + read_only_attributes
@@ -397,11 +397,11 @@ class RunnerResult(object):
 
 class Subscriber(object):
 	
-	def setup(self):
+	def setup(self, *args, **kwargs):
 		pass
 	
 	def __call__(self, *args, **kwargs):
 		pass
 
-	def close(self):
+	def close(self, *args, **kwargs):
 		pass

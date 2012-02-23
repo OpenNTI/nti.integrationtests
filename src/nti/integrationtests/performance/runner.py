@@ -2,6 +2,7 @@ import os
 import time
 import Queue
 import shutil
+import inspect
 import threading
 import multiprocessing
 
@@ -30,7 +31,9 @@ class ResultEventNotifier(threading.Thread):
 				result = self.queue.get_nowait()
 				if result:
 					for subscriber in self.subscribers:
-						subscriber(self.timestamp, self.groups[result.group_name], result)
+						subscriber(	timestamp = self.timestamp,
+								 	group = self.groups[result.group_name],
+								 	result = result)
 				
 				self.queue.task_done()
 				if not result: break
@@ -105,8 +108,10 @@ def run(config_file):
 	
 	run_localtime = time.localtime()
 	timestamp = time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime)
-	subscribers = []
+	context.timestamp = timestamp
 	
+	subscribers = []
+
 	output_dir = context.output_dir
 	if output_dir:
 		output_dir = os.path.expanduser(context.output_dir)
@@ -118,6 +123,10 @@ def run(config_file):
 			os.makedirs(result_output_dir)
 		output_file = os.path.join(result_output_dir, 'results.txt')
 
+		context.output_dir = output_dir
+		context.output_file = output_file
+		context.result_output_dir = result_output_dir
+		
 		# add csv data subscriber
 		subscribers.append(ResultFileWriter(output_file))
 		
@@ -129,7 +138,15 @@ def run(config_file):
 				subscribers.append(ResultBatchDbLoader(db_path, timestamp, groups, output_file))
 			else:
 				subscribers.append(ResultDbWriter(db_path))
-			
+				
+			context.db_path = db_path
+		
+	ctx_sbs = context.script_subscriber
+	if ctx_sbs:
+		ctx_sbs = ctx_sbs(context=context) if inspect.isclass(ctx_sbs) else ctx_sbs
+		if callable(ctx_sbs):
+			subscribers.append(ctx_sbs)
+		
 	queue = multiprocessing.JoinableQueue()
 	notifier = ResultEventNotifier(queue, timestamp, groups, subscribers)
 	notifier.daemon = True
