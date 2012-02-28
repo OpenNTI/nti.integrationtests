@@ -65,6 +65,18 @@ class QuizTester(BodyTester):
 	def testBody(self, parsedBody, mimeType, info):
 		assert parsedBody['Items']['1']['Text'] == info[0]['1']['Text']
 		assert parsedBody['Items']['1']['Answers'] == info[0]['1']['Answers']
+		
+class QuizResultTester(BodyTester):
+	
+	MIME_TYPE = 'application/vnd.nextthought.quizresult'
+	
+	def testBody(self, parsedBody, mimeType, info):
+		assert info[0]['1']['Text'] == parsedBody['Items'][0]['Question']['Text']
+		assert info[0]['1']['Answers'] == parsedBody['Items'][0]['Question']['Answers']
+#		print '\n\n'
+#		print info[0]['1']['Assessment']
+#		print parsedBody['Items'][0]['Assessment']
+##		assert info[0]['1']['Assessment'] == parsedBody['Items'][0]['Assessment']
 	
 # -----------------------------------
 
