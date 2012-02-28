@@ -98,12 +98,11 @@ def test_generator():
 	test_paths = get_json_files(test_files_path)
 
 	# massive nested for loops that generate all the tests to be ran
-		
 	for test_path in test_paths:
+		
 		for collection in workspace.collections:
 			href = workspace.collections[collection].href
 			for accept in workspace.collections[collection].accepts:
-				
 				# variables meant to prevent 
 				# bad tests from stopping 
 				# other tests from running
@@ -111,14 +110,15 @@ def test_generator():
 				bad_test = False
 				
 				test_values = open_data_file(test_path)
-
-				if accept == test_values['data_type'] or test_values['data_type'] == 'application/vnd.nextthought.quiz':
-					
+				
+				if accept == test_values['data_type']:
 					body_inspector = get_body_inspector(test_values['data_type'])
 					
 					# if the test file doesnt exist, catch that error and continue
 					try:
 						for test_type in test_values["test_types"]:
+							for input_formatt in test_values['input_formats']:
+								input_formatt = get_format(input_formatt)
 							test_type_obj = get_request_type(test_type)
 							for responseType in test_values['response_types']:
 								for input_formatt in test_values['input_formats']:
@@ -149,6 +149,8 @@ def test_generator():
 									elif test_type != 'Post' and test_type != 'Put' and \
 										test_values['response_types'][responseType]['classification'] == 'BadData':
 										pass
+									elif accept == 'application/vnd.nextthought.quizresult':
+										yield test_type_obj.makeQuizResultRequest, kwargs
 									else:
 										yield test_type_obj.makeRequest, kwargs
 									
@@ -199,7 +201,7 @@ def main(args = None):
 	print "\tRoot dir = %s\n" % root_dir
 	
 	# simply ignore the nose parameters
-	sys.argv = [sys.argv[0]]
+	sys.argv = [sys.argv[0], '-s']
 	nose.run()
 	
 if __name__ == '__main__':
