@@ -8,6 +8,7 @@ from hamcrest import assert_that, greater_than_or_equal_to, less_than_or_equal_t
 
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
+from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 
 def _http_ise_error_logging(f):
 	def to_call( *args, **kwargs ):
@@ -82,6 +83,17 @@ class BasicSeverOperation(object):
 		self.testArgs = None
 		self.preRequestTime = 0
 
+	def makeQuizResultRequest(self, kwargs): 
+		new_server_request = ServerRequest()
+		no_format = NoFormat()
+		url = urljoin(kwargs['endpoint'], kwargs['href'])
+		data = no_format.write(kwargs['objRunner']['quiz_obj']['post_data'])
+		request = new_server_request.post(url=url, data=data, \
+									username=kwargs['username'], password=kwargs['password'])
+		parsed_body = no_format.read(request)
+		kwargs['objRunner']['objects']['post_data']['QuizID'] = parsed_body['ID']
+		kwargs['objRunner']['objects']['put_data']['QuizID'] = parsed_body['ID']
+		self.makeRequest(kwargs)
 
 	@_http_ise_error_logging
 	def obj_setUp(self):
