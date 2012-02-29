@@ -38,7 +38,7 @@ class TestQuizzes(DataServerTestCase):
 		
 	def test_creating_a_quizz_and_result(self):
 
-		qq  = QuizQuestion(ID='q1', text='Area of an 8x8 square?', answers=['64', '64.0'])
+		qq  = QuizQuestion(ID='q1', text='Area of an 8x8 square?', answers=['$64$', '$64.0$'])
 		q = Quiz(container=self.container)
 		q.add_question(qq)
 		q = self.ds.create_object(q)
@@ -46,7 +46,7 @@ class TestQuizzes(DataServerTestCase):
 		quizid = q.ID
 		assert_that(qq, is_not(None))
 			
-		qqr = QuizQuestionResponse(question="q1", response="64")
+		qqr = QuizQuestionResponse(question="q1", response="$64$")
 		qr = QuizResult(quizid=quizid, container=self.container)
 		qr.add_answer('q1', qqr)
 		
@@ -55,6 +55,7 @@ class TestQuizzes(DataServerTestCase):
 		
 		qqr = obj.get_answer('q1')
 		assert_that(qqr, is_not(None))
+		assert_that(qqr.assessment, is_(True))
 	
 if __name__ == '__main__':
 	unittest.main()
