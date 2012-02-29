@@ -15,9 +15,8 @@
 									"Class": "QuizQuestion",
 									"Answers": 
 										[
-											"True", 
-											"1", 
-											"1.0"
+											"$1$", 
+											"$1.0$"
 										],  
 									"MimeType": "application/vnd.nextthought.quizquestion",
 									"ID": "1", 
@@ -34,7 +33,7 @@
 					"ContainerId": "test.user.container.1324420216.04", 
 					"Class": "QuizResult", 
 					"ID": "mathcounts-2011-0", 
-					"QuizID":"tag:nextthought.com,2011-10:logan.testi@nextthought.com-OID-0x051c:5573657273",
+					"QuizID":"tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x051c:5573657273",
 					"Items": 
 						{
 							"1" : 
@@ -42,7 +41,7 @@
 									"Class": "QuizQuestionResponse",
 									"Assessment":"True",
 									"Question":"This is a quiz",
-									"Response":"True"
+									"Response":"$1$"
 								}
 						}
 				},
@@ -52,7 +51,7 @@
 					"ContainerId": "test.user.container.1324420216.04", 
 					"Class": "QuizResult", 
 					"ID": "mathcounts-2011-0", 
-					"QuizID":"tag:nextthought.com,2011-10:logan.testi@nextthought.com-OID-0x051c:5573657273",
+					"QuizID":"tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x051c:5573657273",
 					"Items": 
 						{
 							"1" : 
@@ -60,7 +59,7 @@
 									"Class": "QuizQuestionResponse",
 									"Assessment":"False",
 									"Question":"This is a quiz",
-									"Response":"False"
+									"Response":"$0$"
 								}
 						}
 				}
@@ -77,9 +76,8 @@
 								"Assessment":"True", 
 								"Answers": 
 									[
-										"False", 
-										"1", 
-										"1.0"
+										"$1$", 
+										"$1.0$"
 									], 
 								"ID": "1"
 							}
@@ -94,9 +92,8 @@
 								"Assessment":"False", 
 								"Answers": 
 									[
-										"False", 
-										"0", 
-										"0.0"
+										"$0$", 
+										"$0.0$"
 									], 
 								"ID": "1"
 							}
@@ -132,8 +129,8 @@
 			"NotFound":
 					{
 						"classification": "NotFound",
-						"input_info" :{"id":"/dataserver2/users/logan.testi%40nextthought.com/Objects/tag%3Anextthought.com%2C2011-10%3Alogan.testi%40nextthought.com-OID-0x03", 
-							"href":"/dataserver2/users/logan.testi%40nextthought.com/doesNotExist"},
+						"input_info" :{"id":"/dataserver2/users/test.user.1%40nextthought.com/Objects/tag%3Anextthought.com%2C2011-10%3Atest.user.1%40nextthought.com-OID-0x03", 
+							"href":"/dataserver2/users/test.user.1%40nextthought.com/doesNotExist"},
 						"if_modified_since_no" : 304,
 						"if_modified_since_yes" : 200,
 						"get": 200,
