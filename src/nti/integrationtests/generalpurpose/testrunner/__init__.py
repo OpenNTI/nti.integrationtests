@@ -6,7 +6,6 @@ from urlparse import urljoin
 
 from hamcrest import assert_that, greater_than_or_equal_to, less_than_or_equal_to, has_entry
 
-from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 
@@ -39,15 +38,14 @@ class BasicSeverOperation(object):
 
 	requests = None
 	objTest = None
-	format = None
 	endpoint = None
 	username = None
 	password = None
-	responseCode = None
-	testPassword = None
 	href_url = None
 	putObjData = None
 	postObjData = None
+	responseCode = None
+	testPassword = None
 	testObjRef = None
 	objResponse = None
 	testHrefUrl = None
@@ -83,7 +81,7 @@ class BasicSeverOperation(object):
 		self.testArgs = None
 		self.preRequestTime = 0
 
-	def makeQuizResultRequest(self, kwargs): 
+	def make_quiz_result_request(self, kwargs): 
 		new_server_request = ServerRequest()
 		no_format = NoFormat()
 		url = urljoin(kwargs['endpoint'], kwargs['href'])
@@ -95,6 +93,8 @@ class BasicSeverOperation(object):
 		kwargs['objRunner']['objects']['put_data']['QuizID'] = parsed_body['ID']
 		self.makeRequest(kwargs)
 
+	makeQuizResultRequest  = make_quiz_result_request
+	
 	@_http_ise_error_logging
 	def obj_setUp(self):
 		if self.testObjRef:
@@ -153,7 +153,6 @@ class BasicSeverOperation(object):
 
 		if lastModifiedTime:
 			assert_that( kwargs, has_entry( 'requestTime', greater_than_or_equal_to( preRequestTime ) ) )
-
 
 
 	changedLastModifiedTime = check_changed_last_modified_time
