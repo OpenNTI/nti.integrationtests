@@ -74,6 +74,7 @@
 							{
 								"Text": "This is a quiz", 
 								"Assessment":"True", 
+								"Response":"$1$",
 								"Answers": 
 									[
 										"$1$", 
@@ -90,6 +91,7 @@
 							{
 								"Text": "This is not a quizresult", 
 								"Assessment":"False", 
+								"Response":"$0$",
 								"Answers": 
 									[
 										"$0$", 
