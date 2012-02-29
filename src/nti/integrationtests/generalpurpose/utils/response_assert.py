@@ -72,9 +72,9 @@ class QuizResultTester(BodyTester):
 	
 	def testBody(self, parsedBody, mimeType, info):
 		assert info[0]['1']['Text'] == parsedBody['Items'][0]['Question']['Text']
-		assert info[0]['1']['Answers'] in parsedBody['Items'][0]['Question']['Answers']
+		assert info[0]['1']['Answers'] == parsedBody['Items'][0]['Question']['Answers']
 		assert info[0]['1']['Response'] == parsedBody['Items'][0]['Response']
-		assert info[0]['1']['Assessment'] == parsedBody['Items'][0]['Assessment']
+		assert info[0]['1']['Assessment'] == str(parsedBody['Items'][0]['Assessment'])
 	
 # -----------------------------------
 
