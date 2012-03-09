@@ -1,6 +1,5 @@
 import numbers
 import transaction
-from threading import local
 
 from ZODB import DB
 from ZODB import FileStorage
@@ -29,71 +28,12 @@ class _NoOpCM(object):
 	def __exit__(self, t, v, tb):
 		pass
 	
-# -----------------------------------
-
-class _ContextManager(object):	
-	local = local()
-	
-	def __init__(self, db):
-		self.db = db
-		self.tm = None
-		self.txn = None
-		self.conn = None
-
-	def __enter__(self):
-		self.tm = transaction.TransactionManager()
-		self.conn = self.db.open( self.tm )
-		self.txn = self.tm.begin()
-		self.local.cm = self
-		return self.conn
-		
-	def __exit__(self, t, v, tb):
-		try:
-			if t is None:
-				self.tm.commit()
-			else:
-				self.tm.abort()
-			self.tm = None
-		finally:
-			self.close()
-	
-	def close(self):
-		if self.conn:
-			try:
-				self.conn.close()
-			except: 
-				pass
-			
-		self.tm = None
-		self.conn = None
-			
-		try:
-			del self.local.cm
-		except:
-			pass
-		
-	def connected(self):
-		return self.conn is not None
-	
-	def abort(self):
-		if self.tm:
-			self.tm.abort()
-			
-	def commit(self):
-		if self.tm:
-			self.tm.commit()
-		
-	@classmethod
-	def get(cls):
-		return cls.local.cm
-	
-	@classmethod
-	def safe_get(cls):
-		return getattr(cls.local,'cm', None)
-
 # =====================
 
 class DataStore():
+	
+	transaction_manager = transaction.TransactionManager()
+	
 	def __init__(self, path):
 		self.path = path
 		self.storage = FileStorage.FileStorage(path)
@@ -108,11 +48,11 @@ class DataStore():
 					dbroot[key] = OOBTree()
 				
 	def dbTrans(self):
-		return _ContextManager(self.db)
+		return self.transaction_manager
 	
 	@property	
 	def root(self):
-		return _ContextManager.get().conn.root()
+		return self.conn.root()
 	
 	@property	
 	def results(self):
