@@ -63,6 +63,7 @@ class DataStore():
 		return self.root['contexts']
 	
 	def close(self):
+		self.conn.close()
 		self.db.close()
 
 # -----------------------------------
