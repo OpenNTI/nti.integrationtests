@@ -22,7 +22,8 @@ setup(
 		],
 
 	install_requires = [ 'nti.dataserver',
-						 'coverage'
+						 'coverage',
+						 'pil'
 						],
 	
 	packages = find_packages('src'),
