@@ -38,14 +38,14 @@ class DataStore():
 		self.path = path
 		self.storage = FileStorage.FileStorage(path)
 		self.db = DB(self.storage)
+		self.conn = self.db.open(self.transaction_manager)
 		self.check_stores()
 			
 	def check_stores(self):
-		with self.dbTrans() as conn:
-			dbroot = conn.root()
+		with self.dbTrans():
 			for key in ('results', 'contexts'):
-				if not dbroot.has_key(key):
-					dbroot[key] = OOBTree()
+				if not self.root.has_key(key):
+					self.root[key] = OOBTree()
 				
 	def dbTrans(self):
 		return self.transaction_manager
