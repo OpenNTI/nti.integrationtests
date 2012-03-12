@@ -54,6 +54,7 @@ class BasicSeverOperation(object):
 	lastModifiedCollection = None
 	preRequestTime = None
 
+	@_http_ise_error_logging
 	def setValues(self, kwargs):
 
 		self.requests = ServerRequest()
@@ -81,6 +82,7 @@ class BasicSeverOperation(object):
 		self.testArgs = None
 		self.preRequestTime = 0
 
+	@_http_ise_error_logging
 	def make_quiz_result_request(self, kwargs): 
 		new_server_request = ServerRequest()
 		no_format = NoFormat()
