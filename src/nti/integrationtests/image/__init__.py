@@ -1,6 +1,5 @@
 import sys, os
 import math, operator
-from nti.integrationtests.image import Comparisons
 from PIL import Image
 import unittest
 
