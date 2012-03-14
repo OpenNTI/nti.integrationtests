@@ -30,7 +30,7 @@ class TestChatSendingObject(HostUserChatTest):
 	def test_chat(self):
 		users = self._run_chat(self.container, 1, self.user_one, self.user_two)
 		for u in users:
-			self.assert_(u.exception == None, "User %s caught exception %s" % (u.username, u.exception))
+			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
 		messages = list(users[1].received_on_channel())
 		self.assertEqual(len(messages), 2, "%s did not get the expected messages" % users[1])

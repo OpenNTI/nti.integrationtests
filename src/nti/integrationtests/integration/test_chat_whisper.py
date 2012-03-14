@@ -18,7 +18,7 @@ class TestWhisperChat(test_chat_multi_user.TestMultiUserChat):
 		entries = random.randint(2, 5)
 		users = self._run_chat(self.container, entries, *self.chat_users)
 		for u in users:
-			self.assert_(u.exception == None, "User %s caught exception %s" % (u.username, u.exception))
+			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
 		mapping  = {}
 		for u in users[1:]:

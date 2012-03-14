@@ -15,7 +15,7 @@ class TestShadowedChat(HostUserChatTest):
 		entries = random.randint(10, 20)
 		users = self._run_chat(self.container, entries, *self.chat_users)
 		for u in users:
-			self.assert_(u.exception == None, "User %s caught exception %s" % (u.username, u.exception))
+			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 		
 		ghost = users[0]
 		chatters = users[1:]

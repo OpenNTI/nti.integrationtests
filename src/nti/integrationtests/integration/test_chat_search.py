@@ -20,7 +20,7 @@ class TestChatSearch(HostUserChatTest):
 		
 		users = self._run_chat(self.container, 0, self.user_one, self.user_two)
 		for u in users:
-			self.assert_(u.exception == None, "User %s caught exception %s" % (u.username, u.exception))
+			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 			
 		self.ds.set_credentials((self.user_one, self.default_user_password))
 		self.ds.wait_for_event(max_wait_seconds=10)

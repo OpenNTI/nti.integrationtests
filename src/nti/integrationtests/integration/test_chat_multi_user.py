@@ -16,7 +16,7 @@ class TestMultiUserChat(HostUserChatTest):
 		users = self._run_chat(self.container, entries, *self.chat_users)
 		
 		for u in users:
-			self.assert_(u.exception == None, "User %s caught exception %s" % (u.username, u.exception))
+			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
 		for i in range(len(users) -1):
 			self._compare(users[i], users[i+1])

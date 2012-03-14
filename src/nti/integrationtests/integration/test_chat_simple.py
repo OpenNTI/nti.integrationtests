@@ -32,7 +32,7 @@ class TestSimpleChat(HostUserChatTest):
 		users = self._run_chat(self.container, entries, self.user_one, self.user_two)
 		
 		for u in users:
-			self.assert_(u.exception == None, "User %s caught exception %s" % (u.username, u.exception))
+			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
 		for i in range(len(users) -1):
 			self._compare(users[i], users[i+1])
@@ -43,7 +43,7 @@ class TestSimpleChat(HostUserChatTest):
 		users = self._run_chat(self.container, entries, self.user_three, self.user_four)
 		
 		for u in users:
-			self.assert_(u.exception == None, "User %s caught exception %s" % (u.username, u.exception))
+			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
 		for i in range(len(users) -1):
 			self._compare(users[i], users[i+1])

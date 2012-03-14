@@ -14,7 +14,7 @@ class TestChatUserleavesEarly(HostUserChatTest):
 		entries = 2
 		users = self._run_chat(self.container, entries, *self.chat_users)
 		for u in users:
-			self.assert_(u.exception == None, "User %s caught exception %s" % (u.username, u.exception))	
+			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 			
 		total_sent =  0
 		for u in users:

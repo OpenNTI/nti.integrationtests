@@ -1,8 +1,11 @@
+import sys
 import time
 import uuid
 import random
+import traceback
 import threading
 import collections
+from StringIO import StringIO
 
 from websocket_interface import Graph
 from websocket_interface import Serverkill
@@ -109,6 +112,7 @@ class BasicUser(Graph):
 			
 		Graph.__init__(self, *args, **kwargs)
 		self.exception = None
+		self.traceback = None
 					
 	def __str__(self):
 		return self.username if self.username else self.socketio_url
@@ -252,7 +256,13 @@ class Host(OneRoomUser):
 			self.wait_heart_beats(3)
 					
 		except Exception, e:
+			sio = StringIO()
+			exc_type, exc_value, exc_traceback = sys.exc_info()
+			traceback.print_exception(exc_type, exc_value, exc_traceback, file=sio)
+			sio.seek(0)
+			
 			self.exception = e
+			self.traceback = sio.read()
 		finally:
 			self.ws_capture_and_close()
 				
@@ -285,7 +295,13 @@ class User(OneRoomUser):
 			self.wait_heart_beats(2)
 					
 		except Exception, e:
+			sio = StringIO()
+			exc_type, exc_value, exc_traceback = sys.exc_info()
+			traceback.print_exception(exc_type, exc_value, exc_traceback, file=sio)
+			sio.seek(0)
+			
 			self.exception = e
+			self.traceback = sio.read()
 		finally:
 			self.ws_capture_and_close()
 			
