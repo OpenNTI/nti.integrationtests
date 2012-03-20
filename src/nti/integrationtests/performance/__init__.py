@@ -308,7 +308,6 @@ class TargetRunner(object):
 					result = self.target(*self.target_args)
 			except Exception, e:
 				exception = e
-				logger.debug(e)
 		
 			iterations = iterations + 1
 			run_time = time.time() - start

@@ -26,6 +26,7 @@ class ResultEventNotifier(threading.Thread):
 		self.groups = { g.group_name: g for g in groups }
 			
 	def run(self):
+		result = None
 		while True:
 			try:
 				result = self.queue.get_nowait()
@@ -39,9 +40,9 @@ class ResultEventNotifier(threading.Thread):
 				if not result: break
 			except Queue.Empty:
 				time.sleep(.05)
-			except Exception, e:
+			except Exception:
 				self.queue.task_done()
-				logger.exception(e)
+				logger.exception("While running group result '%s' through event subscribers" % result)
 				
 
 # -----------------------------------
