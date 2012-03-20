@@ -2,87 +2,55 @@ import sys, os
 import math, operator
 from PIL import Image
 
-# stores image info
-class FileStatis(object):
-    
-    file_name = None
-    
-    base_pic_path = None
-    test_pic_path = None
-    rel_path = None
-    
-    file_in_base = False
-    file_in_test = False
-    file_statis = None
-    
-    file_size = 0
-    
-    def __init__(self, file_name, file_rel_path, file_size, base_dir_path=None, test_dir_path=None, file_in_base=False, file_in_test=False):
-        self.file_name = file_name
-        self.rel_path = file_rel_path
-        self.file_size = file_size
-        if base_dir_path: self.base_pic_path = base_dir_path + file_rel_path + file_name
-        if test_dir_path: self.test_pic_path = test_dir_path + file_rel_path + file_name
-        if file_in_base: self.file_in_base = True 
-        if file_in_test: self.file_in_test = True
-
-    def found_base_file(self, path):
-        self.base_pic_path = path + self.file_name
-        self.file_in_base = True
-    
-    def found_test_file(self, path):
-        self.test_pic_path = path + self.file_name
-        self.file_in_test = True
-    
-    def check_statis(self):
-        if not self.file_in_base: self.file_statis = 'pic not in base pics'
-        elif not self.file_in_test: self.file_statis = 'pic not in test pics'
-        else:
-            bh = Image.open(self.base_pic_path).histogram()
-            th = Image.open(self.test_pic_path).histogram()
-            rms = math.sqrt(reduce(operator.add, map(lambda a,b: (a-b)**2, bh, th))/len(bh))
-            if rms == float(0.0): self.file_statis = 'images are equal'
-            else: self.file_statis = 'images are not equal'
-
 extentions = ['jpg', 'png', 'bmp', 'gif']
 
-def check_paths(basePicDir, testPicDir):
+def check_paths(basePicDir, testPicDir, txt_file):
     assert os.path.exists(basePicDir), "cannot find base directory pictures"
     assert os.path.exists(testPicDir), "cannot find test directory pictures"
+    assert os.path.exists(txt_file), "cannot find target txt_file"
                 
-def store_pics(pic_data, abs_path, rel_path="/", is_base_pic=True):
+def store_pics(abs_path, rel_path="/"):
     path = abs_path + rel_path
-    pic_data['Items'] = pic_data.get('Items', [])
+    pic_data = {}
     items = os.listdir(path)
     for item in items:
         if os.path.isdir(path + '/' + item): 
-            pic_data[item] = pic_data.get(item, {})
-            store_pics(pic_data[item], abs_path, rel_path + '/' + item, is_base_pic)
+            pic_data[item] = store_pics(abs_path, rel_path + item + '/')
         else:
-            not_found = True
-            for pic in pic_data['Items']:
-                if item == pic.file_name and is_base_pic:
-                    pic.found_base_file(path)
-                    not_found = False
-                elif item == pic.file_name:
-                    pic.found_test_file(path)
-                    not_found = False
-            if not_found and len(item.split(".")) is 2 and item.split(".")[1] in extentions and is_base_pic:
-                newPic = FileStatis(item, rel_path, os.path.getsize(path+item), base_dir_path=abs_path, file_in_base=True)
-                pic_data['Items'].append(newPic)
-            elif not_found and len(item.split(".")) is 2 and item.split(".")[1] in extentions:
-                newPic = FileStatis(item, rel_path, os.path.getsize(path+item), base_dir_path=abs_path, file_in_test=True)
-                pic_data['Items'].append(newPic)
+            if len(item.split(".")) is 2 and item.split(".")[1] in extentions:
+                pic_data[item] = rel_path + item
+    return pic_data
+#                newPic = FileStatis(item, rel_path, os.path.getsize(path+item), base_dir_path=abs_path, file_in_base=True)
         
-def write_pic_to_file(pic_data, txt_file_path):
-    f = open(txt_file_path, 'w')
-    for key in pic_data.keys():
-        if isinstance(pic_data[key], dict):
-            write_pic_to_file(pic_data[key], txt_file_path)
-        elif isinstance(pic_data[key], list):
-            for pic in pic_data[key]:
-                pic.check_statis()
-                f.write('name:' + pic.file_name + ', path: ' + pic.rel_path + ', file size: ' + str(pic.file_size) + ', result: ' + pic.file_statis + '\n')
+def compare_pics(base_pic_data, test_pic_data, f, files):
+    base_keys = base_pic_data.keys()
+    test_keys = test_pic_data.keys()
+    for key in base_keys:
+        if key in test_keys:
+            base_key = base_pic_data[key]
+            test_key = test_pic_data[key]
+            del(base_pic_data[key])
+            del(test_pic_data[key])
+            if isinstance(base_key, dict) and isinstance(test_key, dict):
+                compare_pics(base_key, test_key, f, files)
+            elif isinstance(base_key, dict): pass #deal with later
+            elif isinstance(test_key, dict): pass #deal with later
+            else:
+                bh = Image.open(files['base_pic_dir'] + base_key).histogram()
+                th = Image.open(files['test_pic_dir'] + test_key).histogram()
+                rms = math.sqrt(reduce(operator.add, map(lambda a,b: (a-b)**2, bh, th))/len(bh))
+                if rms == 0.0:
+                    f.write('name: ' + key + ', file path: ' + base_key + ', file size: ' + str(os.path.getsize(files['base_pic_dir'] + base_key))  + ', assessment: pictures are equivalent' + '\n')
+                else:
+                    f.write('name: ' + key + ', file path: ' + base_key + ', file size of base: ' + str(os.path.getsize(files['base_pic_dir'] + base_key))  + ', file size of test: ' + str(os.path.getsize(files['test_pic_dir'] + test_key))  + ', assessment: pictures are not equivalent' + '\n')
+    for key in base_pic_data.keys():
+        f.write('name: ' + key + ', file path: ' + base_pic_data[key] + ', file size: ' + str(os.path.getsize(files['base_pic_dir'] + base_pic_data[key]))  + ', assessment: picture only found in base pics' + '\n')
+    for key in test_pic_data.keys():
+        f.write('name: ' + key + ', file path: ' + test_pic_data[key] + ', file size: ' + str(os.path.getsize(files['test_pic_dir'] + test_pic_data[key]))  + ', assessment: picture only found in test pics' + '\n')
+                
+def write_pic_to_file(base_pic_data, test_pic_data, files):
+    f = open(files['txt_file'], 'w')
+    compare_pics(base_pic_data, test_pic_data, f, files)
     f.close()
     
         
@@ -90,11 +58,11 @@ def run_tests():
     base_pic_dir = sys.argv[1]
     test_pic_dir = sys.argv[2]
     txt_file     = sys.argv[3]
-    check_paths(base_pic_dir, test_pic_dir)
-    pic_data = {}
-    store_pics(pic_data, base_pic_dir)
-    store_pics(pic_data, test_pic_dir, is_base_pic=False)
-    write_pic_to_file(pic_data, txt_file)
+    check_paths(base_pic_dir, test_pic_dir, txt_file)
+    base_pic_data = store_pics(base_pic_dir)
+    test_pic_data = store_pics(test_pic_dir)
+    files = {'base_pic_dir':base_pic_dir, 'test_pic_dir':test_pic_dir, 'txt_file':txt_file}
+    write_pic_to_file(base_pic_data, test_pic_data, files)
 
 if __name__ == '__main__':
     run_tests()
