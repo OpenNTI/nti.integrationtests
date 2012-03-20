@@ -83,7 +83,7 @@ class BasicSeverOperation(object):
 		self.preRequestTime = 0
 
 	@_http_ise_error_logging
-	def make_quiz_result_request(self, kwargs): 
+	def make_quiz_result_request(self, kwargs):
 		new_server_request = ServerRequest()
 		no_format = NoFormat()
 		url = urljoin(kwargs['endpoint'], kwargs['href'])
@@ -96,7 +96,7 @@ class BasicSeverOperation(object):
 		self.makeRequest(kwargs)
 
 	makeQuizResultRequest  = make_quiz_result_request
-	
+
 	@_http_ise_error_logging
 	def obj_setUp(self):
 		if self.testObjRef:
@@ -127,10 +127,8 @@ class BasicSeverOperation(object):
 		_http_ise_error_logging(f)
 
 	def set_modification_time(self, parsed_body):
-		try:
-			self.lastModified = parsed_body['LastModified']
-		except KeyError:
-			self.lastModified = None
+		self.lastModified = parsed_body.get( 'LastModified', parsed_body.get( 'Last Modified' ) )
+		return self.lastModified
 	setModificationTime = set_modification_time
 
 	def set_collection_modification_time(self):
@@ -138,6 +136,7 @@ class BasicSeverOperation(object):
 			request = self.requests.get(self.href_url, self.username, self.password)
 			parsed_body = json.loads(request.read())
 			self.lastModifiedCollection = parsed_body['Last Modified']
+			return self.lastModifiedCollection
 		except urllib2.HTTPError or KeyError:
 			self.lastModifiedCollection = None
 	setCollectionModificationTime = set_collection_modification_time
@@ -163,12 +162,11 @@ class BasicSeverOperation(object):
 		lastModifiedTimeCollection = kwargs.get('collectionTime', None)
 		preRequestTime = kwargs['preRequestTime']
 		lastModifiedTime = kwargs.get('requestTime', None)
-		if lastModifiedTimeCollection:
+		if lastModifiedTimeCollection and preRequestTime:
 			assert_that( kwargs, has_entry( 'collectionTime', less_than_or_equal_to( preRequestTime ) ) )
 
-		if lastModifiedTime:
+		if lastModifiedTime and preRequestTime:
 			assert_that( kwargs, has_entry( 'requestTime', less_than_or_equal_to( preRequestTime ) ) )
 
 
 	unchangedLastModifiedTime = check_unchanged_last_modified_time
-

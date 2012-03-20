@@ -54,9 +54,9 @@ class ServerRequest(object):
 			result = urllib2.urlopen(request)
 			result.close()
 			return result.code
-		except urllib2.HTTPError, error:
+		except urllib2.HTTPError as error:
 			return error.code
-	
+
 	def ifModifiedSinceNo(self, url, username, password):
 		request = urllib2.Request(url=url)
 		auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -70,5 +70,5 @@ class ServerRequest(object):
 			result = urllib2.urlopen(request)
 			result.close()
 			return result.code
-		except urllib2.HTTPError, error:
+		except urllib2.HTTPError as error:
 			return error.code
