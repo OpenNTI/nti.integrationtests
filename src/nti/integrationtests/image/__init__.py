@@ -75,15 +75,15 @@ def store_pics(pic_data, abs_path, rel_path="/", is_base_pic=True):
                 pic_data['Items'].append(newPic)
         
 def write_pic_to_file(pic_data, txt_file_path):
+    f = open(txt_file_path, 'w')
     for key in pic_data.keys():
         if isinstance(pic_data[key], dict):
             write_pic_to_file(pic_data[key], txt_file_path)
         elif isinstance(pic_data[key], list):
             for pic in pic_data[key]:
                 pic.check_statis()
-#                f = open(txt_file_path, 'w')
-#                f.write('name:' + pic.file_name + ', path: ' + pic.rel_path + ', file size: ' + str(pic.file_size) + ', result: ' + pic.file_statis)
-                print 'name:' + pic.file_name + ', path: ' + pic.rel_path + ', file size: ' + str(pic.file_size) + ', result: ' + pic.file_statis
+                f.write('name:' + pic.file_name + ', path: ' + pic.rel_path + ', file size: ' + str(pic.file_size) + ', result: ' + pic.file_statis + '\n')
+    f.close()
     
         
 def run_tests():
