@@ -11,7 +11,7 @@ from hamcrest import assert_that
 class TestThreadedNotes(DataServerTestCase):
 
 	user_one = ('test.user.1@nextthought.com', 'temp001')
-	user_two = ('test.user2@nextthought.com', 'temp001')
+	user_two = ('test.user.2@nextthought.com', 'temp001')
 	user_three = ('test.user.3@nextthought.com', 'temp001')
 
 	def setUp(self):

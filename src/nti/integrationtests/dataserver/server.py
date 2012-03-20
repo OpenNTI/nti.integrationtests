@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import sys
 import time
@@ -8,10 +10,12 @@ import subprocess
 import ConfigParser
 from datetime import datetime
 
+import logging
+logger = logging.getLogger(__name__)
+
 from nti.integrationtests.utils import get_int_option
 from nti.integrationtests.utils import get_bool_option
 
-# -----------------------------------
 
 DEFAULT_USER_PASSWORD = 'temp001'
 
@@ -21,7 +25,6 @@ DATASERVER_DIR = os.getenv('DATASERVER_DIR', '~/tmp')
 SERVER_CONFIG = os.getenv('SERVER_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/development.ini"))
 COVERAGE_CONFIG = os.getenv('COVERAGE_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/coverage_run.cfg"))
 
-# -----------------------------------
 		
 class DataserverProcess(object):
 
@@ -83,7 +86,7 @@ class DataserverProcess(object):
 	def _start_process(self, block_interval_seconds=1, max_wait_secs=30, *arg, **kwargs):
 
 		if self.process or self.is_running():
-			print 'Dataserver already running.  Won\'t start a new one'
+			logger.debug( "Dataserver already running.  Won't start a new one" )
 		else:
 		
 			port = int(kwargs.get('port', PORT))
@@ -93,12 +96,12 @@ class DataserverProcess(object):
 			root_dir = os.path.expanduser(kwargs.get('root_dir', DATASERVER_DIR))
 			pserve_ini_file = kwargs.get('pserve_ini_file', None) or SERVER_CONFIG
 						
-			print 'Starting dataserver (%s,%s)' % (port, root_dir)
+			logger.info( 'Starting dataserver (%s,%s)', port, root_dir)
 			
-			pserve_ini_file = self._rewrite_pserve_config(	config = pserve_ini_file, 
-															root_dir = root_dir, 
-															port = port,
-															sync_changes = sync_changes)
+			pserve_ini_file = self._rewrite_pserve_config(	config=pserve_ini_file, 
+															root_dir=root_dir, 
+															port=port,
+															sync_changes=sync_changes)
 			if use_coverage:
 				self._writer_supervisor_config_coverage(root_dir, pserve_ini_file, coverage_rcfile)
 			else:
@@ -122,14 +125,13 @@ class DataserverProcess(object):
 			if self.KEY_TEST_WAIT in os.environ:
 				time.sleep( int( os.environ[self.KEY_TEST_WAIT] ) )
 		
-	# -----------------------------------
 	
 	def _rewrite_pserve_config(	self,
 								config,
-								root_dir = DATASERVER_DIR,
-								port = PORT,
-								sync_changes = None, 
-								out_dir = "/tmp"):
+								root_dir=DATASERVER_DIR,
+								port=PORT,
+								sync_changes=None, 
+								out_dir="/tmp"):
 		
 		if not os.path.exists(config):
 			raise OSError('No pserve file %s' % config)
@@ -194,7 +196,7 @@ class DataserverProcess(object):
 		visord = os.path.join(os.path.expanduser(root_dir), 'etc', 'supervisord_dev.conf')
 		self._rewrite_supervisor_config(visord, command_prefix)
 	
-	def _writer_supervisor_config_coverage(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG,\
+	def _writer_supervisor_config_coverage(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG,
 										   rcfile=COVERAGE_CONFIG):
 		
 		if not os.path.exists(rcfile):
@@ -206,7 +208,6 @@ class DataserverProcess(object):
 		command_prefix = os.path.join(os.path.dirname(sys.executable), command_prefix)
 		self._rewrite_supervisor_config(visord, command_prefix)
 	
-	# -----------------------------------
 
 	def terminate_server(self, block_interval_seconds=1, max_wait_secs=30):
 		if self.process or self.is_running():

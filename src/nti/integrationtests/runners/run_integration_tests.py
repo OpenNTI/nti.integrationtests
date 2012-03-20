@@ -25,7 +25,7 @@ def main(args = None):
 	port = opts.port if opts.port else get_open_port()
 	
 	dirname = os.path.join(os.path.dirname( __file__ ), '..', 'integration')
-	test_runner(path=dirname, use_coverage=use_coverage, coverage_report=coverage_report,\
+	test_runner(path=dirname, use_coverage=use_coverage, coverage_report=coverage_report,
 				port=port, root_dir=root_dir)
 
 if __name__ == '__main__':
