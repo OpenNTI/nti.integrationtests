@@ -41,7 +41,7 @@ class ResultEventNotifier(threading.Thread):
 				time.sleep(.05)
 			except Exception, e:
 				self.queue.task_done()
-				logger.error(e)
+				logger.exception(e)
 				
 
 # -----------------------------------
