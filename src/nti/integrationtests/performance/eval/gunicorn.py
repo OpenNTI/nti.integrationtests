@@ -95,14 +95,5 @@ def create_note(*args, **kwargs):
 	
 	return None
 
-if __name__ == '__main__':
-	logger = logging.getLogger('')
-	
-	logging.basicConfig(level=logging.INFO,
-						format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
-
-	from nti.integrationtests.performance.runner import run
-	config_file = os.path.join(os.path.dirname(__file__), "gunicorn.cfg")
-	run(config_file)
 
 
