@@ -492,7 +492,7 @@ def create_ds_connection(host, port, resource=None, is_secure=False, timeout=def
 			raise WebSocketException("Invalid server response")
 	else:
 		ws.close()
-		raise WebSocketException("Invalid status %s" % status)
+		raise WebSocketException("Invalid status %s writing to %s (%s)" % (status, resource, resp_headers))
 	
 if __name__ == "__main__":
 	ws = create_ds_connection('localhost', 8080)
