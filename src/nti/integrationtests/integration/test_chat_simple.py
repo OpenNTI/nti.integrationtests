@@ -4,7 +4,6 @@ import unittest
 from nti.integrationtests.dataserver.client import DataserverClient
 
 from user_chat_objects import HostUserChatTest
-from websocket_interface import Serverkill
 
 class TestSimpleChat(HostUserChatTest):
 	
@@ -53,7 +52,7 @@ class TestSimpleChat(HostUserChatTest):
 		entries = random.randint(5, 10)
 		one, two = self._run_chat(self.container, entries, self.user_one, self.user_five)
 		self.assert_(len(one.users_online) == 0, "No user was supposed to be online")
-		self.assert_(isinstance(two.exception, Serverkill), "Invalid Auth was expected for %s" % two.username)
+		self.assert_(two.exception, "Invalid Auth was expected for %s" % two.username)
 		
 	def _compare(self, sender, receiver):
 		_sent = list(sender.sent)
