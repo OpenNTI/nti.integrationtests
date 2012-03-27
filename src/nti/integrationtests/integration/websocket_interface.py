@@ -58,7 +58,8 @@ class BasicMessageContext(threading.local):
 		return self._last_recv
 	
 	def send(self, ws, msg):
-		ws.send(unicode(msg))
+		msg = unicode(msg)
+		ws.send(msg)
 		self._last_sent = msg
 		return self._last_sent
 	
@@ -96,7 +97,7 @@ class MessageContext(BasicMessageContext):
 		return msg
 	
 	def send(self, ws, msg):
-		super(MessageContext, self).send(ws, msg)
+		msg = super(MessageContext, self).send(ws, msg)
 		self._sent.append(msg)
 		return msg
 	
@@ -238,7 +239,7 @@ class Graph(object):
 				
 		self.ws = kwargs.get('ws', None)
 		self.host = kwargs.get('host', None)
-		self.port = kwargs.get('port', 8080)
+		self.port = kwargs.get('port', 8081)
 		self.timeout = kwargs.get('timeout', DEAULT_TIMEOUT)
 		self.username = kwargs.get('username', None)
 		self.password = kwargs.get('password', DEFAULT_USER_PASSWORD)
@@ -521,11 +522,12 @@ def isHeartBeat(msg):
 	return str(msg).startswith(WS_HEART_BEAT)
 
 def encode(data, data_format='json'):
+	result = None
 	if data_format == 'json':
-		return json.dumps(data)
+		result = json.dumps(data)
 	elif data_format == 'plist':
-		return plistlib.writePlistToString(data)
-	return None
+		result = plistlib.writePlistToString(data)
+	return unicode(result) if result else None
 		
 def decode(msg, data_format='json'):
 	if msg and msg.startswith(WS_BROADCAST):
@@ -729,11 +731,11 @@ def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, timeout=DE
 				message_context=default_message_ctx):
 
 	# create the connectiona and do a handshake. 
-	ws = create_ds_connection(host, port, timeout=timeout)
-	
-	# send connection string
-	d = {"args":[username, password]}
-	msg = '%s%s' % (WS_BROADCAST, encode(d,'json'))
-	message_context.send(ws, msg)
-	
+	ws = create_ds_connection(host, port, username=username, password=password, timeout=timeout)
 	return ws
+
+if __name__ == "__main__":
+	ws = _ws_connect('localhost', 8081, 'test.user.1@nextthought.com', 'temp001')
+	_next_event(ws)
+	_ws_disconnect(ws)
+	ws.close()
