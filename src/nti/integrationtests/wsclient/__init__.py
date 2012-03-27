@@ -19,14 +19,15 @@ Copyright (C) 2010 Hiroki Ohtani(liris)
 
 """
 
-import socket
-import random
-import struct
 import md5
-import logging
+import base64
+import random
+import socket
+import struct
 from urlparse import urlparse
 
-logger = logging.getLogger()
+import logging
+logger = logging.getLogger(__name__)
 
 #########################
 
@@ -42,7 +43,7 @@ traceEnabled = False
 
 # ---------------------------------
 
-def enable_trace(trackable=False):
+def enable_trace(trackable=True):
 	"""
 	turn on/off the tracability.
 	"""
@@ -458,7 +459,7 @@ def create_connection(url, timeout=default_timeout, on_handshake=None, **options
 	
 # ---------------------------------
 
-def create_ds_connection(host, port, resource=None, is_secure=False, timeout=default_timeout, **options):
+def create_ds_connection(host, port, username, password, resource=None, is_secure=False, timeout=default_timeout, **options):
 	
 	resource = resource or '/socket.io/1/'
 	if resource[-1] != '/':
@@ -468,8 +469,12 @@ def create_ds_connection(host, port, resource=None, is_secure=False, timeout=def
 	ws.settimeout(timeout)
 	ws.sock.connect((host, port))
 	
+	base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+	auth_header = 'Authorization: Basic %s' % base64string
+	
 	# socket.io handshake
 	ws.sock.send('POST %s HTTP/1.1\r\n' % resource)
+	ws.sock.send(auth_header)
 	ws.sock.send('Content-Length: 0\r\n')
 	ws.sock.send('\r\n')
 	
@@ -485,6 +490,11 @@ def create_ds_connection(host, port, resource=None, is_secure=False, timeout=def
 			if ':15:10:websocket' in msg:
 				sessiond_id = msg.split(":")[0]
 				resource = '%s%s/%s' % (resource, 'websocket', sessiond_id)
+				
+				header = options.get('headers', [])
+				header.append(auth_header)
+				options['headers'] = header
+				
 				ws._handshake(host, port, resource, is_secure, **options)
 				return ws
 		else:
@@ -495,6 +505,6 @@ def create_ds_connection(host, port, resource=None, is_secure=False, timeout=def
 		raise WebSocketException("Invalid status %s writing to %s (%s)" % (status, resource, resp_headers))
 	
 if __name__ == "__main__":
-	ws = create_ds_connection('localhost', 8080)
+	ws = create_ds_connection('localhost', 8081, 'test.user.1@nextthought.com', 'temp001')
 	ws.close()
 	
