@@ -47,7 +47,8 @@ def compare_pics(base_pic_data, test_pic_data, f, files, rel_path=''):
                 if rms == 0.0:
                     f.write(('name: %s, file path: %s, file size: %d, assessment: %s\n') % (key, print_path, base_file_size, 'pictures are equivalent'))
                 else:
-                    f.write(('\n\n\nname: %s, file path: %s, file size(base): %d, file size(test): %d, assessment: %s\n') % (key, print_path, base_file_size, test_file_size, 'pictures are not equivalent'))
+                    f.write(('name: %s, file path: %s, file size(base): %d, file size(test): %d, assessment: %s\n') % 
+                            (key, print_path, base_file_size, test_file_size, 'pictures are not equivalent'))
     for key in base_pic_data.keys():
         print_path = '~/' + rel_path + key
         file_size = os.path.getsize(files['base_pic_dir'] + key)
