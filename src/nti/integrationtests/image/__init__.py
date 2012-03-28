@@ -37,8 +37,10 @@ def compare_pics(base_pic_data, test_pic_data, f, files, rel_path=''):
             if isinstance(base_key, dict) and isinstance(test_key, dict):
                 local_path = rel_path + key + '/'
                 compare_pics(base_key, test_key, f, files, local_path)
-            elif isinstance(base_key, dict): pass #deal with later
-            elif isinstance(test_key, dict): pass #deal with later
+            elif isinstance(base_key, dict): 
+                f.write(('name: %s, file path: %s, assessment: %s') % (key, local_path+key, ('%s is a dir in the base set of pictures and a picture in the rendered content' % key)))
+            elif isinstance(test_key, dict):
+                f.write(('name: %s, file path: %s, assessment: %s') % (key, local_path+key, ('%s is a dir in the rendered set of pictures and a picture in the base content' % key)))
             else:
                 bh = Image.open(files['base_pic_dir'] + rel_path + base_key).histogram()
                 th = Image.open(files['test_pic_dir'] + rel_path + test_key).histogram()
@@ -49,7 +51,7 @@ def compare_pics(base_pic_data, test_pic_data, f, files, rel_path=''):
                 if rms == 0.0:
                     f.write(('name: %s, file path: %s, file size: %d, assessment: %s\n') % (key, print_path, base_file_size, 'pictures are equivalent'))
                 else:
-                    f.write(('name: %s, file path: %s, file size(base): %d, file size(test): %d, assessment: %s\n') % 
+                    f.write(('name: %s, file path: %s, file size(base): %d, file size(rendered): %d, assessment: %s\n') % 
                             (key, print_path, base_file_size, test_file_size, 'pictures are not equivalent'))
     for key in base_pic_data.keys():
         print_path = '~/' + rel_path + key
@@ -58,7 +60,7 @@ def compare_pics(base_pic_data, test_pic_data, f, files, rel_path=''):
     for key in test_pic_data.keys():
         print_path = '~/' + rel_path + key
         file_size = os.path.getsize(files['test_pic_dir'] + key)
-        f.write(('name: %s, file path: %s, file size: %d, assessment: %s\n') % (key, print_path, file_size, 'picture only found in test pics'))
+        f.write(('name: %s, file path: %s, file size: %d, assessment: %s\n') % (key, print_path, file_size, 'picture only found in rendered pics'))
                 
 def write_pic_to_file(base_pic_data, test_pic_data, files):
     f = open(files['txt_file'], 'w')
