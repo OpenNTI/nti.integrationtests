@@ -2,7 +2,9 @@ import sys, os, re
 import math, operator
 from PIL import Image
 
-extentions = '.+jpeg|.+png|.+gif|.+bmp'
+extentions = '.+(jpeg|png|gif|bmp)'
+noextention = '\w*\.'
+toManyExtentions = '(\w*\.\w*\.)'
 
 def check_paths(basePicDir, testPicDir, txt_file):
     assert os.path.exists(basePicDir), "cannot find base directory pictures"
@@ -17,7 +19,7 @@ def store_pics(abs_path):
         if os.path.isdir(abs_path + '/' + item): 
             pic_data[item] = store_pics(abs_path + item)
         else:
-            if not (re.match('\w*\.\w*\.', item)) and re.match(extentions, item):
+            if not (not re.match(noextention, item) or re.match(toManyExtentions, item)) and re.match(extentions, item):
                 pic_data[item] = item
     return pic_data
         
