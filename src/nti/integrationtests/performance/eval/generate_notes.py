@@ -20,6 +20,7 @@ def script_teardown(context):
 
 def create_note(*args, **kwargs):
 	context = kwargs['__context__']
+	runner = kwargs['__runner__']
 	endpoint = context.endpoint
 	credentials = getattr(context, "credentials", None)
 	
@@ -27,6 +28,8 @@ def create_note(*args, **kwargs):
 		container = args[0]
 		if len(args) >=2:
 			credentials = args[1]
+			if '%s' in credentials[0]:
+				credentials = (credentials[0] % runner, credentials[1])
 	else:
 		nttype = generate_random_text()
 		container = generate_ntiid(nttype=nttype)

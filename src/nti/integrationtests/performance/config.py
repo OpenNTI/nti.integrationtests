@@ -94,10 +94,11 @@ def read_config(config_file, process_args=True):
 	context.call_wait_time = get_float_option(config, name="call_wait_time", default=0)
 	context.max_iterations = get_int_option(config, name="max_iterations")
 	
-	for section in config.sections():
+	for num, section in enumerate(config.sections()):
 		delegate = DelegateContext(context)
 		parse_items(delegate, config, process_args, section)
 		
+		delegate.group_number = num
 		delegate.group_name = get_option(config, section, 'group_name', section)
 		delegate.rampup = get_int_option(config, section, 'rampup', context.rampup)
 			

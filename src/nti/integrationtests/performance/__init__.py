@@ -286,6 +286,11 @@ class TargetRunner(object):
 		spec = inspect.getargspec(self.target)
 		return (spec.args and spec.args[-1] == '__context__') or spec.keywords
 		
+	@property
+	def allow_keywords(self):
+		spec = inspect.getargspec(self.target)
+		return True if spec.keywords else False
+	
 	def run(self):
 		elapsed = 0
 		iterations = 0
@@ -295,6 +300,8 @@ class TargetRunner(object):
 					self.runner_num, self.run_time, self.max_iterations)
 		
 		can_bind_context = self.allow_context
+		can_bind_any_keyword = self.allow_keywords
+		
 		while 	(self.run_time and elapsed < self.run_time) or \
 				(self.max_iterations and iterations < self.max_iterations):
 			
@@ -302,7 +309,9 @@ class TargetRunner(object):
 			exception = None
 			start = time.time()
 			try:
-				if can_bind_context:
+				if can_bind_any_keyword:
+					result = self.target(*self.target_args, __context__=self.context, __runner__=self.runner_num)
+				elif can_bind_context:
 					result = self.target(*self.target_args, __context__=self.context)
 				else:
 					result = self.target(*self.target_args)
