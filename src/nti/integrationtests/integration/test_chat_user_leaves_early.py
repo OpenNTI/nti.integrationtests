@@ -1,5 +1,6 @@
 import unittest
 	
+from hamcrest import assert_that, has_length
 import user_chat_objects
 from user_chat_objects import HostUserChatTest
 
@@ -21,7 +22,7 @@ class TestChatUserleavesEarly(HostUserChatTest):
 			total_sent = total_sent + len(list(u.sent))
 			
 		self.assertEqual(total_sent, 10, "Incorrect number of messages sent")
-		self.assertEqual( len(list(users[2].received)), 6, "Unexpected number of messages") 
+		assert_that( list(users[2].received), has_length( 6 ) )
 		
 	def _create_user(self, username):
 		early = username == self.leave_early_user
