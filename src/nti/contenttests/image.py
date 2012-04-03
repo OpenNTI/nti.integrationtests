@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
+import os
+import re
 import sys
+import glob
 import math
 import operator
 
@@ -50,7 +53,33 @@ def compare_images_scipy(source, target):
 
 # ----------------------------
 
+default_extentions = '.+(jpeg|png|gif|bmp|jpg)'
+
+def _image_finder(current_path, extentions=default_extentions, initial_path=None, relative=True):
+	current_path = current_path if current_path[-1] == '/' else (current_path + '/')
+	initial_path = initial_path or current_path
+	result = set()
+	for path in glob.iglob(current_path + '*'):
+		if os.path.isdir(path):
+			s = _image_finder(path, extentions, initial_path, relative)
+			result.update(s)
+		else:
+			name = os.path.basename(path)
+			if re.match(extentions, name):
+				if relative:
+					result.add(path[len(initial_path):])
+				else:
+					result.add(path)
+	return result
+
+def get_images(source_path, extentions=default_extentions, relative=True):
+	result = _image_finder(source_path, extentions=extentions, relative=relative) if os.path.isdir(source_path) else ()
+	return result
+
+# ----------------------------
+
 if __name__ == "__main__":
-	source, target = sys.argv[1:1+2]
-	print "PIL", compare_images_pil(source, target)
-	print "scipy", compare_images_scipy(source, target)
+	s = get_images(sys.argv[1])
+	for x, p in enumerate(s):
+		print p
+		if x > 10: break
