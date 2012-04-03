@@ -723,8 +723,7 @@ def _shadowUsers(ws, containerId, users, data_format='json', message_context=def
 # -----------------------------
 
 def _ws_disconnect(ws, data_format='json', message_context=default_message_ctx):
-	d = {"name":WS_DISCONNECT, "args":[]}
-	msg = encode(d, data_format)	
+	msg = b"0::"
 	message_context.send(ws, msg)
 	
 def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, timeout=DEAULT_TIMEOUT,
