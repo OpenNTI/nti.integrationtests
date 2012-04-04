@@ -70,6 +70,7 @@ def _image_finder(current_path, extentions=default_extentions, initial_path=None
 					result.add(path[len(initial_path):])
 				else:
 					result.add(path)
+	result = sorted(result)
 	return result
 
 def get_images(source_path, extentions=default_extentions, relative=True):
@@ -80,6 +81,7 @@ def get_images(source_path, extentions=default_extentions, relative=True):
 
 if __name__ == "__main__":
 	s = get_images(sys.argv[1])
+	print len(s)
 	for x, p in enumerate(s):
 		print p
 		if x > 10: break
