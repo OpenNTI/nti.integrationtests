@@ -4,6 +4,7 @@ import time
 import warnings
 import collections
 from urlparse import urljoin
+from url_httplib import URLHttpLib
 
 from nti.integrationtests.contenttypes.servicedoc import Link
 from nti.integrationtests.contenttypes.servicedoc import Item
@@ -24,7 +25,7 @@ from nti.integrationtests.contenttypes import adapt_ds_object
 from nti.integrationtests.contenttypes import TranscriptSummary
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 
-from url_httplib import URLHttpLib
+from hamcrest import assert_that, is_, is_not, none, instance_of
 
 # -----------------------------------
 
@@ -150,19 +151,18 @@ class DataserverClient(object):
 		return self.create_friends_list(FriendsList(name=name, friends=friends), credentials=credentials, adapt=adapt)
 
 	def create_friends_list(self, obj, credentials=None, adapt=True):
-		check_that(isinstance(obj, FriendsList), "must provide a valid DataServer object", obj)
+		assert_that(obj, instance_of(FriendsList), 'must provide a valid DataServer object')
 		collection, _ = self._get_collection(name='FriendsLists', credentials=credentials)
 		return self._post_to_collection(obj, collection, credentials, adapt=adapt)
 	
 	def get_friends_lists(self, credentials=None, adapt=True):
-		
 		collection, _ = self._get_collection(name='FriendsLists', credentials=credentials)
 		
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, collection.href)
 		
 		rp = self.httplib.do_get(url, credentials)
-		check_that(rp.status_int == 200, 'invalid status code getting friends lists', code=rp.status_int)
+		assert_that(rp.status_int, is_(200), 'invalid status code getting friends lists')
 		
 		data = self.httplib.deserialize(rp)
 		data = data.get('Items', {})
@@ -174,18 +174,18 @@ class DataserverClient(object):
 	
 	def get_user_generated_data(self, container, workspace=None, credentials=None, adapt=True):
 		data = self._get_container_item_data(container=container, link_rel='UserGeneratedData', workspace=workspace,
-												 credentials=credentials, validate=True)
+											 credentials=credentials, validate=True)
 		return adapt_ds_object(data) if adapt else data
 
 	def get_recursive_stream_data(self, container, workspace=None, credentials=None, adapt=True):
 		data = self._get_container_item_data(container=container, link_rel='RecursiveStream', workspace=workspace,
-												 credentials=credentials, validate=True)
+											 credentials=credentials, validate=True)
 		return adapt_ds_object(data) if adapt else data
 	
 	
 	def get_recursive_user_generated_data(self, container, workspace=None, credentials=None, adapt=True):
 		data = self._get_container_item_data(container=container, link_rel='RecursiveUserGeneratedData', workspace=workspace,
-												 credentials=credentials, validate=True)
+											 credentials=credentials, validate=True)
 		return adapt_ds_object(data) if adapt else data
 	
 	getUserGeneratedData = get_user_generated_data
@@ -197,42 +197,47 @@ class DataserverClient(object):
 		collection, _ = self._get_collection(name='Objects', workspace='Global', credentials=credentials)
 		credentials = self._credentials_to_use(credentials)
 		url = _check_url(urljoin(self.endpoint, collection.href)) + obj_id
+		
 		rp = self.httplib.do_get(url, credentials)
-		check_that(rp.status_int == 200, "invalid status code getting object with id '%s'" % obj_id, obj_id, rp.status_int)
+		assert_that(rp.status_int, is_(200), "invalid status code getting object with id '%s'" % obj_id)
+		
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 	
 	def create_object(self, obj, credentials=None, name='Pages', workspace=None, adapt=True, **kwargs):
-		check_that(isinstance(obj, DSObject), "must provide a valid DataServer object", obj)
-		check_that(obj.container, "must provide a valid container", obj)
+		assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
+		assert_that(obj.container, is_not(none()), '"must provide a valid container')
 		pages, _ = self._get_collection(name=name, workspace=workspace, credentials=credentials)
 		return self._post_to_collection(obj, pages, credentials, adapt=adapt)
 	
 	def update_object(self, obj, link=None, credentials=None, adapt=True):
 		
 		if not link:
-			check_that(isinstance(obj, DSObject), "must provide a valid DataServer object", obj)
+			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
 		
 		href = link or obj.get_edit_link()
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
+		
 		rp = self.httplib.do_put(url, credentials=credentials, data=self.object_to_persist(obj))
-		check_that(rp.status_int == 200, 'invalid status code while updating an object', obj, rp.status_int)
+		assert_that(rp.status_int, is_(200), 'invalid status code while updating an object')
+		
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 	
 	def delete_object(self, obj, link=None, credentials=None):
 		
 		if not link:
-			check_that(isinstance(obj, DSObject), "must provide a valid DataServer object", obj)
+			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
 		
 		href = link or obj.get_delete_link()
 		check_that(href, "no delete link was provided", obj)
 		
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
+		
 		rp = self.httplib.do_delete(url, credentials=credentials)
-		check_that(rp.status_int == 204, 'invalid status code while deleting an object', obj, rp.status_int)
+		assert_that(rp.status_int, is_(204), 'invalid status code while deleting an object')
 		
 		return None
 	
