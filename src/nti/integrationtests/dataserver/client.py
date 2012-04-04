@@ -29,27 +29,6 @@ from hamcrest import assert_that, is_, is_not, none, instance_of
 
 # -----------------------------------
 
-class DeclarationError(AssertionError):
-	def __init__(self, message='', args=None, code=None):
-		super(DeclarationError, self).__init__(message, args)
-		self.code = code
-	
-	@property
-	def status_code(self):
-		return self.code
-	
-	def __str__(self):
-		return self.message
-	
-	def __repr__(self):
-		return "DeclarationError(%s,%s,%s)" % (self.message, self.args, self.code)
-		
-def check_that(expr, message='', args=None, code=None):
-	if not expr:
-		raise DeclarationError(message=message, args=args, code=code)
-	
-# -----------------------------------
-
 def get_root_item():
 	return ROOT_ITEM
 
@@ -206,7 +185,7 @@ class DataserverClient(object):
 	
 	def create_object(self, obj, credentials=None, name='Pages', workspace=None, adapt=True, **kwargs):
 		assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
-		assert_that(obj.container, is_not(none()), '"must provide a valid container')
+		assert_that(obj.container, is_not(none()), 'must provide a valid container')
 		pages, _ = self._get_collection(name=name, workspace=workspace, credentials=credentials)
 		return self._post_to_collection(obj, pages, credentials, adapt=adapt)
 	
@@ -231,7 +210,7 @@ class DataserverClient(object):
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
 		
 		href = link or obj.get_delete_link()
-		check_that(href, "no delete link was provided", obj)
+		assert_that(href, is_not(none()), 'no delete link was provided')
 		
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
@@ -287,11 +266,11 @@ class DataserverClient(object):
 				continue
 			
 			href = item.get_link('transcript')
-			check_that( href, 'could not find a transcript link for %s' % room_id, room_id)
-			
+			assert_that(href, is_not(none()), 'could not find a transcript link for %s' % room_id)
+		
 			url = urljoin(self.endpoint, href)
 			rp = self.httplib.do_get(url, credentials)
-			check_that(rp.status_int == 200, 'invalid status code while getting transcript data', href, rp.status_int)
+			assert_that(rp.status_int, is_(200), 'invalid status code while getting transcript data')
 			
 			data = self.httplib.deserialize(rp)
 			return adapt_ds_object(data) if adapt else data
@@ -310,7 +289,7 @@ class DataserverClient(object):
 		url = _check_url(urljoin(self.endpoint, link.href)) + query
 		
 		rp = self.httplib.do_get(url, credentials)
-		check_that(rp.status_int == 200, 'invalid status code while searching user data', url, rp.status_int)
+		assert_that(rp.status_int, is_(200), 'invalid status code while searching user data')
 		
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
@@ -335,7 +314,7 @@ class DataserverClient(object):
 		if rp.status_int == 404:
 			return EMPTY_CONTAINER_ARRAY
 		
-		check_that(rp.status_int == 200, 'invalid status code while getting user object(s)', url, rp.status_int)
+		assert_that(rp.status_int, is_(200), 'invalid status code while getting user object(s)')
 		
 		data = self.httplib.deserialize(rp)	
 		return adapt_ds_object(data) if adapt else data
@@ -346,13 +325,13 @@ class DataserverClient(object):
 		
 		credentials = self._credentials_to_use(credentials)
 		ds_ws = self._get_or_parse_user_doc(credentials)
-		check_that(ds_ws, "could not find service document for '%s'" % credentials[0], credentials)
+		assert_that(ds_ws, is_not(none()), "could not find service document for '%s'" % credentials[0])
 		
 		ws = ds_ws.get('Global', None)
-		check_that(ws, "could not find Global workspace for '%s'" % credentials[0], credentials)
+		assert_that(ws, is_not(none()), "could not find Global workspace for '%s'" % credentials[0])
 		
 		link = ws.get_link('UserSearch')
-		check_that(ws, "could not find a UserSearch link in Global workspace for '%s'" % credentials[0], credentials)
+		assert_that(link, is_not(none()), "could not find a UserSearch link in Global workspace for '%s'" % credentials[0])
 		
 		return (link, ws)
 	
@@ -379,11 +358,12 @@ class DataserverClient(object):
 							content_type=None, credentials=None, slug=None, adapt=True):
 		credentials = self._credentials_to_use(credentials)
 		class_info = self.get_class(provider, class_name, credentials=credentials, adapt=True)
-		check_that(class_info, "could not find a class with name %s" % class_name, class_name)
+		assert_that(class_info, is_not(none()), "could not find a class with name '%s'" % class_name)
+		
 		href = class_info.href
 		if section_name:
 			section = class_info.get_section(section_name)
-			check_that(section, "could not find a section with name %s" % section_name, section_name)
+			assert_that(section, is_not(none()), "could not find a section with name '%s'" % section_name)
 			href = section.href
 			
 		location, slug = self._post_raw_content(href, source_file, content_type, slug=slug)
@@ -416,15 +396,15 @@ class DataserverClient(object):
 		workspace = workspace or credentials[0]
 		ds_ws = self._get_or_parse_user_doc(credentials)
 		if validate:
-			check_that(ds_ws, "could not find service document for '%s'" % credentials[0], credentials)
+			assert_that(ds_ws, is_not(none()), "could not find service document for '%s'" % credentials[0])
 		
 		ws = ds_ws.get(workspace, None) if ds_ws else None
 		if validate:
-			check_that(ws, "could not find '%s' workspace" % workspace, workspace)
+			assert_that(ws, is_not(none()), "could not find '%s' workspace" % workspace)
 		
 		collection = ws.get_collection(name) if ws else None
 		if validate:
-			check_that(collection, "could not find '%s' collection" % name, name)
+			assert_that(collection, is_not(none()), "could not find '%s' collection" % name)
 	
 		return (collection, ws)
 		
@@ -468,7 +448,8 @@ class DataserverClient(object):
 		
 		link = item.get_link(link_rel)
 		if validate:
-			check_that(link, "could not find '%s' link", link_rel)
+			assert_that(link, is_not(none()), "could not find '%s' link" % link_rel)
+			
 		elif not link:
 			return EMPTY_CONTAINER_DICT
 		
@@ -479,15 +460,16 @@ class DataserverClient(object):
 		if rp.status_int == 404:
 			return EMPTY_CONTAINER_DICT
 		
-		check_that(rp.status_int == 200, "invalid status code getting '%s'" % link_rel, link_rel, rp.status_int)
-		
+		assert_that(rp.status_int, is_(200), "invalid status code getting '%s'" % link_rel)
 		return self.httplib.deserialize(rp)
 		
 	def _post_to_collection(self, obj, collection, credentials=None, adapt=True):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, collection.href)
+		
 		rp = self.httplib.do_post(url, credentials=credentials, data=self.object_to_persist(obj))
-		check_that(rp.status_int == 201, 'invalid status code while posting an object', obj, rp.status_int)
+		assert_that(rp.status_int, is_(201), 'invalid status code while posting an object')
+		
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 	
@@ -495,9 +477,10 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		slug = slug or os.path.basename(source)
 		url = urljoin(self.endpoint, href) 
+		
 		rp = self.httplib.do_upload_resource(url, credentials=credentials, source_file=source,
 											 content_type=content_type, headers= {'slug' : slug })
-		check_that(rp.status_int == 201, 'invalid status code while posting raw content', href, rp.status_int)
+		assert_that(rp.status_int, is_(201), 'invalid status code while posting raw content')
 		
 		headers = rp.headers
 		return (headers.get('location', None), slug)
@@ -512,8 +495,10 @@ class DataserverClient(object):
 	def _parse_collection_data(self, href, credentials=None):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
+		
 		rp = self.httplib.do_get(url, credentials)
-		check_that(rp.status_int == 200, 'invalid status code while getting collection data', href, rp.status_int)
+		assert_that(rp.status_int, is_(200), 'invalid status code while getting collection data')
+		
 		data = self.httplib.deserialize(rp)
 		return Collection.new_from_dict(data) if data else None
 	
