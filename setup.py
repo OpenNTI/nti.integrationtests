@@ -23,7 +23,7 @@ setup(
 
 	install_requires = [ 'nti.dataserver',
 						 'coverage',
-						 'pyobjc-core'
+						 'pyobjc-core',
 						 'pyobjc'
 						],
 	
