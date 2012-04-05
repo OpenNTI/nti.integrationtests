@@ -23,7 +23,8 @@ setup(
 
 	install_requires = [ 'nti.dataserver',
 						 'coverage',
-						 'pil'
+						 'pyobjc-core'
+						 'pyobjc'
 						],
 	
 	packages = find_packages('src'),
