@@ -74,7 +74,6 @@ def _image_finder(current_path, extentions=default_extentions, initial_path=None
 					result.add(path[len(initial_path):])
 				else:
 					result.add(path)
-	result = sorted(result)
 	return result
 
 def get_images(source_path, extentions=default_extentions, relative=True):
@@ -95,11 +94,18 @@ def compare_directories(source, target, out_file, extentions=default_extentions)
 		f.write('\t'.join(lst))
 		f.write('\n')
 		f.flush()
-			
+		
+	def _pil(src, tgt):
+		try:
+			return compare_images_pil(src, tgt)
+		except:
+			return 'NaN'
+					
 	with open(out_file, "w") as f:
 		
 		# header
-		_write(f, ['name','master-size', 'target-size', 'histogram-comp', 'manhattan-norm','zero-norm'])
+		_write(f, ['name','master-size', 'target-size', 'histogram-comp'])
+		
 		# compare in both files
 		for name in intersection:
 			lst = []
@@ -109,11 +115,8 @@ def compare_directories(source, target, out_file, extentions=default_extentions)
 			tgt = os.path.join(target, name)
 			lst.append(str(os.path.getsize(tgt)))
 			
-			pil = compare_images_pil(src, tgt)
+			pil = _pil(src, tgt)
 			lst.append(str(pil))
-			
-			scp = compare_images_scipy(src, tgt)
-			lst.extend(scp)
 			_write(f, lst)
 			
 		# only in source
@@ -136,8 +139,5 @@ def compare_directories(source, target, out_file, extentions=default_extentions)
 # ----------------------------
 
 if __name__ == "__main__":
-	s = get_images(sys.argv[1])
-	print len(s)
-	for x, p in enumerate(s):
-		print p
-		if x > 10: break
+	src, tgt, out = sys.argv[1:4]
+	compare_directories(src, tgt, out)
