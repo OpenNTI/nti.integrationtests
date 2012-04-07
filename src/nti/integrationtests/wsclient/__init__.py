@@ -49,7 +49,7 @@ def enable_trace(trackable=True):
 	"""
 	global traceEnabled
 	traceEnabled = trackable
-	
+
 	if trackable:
 		if not logger.handlers:
 			logger.addHandler(logging.StreamHandler())
@@ -72,7 +72,7 @@ def get_default_timeout():
 
 def _parse_url(url):
 	"""
-	parse url and the result is tuple of 
+	parse url and the result is tuple of
 	(hostname, port, resource path and the flag of secure mode)
 	"""
 	parsed = urlparse(url)
@@ -83,7 +83,7 @@ def _parse_url(url):
 	port = 0
 	if parsed.port:
 		port = parsed.port
-		
+
 	is_secure = False
 	if parsed.scheme == "ws":
 		if not port:
@@ -94,12 +94,12 @@ def _parse_url(url):
 			port  = 443
 	else:
 		raise ValueError("scheme %s is invalid" % parsed.scheme)
-	
+
 	if parsed.path:
 		resource = parsed.path
 	else:
 		resource = "/"
-		
+
 	return (hostname, port, resource, is_secure)
 
 # ---------------------------------
@@ -124,7 +124,7 @@ def _create_sec_websocket_key():
 	for _ in range(spaces_n):
 		pos = random.randint(1, len(key_n)-1)
 		key_n = key_n[0:pos] + " " + key_n[pos:]
-		
+
 	return number_n, key_n
 
 def _create_key3():
@@ -142,7 +142,7 @@ HEADERS_TO_EXIST_FOR_HIXIE75 = ["websocket-origin", "websocket-location",]
 
 class WebSocketException(Exception):
 	pass
-	
+
 class ConnectionClosedException(WebSocketException):
 	pass
 
@@ -151,23 +151,23 @@ class ConnectionClosedException(WebSocketException):
 class _SSLSocketWrapper(object):
 	def __init__(self, sock):
 		self.ssl = socket.ssl(sock)
-	
+
 	def recv(self, bufsize):
 		return self.ssl.read(bufsize)
-	
+
 	def send(self, payload):
 		return self.ssl.write(payload)
-	
+
 class WebSocket(object):
 	"""
 	Low level WebSocket interface.
 	This class is based on
 	  The WebSocket protocol draft-hixie-thewebsocketprotocol-76
 	  http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76
-	
+
 	We can connect to the websocket server and send/recieve data.
 	The following example is a echo client.
-	
+
 	>>> import websocket
 	>>> ws = websocket.WebSocket()
 	>>> ws.Connect("ws://localhost:8080/echo")
@@ -176,7 +176,7 @@ class WebSocket(object):
 	'Hello, Server'
 	>>> ws.close()
 	"""
-	
+
 	def __init__(self):
 		"""
 		Initalize WebSocket object.
@@ -189,13 +189,13 @@ class WebSocket(object):
 		Set the timeout to the websocket.
 		"""
 		self.sock.settimeout(timeout)
-		
+
 	def gettimeout(self):
 		"""
 		Get the websocket timeout.
 		"""
 		return self.sock.gettimeout()
-		
+
 	def connect(self, url, **options):
 		"""
 		Connect to url. url is websocket url scheme. ie. ws://host:port/resource
@@ -204,15 +204,15 @@ class WebSocket(object):
 		self.sock.connect((host, port))
 		self._handshake(	host, port, resource, is_secure,  **options)
 		return self
-		
+
 	def _handshake(self, host, port, resource, is_secure, **options):
-		
+
 		if is_secure:
 			self.io_sock = _SSLSocketWrapper(self.sock)
-			
+
 		sock = self.io_sock
 		ws_info = list()
-		
+
 		ws_info.append("GET %s HTTP/1.1" % resource)
 		ws_info.append("Upgrade: WebSocket")
 		ws_info.append("Connection: Upgrade")
@@ -220,22 +220,22 @@ class WebSocket(object):
 			hostport = host
 		else:
 			hostport = "%s:%d" % (host, port)
-			
+
 		ws_info.append("Host: %s" % hostport)
 		ws_info.append("Origin: %s" % hostport)
-		
+
 		number_1, key_1 = _create_sec_websocket_key()
 		ws_info.append("Sec-WebSocket-Key1: %s" % key_1)
 		number_2, key_2 = _create_sec_websocket_key()
 		ws_info.append("Sec-WebSocket-Key2: %s" % key_2)
-		
+
 		if "headers" in options:
 			ws_info.extend(options["headers"])
-		
+
 		ws_info.append("")
 		key_3 = _create_key3()
 		ws_info.append(key_3)
-	
+
 		header_str = "\r\n".join(ws_info)
 		sock.send(header_str)
 		if traceEnabled:
@@ -243,11 +243,11 @@ class WebSocket(object):
 			logger.debug( header_str)
 			logger.debug("-----------------------")
 
-		status, resp_headers = self._read_headers()			
+		status, resp_headers = self._read_headers()
 		if status != 101:
 			self.close()
 			raise WebSocketException("Handshake Status %d" % status)
-		
+
 		success, secure = self._validate_header(resp_headers)
 		if not success:
 			self.close()
@@ -258,25 +258,25 @@ class WebSocket(object):
 			if not self._validate_resp(number_1, number_2, key_3, resp):
 				self.close()
 				raise WebSocketException("challenge-response error")
-		
+
 		self.connected = True
-		
+
 	def _validate_resp(self, number_1, number_2, key3, resp):
 		challenge = struct.pack("!I", number_1)
 		challenge += struct.pack("!I", number_2)
 		challenge += key3
 		digest = md5.md5(challenge).digest()
 		return resp == digest
-	
+
 	def _get_resp(self):
 		result = self._recv(16)
 		if traceEnabled:
 			logger.debug("--- challenge response result ---")
 			logger.debug(repr(result))
 			logger.debug("---------------------------------")
-		
+
 		return result
-	
+
 	def _validate_header(self, headers):
 		#TODO: check other headers
 		for key, value in HEADERS_TO_CHECK.iteritems():
@@ -301,7 +301,7 @@ class WebSocket(object):
 			return True, False
 
 		return False, False
-	
+
 	def _read_headers(self):
 		status = None
 		headers = {}
@@ -328,9 +328,9 @@ class WebSocket(object):
 
 		if traceEnabled:
 			logger.debug("-----------------------")
-			
+
 		return status, headers
-	
+
 	def send(self, payload):
 		"""
 		Send the data as string. payload must be utf-8 string or unicoce.
@@ -341,7 +341,7 @@ class WebSocket(object):
 		self.io_sock.send(data)
 		if traceEnabled:
 			logger.debug("send: " + repr(data))
-	
+
 	def recv(self):
 		"""
 		Reeive utf-8 string data from the server.
@@ -371,7 +371,7 @@ class WebSocket(object):
 			return None
 
 		raise WebSocketException("Invalid frame type %s" % b)
-		
+
 	def _read_length(self):
 		length = 0
 		while True:
@@ -381,7 +381,7 @@ class WebSocket(object):
 				break
 
 		return length
-	
+
 	def close(self):
 		"""
 		Close Websocket object
@@ -402,25 +402,25 @@ class WebSocket(object):
 			except:
 				pass
 		self._closeInternal()
-		
+
 	def _closeInternal(self):
 		self.connected = False
 		self.sock.close()
 		self.io_sock = self.sock
-		
+
 	def _recv(self, bufsize):
 		_data = self.io_sock.recv(bufsize)
 		if not _data:
 			raise ConnectionClosedException()
 		return _data
-	
+
 	def _recv_strict(self, bufsize):
 		remaining = bufsize
 		_data = ""
 		while remaining:
 			_data += self._recv(remaining)
 			remaining = bufsize - len(_data)
-			
+
 		return _data
 
 	def _recv_line(self):
@@ -431,7 +431,7 @@ class WebSocket(object):
 			if c == "\n":
 				break
 		return "".join(line)
-	
+
 	def _recv_till_found(self, word):
 		line = []
 		while True:
@@ -442,13 +442,13 @@ class WebSocket(object):
 				if word in s:
 					return s
 		return None
-	
+
 # ---------------------------------
 
 def create_connection(url, timeout=default_timeout, on_handshake=None, **options):
 	"""
 	connect to url and return websocket object.
-	
+
 	Connect to url and return the WebSocket object.
 	Passing optional timeout parameter will set the timeout on the socket.
 	If no timeout is supplied, the global default timeout setting returned by getdefauttimeout() is used.
@@ -457,45 +457,45 @@ def create_connection(url, timeout=default_timeout, on_handshake=None, **options
 	websock.settimeout(timeout)
 	websock.connect(url, on_handshake=on_handshake, **options)
 	return websock
-	
+
 # ---------------------------------
 
 def create_ds_connection(host, port, username, password, resource=None, is_secure=False, timeout=default_timeout, **options):
-	
+
 	resource = resource or '/socket.io/1/'
 	if resource[-1] != '/':
 		resource += '/'
-		
+
 	ws = WebSocket()
 	ws.settimeout(timeout)
 	ws.sock.connect((host, port))
-	
+
 	base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
 	auth_header = 'Authorization: Basic %s' % base64string
-	
+
 	# socket.io handshake
 	ws.sock.send('POST %s HTTP/1.1\r\n' % resource)
 	ws.sock.send(auth_header)
 	ws.sock.send('Content-Length: 0\r\n')
 	ws.sock.send('\r\n')
-	
+
 	status, resp_headers = ws._read_headers()
 	if status == 200:
 		cl = resp_headers['content-length'] if 'content-length' in resp_headers else None
 		if cl:
 			content_length = int(resp_headers['content-length'])
-			
+
 			# get the session id. the server returns the session id e.g.
 			# 57e45c8578d9426fb0f12336c5ef21ed:15:10:websocket,xhr-polling
 			msg = ws._recv_strict(content_length)
 			if ':15:10:websocket' in msg:
 				sessiond_id = msg.split(":")[0]
 				resource = '%s%s/%s' % (resource, 'websocket', sessiond_id)
-				
+
 				header = options.get('headers', [])
 				header.append(auth_header)
 				options['headers'] = header
-				
+
 				ws._handshake(host, port, resource, is_secure, **options)
 				return ws
 		else:
@@ -504,8 +504,7 @@ def create_ds_connection(host, port, username, password, resource=None, is_secur
 	else:
 		ws.close()
 		raise WebSocketException("Invalid status %s writing to %s (%s)" % (status, resource, resp_headers))
-	
+
 if __name__ == "__main__":
 	ws = create_ds_connection('localhost', 8081, 'test.user.1@nextthought.com', 'temp001')
 	ws.close()
-	
