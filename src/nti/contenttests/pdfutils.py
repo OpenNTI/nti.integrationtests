@@ -1,49 +1,6 @@
 import os
 
-from Quartz import kCFURLPOSIXPathStyle
-from Quartz import kCGRenderingIntentDefault
-from Quartz import CFSTR
-from Quartz import CGImageCreate
-from Quartz import CGImageDestinationAddImage
-from Quartz import CGImageDestinationFinalize
-from Quartz import CGPDFDataFormatRaw
-from Quartz import CGPDFDataFormatJPEGEncoded
-from Quartz import CGPDFDocumentGetPage
-from Quartz import CFURLCreateFromFileSystemRepresentation
-from Quartz import CGPDFDocumentCreateWithURL
-from Quartz import CGPDFDocumentGetNumberOfPages
-from Quartz import CGPDFPageGetDictionary
-from Quartz import CGPDFDictionaryGetDictionary
-from Quartz import CGPDFDictionaryGetCount
-from Quartz import CGPDFDictionaryApplyFunction
-from Quartz import CGDataProviderCreateWithCFData
-from Quartz import CGPDFObjectGetType
-from Quartz import CGPDFObjectGetValue
-from Quartz import CGPDFDictionaryGetStream
-from Quartz import CGPDFDictionaryGetName
-from Quartz import CGPDFStreamGetDictionary
-from Quartz import CGPDFStreamCopyData
-from Quartz import CFURLCreateWithFileSystemPath
-from Quartz import CGPDFDictionaryGetInteger
-from Quartz import CGPDFDictionaryGetBoolean
-from Quartz import CGColorSpaceCreateDeviceRGB
-from Quartz import CGPDFDictionaryGetArray
-from Quartz import CGColorSpaceGetNumberOfComponents
-from Quartz import CGColorSpaceCreateDeviceRGB
-from Quartz import CGColorSpaceCreateDeviceCMYK
-from Quartz import CGColorSpaceCreateDeviceGray
-from Quartz import CGImageDestinationCreateWithURL
-from Quartz import CFURLWriteDataAndPropertiesToResource
-
-from Quartz import PDFDocument
-from Quartz import NSMakeRange
-from Quartz import NSDocumentTypeDocumentAttribute
-from Quartz import NSHTMLTextDocumentType 
-from Quartz import NSRTFTextDocumentType
-from Quartz import NSViewZoomDocumentAttribute
-from Quartz import NSPlainTextDocumentType
-from Quartz import NSCharacterEncodingDocumentAttribute
-from Quartz import NSUTF8StringEncoding
+from Quartz import *
 
 #########################
 
