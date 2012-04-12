@@ -1,4 +1,5 @@
 import os
+import six
 import time
 import random
 import unittest
@@ -29,7 +30,7 @@ class TestBasicClassRoom(DataServerTestCase):
 		self.ds.set_credentials(self.owner)
 	
 	def make_collecion(self, obj):
-		if isinstance(obj, basestring):
+		if isinstance(obj, six.string_types):
 			return [obj]
 		return obj if isinstance(obj, collections.Iterable) else [obj]
 		

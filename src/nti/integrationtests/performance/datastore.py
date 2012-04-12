@@ -1,3 +1,4 @@
+import six
 import numbers
 import transaction
 
@@ -80,7 +81,7 @@ def _add_timestamp_stores(store, timestamp, use_trx=True):
 			store.contexts[timestamp] = PersistentMapping()
 			
 def add_result(store, timestamp, record, use_trx=True):
-	if isinstance(record, basestring):
+	if isinstance(record, six.string_types):
 		record = process_record(record)
 	assert isinstance(record, RunnerResult)
 	
@@ -92,7 +93,7 @@ def add_result(store, timestamp, record, use_trx=True):
 		
 		try:
 			if 	result is None or \
-				isinstance(result, basestring) or \
+				isinstance(result, six.string_types) or \
 				isinstance(result, numbers.Real) or \
 				IPersistent.implementedBy(result.__class__):
 				

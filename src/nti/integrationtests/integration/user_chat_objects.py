@@ -1,3 +1,4 @@
+import six
 import sys
 import time
 import uuid
@@ -83,7 +84,7 @@ class BasicChatTest(DataServerTestCase):
 	@classmethod
 	def register_friends(cls, username, friends, password=DEFAULT_USER_PASSWORD, ds_client=None):
 		
-		if isinstance(friends, basestring) or not isinstance(friends, collections.Iterable):
+		if isinstance(friends, six.string_types) or not isinstance(friends, collections.Iterable):
 			friends = [friends]
 		elif not isinstance(friends, list):
 			friends = list(set(friends))

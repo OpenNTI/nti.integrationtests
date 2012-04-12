@@ -1,3 +1,4 @@
+import six
 import time
 import inspect
 import numbers
@@ -106,7 +107,7 @@ class DelegateContext(Context):
 			if k.startswith("_"):
 				continue
 			
-			if isinstance(v, numbers.Real) or isinstance(v, basestring):
+			if isinstance(v, numbers.Real) or isinstance(v, six.string_types):
 				external[k] = v
 			elif inspect.isfunction(v):
 				external[k] = '%s.%s' % (v.__module__, v.__name__)

@@ -1,4 +1,5 @@
 import pdb
+import six
 import pprint
 import inspect
 import UserDict
@@ -180,7 +181,7 @@ class DSObject(Persistent, UserDict.DictMixin):
 	def _assign_to_list(self, mapkey, val, defType=list):
 		if isinstance(val, list):
 			collection = val
-		elif isinstance(val, basestring):
+		elif isinstance(val, six.string_types):
 			collection = [val]
 		elif isinstance(val, collections.Iterable):
 			collection = self._data[mapkey] if mapkey in self._data else defType()

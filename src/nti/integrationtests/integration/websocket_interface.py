@@ -1,3 +1,4 @@
+import six
 import json
 import plistlib
 import threading
@@ -121,7 +122,7 @@ def _nonefy(s):
 	return None if s and str(s) == 'null' else s
 
 def _create_message_body(info):
-	if isinstance(info, basestring):
+	if isinstance(info, six.string_types):
 		body = [info]
 	elif isinstance(info, list):
 		body = [toExternalObject(m) for m in info]
@@ -154,7 +155,7 @@ class _Room():
 		return "<%s,%s,%s,%s,%s>" % (self.ID, self.occupants, self.active, self.moderated, self.containerId)
 	
 	def __eq__( self, other ):
-		if isinstance(other, basestring):
+		if isinstance(other, six.string_types):
 			return self.ID == other
 		elif isinstance(other, _Room):
 			return self.ID == other.ID
@@ -198,7 +199,7 @@ class _RecvMessage(_Message):
 		self.lastModified = kwargs.get('lastModified', 0)
 	
 	def __eq__( self, other ):
-		if isinstance(other, basestring):
+		if isinstance(other, six.string_types):
 			return self.ID == other
 		elif isinstance(other, _RecvMessage):
 			return self.ID == other.ID
@@ -213,7 +214,7 @@ class _PostMessage(_Message):
 		super(_PostMessage, self).__init__(**kwargs)
 	
 	def __eq__( self, other ):
-		if isinstance(other, basestring):
+		if isinstance(other, six.string_types):
 			return str(self.message) == other
 		elif isinstance(other, _PostMessage):
 			return self.message == other.message
@@ -504,7 +505,7 @@ class InActiveRoom(WebSocketException):
 
 def toList(data, unique=True):
 	if data:
-		if isinstance(data, basestring) or not isinstance(data, collections.Iterable):
+		if isinstance(data, six.string_types) or not isinstance(data, collections.Iterable):
 			data = [data]
 		elif not isinstance(data, list):
 			data = list(set(data)) if unique else list(data)
@@ -539,7 +540,7 @@ def decode(msg, data_format='json'):
 	return None
 
 def isEvent(data, event, data_format='json'):	
-	if isinstance(data, basestring):
+	if isinstance(data, six.string_types):
 		data = decode(data, data_format)
 	if isinstance(data, dict):
 		return data.get('name',None) == event

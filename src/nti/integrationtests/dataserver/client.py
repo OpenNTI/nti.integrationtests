@@ -1,4 +1,5 @@
 import os
+import six
 import json
 import time
 import warnings
@@ -103,7 +104,7 @@ class DataserverClient(object):
 		return self.create_object(note, adapt=adapt, **kwargs)
 	
 	def create_text_and_body(self, data):
-		if isinstance(data, basestring) or isinstance(data, DSObject):
+		if isinstance(data, six.string_types) or isinstance(data, DSObject):
 			body = [data]
 		elif isinstance(data, list):
 			body = data
