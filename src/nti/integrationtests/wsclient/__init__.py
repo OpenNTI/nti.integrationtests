@@ -19,6 +19,7 @@ Copyright (C) 2010 Hiroki Ohtani(liris)
 
 """
 
+import re
 import md5
 import base64
 import random
@@ -460,6 +461,8 @@ def create_connection(url, timeout=default_timeout, on_handshake=None, **options
 
 # ---------------------------------
 
+_msg_pat = re.compile('.+\\:15\\:10\\:.*websocket.*')
+
 def create_ds_connection(host, port, username, password, resource=None, is_secure=False, timeout=default_timeout, **options):
 
 	resource = resource or '/socket.io/1/'
@@ -487,8 +490,9 @@ def create_ds_connection(host, port, username, password, resource=None, is_secur
 
 			# get the session id. the server returns the session id e.g.
 			# 57e45c8578d9426fb0f12336c5ef21ed:15:10:websocket,xhr-polling
+			# 5ac894738a704995bd846dcad606e1aa:15:10:flashsocket,websocket,xhr-polling
 			msg = ws._recv_strict(content_length)
-			if ':15:10:websocket' in msg:
+			if _msg_pat.match(msg):
 				sessiond_id = msg.split(":")[0]
 				resource = '%s%s/%s' % (resource, 'websocket', sessiond_id)
 
@@ -498,6 +502,9 @@ def create_ds_connection(host, port, username, password, resource=None, is_secur
 
 				ws._handshake(host, port, resource, is_secure, **options)
 				return ws
+			else:
+				ws.close()
+				raise WebSocketException("Could not find session id in server reply '%s'" % msg)
 		else:
 			ws.close()
 			raise WebSocketException("Invalid server response")
