@@ -7,57 +7,34 @@ import glob
 import math
 import operator
 
-# ----------------------------
-
 from PIL import Image
+
+import logging
+logger = logging.getLogger( __name__ )
+logging.basicConfig(level=logging.INFO,
+					format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
+
+default_extentions = '.+(jpeg|png|gif|bmp|jpg)'
+
+# ----------------------------
 
 def compare_images_pil(source, target):
 	source_hist = Image.open(source).histogram()
 	target_hist = Image.open(target).histogram()
-	rms = math.sqrt(reduce(operator.add, map(lambda a,b: (a-b)**2, source_hist, target_hist))/len(source_hist))
+	
+	def f(a,b):
+		a = a or 0
+		b = b or 0
+		return (a-b)**2
+	
+	rms = math.sqrt(reduce(operator.add, map(f, source_hist, target_hist))/len(source_hist))
 	return rms
 
 # ----------------------------
 
-from scipy.misc import imread
-from scipy.linalg import norm
-from scipy import sum, average
-
-def _to_grayscale(arr):
-	"""
-	if arr is a color image (3D array), convert it to grayscale (2D array).
-	"""
-	result = average(arr, -1) if  len(arr.shape) == 3 else arr
-	return result
-
-def _normalize(arr):
-	rng = arr.max()-arr.min()
-	amin = arr.min()
-	return (arr-amin)*255/rng
-
 def _check_dir(path):
 	path = path if path[-1] == '/' else (path + '/')
 	return path
-
-def compare_images_scipy(source, target):
-	"""
-	from http://stackoverflow.com/questions/189943/how-can-i-quantify-difference-between-two-images
-	"""
-	# read images as 2D arrays (convert to grayscale for simplicity)
-	img_1 = _to_grayscale(imread(source).astype(float))
-	img_2 = _to_grayscale(imread(target).astype(float))
-	
-	img_1 = _normalize(img_1)
-	img_2 = _normalize(img_2)
-	
-	diff = img_1 - img_2  # elementwise for scipy arrays
-	m_norm = sum(abs(diff))  # manhattan norm
-	z_norm = norm(diff.ravel(), 0)  # zero norm
-	return (m_norm, z_norm)
-
-# ----------------------------
-
-default_extentions = '.+(jpeg|png|gif|bmp|jpg)'
 
 def _image_finder(current_path, extentions=default_extentions, initial_path=None, relative=True):
 	current_path = _check_dir(current_path)
@@ -81,8 +58,9 @@ def get_images(source_path, extentions=default_extentions, relative=True):
 	return result
 
 def compare_directories(source, target, out_file, extentions=default_extentions):
-	source = _check_dir(source)
-	target = _check_dir(target)
+	out_file = os.path.expanduser(out_file)
+	source = _check_dir(os.path.expanduser(source))
+	target = _check_dir(os.path.expanduser(target))
 	src_images = get_images(source, extentions=extentions)
 	tgt_images = get_images(target, extentions=extentions)
 	
@@ -99,7 +77,8 @@ def compare_directories(source, target, out_file, extentions=default_extentions)
 		try:
 			return compare_images_pil(src, tgt)
 		except:
-			return 'NaN'
+			logger.exception("Error comparing '%s' and '%s'" % (src, tgt))
+			return float('nan')
 					
 	with open(out_file, "w") as f:
 		
