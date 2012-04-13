@@ -246,7 +246,7 @@ class TestBasicSharing(DataServerTestCase):
 	def test_search_shared(self):
 		self.ds.set_credentials(self.owner)
 		note = self.ds.create_note("kyoka suigetsu", self.container, adapt=True)
-		note = self.ds.share_object(note, self.target, adapt=True)
+		note = self.ds.share_object(note, self.target[0], adapt=True)
 		time.sleep(2)
 		
 		self.ds.set_credentials(self.target)
