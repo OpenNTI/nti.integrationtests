@@ -308,7 +308,7 @@ class DataserverClient(object):
 	def execute_user_search(self, search, credentials=None, adapt=True):
 		
 		credentials = self._credentials_to_use(credentials)
-		link, _ = self. _get_user_search_link(credentials=credentials)
+		link, _ = self._get_user_search_link(credentials=credentials)
 		url = _check_url(urljoin(self.endpoint, link.href)) + search
 		
 		rp = self.httplib.do_get(url, credentials)
