@@ -49,41 +49,41 @@ CHANNELS = (DEFAULT_CHANNEL, WHISPER_CHANNEL, META_CHANNEL, CONTENT_CHANNEL, POL
 # -----------------------------
 
 class BasicMessageContext(threading.local):
-	
+
 	def __init__(self):
 		self._last_sent = None
 		self._last_recv = None
-		
+
 	def recv(self, ws):
 		self._last_recv = ws.recv()
 		return self._last_recv
-	
+
 	def send(self, ws, msg):
 		msg = unicode(msg)
 		ws.send(msg)
 		self._last_sent = msg
 		return self._last_sent
-	
+
 	def reset(self):
 		self._last_sent = None
 		self._last_recv = None
-		
+
 	@property
 	def sent(self):
-		return [self._last_sent] if self._last_sent else [] 
-	
+		return [self._last_sent] if self._last_sent else []
+
 	@property
 	def received(self):
-		return [self._last_recv] if self._last_recv else [] 
-	
+		return [self._last_recv] if self._last_recv else []
+
 	@property
 	def last_recv(self):
 		return self._last_recv
-	
+
 	@property
 	def last_sent(self):
 		return self._last_sent
-	
+
 basic_message_ctx = BasicMessageContext()
 
 class MessageContext(BasicMessageContext):
@@ -91,29 +91,29 @@ class MessageContext(BasicMessageContext):
 		super(MessageContext, self).__init__()
 		self._sent=[]
 		self._recv=[]
-	
+
 	def recv(self, ws):
 		msg = super(MessageContext, self).recv(ws)
 		self._recv.append(msg)
 		return msg
-	
+
 	def send(self, ws, msg):
 		msg = super(MessageContext, self).send(ws, msg)
 		self._sent.append(msg)
 		return msg
-	
+
 	def reset(self):
 		self._sent=[]
 		self._recv=[]
-		
+
 	@property
 	def sent(self):
 		return self._sent
-	
+
 	@property
 	def received(self):
 		return self._recv
-	
+
 default_message_ctx = MessageContext()
 
 # -----------------------------
@@ -129,31 +129,31 @@ def _create_message_body(info):
 	else:
 		body = [toExternalObject(info) or info]
 	return body
-	
+
 class _Room():
 	def __init__(self, **kwargs):
 
-		ID = kwargs.get('ID', kwargs.get('id', None))	
-		active = kwargs.get('Active', kwargs.get('active', True))		
+		ID = kwargs.get('ID', kwargs.get('id', None))
+		active = kwargs.get('Active', kwargs.get('active', True))
 		occupants = kwargs.get('Occupants', kwargs.get('occupants', None))
 		moderated = kwargs.get('Moderated',  kwargs.get('moderated', False))
 		containerId = kwargs.get('ContainerId',  kwargs.get('containerId', None))
-		
+
 		assert ID, "must specify a valid room ID"
 		assert occupants != None,"must specify valid room occupants"
-		
+
 		self.ID = ID
 		self.active = active
 		self.occupants = occupants
 		self.moderated = moderated
-		self.containerId = containerId 
-	
+		self.containerId = containerId
+
 	def __str__(self):
 		return self.ID
-	
+
 	def __repr__(self):
 		return "<%s,%s,%s,%s,%s>" % (self.ID, self.occupants, self.active, self.moderated, self.containerId)
-	
+
 	def __eq__( self, other ):
 		if isinstance(other, six.string_types):
 			return self.ID == other
@@ -161,8 +161,8 @@ class _Room():
 			return self.ID == other.ID
 		else:
 			return False
-		
-		
+
+
 class _Message(object):
 	def __init__(self, **kwargs):
 		self.message = kwargs['message']
@@ -174,7 +174,7 @@ class _Message(object):
 	@property
 	def content(self):
 		return self.message
-	
+
 	@property
 	def text(self):
 		if self.message:
@@ -184,20 +184,20 @@ class _Message(object):
 				return str(self.message)
 		else:
 			return None
-		
+
 	def __str__(self):
 		return self.message
 
 	def __repr__(self):
 		return "<%s,%s>" % (self.__class__.__name__, self.message)
-	
+
 class _RecvMessage(_Message):
 	def __init__(self, **kwargs):
 		super(_RecvMessage, self).__init__(**kwargs)
 		self.ID = kwargs['ID']
 		self.creator = kwargs['creator']
 		self.lastModified = kwargs.get('lastModified', 0)
-	
+
 	def __eq__( self, other ):
 		if isinstance(other, six.string_types):
 			return self.ID == other
@@ -205,14 +205,14 @@ class _RecvMessage(_Message):
 			return self.ID == other.ID
 		else:
 			return False
-		
+
 	def __repr__(self):
 		return "<%s,%s,%s>" % (self.__class__.__name__, self.ID, self.message)
-		
+
 class _PostMessage(_Message):
 	def __init__(self, **kwargs):
 		super(_PostMessage, self).__init__(**kwargs)
-	
+
 	def __eq__( self, other ):
 		if isinstance(other, six.string_types):
 			return str(self.message) == other
@@ -220,24 +220,24 @@ class _PostMessage(_Message):
 			return self.message == other.message
 		else:
 			return False
-		
+
 class Graph(object):
-	
+
 	def __init__(self, *args, **kwargs):
-		
+
 		self.rooms = {}
 		self.sent_messages = []
 		self.recv_messages = OrderedDict()
 		self.shadowed_messages = OrderedDict()
 		self.moderated_messages = OrderedDict()
-		
+
 		self.ws_sent = None
 		self.ws_recv = None
 		self.killed = False
 		self.heart_beats = 0
-			
+
 		self.message_context = kwargs.get('message_context', default_message_ctx)
-				
+
 		self.ws = kwargs.get('ws', None)
 		self.host = kwargs.get('host', None)
 		self.port = kwargs.get('port', 8081)
@@ -249,107 +249,107 @@ class Graph(object):
 
 		self.timeout = self.timeout
 		self.data_format = self.data_format or 'json'
-		
+
 	# ---- --------- ----
-		
-	@property	
+
+	@property
 	def sent(self):
 		for m in self.sent_messages:
 			yield m.text
-			
+
 	@property
 	def received(self):
 		for m in self.recv_messages.itervalues():
 			yield m.text
-			
-	@property	
+
+	@property
 	def moderated(self):
 		for m in self.moderated_messages.itervalues():
 			yield m.text
-			
-	@property	
+
+	@property
 	def shadowed(self):
 		for m in self.shadowed_messages.itervalues():
 			yield m.text
-		
+
 	def sent_on_channel(self, channel=DEFAULT_CHANNEL):
 		for m in self.sent_messages:
 			if m.channel == channel:
 				yield m
-				
+
 	def received_on_channel(self, channel=DEFAULT_CHANNEL):
 		for m in self.recv_messages.itervalues():
 			if m.channel == channel:
 				yield m
-			
+
 	def get_received_messages(self):
 		return self._get_and_clear(self.recv_messages)
-	
+
 	def get_shadowed_messages(self):
 		return self._get_and_clear(self.shadowed_messages)
-	
+
 	def get_moderated_messages(self):
 		return self._get_and_clear(self.moderated_messages)
-	
+
 	def _get_and_clear(self, messages):
 		result = list(messages.itervalues())
 		messages.clear()
 		return result
-	
+
 	# ---- Callbacks ----
-	
+
 	def serverKill(self, args=None):
 		self.killed = True
 		self.connected = False
-		
+
 	def connect(self):
 		self.connected = True
-	
+
 	def disconnect(self):
 		self.connected = False
-	
+
 	def heartBeat(self):
 		self.connected = True
 		self.heart_beats += 1
-	
+
 	def enterRoom(self, **kwargs):
 		d = dict(kwargs)
 		d['data_format'] = self.data_format
 		d['message_context'] = self.message_context
 		return _enterRoom(self.ws, **d)
-	
+
 	def exitRoom( self, room_id ):
 		if room_id in self.rooms:
 			_exitRoom(self.ws, room_id, self.data_format, message_context=self.message_context)
 			return self.rooms.pop(room_id, None)
 		else:
 			return None
-	
+
 	def makeModerated(self, containerId, flag=True):
 		_makeModerated(self.ws, containerId, flag, self.data_format, message_context=self.message_context)
-				
+
 	def approveMessages(self, mids):
 		_approveMessages(self.ws, mids, self.data_format, message_context=self.message_context)
-		
+
 	def shadowUsers(self, containerId, users):
 		_shadowUsers(self.ws, containerId, users, self.data_format, message_context=self.message_context)
-		
-	chat_exitRoom = exitRoom 
-	chat_enterRoom = enterRoom 
+
+	chat_exitRoom = exitRoom
+	chat_enterRoom = enterRoom
 	chat_shadowUsers = shadowUsers
 	chat_makeModerated = makeModerated
 	chat_approveMessage = approveMessages
-	
+
 	# ---- ----- ----
-	
+
 	def chat_roomMembershipChanged(self, room_info):
 		pass
-	
+
 	def chat_presenceOfUserChangedTo(self, username, status):
 		pass
-	
+
 	def chat_exitedRoom(self, **kwargs):
-		ID = kwargs.get('ID', kwargs.get('id', None))	
+		ID = kwargs.get('ID', kwargs.get('id', None))
 		occupants = kwargs.get('Occupants', kwargs.get('occupants', []))
 		if not self.username in occupants:
 			return self.rooms.pop(ID, None) if ID else None
@@ -357,56 +357,56 @@ class Graph(object):
 			room = _Room(**kwargs)
 			self.rooms[ID] = room
 			return room
-		
+
 	def chat_enteredRoom(self, **kwargs):
 		room = _Room(**kwargs)
 		self.rooms[room.ID] = room
 		return room
-	
+
 	def chat_postMessage(self, **kwargs):
 		d = dict(kwargs)
 		d['message_context'] = self.message_context
 		d['message'] = _create_message_body(kwargs['message'])
 		_postMessage(ws=self.ws, data_format=self.data_format, **d)
-		
+
 		post_msg = _PostMessage(**d)
 		self.sent_messages.append(post_msg)
 		return post_msg
-	
+
 	postMessage = chat_postMessage
-	
+
 	# ---- ----- ----
-	
+
 	def _msg_params(self, **kwargs):
 		return {'message'		: kwargs['Body'],
-				'ID'			: kwargs['ID'], 
-				'containerId'	: kwargs['ContainerId'], 
+				'ID'			: kwargs['ID'],
+				'containerId'	: kwargs['ContainerId'],
 				'creator'		: kwargs['Creator'],
 				'channel'		: kwargs.get('channel', DEFAULT_CHANNEL),
 				'lastModified'	: kwargs.get('Last Modified', 0),
 				'inReplyTo'		: _nonefy(kwargs.get('inReplyTo', None)),
 				'recipients'	: _nonefy(kwargs.get('recipients', None)) }
-		
+
 	def chat_recvMessage(self, **kwargs):
 		d = self._msg_params(**kwargs)
 		self.recv_messages[d['ID']] = _RecvMessage(**d)
 		return self.recv_messages[d['ID']]
-	
+
 	def chat_recvMessageForModeration(self, **kwargs):
 		d = self._msg_params(**kwargs)
 		self.moderated_messages[d['ID']] = _RecvMessage(**d)
 		return self.moderated_messages[d['ID']]
-		
+
 	def chat_recvMessageForShadow(self, **kwargs):
 		d = self._msg_params(**kwargs)
 		self.shadowed_messages[d['ID']] = _RecvMessage(**d)
 		return self.shadowed_messages[d['ID']]
-	
+
 	recvMessage = chat_recvMessage
 	recvMessageForModeration = chat_recvMessageForModeration
-	
+
 	# ---- ----- ----
-	
+
 	def runLoop(self):
 		self.killed = False
 		try:
@@ -414,30 +414,30 @@ class Graph(object):
 				self.ws_connect()
 			else:
 				self.connected = getattr(self.ws, "connected", False)
-				
+
 			while self.connected or not self.killed:
 				_next_event(self.ws, self, message_context=self.message_context)
 		except ConnectionClosedException:
 			pass
 		finally:
 			self.ws_capture()
-	
+
 	def nextEvent(self):
 		return _next_event(self.ws, self, message_context=self.message_context)
-	
+
 	# ---- WebSocket ----
-	
+
 	def ws_connect(self):
-		
+
 		if self.ws_connected:
 			self.ws.close()
-			
+
 		self.ws = _ws_connect(self.host, self.port, username=self.username,\
 							  password=self.password, timeout=self.timeout,\
 							  message_context=self.message_context)
-				
+
 		self.connected = getattr(self.ws, "connected", False)
-		
+
 	def ws_close(self):
 		if self.ws_connected:
 			try:
@@ -446,29 +446,29 @@ class Graph(object):
 			finally:
 				self.ws = None
 				self.connected = False
-		
+
 	def ws_capture(self, reset=True):
 		self.ws_sent = list(self.message_context.sent)
 		self.ws_recv = list(self.message_context.received)
-		if reset: 
+		if reset:
 			self.message_context.reset()
-		
+
 	def ws_capture_and_close(self, reset=True):
 		self.ws_capture(reset=reset)
 		self.ws_close()
-		
+
 	@property
 	def ws_connected(self):
 		return getattr(self.ws, "connected", False) if self.ws else False
-	
+
 	@property
 	def ws_last_recv(self):
 		return self.message_context.last_recv
-	
+
 	@property
 	def ws_last_sent(self):
 		return self.message_context.last_sent
-				
+
 # -----------------------------
 
 def _self_of_emtpy(s):
@@ -477,7 +477,7 @@ def _self_of_emtpy(s):
 class Serverkill(WebSocketException):
 	def __init__(self, args=None):
 		super(Serverkill, self).__init__(str(args) if args else '')
-		
+
 class InvalidAuthorization(WebSocketException):
 	def __init__(self, username, password=''):
 		super(InvalidAuthorization, self).__init__('Invalid credentials for %s' % username)
@@ -488,19 +488,19 @@ class InvalidDataFormat(WebSocketException):
 	def __init__(self, data_format=''):
 		super(InvalidDataFormat, self).__init__('Invalid data format %s' % data_format)
 		self.data_format = data_format
-		
+
 class CouldNotEnterRoom(WebSocketException):
 	def __init__(self, room_id=None):
 		super(CouldNotEnterRoom, self).__init__('Could not enter room' + _self_of_emtpy( room_id))
-		
+
 class NotEnoughOccupants(WebSocketException):
 	def __init__(self, room_id=''):
 		super(NotEnoughOccupants, self).__init__('room %s does not have enough occupants' % room_id)
-	
+
 class InActiveRoom(WebSocketException):
 	def __init__(self, room_id=''):
 		super(InActiveRoom, self).__init__('Room is inactive %s' % room_id)
-		
+
 # -----------------------------
 
 def toList(data, unique=True):
@@ -510,7 +510,7 @@ def toList(data, unique=True):
 		elif not isinstance(data, list):
 			data = list(set(data)) if unique else list(data)
 	return data
-		
+
 # -----------------------------
 
 def isConnect(msg):
@@ -529,7 +529,7 @@ def encode(data, data_format='json'):
 	elif data_format == 'plist':
 		result = plistlib.writePlistToString(data)
 	return unicode(result) if result else None
-		
+
 def decode(msg, data_format='json'):
 	if msg and msg.startswith(WS_BROADCAST):
 		msg = msg[len(WS_BROADCAST):]
@@ -539,7 +539,7 @@ def decode(msg, data_format='json'):
 			return plistlib.readPlistFromString(msg)
 	return None
 
-def isEvent(data, event, data_format='json'):	
+def isEvent(data, event, data_format='json'):
 	if isinstance(data, six.string_types):
 		data = decode(data, data_format)
 	if isinstance(data, dict):
@@ -548,13 +548,13 @@ def isEvent(data, event, data_format='json'):
 
 def isServerKill(data, data_format='json'):
 	return isEvent(data, SERVER_KILL, data_format)
-	
+
 def isRecvMessage(data, data_format='json'):
 	return isEvent(data, EVT_RECV_MESSAGE, data_format)
 
 def isExitedRoom(data, data_format='json'):
 	return isEvent(data, EVT_EXITED_ROOM, data_format)
-	
+
 def isEnteredRoom(data, data_format='json'):
 	return isEvent(data, EVT_ENTERED_ROOM, data_format)
 
@@ -576,48 +576,48 @@ def isApproveMessages(data, data_format='json'):
 def _next_event(ws, graph=None, message_context=default_message_ctx):
 	msg = message_context.recv(ws)
 	if graph and isinstance(graph, Graph):
-	
+
 		if isConnect(msg):
 			graph.connect()
 		elif isHeartBeat(msg):
 			graph.heartBeat()
 		elif isBroadCast(msg):
 			d = decode(msg)
-			if isServerKill(d): 
+			if isServerKill(d):
 				graph.serverKill(args=d.get('args', None))
 			elif isEnteredRoom(d) or isExitedRoom(d):
-				
+
 				entered = isEnteredRoom(d)
 				params = d['args'][0]
-		
+
 				if entered:
 					graph.chat_enteredRoom(**params)
 				else:
 					graph.chat_exitedRoom(**params)
-					
+
 			elif isRecvMessage(d) or isRecv4Moderation(d) or isRecvMessageForShadow(d):
 				moderated = isRecv4Moderation(d)
 				shadow = isRecvMessageForShadow(d)
-				
+
 				params = d['args'][0]
-							
+
 				if moderated:
 					graph.chat_recvMessageForModeration(**params)
 				elif shadow:
 					graph.chat_recvMessageForShadow(**params)
 				else:
 					graph.chat_recvMessage(**params)
-									
+
 			elif isPresenceOfUserChangedTo(d):
 				d = d['args']
 				graph.chat_presenceOfUserChangedTo(username=d[0], status=d[1])
-				
+
 			elif isRoomMembershipChanged(d):
 				room_info = d['args'][0]
 				graph.chat_roomMembershipChanged(room_info)
-				
+
 	return msg
-			
+
 def _exitRoom(ws, containerId, data_format='json', message_context=default_message_ctx):
 	d = {"name":EVT_EXIT_ROOM, "args":[containerId]}
 	msg = encode(d, data_format)
@@ -628,28 +628,28 @@ def _exitRoom(ws, containerId, data_format='json', message_context=default_messa
 		raise InvalidDataFormat(data_format)
 
 def _enterRoom(ws, **kwargs):
-	
+
 	message_context = kwargs.get('message_context', default_message_ctx)
-	
+
 	occupants = kwargs.get('occupants', kwargs.get('Occupants',None))
 	inReplyTo = kwargs.get("inReplyTo", None)
 	references = kwargs.get("references", None)
 	containerId = kwargs.get("containerId", kwargs.get("ContainerId", None))
-	
+
 	data_format = kwargs.get("data_format", 'json')
-	
+
 	assert containerId," must specify either valid container id"
-	
+
 	args = {"Occupants": occupants}
 	if containerId:
 		args["ContainerId"] = containerId
-		
+
 	if inReplyTo:
 		args["inReplyTo"] = inReplyTo
-		
+
 	if references:
 		args["references"] = references
-		
+
 	d = {"name":EVT_ENTER_ROOM, "args":[args]}
 	msg = encode(d, data_format)
 	if msg:
@@ -657,9 +657,9 @@ def _enterRoom(ws, **kwargs):
 		message_context.send(ws, msg)
 	else:
 		raise InvalidDataFormat(data_format)
-			
+
 	return (None, None)
-	
+
 def _postMessage(ws, **kwargs):
 
 	message = kwargs['message']
@@ -667,40 +667,40 @@ def _postMessage(ws, **kwargs):
 	recipients = kwargs.get("recipients", None)
 	channel = kwargs.get("channel", DEFAULT_CHANNEL)
 	containerId = kwargs.get("containerId", kwargs.get("ContainerId", None))
-		
+
 	assert containerId," must specify a valid container"
-	
+
 	data_format = kwargs.get("data_format", 'json')
 	message_context = kwargs.get('message_context', default_message_ctx)
-	
+
 	args = {"ContainerId": containerId, "Body": message, "Class":"MessageInfo"}
 	if channel and channel != DEFAULT_CHANNEL:
 		args['channel'] = channel
-	
+
 	if recipients:
 		args['recipients'] = recipients
-		
+
 	if inReplyTo:
 		args['inReplyTo'] = inReplyTo
-		
+
 	d = {"name":EVT_POST_MESSOGE, "args":[args]}
-	msg = encode(d, data_format)	
+	msg = encode(d, data_format)
 	if msg:
 		msg = WS_BROADCAST + msg
 		message_context.send(ws, msg)
 	else:
 		raise InvalidDataFormat(data_format)
-		
+
 def _makeModerated(ws, containerId, flag=True, data_format='json', message_context=default_message_ctx):
-	
+
 	d = {"name":EVT_MAKE_MODERATED, "args":[containerId, flag]}
-	msg = encode(d, data_format)	
+	msg = encode(d, data_format)
 	if msg:
 		msg = WS_BROADCAST + msg
 		message_context.send(ws, msg)
 	else:
 		raise InvalidDataFormat(data_format)
-	
+
 def _approveMessages(ws, mids, data_format='json', message_context=default_message_ctx):
 	mids = toList(mids)
 	d = {"name":EVT_APPROVE_MSGS, "args":[mids]}
@@ -710,7 +710,7 @@ def _approveMessages(ws, mids, data_format='json', message_context=default_messa
 		message_context.send(ws, msg)
 	else:
 		raise InvalidDataFormat(data_format)
-	
+
 def _shadowUsers(ws, containerId, users, data_format='json', message_context=default_message_ctx):
 	users = toList(users)
 	d = {"name":EVT_SHADOW_USERS, "args":[containerId, users]}
@@ -726,11 +726,11 @@ def _shadowUsers(ws, containerId, users, data_format='json', message_context=def
 def _ws_disconnect(ws, data_format='json', message_context=default_message_ctx):
 	msg = b"0::"
 	message_context.send(ws, msg)
-	
+
 def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, timeout=DEAULT_TIMEOUT,
 				message_context=default_message_ctx):
 
-	# create the connectiona and do a handshake. 
+	# create the connectiona and do a handshake.
 	ws = create_ds_connection(host, port, username=username, password=password, timeout=timeout)
 	return ws
 
