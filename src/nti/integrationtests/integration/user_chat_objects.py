@@ -233,8 +233,7 @@ class Host(OneRoomUser):
 		references = kwargs.get("references", None)
 		
 		try:
-			if not self.ws_connected:
-				self.ws_connect()
+			self.ws_connect()
 			
 			# wait users are connected
 			
@@ -276,8 +275,7 @@ class User(OneRoomUser):
 			entries = kwargs.get('entries', None)
 					
 			# connect
-			if not self.ws_connected:
-				self.ws_connect()
+			self.ws_connect()
 	
 			# check for an connect event
 			event = kwargs.get('connect_event', None)
