@@ -1,10 +1,13 @@
 import six
+import sys
 import time
 import inspect
 import numbers
 import UserDict
 import threading
+import traceback
 import multiprocessing
+from StringIO import StringIO
 
 import logging
 logger = logging.getLogger(__name__)
@@ -316,8 +319,12 @@ class TargetRunner(object):
 					result = self.target(*self.target_args, __context__=self.context)
 				else:
 					result = self.target(*self.target_args)
-			except Exception, e:
-				exception = e
+			except Exception:
+				sio = StringIO()
+				exc_type, exc_value, exc_traceback = sys.exc_info()
+				traceback.print_exception(exc_type, exc_value, exc_traceback, file=sio)
+				sio.seek(0)
+				exception = sio.read()
 		
 			iterations = iterations + 1
 			run_time = time.time() - start
@@ -335,6 +342,7 @@ class TargetRunner(object):
 				else:
 					custom_timers = None
 					
+				result = repr(result) if result is not None else result
 				runner_result = RunnerResult(group_name = self.group_name,
 											 runner_num = self.runner_num, 
 											 run_time = run_time,
