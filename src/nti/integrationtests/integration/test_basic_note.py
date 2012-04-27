@@ -86,6 +86,13 @@ class TestBasicNotes(DataServerTestCase):
 	
 # ----------------------
 
+	def test_create_empty_note(self):
+		try:
+			self.ds.create_note(u'', self.container, adapt=True)
+			self.fail('an empty not was created')
+		except:
+			pass
+		
 	def test_body_key_is_object(self):
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to post', self.container, adapt=True)
