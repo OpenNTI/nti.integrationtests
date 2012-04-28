@@ -1,50 +1,55 @@
-import random
+#!/usr/bin/env python
+from __future__ import unicode_literals
 import unittest
+
+from hamcrest import assert_that, is_, has_entry, not_none, has_property, has_key
+from hamcrest import is_in
 
 from user_chat_objects import HostUserChatTest
 
 class TestChatTranscript(HostUserChatTest):
-		
+
 	def setUp(self):
 		super(TestChatTranscript, self).setUp()
-		
+
 		self.user_one = self.user_names[0]
 		self.user_two = self.user_names[1]
-		
+
 	def test_transcript(self):
-		
-		entries = random.randint(20, 50)
+
+		entries = 50
 		one, two = self._run_chat(self.container, entries, self.user_one, self.user_two)
 		for u in (one, two):
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
-			
-		self.assert_(one.room, "User '%s' could not enter room" % one.username)
-		self.assert_(two.room, "User '%s' could not enter room" % two.username)
+
+		assert_that( one, has_property( 'room', not_none() ), "User '%s' could not enter room" % one.username)
+		assert_that( two, has_property( 'room', not_none() ), "User '%s' could not enter room" % two.username)
+
 		room_id = two.room
-		
+
 		all_msgs = []
-		map(lambda x: all_msgs.append(x), one.sent)
-		map(lambda x: all_msgs.append(x), one.received)
-		
+		map(all_msgs.append, one.sent)
+		map(all_msgs.append, one.received)
+
 		self.ds.set_credentials(user=one.username, password=one.password)
 		t = self.ds.get_transcript(self.container, room_id)
-		
-		self.assertTrue(t.has_key(u'RoomInfo'), 'Could not find room info')
-		
-		ri = t[u'RoomInfo']
-		self.assertEqual(entries*2, ri.messageCount, 'Unexpected message count')
-		self.assertEqual(room_id, ri.id, 'Unexpected room id')
-		
-		self.assertTrue(t.has_key(u'Messages'), 'Incomplete message')
+
+		assert_that( t, has_key( 'RoomInfo' ) )
+
+		ri = t['RoomInfo']
+		assert_that( ri, has_property( 'id', room_id ) )
+		assert_that( ri, has_property( 'messageCount', entries * 2) )
+		assert_that( t, has_key( 'Messages' ) )
+
 		messages = t['Messages']
 		for m in messages:
 			body = m['Body'][0]
-			self.assert_(body != None, 'Invalid body')
-			self.assert_(m[u'ID'], 'No id for message found')
-			self.assertEqual(m[u'ContainerId'], room_id, 'Unexpected message room id')
-			self.assertEqual(m[u'Status'], u'st_POSTED', 'Unexpected message status')
-			self.assert_(body in all_msgs, 'Unexpected message')
+			assert_that( m, has_key( 'ID' ) )
+			assert_that( body, is_( not_none() ) )
+			assert_that( m, has_entry( 'ContainerId', room_id ) )
+			assert_that( m, has_entry( 'Status', 'st_POSTED' ) )
+			assert_that( body, is_in( all_msgs ) )
+
 
 if __name__ == '__main__':
 	unittest.main()
-	
