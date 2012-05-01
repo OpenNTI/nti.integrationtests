@@ -1,8 +1,8 @@
 import time
 import unittest
 
-import user_chat_objects
-from user_chat_objects import HostUserChatTest
+from nti.integrationtests.chat import objects
+from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
 from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import CanvasPolygonShape
@@ -47,7 +47,7 @@ class TestChatSendingObject(HostUserChatTest):
 	
 # ----------------------------
 	
-class Host(user_chat_objects.Host):
+class Host(objects.Host):
 		
 	def __init__(self, host_messages, *args, **kwargs):
 		super(Host, self).__init__(*args, **kwargs)

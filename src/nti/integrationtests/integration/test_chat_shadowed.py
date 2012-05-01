@@ -1,10 +1,9 @@
-from hamcrest import assert_that, has_length, has_key, greater_than_or_equal_to
-
-import random
 import unittest
 
-import user_chat_objects
-from user_chat_objects import HostUserChatTest
+from nti.integrationtests.chat import objects
+from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
+
+from hamcrest import assert_that, has_length, greater_than_or_equal_to
 
 class TestShadowedChat(HostUserChatTest):
 
@@ -35,8 +34,7 @@ class TestShadowedChat(HostUserChatTest):
 		return Ghost(self.users_to_shadow, username=username, occupants=occupants, port=self.port)
 
 
-
-class Ghost(user_chat_objects.Host):
+class Ghost(objects.Host):
 
 	def __init__(self, users_to_shadow, *args, **kwargs):
 		super(Ghost, self).__init__(*args, **kwargs)

@@ -1,8 +1,8 @@
 import time
 import unittest
 
-import user_chat_objects
-from user_chat_objects import HostUserChatTest
+from nti.integrationtests.chat import objects
+from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
 class TestChatSearch(HostUserChatTest):
 	
@@ -68,7 +68,7 @@ class TestChatSearch(HostUserChatTest):
 		
 # ---------------------------
 
-class Host(user_chat_objects.Host):
+class Host(objects.Host):
 		
 	def __init__(self, host_messages, *args, **kwargs):
 		super(Host, self).__init__(*args, **kwargs)
@@ -79,7 +79,7 @@ class Host(user_chat_objects.Host):
 			self.chat_postMessage(message=unicode(m), containerId=room_id)
 			time.sleep(0.25)
 		
-class User(user_chat_objects.User):
+class User(objects.User):
 		
 	def __init__(self, user_messages, *args, **kwargs):
 		super(User, self).__init__(*args, **kwargs)

@@ -1,10 +1,10 @@
-from hamcrest import assert_that, has_length, greater_than, greater_than_or_equal_to
 import random
 import unittest
 
 from nti.integrationtests.dataserver.client import DataserverClient
+from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
-from user_chat_objects import HostUserChatTest
+from hamcrest import assert_that, has_length, greater_than, greater_than_or_equal_to
 
 class TestSimpleChat(HostUserChatTest):
 

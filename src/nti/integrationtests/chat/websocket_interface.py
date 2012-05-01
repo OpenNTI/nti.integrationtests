@@ -6,6 +6,7 @@ import collections
 from collections import OrderedDict
 
 from nti.integrationtests.contenttypes import toExternalObject
+
 from nti.integrationtests.wsclient import WebSocketException
 from nti.integrationtests.wsclient import create_ds_connection
 from nti.integrationtests.wsclient import ConnectionClosedException

@@ -1,9 +1,9 @@
-
 import unittest
 
+from nti.integrationtests.chat import objects
+from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
+
 from hamcrest import assert_that, has_length, greater_than_or_equal_to, is_
-import user_chat_objects
-from user_chat_objects import HostUserChatTest
 
 class TestChatUserleavesEarly(HostUserChatTest):
 
@@ -33,7 +33,7 @@ class TestChatUserleavesEarly(HostUserChatTest):
 		return Host(username=username, occupants=occupants, port=self.port)
 
 
-class Host(user_chat_objects.Host):
+class Host(objects.Host):
 	def post_messages(self, room_id, entries, *args, **kwargs):
 		self.post_random_messages(room_id, entries)
 		self.wait_heart_beats(2)
@@ -43,7 +43,7 @@ class Host(user_chat_objects.Host):
 		super(Host, self).__call__(*args, **kwargs)
 		#print 'done host'
 
-class User(user_chat_objects.User):
+class User(objects.User):
 
 	def __init__(self, leaves_early=False, *args, **kwargs):
 		super(User, self).__init__(*args, **kwargs)

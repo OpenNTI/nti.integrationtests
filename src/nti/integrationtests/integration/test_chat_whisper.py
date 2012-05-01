@@ -2,13 +2,11 @@ import time
 import random
 import unittest
 
-import test_chat_multi_user
-import user_chat_objects
-from websocket_interface import WHISPER_CHANNEL
+from nti.integrationtests.chat import objects
+from nti.integrationtests.integration import test_chat_multi_user
+from nti.integrationtests.chat.websocket_interface import WHISPER_CHANNEL
 
-from hamcrest import has_key
-from hamcrest import has_item
-from hamcrest import assert_that
+from hamcrest import has_key, has_item, assert_that
 
 class TestWhisperChat(test_chat_multi_user.TestMultiUserChat):
 	
@@ -37,7 +35,7 @@ class TestWhisperChat(test_chat_multi_user.TestMultiUserChat):
 		
 # ----------------------------
 
-class Host(user_chat_objects.Host):
+class Host(objects.Host):
 		
 	def post_messages(self, room_id, *args, **kwargs):
 		entries = random.randint(20, 30)

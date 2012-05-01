@@ -1,8 +1,9 @@
 import random
 import unittest
 
-import user_chat_objects
-from user_chat_objects import HostUserChatTest
+from nti.integrationtests.chat.objects import Host
+
+from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
 class TestModeratedChat(HostUserChatTest):
 	
@@ -34,7 +35,7 @@ class TestModeratedChat(HostUserChatTest):
 
 # ----------------------------
 			
-class Moderator(user_chat_objects.Host):
+class Moderator(Host):
 		
 	def chat_recvMessageForModeration(self, **kwargs):
 		super(Moderator, self).chat_recvMessageForModeration(**kwargs)

@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from user_chat_objects import HostUserChatTest
+from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
 class TestMultiUserChat(HostUserChatTest):
 	
