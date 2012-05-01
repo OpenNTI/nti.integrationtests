@@ -14,11 +14,9 @@ from websocket_interface import InActiveRoom
 from websocket_interface import CouldNotEnterRoom
 from websocket_interface import NotEnoughOccupants
 
-from nti.integrationtests.dataserver.client import DataserverClient
-from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
 from nti.integrationtests import DataServerTestCase
-from nti.integrationtests.dataserver.server import PORT
-from nti.integrationtests.dataserver.server import SERVER_HOST
+from nti.integrationtests.dataserver.client import DataserverClient
+from nti.integrationtests.dataserver.server import (SERVER_HOST, PORT, DEFAULT_USER_PASSWORD)
 
 SOCKET_IO_HOST	= SERVER_HOST
 SOCKET_IO_PORT	= PORT
@@ -47,7 +45,7 @@ phrases = (	"Yellow brown",
 			"Sit Upon the Frozen Heavens",
 			"Call forth the Twilight")
 
-def generate_message(a_min=1, a_max=4):
+def generate_message(a_min=1, a_max=4, phrases=phrases):
 	return " ".join(random.sample(phrases, random.randint(a_min, a_max)))
 
 # ----------------------------
