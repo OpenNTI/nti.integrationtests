@@ -3,23 +3,13 @@ import random
 import tempfile
 
 from nti.integrationtests import generate_ntiid
-from nti.integrationtests.performance import Subscriber
 from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.utils import boolean_states
+from nti.integrationtests.performance import Subscriber
 from nti.integrationtests.dataserver.client import DataserverClient
 from nti.integrationtests.dataserver.server import DataserverProcess
 
-phrases = (	"Shoot To Kill",
-			"Bloom, Split and Deviate",
-			"Rankle the Seas and the Skies",
-			"Lightning Flash Flame Shell",
-			"Flower Wind Rage and Flower God Roar, Heavenly Wind Rage and Heavenly Demon Sneer",
-			"All Waves, Rise now and Become my Shield, Lightning, Strike now and Become my Blade", 
-			"Cry, Raise Your Head, Rain Without end.",
-			"Sting All Enemies To Death",
-			"Reduce All Creation to Ash",
-			"Sit Upon the Frozen Heavens", 
-			"Call forth the Twilight")
+from nti.integrationtests.chat import generate_message
 
 # -----------------------------------
 
@@ -72,11 +62,6 @@ def new_client(context):
 	credentials = getattr(context, "credentials", None)
 	client = DataserverClient(endpoint=endpoint, credentials=credentials)
 	return client
-
-# -----------------------------------
-
-def generate_message(a_min=1, a_max=4):
-	return " ".join(random.sample(phrases, random.randint(a_min, a_max)))
 
 # -----------------------------------
 
