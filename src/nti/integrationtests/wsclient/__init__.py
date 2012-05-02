@@ -479,7 +479,7 @@ def create_ds_connection(host, port, username, password, resource=None, is_secur
 	# socket.io handshake
 	ws.sock.send('POST %s HTTP/1.1\r\n' % resource)
 	ws.sock.send(auth_header)
-	ws.sock.send('Content-Length: 0\r\n')
+	ws.sock.send('\r\nContent-Length: 0\r\n')
 	ws.sock.send('\r\n')
 
 	status, resp_headers = ws._read_headers()
