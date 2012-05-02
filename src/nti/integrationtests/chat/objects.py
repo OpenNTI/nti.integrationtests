@@ -136,6 +136,7 @@ class Host(OneRoomUser):
 
 	def __call__(self, *arg, **kwargs):
 
+		delay = kwargs.get('delay', 0.25)
 		entries = kwargs.get('entries', None)
 		inReplyTo = kwargs.get("inReplyTo", None)
 		references = kwargs.get("references", None)
@@ -183,9 +184,10 @@ class Invitee(OneRoomUser):
 
 	def __call__(self, *args, **kwargs):
 		try:
+			delay = kwargs.get('delay', 0.25)
 			entries = kwargs.get('entries', None)
 			max_heart_beats = kwargs.get('max_heart_beats', 2)
-			
+
 			# connect
 			self.ws_connect()
 
@@ -198,7 +200,7 @@ class Invitee(OneRoomUser):
 			# write any messages
 			room_id = self.room
 			if room_id:
-				self.post_messages(room_id, entries)
+				self.post_messages(room_id, entries, delay=delay)
 			else:
 				raise Exception('%s did not enter a chat room' % self.username)
 
@@ -221,8 +223,9 @@ User = Invitee
 
 # ----------------------------
 
-def run_chat(containerId, host_user, invitees, entries=None, use_threads=True, 
-			 host_class=Host, invitee_class=Invitee, server=SOCKET_IO_HOST, port=SOCKET_IO_PORT, **kwargs):
+def run_chat(containerId, host_user, invitees, entries=None, delay=0.25, 
+			 use_threads=True, host_class=Host, invitee_class=Invitee, 
+			 server=SOCKET_IO_HOST, port=SOCKET_IO_PORT, **kwargs):
 
 	runnables = []
 	entries = entries or random.randint(5, 20)
@@ -231,7 +234,8 @@ def run_chat(containerId, host_user, invitees, entries=None, use_threads=True,
 	host = host_class(host_user, invitees, host=server, port=port)
 	users = [invitee_class(username=name, host=server, port=port) for name in invitees]
 
-	required_args = {'entries':entries, 'containerId':containerId, 'connect_event':connect_event}
+	required_args = {'entries':entries, 'containerId':containerId, 'connect_event':connect_event,
+					 'delay':delay}
 
 	runnable_args = dict(kwargs)
 	runnable_args.update(required_args)
@@ -263,22 +267,30 @@ def run_chat(containerId, host_user, invitees, entries=None, use_threads=True,
 
 if __name__ == '__main__':
 	cid = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.0'
-	host = 'test.user.1@nextthought.com'
-	users = ['test.user.%s@nextthought.com' % s for s in range(2, 10)]
-	entries = 50
+	host = 'test.user.41@nextthought.com'
+	users =[] # ['test.user.%s@nextthought.com' % s for s in range(7, 8)]
+	all_users = [host] + users
 	
-	def create_fl():
+	entries = 50
+	server = 'csanchez.local'
+	
+	def create_fl(username):
 		import uuid
 		from nti.integrationtests.dataserver.client import DataserverClient
 		from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
 		
-		endpoint = 'http://%s:%s/dataserver2' % ('localhost', 8081)
-		ds = DataserverClient(endpoint=endpoint, credentials=(host, DEFAULT_USER_PASSWORD))
-		list_name = 'cfl-%s-%s' % (host, str(uuid.uuid4()).split('-')[0])
+		endpoint = 'http://%s:%s/dataserver2' % (server, 8081)
+		ds = DataserverClient(endpoint=endpoint, credentials=(username, DEFAULT_USER_PASSWORD))
+		list_name = 'cfl-%s-%s' % (username, str(uuid.uuid4()).split('-')[0])
+		
+		users = list(all_users)
+		users.remove(username)
 		ds.createFriendsListWithNameAndFriends(list_name, users)
 		
-	create_fl()
-	result = run_chat(cid, host, users, entries=entries, use_threads=True)
+	#for username in all_users:
+	#	create_fl(username)
+		
+	result = run_chat(cid, host, users, entries=entries, delay=0.25, use_threads=True, server=server)
 	for r in result:
 		print r.username, r.exception
 
