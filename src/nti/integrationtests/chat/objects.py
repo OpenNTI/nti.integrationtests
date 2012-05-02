@@ -2,6 +2,8 @@ import sys
 import time
 import random
 import traceback
+import threading
+import multiprocessing
 from StringIO import StringIO
 
 from nti.integrationtests.chat import generate_message
@@ -139,16 +141,17 @@ class Host(OneRoomUser):
 		references = kwargs.get("references", None)
 		containerId = kwargs.get('containerId', None)
 		connect_event = kwargs.get('connect_event', None)
-
+		max_heart_beats = kwargs.get('max_heart_beats', 3)
+		
 		try:
 			self.ws_connect()
 
 			# wait users are connected
 
 			self.heart_beats = 0
-			while self.heart_beats < 3 and len(self.online) < len(self.occupants):
+			while self.heart_beats < max_heart_beats and len(self.online) < len(self.occupants):
 				self.nextEvent()
-
+			
 			self.enterRoom(	occupants=self.occupants, containerId=containerId,
 							inReplyTo=inReplyTo, references=references)
 			self.wait_4_room()
@@ -161,7 +164,7 @@ class Host(OneRoomUser):
 				raise Exception('%s did not enter a chat room' % self.username)
 
 			# process messages
-			self.wait_heart_beats(3)
+			self.wait_heart_beats(max_heart_beats)
 
 		except Exception, e:
 			sio = StringIO()
@@ -176,12 +179,13 @@ class Host(OneRoomUser):
 
 # ----------------------------
 
-class User(OneRoomUser):
+class Invitee(OneRoomUser):
 
 	def __call__(self, *args, **kwargs):
 		try:
 			entries = kwargs.get('entries', None)
-
+			max_heart_beats = kwargs.get('max_heart_beats', 2)
+			
 			# connect
 			self.ws_connect()
 
@@ -199,7 +203,7 @@ class User(OneRoomUser):
 				raise Exception('%s did not enter a chat room' % self.username)
 
 			# get any message
-			self.wait_heart_beats(2)
+			self.wait_heart_beats(max_heart_beats)
 
 		except Exception, e:
 			sio = StringIO()
@@ -209,6 +213,73 @@ class User(OneRoomUser):
 
 			self.exception = e
 			self.traceback = sio.read()
+			print self.traceback 
 		finally:
 			self.ws_capture_and_close()
+
+User = Invitee
+
+# ----------------------------
+
+def run_chat(containerId, host_user, invitees, entries=None, use_threads=True, 
+			 host_class=Host, invitee_class=Invitee, server=SOCKET_IO_HOST, port=SOCKET_IO_PORT, **kwargs):
+
+	runnables = []
+	entries = entries or random.randint(5, 20)
+	connect_event = threading.Event() if use_threads else multiprocessing.Event()
+
+	host = host_class(host_user, invitees, host=server, port=port)
+	users = [invitee_class(username=name, host=server, port=port) for name in invitees]
+
+	required_args = {'entries':entries, 'containerId':containerId, 'connect_event':connect_event}
+
+	runnable_args = dict(kwargs)
+	runnable_args.update(required_args)
+	
+	# start host
+	runnable = 	threading.Thread(target=host, kwargs=dict(runnable_args)) if use_threads else \
+		 		multiprocessing.Process(target=host, kwargs=dict(runnable_args))
+	runnable.start()
+	runnables.append(runnable)
+
+	# wait for host to connect
+	time.sleep(1)
+
+	# start users
+	for u in users:
+		runnable = 	threading.Thread(target=u, kwargs=dict(runnable_args)) if use_threads else \
+		 			multiprocessing.Process(target=host, kwargs=dict(runnable_args))
+		runnable.start()
+		runnables.append(runnable)
+
+	# wait for termination
+	for t in runnables:
+		t.join()
+
+	result = [host]
+	result.extend(users)
+
+	return result
+
+if __name__ == '__main__':
+	cid = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.0'
+	host = 'test.user.1@nextthought.com'
+	users = ['test.user.%s@nextthought.com' % s for s in range(2, 10)]
+	entries = 50
+	
+	def create_fl():
+		import uuid
+		from nti.integrationtests.dataserver.client import DataserverClient
+		from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
+		
+		endpoint = 'http://%s:%s/dataserver2' % ('localhost', 8081)
+		ds = DataserverClient(endpoint=endpoint, credentials=(host, DEFAULT_USER_PASSWORD))
+		list_name = 'cfl-%s-%s' % (host, str(uuid.uuid4()).split('-')[0])
+		ds.createFriendsListWithNameAndFriends(list_name, users)
+		
+	create_fl()
+	result = run_chat(cid, host, users, entries=entries, use_threads=True)
+	for r in result:
+		print r.username, r.exception
+
 
