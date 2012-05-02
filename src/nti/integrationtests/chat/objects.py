@@ -252,7 +252,7 @@ def run_chat(containerId, host_user, invitees, entries=None, delay=0.25,
 	# start users
 	for u in users:
 		runnable = 	threading.Thread(target=u, kwargs=dict(runnable_args)) if use_threads else \
-		 			multiprocessing.Process(target=host, kwargs=dict(runnable_args))
+		 			multiprocessing.Process(target=u, kwargs=dict(runnable_args))
 		runnable.start()
 		runnables.append(runnable)
 
