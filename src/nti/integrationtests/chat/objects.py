@@ -235,7 +235,7 @@ def run_chat(containerId, host_user, invitees, entries=None, delay=0.25,
 	users = [invitee_class(username=name, host=server, port=port) for name in invitees]
 
 	required_args = {'entries':entries, 'containerId':containerId, 'connect_event':connect_event,
-					 'delay':delay}
+					 'delay':delay, 'max_heart_beats':max_heart_beats}
 
 	runnable_args = dict(kwargs)
 	runnable_args.update(required_args)
@@ -268,7 +268,7 @@ def run_chat(containerId, host_user, invitees, entries=None, delay=0.25,
 if __name__ == '__main__':
 	cid = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.0'
 	host = 'test.user.1@nextthought.com'
-	users =['test.user.%s@nextthought.com' % s for s in range(2, 4)]
+	users =['test.user.%s@nextthought.com' % s for s in range(2, 11)]
 	all_users = [host] + users
 	
 	entries = 50
@@ -290,7 +290,7 @@ if __name__ == '__main__':
 	for username in all_users:
 		create_fl(username)
 		
-	result = run_chat(cid, host, users, entries=entries, delay=0.25, use_threads=True, server=server, max_heart_beats=20)
+	result = run_chat(cid, host, users, entries=entries, delay=2, use_threads=True, server=server, max_heart_beats=3)
 	for r in result:
 		print r.username, len(list(r.sent)), len(list(r.received)), r.exception
 
