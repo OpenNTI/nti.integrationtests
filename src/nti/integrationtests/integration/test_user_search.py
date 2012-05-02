@@ -53,7 +53,7 @@ class TestUserSearch(DataServerTestCase):
 		result = self.ds.execute_user_search("%s.2*" % self.prefix)
 		assert_that(result, container_of_length(0))
 
-		result = self.ds.execute_user_search("this_user_dne" % self.prefix)
+		result = self.ds.execute_user_search("this_user_dne")
 		assert_that(result, container_of_length(0))
 
 		self._delete_user_notes(objects)
