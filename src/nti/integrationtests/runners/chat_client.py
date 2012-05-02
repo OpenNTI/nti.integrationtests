@@ -11,10 +11,10 @@ import argparse
 import threading
 from datetime import datetime
 
-from nti.integrationtests.integration.websocket_interface import Graph
-from nti.integrationtests.integration.websocket_interface import CHANNELS
-from nti.integrationtests.integration.websocket_interface import DEFAULT_CHANNEL
-from nti.integrationtests.integration.websocket_interface import basic_message_ctx
+from nti.integrationtests.chat.websocket_interface import Graph
+from nti.integrationtests.chat.websocket_interface import CHANNELS
+from nti.integrationtests.chat.websocket_interface import DEFAULT_CHANNEL
+from nti.integrationtests.chat.websocket_interface import MessageContext
 
 #########################
 
@@ -119,7 +119,7 @@ class Open(Command):
 			self.client.ws_close()
 			
 		self.client = User(	username=ns.user, host=ns.host, port=ns.port, \
-							password=ns.password, message_context=basic_message_ctx)
+							password=ns.password, message_context=MessageContext())
 		
 		try:
 			self.client.ws_connect()

@@ -49,7 +49,7 @@ CHANNELS = (DEFAULT_CHANNEL, WHISPER_CHANNEL, META_CHANNEL, CONTENT_CHANNEL, POL
 
 # -----------------------------
 
-class BasicMessageContext(threading.local):
+class BasicMessageContext(object):
 
 	def __init__(self):
 		self._last_sent = None
@@ -85,8 +85,6 @@ class BasicMessageContext(threading.local):
 	def last_sent(self):
 		return self._last_sent
 
-basic_message_ctx = BasicMessageContext()
-
 class MessageContext(BasicMessageContext):
 	def __init__(self):
 		super(MessageContext, self).__init__()
@@ -115,7 +113,11 @@ class MessageContext(BasicMessageContext):
 	def received(self):
 		return self._recv
 
-default_message_ctx = MessageContext()
+class ThreadLocalMessageContext(threading.local, MessageContext):
+	def __init__(self):
+		MessageContext.__init__(self)
+
+default_message_context = ThreadLocalMessageContext()
 
 # -----------------------------
 
@@ -237,7 +239,7 @@ class Graph(object):
 		self.killed = False
 		self.heart_beats = 0
 
-		self.message_context = kwargs.get('message_context', default_message_ctx)
+		self.message_context = kwargs.get('message_context', MessageContext())
 
 		self.ws = kwargs.get('ws', None)
 		self.host = kwargs.get('host', None)
@@ -574,7 +576,7 @@ def isRecvMessageForShadow(data, data_format='json'):
 def isApproveMessages(data, data_format='json'):
 	return isEvent(data, EVT_APPROVE_MSGS, data_format)
 
-def _next_event(ws, graph=None, message_context=default_message_ctx):
+def _next_event(ws, graph=None, message_context=default_message_context):
 	msg = message_context.recv(ws)
 	if graph and isinstance(graph, Graph):
 
@@ -619,7 +621,7 @@ def _next_event(ws, graph=None, message_context=default_message_ctx):
 
 	return msg
 
-def _exitRoom(ws, containerId, data_format='json', message_context=default_message_ctx):
+def _exitRoom(ws, containerId, data_format='json', message_context=default_message_context):
 	d = {"name":EVT_EXIT_ROOM, "args":[containerId]}
 	msg = encode(d, data_format)
 	if msg:
@@ -630,7 +632,7 @@ def _exitRoom(ws, containerId, data_format='json', message_context=default_messa
 
 def _enterRoom(ws, **kwargs):
 
-	message_context = kwargs.get('message_context', default_message_ctx)
+	message_context = kwargs.get('message_context', default_message_context)
 
 	occupants = kwargs.get('occupants', kwargs.get('Occupants',None))
 	inReplyTo = kwargs.get("inReplyTo", None)
@@ -672,7 +674,7 @@ def _postMessage(ws, **kwargs):
 	assert containerId," must specify a valid container"
 
 	data_format = kwargs.get("data_format", 'json')
-	message_context = kwargs.get('message_context', default_message_ctx)
+	message_context = kwargs.get('message_context', default_message_context)
 
 	args = {"ContainerId": containerId, "Body": message, "Class":"MessageInfo"}
 	if channel and channel != DEFAULT_CHANNEL:
@@ -692,7 +694,7 @@ def _postMessage(ws, **kwargs):
 	else:
 		raise InvalidDataFormat(data_format)
 
-def _makeModerated(ws, containerId, flag=True, data_format='json', message_context=default_message_ctx):
+def _makeModerated(ws, containerId, flag=True, data_format='json', message_context=default_message_context):
 
 	d = {"name":EVT_MAKE_MODERATED, "args":[containerId, flag]}
 	msg = encode(d, data_format)
@@ -702,7 +704,7 @@ def _makeModerated(ws, containerId, flag=True, data_format='json', message_conte
 	else:
 		raise InvalidDataFormat(data_format)
 
-def _approveMessages(ws, mids, data_format='json', message_context=default_message_ctx):
+def _approveMessages(ws, mids, data_format='json', message_context=default_message_context):
 	mids = toList(mids)
 	d = {"name":EVT_APPROVE_MSGS, "args":[mids]}
 	msg = encode(d, data_format)
@@ -712,7 +714,7 @@ def _approveMessages(ws, mids, data_format='json', message_context=default_messa
 	else:
 		raise InvalidDataFormat(data_format)
 
-def _shadowUsers(ws, containerId, users, data_format='json', message_context=default_message_ctx):
+def _shadowUsers(ws, containerId, users, data_format='json', message_context=default_message_context):
 	users = toList(users)
 	d = {"name":EVT_SHADOW_USERS, "args":[containerId, users]}
 	msg = encode(d, data_format)
@@ -724,12 +726,12 @@ def _shadowUsers(ws, containerId, users, data_format='json', message_context=def
 
 # -----------------------------
 
-def _ws_disconnect(ws, data_format='json', message_context=default_message_ctx):
+def _ws_disconnect(ws, data_format='json', message_context=default_message_context):
 	msg = b"0::"
 	message_context.send(ws, msg)
 
 def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, timeout=DEAULT_TIMEOUT,
-				message_context=default_message_ctx):
+				message_context=default_message_context):
 
 	# create the connectiona and do a handshake.
 	ws = create_ds_connection(host, port, username=username, password=password, timeout=timeout)

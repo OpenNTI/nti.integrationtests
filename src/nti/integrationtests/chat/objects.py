@@ -166,7 +166,7 @@ class Host(OneRoomUser):
 
 			# process messages
 			self.wait_heart_beats(max_heart_beats)
-
+			
 		except Exception, e:
 			sio = StringIO()
 			exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -206,7 +206,7 @@ class Invitee(OneRoomUser):
 
 			# get any message
 			self.wait_heart_beats(max_heart_beats)
-
+			
 		except Exception, e:
 			sio = StringIO()
 			exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -224,7 +224,7 @@ User = Invitee
 # ----------------------------
 
 def run_chat(containerId, host_user, invitees, entries=None, delay=0.25, 
-			 use_threads=True, host_class=Host, invitee_class=Invitee, 
+			 max_heart_beats=3, use_threads=True, host_class=Host, invitee_class=Invitee, 
 			 server=SOCKET_IO_HOST, port=SOCKET_IO_PORT, **kwargs):
 
 	runnables = []
@@ -268,7 +268,7 @@ def run_chat(containerId, host_user, invitees, entries=None, delay=0.25,
 if __name__ == '__main__':
 	cid = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.0'
 	host = 'test.user.1@nextthought.com'
-	users =['test.user.%s@nextthought.com' % s for s in range(2, 20)]
+	users =['test.user.%s@nextthought.com' % s for s in range(2, 4)]
 	all_users = [host] + users
 	
 	entries = 50
@@ -290,8 +290,8 @@ if __name__ == '__main__':
 	for username in all_users:
 		create_fl(username)
 		
-	result = run_chat(cid, host, users, entries=entries, delay=0.25, use_threads=True, server=server)
+	result = run_chat(cid, host, users, entries=entries, delay=0.25, use_threads=True, server=server, max_heart_beats=20)
 	for r in result:
-		print r.username, r.exception
+		print r.username, len(list(r.sent)), len(list(r.received)), r.exception
 
 
