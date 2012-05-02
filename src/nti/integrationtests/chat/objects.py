@@ -160,7 +160,7 @@ class Host(OneRoomUser):
 
 			room_id = self.room
 			if room_id:
-				self.post_messages(room_id, entries)
+				self.post_messages(room_id, entries, delay=delay)
 			else:
 				raise Exception('%s did not enter a chat room' % self.username)
 
@@ -267,12 +267,12 @@ def run_chat(containerId, host_user, invitees, entries=None, delay=0.25,
 
 if __name__ == '__main__':
 	cid = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.0'
-	host = 'test.user.41@nextthought.com'
-	users =[] # ['test.user.%s@nextthought.com' % s for s in range(7, 8)]
+	host = 'test.user.1@nextthought.com'
+	users =['test.user.%s@nextthought.com' % s for s in range(2, 20)]
 	all_users = [host] + users
 	
 	entries = 50
-	server = 'csanchez.local'
+	server = 'localhost'
 	
 	def create_fl(username):
 		import uuid
@@ -287,8 +287,8 @@ if __name__ == '__main__':
 		users.remove(username)
 		ds.createFriendsListWithNameAndFriends(list_name, users)
 		
-	#for username in all_users:
-	#	create_fl(username)
+	for username in all_users:
+		create_fl(username)
 		
 	result = run_chat(cid, host, users, entries=entries, delay=0.25, use_threads=True, server=server)
 	for r in result:
