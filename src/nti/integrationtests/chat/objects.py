@@ -215,7 +215,7 @@ class Invitee(OneRoomUser):
 
 			self.exception = e
 			self.traceback = sio.read()
-			print self.traceback 
+			# print self.traceback 
 		finally:
 			self.ws_capture_and_close()
 
