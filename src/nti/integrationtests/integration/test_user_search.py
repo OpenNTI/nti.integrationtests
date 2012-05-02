@@ -13,7 +13,7 @@ class TestUserSearch(DataServerTestCase):
 		super(TestUserSearch, self).setUp()
 		self.prefix = 'test.user'
 		self.container = 'container-%s' % uuid.uuid1()
-		self.users = [('%s.%s@nextthought.com' % (self.prefix, r), self.default_user_password) for r in xrange(15,19)]
+		self.users = [('%s.%s@nextthought.com' % (self.prefix, r), self.default_user_password) for r in range(15,19)]
 
 	def _create_note_object(self, client, note, container):
 		return client.create_object(note, objType='Note', container=container)
@@ -53,7 +53,7 @@ class TestUserSearch(DataServerTestCase):
 		result = self.ds.execute_user_search("%s.2*" % self.prefix)
 		assert_that(result, container_of_length(0))
 
-		result = self.ds.execute_user_search("%s.35" % self.prefix)
+		result = self.ds.execute_user_search("this_user_dne" % self.prefix)
 		assert_that(result, container_of_length(0))
 
 		self._delete_user_notes(objects)
