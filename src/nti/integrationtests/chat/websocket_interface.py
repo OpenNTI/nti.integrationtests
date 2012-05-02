@@ -675,7 +675,7 @@ def _postMessage(ws, **kwargs):
 
 	data_format = kwargs.get("data_format", 'json')
 	message_context = kwargs.get('message_context', default_message_context)
-
+		
 	args = {"ContainerId": containerId, "Body": message, "Class":"MessageInfo"}
 	if channel and channel != DEFAULT_CHANNEL:
 		args['channel'] = channel
