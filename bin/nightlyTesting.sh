@@ -34,7 +34,7 @@ nosetests -s -d run_tests.py >> $LOG 2>&1
 cd $TMPDIR
 
 echo "Running integration tests" >> $LOG 2>&1
-nti_run_integration_tests --use_coverage >> $LOG 2>&1
+nti_run_integration_tests --use_coverage --sync_changes >> $LOG 2>&1
 
 # combine coverage data from integration tests
 
