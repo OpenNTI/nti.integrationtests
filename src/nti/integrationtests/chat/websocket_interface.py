@@ -210,7 +210,7 @@ class _RecvMessage(_Message):
 			return False
 
 	def __repr__(self):
-		return "<%s,%s,%s>" % (self.__class__.__name__, self.ID, self.message)
+		return "<%s,%s,%s,%s>" % (self.__class__.__name__, self.ID, self.creator, self.message)
 
 class _PostMessage(_Message):
 	def __init__(self, **kwargs):
