@@ -62,7 +62,7 @@ class BasicUser(Graph):
 		for _ in xrange(entries):
 			content = self.generate_message()
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
-			if delay:
+			if delay is not None and delay > 0:
 				time.sleep(delay)
 
 # ----------------------------
