@@ -292,6 +292,6 @@ if __name__ == '__main__':
 		
 	result = run_chat(cid, host, users, entries=entries, delay=2, use_threads=True, server=server, max_heart_beats=3)
 	for r in result:
-		print r.username, len(list(r.sent)), len(list(r.received)), r.exception
+		print r.username, len(list(r.sent)), len(list(r.received)), r.traceback
 
 
