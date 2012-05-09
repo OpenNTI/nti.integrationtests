@@ -272,7 +272,7 @@ if __name__ == '__main__':
 	all_users = [host] + users
 	
 	entries = 50
-	server = 'localhost'
+	server = 'localhost' #'192.168.0.151'
 	
 	def create_fl(username):
 		import uuid
