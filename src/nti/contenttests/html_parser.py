@@ -1,85 +1,79 @@
-'''
-Created on May 14, 2012
-
-@author: ltesti
-'''
-
 import sys
 import lxml.html as lhtml
 from nltk import clean_html
-
-#from urlparse import urljoin
 
 class HtmlData(object):
     
     def __init__(self, doc):
         self.doc = doc
         self.parsed_html = {'links':{}, 'span':{}, 'attributes':[], 'img':[], 'iframe':[], 'paragraph':[]}
-        self.text = lambda t: t
     
     def parse_ntiid(self, elem):
-        if(self.text(elem.get("name") == 'NTIID')):
-            self.parsed_html['NTIID'] = [self.text(elem.get("content")), self.text(elem.get("name"))]
+        if elem.get("name") == 'NTIID':
+            self.parsed_html['NTIID'] = (elem.get("content"), elem.get("name"))
     
     def parse_links(self, elem):
-        if(self.text(elem.get('rel') == 'next')):
-            self.parsed_html['links']['next'] = [self.text(elem.get("href"))]
-        if(self.text(elem.get('rel') == 'prev')):
-            self.parsed_html['links']['prev'] = [self.text(elem.get("href"))]
-        if(self.text(elem.get('rel') == 'up')):
-            self.parsed_html['links']['up'] = [self.text(elem.get("href"))]
+        if elem.get('rel') == 'next':
+            self.parsed_html['links']['next'] = elem.get("href")
+        elif elem.get('rel') == 'prev':
+            self.parsed_html['links']['prev'] = elem.get("href")
+        elif elem.get('rel') == 'up':
+            self.parsed_html['links']['up'] = elem.get("href")
     
     def parse_span(self, elem):
-        if(self.text(elem.get("class")) == 'ref'):
-            self.parsed_html['span']['ref'] = [self.text(self.to_text(elem))]
-        if(self.text(elem.get("class")) == 'label'):
-            self.parsed_html['span']['label'] = [self.text(self.to_text(elem))]
+        if elem.get("class") == 'ref':
+            self.parsed_html['span']['ref'] = self.to_text(elem)
+        if elem.get("class") == 'label':
+            self.parsed_html['span']['label'] = self.to_text(elem)
     
     def parse_anchor_elems(self, elem):
-        self.parsed_html['attributes'].append([self.text(elem.get("name")), self.text(elem.get("id"))])
+        self.parsed_html['attributes'].append((elem.get("name"), elem.get("id")))
     
     def parse_images(self, elem):
-        self.parsed_html['img'].append(self.text(elem.get("style")))
+        self.parsed_html['img'].append(elem.get("style"))
     
     def parse_iframe_src_att(self, elem):
-        self.parsed_html['iframe'].append(self.text(elem.get("src")))
+        self.parsed_html['iframe'].append(elem.get("src"))
     
     def parse_paragraphs(self, elem):
-        text = self.text(self.to_text(elem))
-        return clean_html(text.lower())
-#        for child in elem.getchildren():
-#            text = self.text(self.to_text(child))
-#            paragraph.append()
-#        return paragraph
+        text = self.to_text(elem)
+        text = clean_html(text)
+        return text
     
     def to_text(self, elem):
-        ret = elem.text or ""
+        ret = []
+        ret.append(elem.text or "")
         for child in elem.getchildren():
-            ret += self.to_text(child)
-            ret += child.tail or ""
-        return ret
+            ret.append(self.to_text(child))
+            ret.append(child.tail or "")
+        return ''.join(ret)
     
     @classmethod
     def parse_element(cls, parser, elem):
         tag = elem.tag
-        if(tag == 'meta'):parser.parse_ntiid(elem)
-        if(tag == 'link'):parser.parse_links(elem)
-        if(tag == 'span'):parser.parse_span(elem)
-        if(tag == 'a'):parser.parse_anchor_elems(elem)
-        if(tag == 'img'):parser.parse_images(elem)
-        if(tag == 'iframe'): parser.parse_iframe_src_att(elem)
-        if(tag == 'p'):
+        if tag == 'meta': 
+            parser.parse_ntiid(elem)
+        elif tag == 'link':
+            parser.parse_links(elem)
+        elif tag == 'span':
+            parser.parse_span(elem)
+        elif tag == 'a':
+            parser.parse_anchor_elems(elem)
+        elif tag == 'img':
+            parser.parse_images(elem)
+        elif tag == 'iframe':
+            parser.parse_iframe_src_att(elem)
+        elif tag == 'p':
             paragraph = parser.parse_paragraphs(elem)
             parser.parsed_html['paragraph'].append(paragraph)
+            
         for child in elem.getchildren():
-            for _ in HtmlData.parse_element(parser, child):
-                yield _
-        return
+            HtmlData.parse_element(parser, child)
     
     @classmethod
     def parse_doc(cls, doc):
         parser = HtmlData(doc)
-        for elem in parser.parse_element(parser, parser.doc): pass
+        parser.parse_element(parser, parser.doc)
         return parser.parsed_html
     
 def items(html, types=None):
