@@ -1,4 +1,5 @@
 import sys
+import os
 import lxml.html as lhtml
 from nltk import clean_html
 
@@ -75,7 +76,30 @@ class HtmlData(object):
         parser = HtmlData(doc)
         parser.parse_element(parser, parser.doc)
         return parser.parsed_html
-    
+
+def is_equal(value1, value2):
+    if(value1 == value2):
+        return 'equal'
+    else:
+        return 'different'
+
+def compare_parsed_data(base_data, test_data):
+    report_data = []
+    if(base_data.keys() == test_data.keys()):
+        report_data.append(['NTIID:', ''])
+        report_data.append(['\tNTIID:', is_equal(base_data['NTIID'], test_data['NTIID'])])
+        report_data.append(['links:', ''])
+        report_data.append(['\tnext: ', is_equal(base_data['links']['next'], test_data['links']['next'])])
+        report_data.append(['\tprev: ', is_equal(base_data['links']['prev'], test_data['links']['prev'])])
+        report_data.append(['\tup:   ', is_equal(base_data['links']['up'], test_data['links']['up'])])
+        report_data.append(['span', ''])
+        report_data.append(['\tref:  ', is_equal(base_data['span']['ref'], test_data['span']['ref'])])
+        report_data.append(['\tlabel:', is_equal(base_data['span']['ref'], test_data['span']['ref'])])
+#        report_data.append(['img:', ''])
+        return report_data
+    else:
+        pass
+
 def items(html, types=None):
     doc = lhtml.fromstring(html)
     return HtmlData.parse_doc(doc)
@@ -85,11 +109,29 @@ def get_file_items(html_file, types=None):
         html = f.read()
         f.close()
         return items(html, types)
+
+def write_file_items(report_data, txt_file):
+    with open(txt_file, "w") as f:
+        for line in report_data:
+            print line
+            f.write(('%s %10s\n' % (line[0], line[1])))
+  
+def is_prop_path(path, extention): 
+    return os.path.isfile(path) and (path.split(".")[1] == extention)
+        
+def send_error(error):
+    print error
         
 def main(args=None):
-    args = args or sys.argv[1:]
-    return get_file_items(sys.argv[1]) if args else None
+    if(len(sys.argv) == 4):
+        if(is_prop_path(sys.argv[1], 'html') and is_prop_path(sys.argv[2], 'html') and is_prop_path(sys.argv[3], 'txt')):
+            base_data = get_file_items(sys.argv[1])
+            test_data = get_file_items(sys.argv[2])
+            report_data = compare_parsed_data(base_data, test_data)
+            write_file_items(report_data, sys.argv[3])
+        else: send_error('improper file types')
+    else:
+        send_error('3 arguments required')
 
 if __name__ == '__main__':
-    from pprint import pprint
-    pprint(main())
+    main()
