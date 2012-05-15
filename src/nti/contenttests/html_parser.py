@@ -6,6 +6,7 @@ Created on May 14, 2012
 
 import sys
 import lxml.html as lhtml
+from nltk import clean_html
 
 #from urlparse import urljoin
 
@@ -44,14 +45,12 @@ class HtmlData(object):
         self.parsed_html['iframe'].append(self.text(elem.get("src")))
     
     def parse_paragraphs(self, elem):
-        paragraph = []
-        for child in elem.getchildren():
-            tag = child.tag
-            if(tag == 'a'):
-                paragraph.append([self.text(child.get('name')), self.text(child.get('id'))])
-            if(tag == 'span'):
-                paragraph.append(self.text(self.to_text(elem)))
-        return paragraph
+        text = self.text(self.to_text(elem))
+        return clean_html(text.lower())
+#        for child in elem.getchildren():
+#            text = self.text(self.to_text(child))
+#            paragraph.append()
+#        return paragraph
     
     def to_text(self, elem):
         ret = elem.text or ""
