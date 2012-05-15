@@ -23,9 +23,10 @@ setup(
 
 	install_requires = [ 'nti.dataserver',
 						 'coverage',
+						 'mmstats',
 						 'pyobjc-core',
 						 'pyobjc',
-						 'mmstats'
+						 'selenium'
 						],
 	
 	packages = find_packages('src'),
