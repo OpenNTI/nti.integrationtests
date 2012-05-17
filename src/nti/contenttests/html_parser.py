@@ -7,28 +7,36 @@ from nltk import clean_html
 
 class MetaData(object):
     
-    def __init__(self, content):
+    def __init__(self, name, content):
+        self.name = name
         self.content = content
     
-    @property
+    def __eq__(self, other):
+        return self.name == other.name and self.content == other.content
+    
     def get_values(self):
-        return self.content
+        return self.name, self.content
     
 class LinkData(object):
     
-    def __init__(self, href):
+    def __init__(self, href, rel):
         self.href = href
-        
-    @property
+        self.rel = rel
+    
+    def __eq__(self, other):
+        return self.href == other.href and self.rel == other.rel
+
     def get_values(self):
-        return self.href
+        return self.href, self.rel
     
 class SpanData(object):
     
     def __init__(self, text):
         self.text = text
-        
-    @property
+    
+    def __eq__(self, other):
+        return self.text == other.text
+    
     def get_values(self):
         return self.text
     
@@ -37,8 +45,10 @@ class AnchorData(object):
     def __init__(self, name, Id):
         self.name = name
         self.Id = Id
-       
-    @property 
+    
+    def __eq__(self, other):
+        return self.name == other.name and self.Id == other.Id
+    
     def get_values(self):
         return self.name, self.Id
     
@@ -46,8 +56,10 @@ class ImageData(object):
     
     def __init__(self, style):
         self.style = style
-        
-    @property
+    
+    def __eq__(self, other):
+        return self.style == other.style
+
     def get_values(self):
         return self.style
     
@@ -56,7 +68,9 @@ class IFrameData(object):
     def __init__(self, src):
         self.src = src
     
-    @property
+    def __eq__(self, other):
+        return self.src == other.src
+    
     def get_values(self):
         return self.src
     
@@ -66,8 +80,10 @@ class ParagraphData(object):
         self.name = name
         text = clean_html(text)
         self.text = text
-        
-    @property
+    
+    def __eq__(self, other):
+        return self.name == other.name and self.text == other.text
+    
     def get_values(self):
         return self.name, self.text
 
@@ -143,16 +159,16 @@ class HtmlData(object):
     
     def parse_meta(self, elem):
         if elem.get("name") == 'NTIID':
-            self.parsed_html['ntiid'].add_value('content', MetaData(elem.get('content')))
+            self.parsed_html['ntiid'].add_value('content', MetaData(elem.get('name'), elem.get('content')))
     
     def parse_links(self, elem):
         rel = elem.get('rel')
         if rel == 'next':
-            self.parsed_html['links'].add_value('next', LinkData(LinkData(elem.get("href"))))
+            self.parsed_html['links'].add_value('next', LinkData(elem.get("href"), elem.get("rel")))
         elif rel == 'prev':
-            self.parsed_html['links'].add_value('prev', LinkData(elem.get("href")))
+            self.parsed_html['links'].add_value('prev', LinkData(elem.get("href"), elem.get("rel")))
         elif rel == 'up':
-            self.parsed_html['links'].add_value('up', LinkData(elem.get("href")))
+            self.parsed_html['links'].add_value('up', LinkData(elem.get("href"), elem.get("rel")))
     
     def parse_span(self, elem):
         clazz = elem.get('class')
@@ -221,24 +237,24 @@ def is_equal(value1, value2, is_para = False):
         values = []
         if isinstance(base, dict):
             for key in base:
-                if base[key].get_values == test[key].get_values:
-                    values.append([key, 'equal', base[key].get_values, test[key].get_values])
+                if base[key] == test[key]:
+                    values.append([key, 'equal', base[key].get_values(), test[key].get_values()])
                 else:
-                    values.append([key, 'different', base[key].get_values, test[key].get_values])
+                    values.append([key, 'different', base[key].get_values(), test[key].get_values()])
             return values
         elif not is_para:
             i = 0
             while(i < len(value1)):
-                if base[i].get_values == test[i].get_values:
-                    values.append(['', 'equal', base[i].get_values, test[i].get_values])
+                if base[i] == test[i]:
+                    values.append(['', 'equal', base[i].get_values(), test[i].get_values()])
                 else:
-                    values.append(['', 'different', base[i].get_values, test[i].get_values])
+                    values.append(['', 'different', base[i].get_values(), test[i].get_values()])
                 i += 1
             return values
         else:
             i = 0
             while(i < len(value1)):
-                if base[i].get_values == test[i].get_values:
+                if base[i] == test[i]:
                     values.append(['', 'paragraph content equal', '', ''])
                 else:
                     values.append(['', 'paragraph content different', '', ''])
