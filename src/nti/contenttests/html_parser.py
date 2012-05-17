@@ -14,8 +14,8 @@ class MetaData(object):
     def __eq__(self, other):
         return self.name == other.name and self.content == other.content
     
-    def get_values(self):
-        return self.name, self.content
+    def __str__(self):
+        return 'name:(%s)  content:(%s)' % (self.name, self.content)
     
 class LinkData(object):
     
@@ -26,8 +26,8 @@ class LinkData(object):
     def __eq__(self, other):
         return self.href == other.href and self.rel == other.rel
 
-    def get_values(self):
-        return self.href, self.rel
+    def __str__(self):
+        return 'href:(%s)  rel:(%s)' % (self.href, self.rel)
     
 class SpanData(object):
     
@@ -37,8 +37,8 @@ class SpanData(object):
     def __eq__(self, other):
         return self.text == other.text
     
-    def get_values(self):
-        return self.text
+    def __str__(self):
+        return 'src:(%s)' % self.text
     
 class AnchorData(object):
     
@@ -49,8 +49,8 @@ class AnchorData(object):
     def __eq__(self, other):
         return self.name == other.name and self.Id == other.Id
     
-    def get_values(self):
-        return self.name, self.Id
+    def __str__(self):
+        return 'name:(%s)  Id:(%s)' % (self.name, self.Id)
     
 class ImageData(object):
     
@@ -60,8 +60,8 @@ class ImageData(object):
     def __eq__(self, other):
         return self.style == other.style
 
-    def get_values(self):
-        return self.style
+    def __str__(self):
+        return 'src:(%s)' % self.style
     
 class IFrameData(object):
     
@@ -71,8 +71,8 @@ class IFrameData(object):
     def __eq__(self, other):
         return self.src == other.src
     
-    def get_values(self):
-        return self.src
+    def __str__(self):
+        return 'src:(%s)' % self.src
     
 class ParagraphData(object):
     
@@ -84,8 +84,8 @@ class ParagraphData(object):
     def __eq__(self, other):
         return self.name == other.name and self.text == other.text
     
-    def get_values(self):
-        return self.name, self.text
+    def __str__(self):
+        return 'name:(%s)  text:(%s)' % (self.name, self.text)
 
 # ------------ object collections ----------
 
@@ -238,17 +238,17 @@ def is_equal(value1, value2, is_para = False):
         if isinstance(base, dict):
             for key in base:
                 if base[key] == test[key]:
-                    values.append([key, 'equal', base[key].get_values(), test[key].get_values()])
+                    values.append([key, 'equal', base[key], test[key]])
                 else:
-                    values.append([key, 'different', base[key].get_values(), test[key].get_values()])
+                    values.append([key, 'different', base[key], test[key]])
             return values
         elif not is_para:
             i = 0
             while(i < len(value1)):
                 if base[i] == test[i]:
-                    values.append(['', 'equal', base[i].get_values(), test[i].get_values()])
+                    values.append(['', 'equal', base[i], test[i]])
                 else:
-                    values.append(['', 'different', base[i].get_values(), test[i].get_values()])
+                    values.append(['', 'different', base[i], test[i]])
                 i += 1
             return values
         else:
