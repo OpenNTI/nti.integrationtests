@@ -3,41 +3,75 @@ import os
 import lxml.html as lhtml
 from nltk import clean_html
 
+# ----------- object classes ------------
+
 class MetaClass(object):
     
     def __init__(self, content):
         self.content = content
     
+    @property
+    def get_values(self):
+        return self.content
+    
 class LinkClass(object):
     
     def __init__(self, href):
         self.href = href
+        
+    @property
+    def get_values(self):
+        return self.href
     
 class SpanClass(object):
     
     def __init__(self, text):
         self.text = text
+        
+    @property
+    def get_values(self):
+        return self.text
     
-class AnshorClass(object):
+class AnchorClass(object):
     
-    def __init__(self, name, id):
+    def __init__(self, name, Id):
         self.name = name
-        self.id = id
+        self.Id = Id
+       
+    @property 
+    def get_values(self):
+        return self.name, self.Id
     
 class ImageClass(object):
     
     def __init__(self, style):
         self.style = style
+        
+    @property
+    def get_values(self):
+        return self.style
     
 class IFrameClass(object):
     
     def __init__(self, src):
         self.src = src
     
+    @property
+    def get_values(self):
+        return self.src
+    
 class ParagraphClass(object):
     
-    def __init__(self, text):
+    def __init__(self, name, text):
+        self.name = name
+        text = clean_html(text)
         self.text = text
+        
+    @property
+    def get_values(self):
+        return self.name, self.text
+
+# ------------ object collections ----------
 
 class ElementsCollection(object):
     
@@ -91,6 +125,8 @@ class ParagraphCollection(ElementsCollection):
     def __init__(self):
         self.data = []
 
+# ------------ add data to collections -------------
+
 class HtmlData(object):
     
     def __init__(self, doc):
@@ -107,35 +143,35 @@ class HtmlData(object):
     
     def parse_meta(self, elem):
         if elem.get("name") == 'NTIID':
-            self.parsed_html['ntiid'].add_value('content', elem.get('content'))
+            self.parsed_html['ntiid'].add_value('content', MetaClass(elem.get('content')))
     
     def parse_links(self, elem):
         rel = elem.get('rel')
         if rel == 'next':
-            self.parsed_html['links'].add_value('next', elem.get("href"))
+            self.parsed_html['links'].add_value('next', LinkClass(LinkClass(elem.get("href"))))
         elif rel == 'prev':
-            self.parsed_html['links'].add_value('prev', elem.get("href"))
+            self.parsed_html['links'].add_value('prev', LinkClass(elem.get("href")))
         elif rel == 'up':
-            self.parsed_html['links'].add_value('up', elem.get("href"))
+            self.parsed_html['links'].add_value('up', LinkClass(elem.get("href")))
     
     def parse_span(self, elem):
         clazz = elem.get('class')
         if clazz == 'ref':
-            self.parsed_html['span'].add_value('ref', self.to_text(elem))
+            self.parsed_html['span'].add_value('ref', SpanClass(self.to_text(elem)))
         if clazz == 'label':
-            self.parsed_html['span'].add_value('label', self.to_text(elem))
+            self.parsed_html['span'].add_value('label', SpanClass(self.to_text(elem)))
     
     def parse_anchor_elems(self, elem):
-        self.parsed_html['anchor'].add_element([elem.get("name"), elem.get("id")])
+        self.parsed_html['anchor'].add_element(AnchorClass(elem.get("name"), elem.get("id")))
     
     def parse_images(self, elem):
-        self.parsed_html['image'].add_element(elem.get("style"))
+        self.parsed_html['image'].add_element(ImageClass(elem.get("style")))
     
     def parse_iframe_src_att(self, elem):
-        self.parsed_html['iframe'].add_element(elem.get("src"))
+        self.parsed_html['iframe'].add_element(IFrameClass(elem.get("src")))
     
     def parse_paragraphs(self, elem):
-        self.parsed_html['paragraph'].add_element(self.to_text(elem))
+        self.parsed_html['paragraph'].add_element(ParagraphClass(elem.get("name"), self.to_text(elem)))
     
     def to_text(self, elem):
         ret = []
@@ -172,6 +208,12 @@ class HtmlData(object):
         HtmlData.parse_element(parser, parser.doc)
         return parser.parsed_html
 
+def items(html):
+    doc = lhtml.fromstring(html)
+    return HtmlData.parse_doc(doc)
+
+# ---------------- comparison functions ---------------
+
 def is_equal(value1, value2, is_para = False):
     base = value1.data
     test = value2.data
@@ -179,24 +221,24 @@ def is_equal(value1, value2, is_para = False):
         values = []
         if isinstance(base, dict):
             for key in base:
-                if base[key] == test[key]:
-                    values.append([key, 'equal', base[key], test[key]])
+                if base[key].get_values == test[key].get_values:
+                    values.append([key, 'equal', base[key].get_values, test[key].get_values])
                 else:
-                    values.append([key, 'different', base[key], test[key]])
+                    values.append([key, 'different', base[key].get_values, test[key].get_values])
             return values
         elif not is_para:
             i = 0
             while(i < len(value1)):
-                if base[i] == test[i]:
-                    values.append(['', 'equal', base[i], test[i]])
+                if base[i].get_values == test[i].get_values:
+                    values.append(['', 'equal', base[i].get_values, test[i].get_values])
                 else:
-                    values.append(['', 'different', base[i], test[i]])
+                    values.append(['', 'different', base[i].get_values, test[i].get_values])
                 i += 1
             return values
         else:
             i = 0
             while(i < len(value1)):
-                if base[i] == test[i]:
+                if base[i].get_values == test[i].get_values:
                     values.append(['', 'paragraph content equal', '', ''])
                 else:
                     values.append(['', 'paragraph content different', '', ''])
@@ -219,9 +261,7 @@ def compare_parsed_data(base_data, test_data):
     else:
         pass
 
-def items(html):
-    doc = lhtml.fromstring(html)
-    return HtmlData.parse_doc(doc)
+# ------------ file i/o --------------
 
 def get_file_items(html_file):
     with open(html_file, "r") as f:
