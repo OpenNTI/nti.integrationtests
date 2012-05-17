@@ -5,17 +5,16 @@ from nltk import clean_html
 
 class Elements(object):
     
-    def add_element(self, info, key=None):
-        if key:
-            self.data[key] = info
-        else:
-            self.data.append(info)
+    def add_element(self, info):
+        self.data.append(info)
+        
+    def add_value(self, key, value):
+        self.data[key] = value
     
-    @property
-    def leng(self):
+    def __len__(self):
         return len(self.data)
 
-class NTIID(Elements):
+class Meta(Elements):
     
     def __init__(self):
         self.data = {}
@@ -62,7 +61,7 @@ class HtmlData(object):
     def __init__(self, doc):
         self.doc = doc
         self.parsed_html = {
-                            'ntiid'     : NTIID(),
+                            'ntiid'     : Meta(),
                             'links'     : Links(),
                             'span'      : Span(),
                             'anchor'    : Anchor(),
@@ -71,25 +70,25 @@ class HtmlData(object):
                             'paragraph' : Paragraph()
                             }
     
-    def parse_ntiid(self, elem):
+    def parse_meta(self, elem):
         if elem.get("name") == 'NTIID':
-            self.parsed_html['ntiid'].add_element(elem.get('content'), 'content')
+            self.parsed_html['ntiid'].add_value('content', elem.get('content'))
     
     def parse_links(self, elem):
         rel = elem.get('rel')
         if rel == 'next':
-            self.parsed_html['links'].add_element(elem.get("href"), 'next')
+            self.parsed_html['links'].add_value('next', elem.get("href"))
         elif rel == 'prev':
-            self.parsed_html['links'].add_element(elem.get("href"), 'prev')
+            self.parsed_html['links'].add_value('prev', elem.get("href"))
         elif rel == 'up':
-            self.parsed_html['links'].add_element(elem.get("href"), 'up')
+            self.parsed_html['links'].add_value('up', elem.get("href"))
     
     def parse_span(self, elem):
         clazz = elem.get('class')
         if clazz == 'ref':
-            self.parsed_html['span'].add_element(self.to_text(elem), 'ref')
+            self.parsed_html['span'].add_value('ref', self.to_text(elem))
         if clazz == 'label':
-            self.parsed_html['span'].add_element(self.to_text(elem), 'label')
+            self.parsed_html['span'].add_value('label', self.to_text(elem))
     
     def parse_anchor_elems(self, elem):
         self.parsed_html['anchor'].add_element([elem.get("name"), elem.get("id")])
@@ -115,7 +114,7 @@ class HtmlData(object):
     def parse_element(cls, parser, elem):
         tag = elem.tag
         if tag == 'meta':
-            parser.parse_ntiid(elem)
+            parser.parse_meta(elem)
         elif tag == 'link':
             parser.parse_links(elem)
         elif tag == 'span':
@@ -141,7 +140,7 @@ class HtmlData(object):
 def is_equal(value1, value2, is_para = False):
     base = value1.data
     test = value2.data
-    if value1.leng == value2.leng:
+    if len(value1) == len(value2):
         values = []
         if isinstance(base, dict):
             for key in base:
@@ -152,7 +151,7 @@ def is_equal(value1, value2, is_para = False):
             return values
         elif not is_para:
             i = 0
-            while(i < value1.leng):
+            while(i < len(value1)):
                 if base[i] == test[i]:
                     values.append(['', 'equal', base[i], test[i]])
                 else:
