@@ -5,7 +5,7 @@ from nltk import clean_html
 
 # ----------- object classes ------------
 
-class MetaClass(object):
+class MetaData(object):
     
     def __init__(self, content):
         self.content = content
@@ -14,7 +14,7 @@ class MetaClass(object):
     def get_values(self):
         return self.content
     
-class LinkClass(object):
+class LinkData(object):
     
     def __init__(self, href):
         self.href = href
@@ -23,7 +23,7 @@ class LinkClass(object):
     def get_values(self):
         return self.href
     
-class SpanClass(object):
+class SpanData(object):
     
     def __init__(self, text):
         self.text = text
@@ -32,7 +32,7 @@ class SpanClass(object):
     def get_values(self):
         return self.text
     
-class AnchorClass(object):
+class AnchorData(object):
     
     def __init__(self, name, Id):
         self.name = name
@@ -42,7 +42,7 @@ class AnchorClass(object):
     def get_values(self):
         return self.name, self.Id
     
-class ImageClass(object):
+class ImageData(object):
     
     def __init__(self, style):
         self.style = style
@@ -51,7 +51,7 @@ class ImageClass(object):
     def get_values(self):
         return self.style
     
-class IFrameClass(object):
+class IFrameData(object):
     
     def __init__(self, src):
         self.src = src
@@ -60,7 +60,7 @@ class IFrameClass(object):
     def get_values(self):
         return self.src
     
-class ParagraphClass(object):
+class ParagraphData(object):
     
     def __init__(self, name, text):
         self.name = name
@@ -143,35 +143,35 @@ class HtmlData(object):
     
     def parse_meta(self, elem):
         if elem.get("name") == 'NTIID':
-            self.parsed_html['ntiid'].add_value('content', MetaClass(elem.get('content')))
+            self.parsed_html['ntiid'].add_value('content', MetaData(elem.get('content')))
     
     def parse_links(self, elem):
         rel = elem.get('rel')
         if rel == 'next':
-            self.parsed_html['links'].add_value('next', LinkClass(LinkClass(elem.get("href"))))
+            self.parsed_html['links'].add_value('next', LinkData(LinkData(elem.get("href"))))
         elif rel == 'prev':
-            self.parsed_html['links'].add_value('prev', LinkClass(elem.get("href")))
+            self.parsed_html['links'].add_value('prev', LinkData(elem.get("href")))
         elif rel == 'up':
-            self.parsed_html['links'].add_value('up', LinkClass(elem.get("href")))
+            self.parsed_html['links'].add_value('up', LinkData(elem.get("href")))
     
     def parse_span(self, elem):
         clazz = elem.get('class')
         if clazz == 'ref':
-            self.parsed_html['span'].add_value('ref', SpanClass(self.to_text(elem)))
+            self.parsed_html['span'].add_value('ref', SpanData(self.to_text(elem)))
         if clazz == 'label':
-            self.parsed_html['span'].add_value('label', SpanClass(self.to_text(elem)))
+            self.parsed_html['span'].add_value('label', SpanData(self.to_text(elem)))
     
     def parse_anchor_elems(self, elem):
-        self.parsed_html['anchor'].add_element(AnchorClass(elem.get("name"), elem.get("id")))
+        self.parsed_html['anchor'].add_element(AnchorData(elem.get("name"), elem.get("id")))
     
     def parse_images(self, elem):
-        self.parsed_html['image'].add_element(ImageClass(elem.get("style")))
+        self.parsed_html['image'].add_element(ImageData(elem.get("style")))
     
     def parse_iframe_src_att(self, elem):
-        self.parsed_html['iframe'].add_element(IFrameClass(elem.get("src")))
+        self.parsed_html['iframe'].add_element(IFrameData(elem.get("src")))
     
     def parse_paragraphs(self, elem):
-        self.parsed_html['paragraph'].add_element(ParagraphClass(elem.get("name"), self.to_text(elem)))
+        self.parsed_html['paragraph'].add_element(ParagraphData(elem.get("name"), self.to_text(elem)))
     
     def to_text(self, elem):
         ret = []
