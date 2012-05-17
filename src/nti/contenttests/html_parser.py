@@ -3,7 +3,43 @@ import os
 import lxml.html as lhtml
 from nltk import clean_html
 
-class Elements(object):
+class MetaClass(object):
+    
+    def __init__(self, content):
+        self.content = content
+    
+class LinkClass(object):
+    
+    def __init__(self, href):
+        self.href = href
+    
+class SpanClass(object):
+    
+    def __init__(self, text):
+        self.text = text
+    
+class AnshorClass(object):
+    
+    def __init__(self, name, id):
+        self.name = name
+        self.id = id
+    
+class ImageClass(object):
+    
+    def __init__(self, style):
+        self.style = style
+    
+class IFrameClass(object):
+    
+    def __init__(self, src):
+        self.src = src
+    
+class ParagraphClass(object):
+    
+    def __init__(self, text):
+        self.text = text
+
+class ElementsCollection(object):
     
     def add_element(self, info):
         self.data.append(info)
@@ -14,14 +50,13 @@ class Elements(object):
     def __len__(self):
         return len(self.data)
 
-class Meta(Elements):
+class MetaCollection(ElementsCollection):
     
     def __init__(self):
         self.data = {}
         self.data['content'] = None
-        
 
-class Links(Elements):
+class LinksCollection(ElementsCollection):
     
     def __init__(self):
         self.data = {}
@@ -29,29 +64,29 @@ class Links(Elements):
         self.data['prev'] = None
         self.data['up'] = None
         
-class Span(Elements):
+class SpanCollection(ElementsCollection):
     
     def __init__(self):
         self.data = {}
         self.data['ref'] = None
         self.data['label'] = None
 
-class Anchor(Elements):
+class AnchorCollection(ElementsCollection):
     
     def __init__(self):
         self.data = []
         
-class Image(Elements):
+class ImageCollection(ElementsCollection):
     
     def __init__(self):
         self.data = []
         
-class IFrame(Elements):
+class IFrameCollection(ElementsCollection):
     
     def __init__(self):
         self.data = []
         
-class Paragraph(Elements):
+class ParagraphCollection(ElementsCollection):
     
     def __init__(self):
         self.data = []
@@ -61,13 +96,13 @@ class HtmlData(object):
     def __init__(self, doc):
         self.doc = doc
         self.parsed_html = {
-                            'ntiid'     : Meta(),
-                            'links'     : Links(),
-                            'span'      : Span(),
-                            'anchor'    : Anchor(),
-                            'image'     : Image(),
-                            'iframe'    : IFrame(),
-                            'paragraph' : Paragraph()
+                            'ntiid'     : MetaCollection(),
+                            'links'     : LinksCollection(),
+                            'span'      : SpanCollection(),
+                            'anchor'    : AnchorCollection(),
+                            'image'     : ImageCollection(),
+                            'iframe'    : IFrameCollection(),
+                            'paragraph' : ParagraphCollection()
                             }
     
     def parse_meta(self, elem):
@@ -160,7 +195,7 @@ def is_equal(value1, value2, is_para = False):
             return values
         else:
             i = 0
-            while(i < value1.leng):
+            while(i < len(value1)):
                 if base[i] == test[i]:
                     values.append(['', 'paragraph content equal', '', ''])
                 else:
