@@ -15,7 +15,7 @@ class MetaData(object):
         return self.name == other.name and self.content == other.content
     
     def __str__(self):
-        return 'name:(%s)  content:(%s)' % (self.name, self.content)
+        return '(%s, %s)' % (self.name, self.content)
     
 class LinkData(object):
     
@@ -27,7 +27,7 @@ class LinkData(object):
         return self.href == other.href and self.rel == other.rel
 
     def __str__(self):
-        return 'href:(%s)  rel:(%s)' % (self.href, self.rel)
+        return '(%s, %s)' % (self.href, self.rel)
     
 class SpanData(object):
     
@@ -38,7 +38,7 @@ class SpanData(object):
         return self.text == other.text
     
     def __str__(self):
-        return 'src:(%s)' % self.text
+        return '(%s)' % self.text
     
 class AnchorData(object):
     
@@ -50,7 +50,7 @@ class AnchorData(object):
         return self.name == other.name and self.Id == other.Id
     
     def __str__(self):
-        return 'name:(%s)  Id:(%s)' % (self.name, self.Id)
+        return '(%s, %s)' % (self.name, self.Id)
     
 class ImageData(object):
     
@@ -61,7 +61,7 @@ class ImageData(object):
         return self.style == other.style
 
     def __str__(self):
-        return 'src:(%s)' % self.style
+        return '(%s)' % self.style
     
 class IFrameData(object):
     
@@ -72,7 +72,7 @@ class IFrameData(object):
         return self.src == other.src
     
     def __str__(self):
-        return 'src:(%s)' % self.src
+        return '(%s)' % self.src
     
 class ParagraphData(object):
     
@@ -85,7 +85,7 @@ class ParagraphData(object):
         return self.name == other.name and self.text == other.text
     
     def __str__(self):
-        return 'name:(%s)  text:(%s)' % (self.name, self.text)
+        return '(%s, %s)' % (self.name, self.text)
 
 # ------------ object collections ----------
 
