@@ -1,12 +1,17 @@
 import os
 import sys
 import lxml.html as lhtml
+from collections import OrderedDict
 
 from nltk import clean_html
 
 # ----------- object classes ------------
 
-class Meta(object):
+class Element(object):
+	def __repr__(self):
+		return '%r%s' % (self.__class__.__name__, self)
+	
+class Meta(Element):
 	
 	def __init__(self, name, content):
 		self.name = name
@@ -16,9 +21,9 @@ class Meta(object):
 		return self.name == other.name and self.content == other.content
 	
 	def __str__(self):
-		return '(%s, %s)' % (self.name, self.content)
+		return '(%s, %r)' % (self.name, self.content)
 	
-class Link(object):
+class Link(Element):
 	
 	def __init__(self, title, href, rel):
 		self.rel = rel
@@ -31,32 +36,33 @@ class Link(object):
 				self.title == other.title
 
 	def __str__(self):
-		return '(%s, %s, %s)' % (self.title, self.rel, self.title)
+		return '(%r, %r, %r)' % (self.title, self.rel, self.href)
 	
-class Span(object):
+class Span(Element):
 	
-	def __init__(self, text):
+	def __init__(self, clazz, text):
 		self.text = text
+		self.clazz = clazz
 	
 	def __eq__(self, other):
-		return self.text == other.text
+		return self.text == other.text and self.clazz == other.clazz
 	
 	def __str__(self):
-		return '(%s)' % self.text
+		return '(%r,%r)' % (self.clazz, self.text)
 	
-class Anchor(object):
+class Anchor(Element):
 	
-	def __init__(self, name, Id):
+	def __init__(self, _id, name):
+		self.id = _id
 		self.name = name
-		self.Id = Id
 	
 	def __eq__(self, other):
-		return self.name == other.name and self.Id == other.Id
+		return self.name == other.name and self.id == other.id
 	
 	def __str__(self):
-		return '(%s, %s)' % (self.name, self.Id)
+		return '(%r, %r)' % (self.id, self.name)
 	
-class Image(object):
+class Image(Element):
 	
 	def __init__(self, style):
 		self.style = style
@@ -65,9 +71,9 @@ class Image(object):
 		return self.style == other.style
 
 	def __str__(self):
-		return '(%s)' % self.style
+		return '(%r)' % self.style
 	
-class IFrame(object):
+class IFrame(Element):
 	
 	def __init__(self, src):
 		self.src = src
@@ -76,72 +82,138 @@ class IFrame(object):
 		return self.src == other.src
 	
 	def __str__(self):
-		return '(%s)' % self.src
+		return '(%r)' % self.src
 	
-class Paragraph(object):
+class Paragraph(Element):
 	
-	def __init__(self, name, text):
-		self.name = name
+	def __init__(self, _id, text):
+		self.id = _id
 		self.text = clean_html(text)
 	
 	def __eq__(self, other):
-		return self.name == other.name and self.text == other.text
+		return self.id == other.id and self.text == other.text
 	
 	def __str__(self):
-		return '(%s, %s)' % (self.name, self.text)
+		return '(%r)' % self.id
+	
+	def __repr__(self):
+		return '%r(%r, %r)' % (self.__class__.__name__, self.id, self.text)
 
 # ------------ object collections ----------
 
-class ElementsCollection(object):
+_equal = 'equal'
+_different = 'different'
+
+class _ElementCollection(object):
 	
-	def add_element(self, info):
-		self.data.append(info)
-		
-	def add_value(self, key, value):
-		self.data[key] = value
+	def idr(self, other):
+		"""
+		return a information difference report
+		"""
+		return ''
 	
 	def __len__(self):
 		return len(self.data)
-
-class MetaCollection(ElementsCollection):
 	
-	def __init__(self):
-		self.data = {}
-		self.data['content'] = None
-
-class LinksCollection(ElementsCollection):
+	def __str__(self):
+		return str(self.data)
 	
-	def __init__(self):
-		self.data = {}
-		
-class SpanCollection(ElementsCollection):
-	
-	def __init__(self):
-		self.data = {}
-		self.data['ref'] = None
-		self.data['label'] = None
+	def __repr__(self):
+		return repr(self.data)
 
-class AnchorCollection(ElementsCollection):
+class _ArrayCollection(_ElementCollection):
 	
 	def __init__(self):
 		self.data = []
+
+	def add_element(self, info):
+		self.data.append(info)
 		
-class ImageCollection(ElementsCollection):
+	def items(self):
+		return self.data
 	
-	def __init__(self):
-		self.data = []
+	def idr(self, other):
+		if len(other) != len(self):
+			result = 'Different data size. %s vs %s' % (len(self), len(other))
+		else:
+			result = []
+			for i in range(len(self) + 1):
+				mo = self.data[i]
+				to = other.data[i]
+				if mo == to:
+					result.append(('', _equal, mo, to))
+				else:
+					result.append(('', _different, mo, to))
+		return result
 		
-class IFrameCollection(ElementsCollection):
+	def __eq__(self, other):
+		return self.data == other.data
 	
+class _MapCollection(_ElementCollection):
+
 	def __init__(self):
-		self.data = []
+		self.data = {}
 		
+	def add_value(self, key, value):
+		self.data[key] = value
+		
+	def items(self):
+		return self.data.items()
+	
+	def idr(self, other):
+		result = []
+		in_master = []
+		
+		for _id, mp in self.data.items():
+			tp = other.data.get(_id, None)
+			if not tp:
+				in_master.append(_id,)
+			elif mp == tp:
+				result.append((_id, _equal, mp, tp))
+			else:
+				result.append((_id, _different, mp, tp))
+				
+		for _id in in_master:
+			result.append((_id, 'missing in target', _id,''))
+		
+		for _id in other.data.keys():
+			if _id not in self.data:
+				result.append((_id, 'missing in master', _id,''))
+				
+		return result
+	
+	def __eq__(self, other):
+		result = len(self) == len(other)
+		if result:
+			for _id, mp in self.data.items():
+				tp = other.data.get(_id, None)
+				result = mp == tp
+				if not result:
+					break
+		return result
+	
+class MetaCollection(_MapCollection):
+	pass
+
+class LinksCollection(_MapCollection):
+	pass
+		
+class SpanCollection(_MapCollection):
+	pass
+
+class ParagraphCollection(_MapCollection):
+	def __init__(self):
+		self.data = OrderedDict()
+		
+class AnchorCollection(_ArrayCollection):
+	pass
+		
+class ImageCollection(_ArrayCollection):
+	pass
+	
+class IFrameCollection(_ArrayCollection):
+	pass
 IframeCollection = IFrameCollection
-
-class ParagraphCollection(ElementsCollection):
-	
-	def __init__(self):
-		self.data = []
 
 # ------------ add data to collections -------------
 
@@ -185,10 +257,12 @@ class HtmlData(object):
 	def parse_span(self, elem):
 		clazz = elem.get('class')
 		if clazz in ('ref', 'label'):
-			self.span.add_value(clazz, Span(self.to_text(elem)))
+			self.span.add_value(clazz, Span(clazz, self.to_text(elem)))
 
 	def parse_anchor(self, elem):
-		self.parsed_html['anchor'].add_element(Anchor(elem.get("name"), elem.get("id")))
+		name, _id = elem.get("name"), elem.get("id")
+		if name or _id:
+			self.parsed_html['anchor'].add_element(Anchor(_id, name))
 
 	def parse_image(self, elem):
 		self.parsed_html['image'].add_element(Image(elem.get("style")))
@@ -197,7 +271,8 @@ class HtmlData(object):
 		self.parsed_html['iframe'].add_element(IFrame(elem.get("src")))
 	
 	def parse_paragraph(self, elem):
-		self.parsed_html['paragraph'].add_element(Paragraph(elem.get("name"), self.to_text(elem)))
+		_id, text = elem.get("id"), self.to_text(elem)
+		self.parsed_html['paragraph'].add_value(_id, text)
 	
 	def to_text(self, elem):
 		ret = []
@@ -231,45 +306,14 @@ def parse_html(html):
 
 # ---------------- comparison functions ---------------
 
-def is_equal(value1, value2, is_para = False):
-	base = value1.data
-	test = value2.data
-	if len(value1) == len(value2):
-		values = []
-		if isinstance(base, dict):
-			for key in base:
-				if base[key] == test[key]:
-					values.append([key, 'equal', base[key], test[key]])
-				else:
-					values.append([key, 'different', base[key], test[key]])
-			return values
-		elif not is_para:
-			i = 0
-			while(i < len(value1)):
-				if base[i] == test[i]:
-					values.append(['', 'equal', base[i], test[i]])
-				else:
-					values.append(['', 'different', base[i], test[i]])
-				i += 1
-			return values
-		else:
-			i = 0
-			while(i < len(value1)):
-				if base[i] == test[i]:
-					values.append(['', 'paragraph content equal', '', ''])
-				else:
-					values.append(['', 'paragraph content different', '', ''])
-				i += 1
-			return values
-	else:
-		return 'diff number of keys'
-
 def compare_parsed_data(base_data, test_data):
 	report_data = []
-	if base_data.keys() == test_data.keys():
-		for key in _html_data_keys:
-			name = key + ':'
-			report_data.append([name, is_equal(base_data[key], test_data[key])])
+	for key in _html_data_keys:
+		name = key + ':'
+		master = base_data.get(key, None)
+		target = test_data.get(key, None)
+		if master and target:
+			report_data.append((name, master.idr(target)))
 	return report_data
 
 # ------------ file i/o --------------
@@ -281,14 +325,13 @@ def parse_html_file(html_file):
 
 def write_file_items(report_data, txt_file):
 	with open(txt_file, "w") as f:
-		for tipe in report_data:
-			f.write(tipe[0] + '\n')
-			for line in tipe[1]:
-				if isinstance(line, list):
+		for key, info in report_data:
+			f.write(key + '\n')
+			if isinstance(info, (tuple,list)):
+				for line in info:
 					f.write(('  %10s%10s (base) %s  (test) %s\n' % (line[0], line[1], line[2], line[3])))
-				else:
-					f.write('\t' + tipe[1] + '\n')
-					break
+			else:
+				f.write('\t%s\n' % info)
 		
 def main(args=None):
 	if len(sys.argv) == 4:
