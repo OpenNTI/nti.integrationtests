@@ -34,7 +34,7 @@ def create_test_friends_lists(users, server='localhost', port=8081, is_secure=Fa
         
 def simulate(users, containerId, entries=None, delay=2, server='localhost', port=8081,
              max_heart_beats=3, use_threads=True, host_class=Host, invitee_class=Invitee,
-             create_test_lists=False, is_secure=False):
+             create_test_lists=True, is_secure=False):
     
     users = max(min(abs(users), 50), 2)
     entries = abs(entries) if entries else 50
@@ -54,7 +54,7 @@ def simulate(users, containerId, entries=None, delay=2, server='localhost', port
 
 if __name__ == '__main__':
     result = simulate(2, 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.0', 3,
-                      server='alpha.nextthought.com', port=80, is_secure=True)
+                      server='alpha.nextthought.com', port=443, is_secure=True)
     
     for r in result:
         print r.username, len(list(r.sent)), len(list(r.received)), r.traceback

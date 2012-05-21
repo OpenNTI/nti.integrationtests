@@ -238,6 +238,7 @@ class Graph(object):
 		self.ws_recv = None
 		self.killed = False
 		self.heart_beats = 0
+		self.is_secure = kwargs.get('is_secure', False)
 
 		self.message_context = kwargs.get('message_context', MessageContext())
 
@@ -435,8 +436,9 @@ class Graph(object):
 		if self.ws_connected:
 			self.ws.close()
 
-		self.ws = _ws_connect(self.host, self.port, username=self.username,\
-							  password=self.password, timeout=self.timeout,\
+		self.ws = _ws_connect(self.host, self.port, username=self.username,
+							  password=self.password, timeout=self.timeout,
+							  is_secure=self.is_secure,
 							  message_context=self.message_context)
 
 		self.connected = getattr(self.ws, "connected", False)
@@ -730,11 +732,12 @@ def _ws_disconnect(ws, data_format='json', message_context=default_message_conte
 	msg = b"0::"
 	message_context.send(ws, msg)
 
-def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, timeout=DEAULT_TIMEOUT,
+def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, timeout=DEAULT_TIMEOUT, is_secure=False,
 				message_context=default_message_context):
 
 	# create the connectiona and do a handshake.
-	ws = create_ds_connection(host, port, username=username, password=password, timeout=timeout)
+	ws = create_ds_connection(host, port, username=username, password=password,
+							  timeout=timeout, is_secure=is_secure)
 	return ws
 
 if __name__ == "__main__":
