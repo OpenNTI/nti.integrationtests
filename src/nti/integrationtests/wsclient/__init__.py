@@ -480,7 +480,7 @@ def create_ds_connection(host, port, username, password, resource=None, is_secur
 
 	ws = WebSocket(is_secure)
 	ws.settimeout(timeout)
-	io_sock = ws.sock
+	io_sock = ws.io_sock
 	io_sock.connect((host, port))
 
 	base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
@@ -523,5 +523,6 @@ def create_ds_connection(host, port, username, password, resource=None, is_secur
 		raise WebSocketException("Invalid status %s writing to %s (%s)" % (status, resource, resp_headers))
 
 if __name__ == "__main__":
-	ws = create_ds_connection('localhost', 8081, 'test.user.1@nextthought.com', 'temp001')
+	ws = create_ds_connection('alpha.nextthought.com', 443, 'test.user.1@nextthought.com', 'temp001', is_secure=True)
+	#ws = create_ds_connection('localhost', 8081, 'test.user.1@nextthought.com', 'temp001')
 	ws.close()
