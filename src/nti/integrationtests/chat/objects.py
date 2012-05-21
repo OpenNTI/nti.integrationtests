@@ -126,11 +126,11 @@ class OneRoomUser(BasicUser):
 	
 	@property
 	def elapsed_recv(self):
-		return self.last_recv_time - self.creation_time
+		return self.last_recv_time - self.creation_time if self.last_recv_time else None
 	
 	@property
 	def elapsed_post(self):
-		return self.last_post_time - self.creation_time
+		return self.last_post_time - self.creation_time if self.last_post_time else None
 
 # ----------------------------
 
