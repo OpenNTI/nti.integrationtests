@@ -265,39 +265,4 @@ def run_chat(containerId, host_user, invitees, entries=None, delay=0.25,
 
 	return result
 
-def simulate(users, containerId, entries=None, delay=2, server='localhost', port=8081,
-			 max_heart_beats=3, use_threads=True):
-	
-	users = max(min(abs(users), 50), 2)
-	entries = abs(entries) if entries else 50
-	
-	host = 'test.user.1@nextthought.com'
-	users =['test.user.%s@nextthought.com' % s for s in range(2, users+1)]
-	all_users = [host] + users
-			
-	def create_fl(username):
-		import uuid
-		from nti.integrationtests.dataserver.client import DataserverClient
-		from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
-		
-		endpoint = 'http://%s:%s/dataserver2' % (server, port)
-		ds = DataserverClient(endpoint=endpoint, credentials=(username, DEFAULT_USER_PASSWORD))
-		list_name = 'cfl-%s-%s' % (username, str(uuid.uuid4()).split('-')[0])
-		
-		users = list(all_users)
-		users.remove(username)
-		ds.createFriendsListWithNameAndFriends(list_name, users)
-		
-	for username in all_users:
-		create_fl(username)
-		
-	result = run_chat(containerId, host, users, entries=entries, delay=delay,
-					  use_threads=use_threads, server=server, port=port, max_heart_beats=max_heart_beats)
-	
-	for r in result:
-		print r.username, len(list(r.sent)), len(list(r.received)), r.traceback
-	
-if __name__ == '__main__':
-	simulate(4, 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.0', 3)
-
 
