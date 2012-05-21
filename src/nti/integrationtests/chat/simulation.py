@@ -48,7 +48,7 @@ def simulate(users, containerId, entries=None, delay=2, server='localhost', port
     result = run_chat(containerId, host, users, entries=entries, delay=delay,
                       use_threads=use_threads, server=server, port=port,
                       max_heart_beats=max_heart_beats, host_class=host_class,
-                      invitee_class=Invitee )
+                      invitee_class=Invitee, is_secure=is_secure)
     
     return result
 

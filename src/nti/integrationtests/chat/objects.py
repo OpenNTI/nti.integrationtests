@@ -225,14 +225,14 @@ User = Invitee
 
 def run_chat(containerId, host_user, invitees, entries=None, delay=0.25, 
 			 max_heart_beats=3, use_threads=True, host_class=Host, invitee_class=Invitee, 
-			 server=SOCKET_IO_HOST, port=SOCKET_IO_PORT, **kwargs):
+			 server=SOCKET_IO_HOST, port=SOCKET_IO_PORT, is_secure=False, **kwargs):
 
 	runnables = []
 	entries = entries or random.randint(5, 20)
 	connect_event = threading.Event() if use_threads else multiprocessing.Event()
 
-	host = host_class(host_user, invitees, host=server, port=port)
-	users = [invitee_class(username=name, host=server, port=port) for name in invitees]
+	host = host_class(host_user, invitees, host=server, port=port, is_secure=is_secure)
+	users = [invitee_class(username=name, host=server, port=port, is_secure=is_secure) for name in invitees]
 
 	required_args = {'entries':entries, 'containerId':containerId, 'connect_event':connect_event,
 					 'delay':delay, 'max_heart_beats':max_heart_beats}
