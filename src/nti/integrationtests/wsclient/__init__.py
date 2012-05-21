@@ -3,19 +3,19 @@ websocket - WebSocket client library for Python
 
 Copyright (C) 2010 Hiroki Ohtani(liris)
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+	This library is free software; you can redistribute it and/or
+	modify it under the terms of the GNU Lesser General Public
+	License as published by the Free Software Foundation; either
+	version 2.1 of the License, or (at your option) any later version.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+	This library is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+	Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU Lesser General Public
+	License along with this library; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 """
 
@@ -151,6 +151,7 @@ class ConnectionClosedException(WebSocketException):
 
 class _SSLSocketWrapper(object):
 	def __init__(self, sock):
+		self.sock = sock
 		self.ssl = socket.ssl(sock)
 
 	def recv(self, bufsize):
@@ -158,6 +159,12 @@ class _SSLSocketWrapper(object):
 
 	def send(self, payload):
 		return self.ssl.write(payload)
+	
+	def settimeout(self, timeout):
+		self.sock.settimeout(timeout)
+		
+	def connect(self, *args, **kwargs):
+		self.sock.connect(*args, **kwargs)
 
 class WebSocket(object):
 	"""
@@ -178,12 +185,14 @@ class WebSocket(object):
 	>>> ws.close()
 	"""
 
-	def __init__(self):
+	def __init__(self, secure=False):
 		"""
 		Initalize WebSocket object.
 		"""
 		self.connected = False
 		self.io_sock = self.sock = socket.socket()
+		if secure:
+			self.io_sock = _SSLSocketWrapper(self.sock)
 
 	def settimeout(self, timeout):
 		"""
@@ -208,7 +217,7 @@ class WebSocket(object):
 
 	def _handshake(self, host, port, resource, is_secure, **options):
 
-		if is_secure:
+		if is_secure and not isinstance(self.io_sock, _SSLSocketWrapper):
 			self.io_sock = _SSLSocketWrapper(self.sock)
 
 		sock = self.io_sock
@@ -469,18 +478,19 @@ def create_ds_connection(host, port, username, password, resource=None, is_secur
 	if resource[-1] != '/':
 		resource += '/'
 
-	ws = WebSocket()
+	ws = WebSocket(is_secure)
 	ws.settimeout(timeout)
-	ws.sock.connect((host, port))
+	io_sock = ws.sock
+	io_sock.connect((host, port))
 
 	base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
 	auth_header = 'Authorization: Basic %s' % base64string
 
 	# socket.io handshake
-	ws.sock.send('POST %s HTTP/1.1\r\n' % resource)
-	ws.sock.send(auth_header)
-	ws.sock.send('\r\nContent-Length: 0\r\n')
-	ws.sock.send('\r\n')
+	io_sock.send('POST %s HTTP/1.1\r\n' % resource)
+	io_sock.send(auth_header)
+	io_sock.send('\r\nContent-Length: 0\r\n')
+	io_sock.send('\r\n')
 
 	status, resp_headers = ws._read_headers()
 	if status == 200:

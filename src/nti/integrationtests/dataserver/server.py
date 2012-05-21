@@ -35,8 +35,12 @@ class DataserverProcess(object):
 	KEY_TEST_WAIT= 'TEST_WAIT'
 
 	@classmethod
-	def resolve_endpoint(cls, host=SERVER_HOST, port=PORT):
-		return 'http://%s:%s/dataserver2' % (host or SERVER_HOST, port or PORT)
+	def resolve_endpoint(cls, host=SERVER_HOST, port=PORT, is_secure=False):
+		port = port or PORT
+		host = host or SERVER_HOST
+		protocol = 'https' if is_secure else 'http'
+		result = '%s://%s:%s/dataserver2' % (protocol, host, port)
+		return result
 	
 	def __init__(self, port=PORT, root_dir=DATASERVER_DIR):
 		self.process = None
