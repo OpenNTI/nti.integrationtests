@@ -72,6 +72,9 @@ class OneRoomUser(BasicUser):
 	def __init__(self, *args, **kwargs):
 		super(OneRoomUser, self).__init__(*args, **kwargs)
 		self._room = None
+		self.last_post_time = None
+		self.last_recv_time = None
+		self.creation_time = time.time()
 
 	# ======================
 
@@ -86,6 +89,10 @@ class OneRoomUser(BasicUser):
 				if len(occupants) <= 1:
 					raise NotEnoughOccupants(rid)
 
+	def chat_postMessage(self, **kwargs):
+		super(OneRoomUser, self).chat_postMessage(**kwargs)
+		self.last_post_time = time.time()
+		
 	def chat_recvMessage(self, **kwargs):
 		super(OneRoomUser, self).chat_recvMessage(**kwargs)
 		creator = kwargs.get('Creator',  kwargs.get('creator', None))
@@ -94,6 +101,7 @@ class OneRoomUser(BasicUser):
 			self.heart_beats = 0
 		else:
 			self.recv_messages.pop(kwargs['ID'] , None)
+		self.last_recv_time = time.time()
 
 	def wait_4_room(self, max_beats=5):
 		self.heart_beats = 0
@@ -115,6 +123,14 @@ class OneRoomUser(BasicUser):
 		if not self._room and len(self.rooms) > 0:
 			self._room = self.first_room
 		return self._room
+	
+	@property
+	def elapsed_recv(self):
+		return self.last_recv_time - self.creation_time
+	
+	@property
+	def elapsed_post(self):
+		return self.last_post_time - self.creation_time
 
 # ----------------------------
 
