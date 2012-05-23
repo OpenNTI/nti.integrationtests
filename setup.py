@@ -26,7 +26,8 @@ setup(
 						 'mmstats',
 						 'pyobjc-core',
 						 'pyobjc',
-						 'selenium'
+						 'selenium',
+						 'httpie'
 						],
 	
 	packages = find_packages('src'),
