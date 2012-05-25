@@ -53,8 +53,11 @@ def simulate(users, containerId, entries=None, delay=2, server='localhost', port
     return result
 
 if __name__ == '__main__':
-    result = simulate(10, 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.0', 50,
-                      delay=2, server='alpha.nextthought.com', port=443, is_secure=True)
-    
+    users = 3 # 10
+    port = 8081 # 443
+    messages = 10 # 50
+    server = 'localhost' #'alpha.nextthought.com'
+    containerId = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.addition'
+    result = simulate(users, containerId, messages, delay=2, server=server, port=port, is_secure=False)
     for r in result:
-        print r.username, len(list(r.sent)), len(list(r.received)), r.traceback, r.elapsed_recv
+        print r.username, len(list(r.sent)), len(list(r.received)), r.elapsed_recv, r.traceback
