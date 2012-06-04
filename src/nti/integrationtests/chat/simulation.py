@@ -53,9 +53,9 @@ def simulate(users, containerId, entries=None, delay=2, server='localhost', port
     return result
 
 if __name__ == '__main__':
-    users = 3 # 10
+    users = 10
     port = 8081 # 443
-    messages = 10 # 50
+    messages = 50
     server = 'localhost' #'alpha.nextthought.com'
     containerId = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.addition'
     result = simulate(users, containerId, messages, delay=2, server=server, port=port, is_secure=False)
