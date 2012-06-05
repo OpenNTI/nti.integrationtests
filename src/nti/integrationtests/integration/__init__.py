@@ -108,7 +108,7 @@ def has_circled_event(changes):
 		if change.changeType=='Circled':
 			return True
 	return False
-		
+
 def of_class(clazz):
 	return has_entry('Class', clazz)
 
@@ -180,3 +180,8 @@ unwrapObject = unwrap_object
 
 def get_notification_count(userObj):
 	return userObj['NotificationCount']
+
+def setup_package():
+	pass
+def teardown_package():
+	pass

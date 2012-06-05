@@ -16,7 +16,7 @@ class URLHttpLib(object):
 	def __init__(self, debug=False):
 		self.debug = debug
 
-	# -----------------------------------
+
 
 	@classmethod
 	def _get_encoding(cls, obj):
@@ -31,7 +31,7 @@ class URLHttpLib(object):
 		if data.find('charset=') != -1:
 			data = data[data.find('charset=') + 8:]
 		return data
-	
+
 	@classmethod
 	def _create_response(cls, code=None, rp=None):
 		status = rp.code if rp else code
@@ -42,7 +42,7 @@ class URLHttpLib(object):
 		return Response(body=body, status=status, headerlist=headerlist, charset=charset)
 
 	# -----------------------------------
-	
+
 	def _create_request(self, credentials, url, data=None, headers={}):
 		request = urllib2.Request(url=url, data=data, headers=headers)
 		auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -57,11 +57,11 @@ class URLHttpLib(object):
 			rp = urllib2.urlopen(request)
 			return self._create_response(rp=rp)
 		except urllib2.HTTPError as http:
-			
+
 			# handle 404s differently
 			if http.code == 404:
 				return URLHttpLib._create_response(code=404)
-			
+
 			# If the server sent us anything,
 			# try to use it
 			_, _, tb = sys.exc_info()
@@ -72,13 +72,34 @@ class URLHttpLib(object):
 				http.msg += ' Body: ' + str( body )[-1600:]
 			except (AttributeError, IOError):
 				pass
-			
+
 			http.msg += '\n Args: ' + str(args)
 			http.msg += '\n KWArgs: ' + str(kwargs)
-			
+
 			# re-raise the original exception object
 			# with the original traceback
 			raise http, None, tb
+		except urllib2.URLError as http:
+			# Probably a connection problem
+			_, _, tb = sys.exc_info()
+			from IPython.core.debugger import Tracer; debug_here = Tracer()() ## DEBUG ##
+
+			try:
+				http.message += ' URL: ' + str(request)
+			except (AttributeError, IOError):
+				pass
+
+			http.message += '\n Args: ' + str(args)
+			http.message += '\n KWArgs: ' + str(kwargs)
+
+			# Stupid URLError doesn't print its message, just the underlying reason,
+			# which is usually a useless socket error
+			http.reason = "%s %s" % (http.reason, http.message)
+
+			# re-raise the original exception object
+			# with the original traceback
+			raise http, None, tb
+
 
 	def _do_debug(self, url, rp, credentials):
 		if self.debug:
@@ -91,7 +112,7 @@ class URLHttpLib(object):
 			pprint.pprint(d)
 
 	# -----------------------------------
-	
+
 	def deserialize(self, rp):
 		return json.loads(rp.body, encoding=rp.charset)
 
@@ -100,7 +121,7 @@ class URLHttpLib(object):
 		result.update(d)
 		result.pop('self')
 		return result
-	
+
 	def do_get(self, url, credentials, *args, **kwargs):
 		call_args = self._prune(locals())
 		request = self._create_request(credentials, url)
@@ -130,36 +151,36 @@ class URLHttpLib(object):
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
-	
+
 	def do_upload_resource(self, url, credentials, source_file, content_type=None, headers={}, is_put=False):
 		call_args = self._prune(locals())
-		
+
 		content_type = content_type if content_type else self._get_mime_type(source_file)
 		request = self._create_request(credentials, url, headers={'Content-Type': content_type})
-		if is_put: request.get_method =  lambda: 'PUT'	
+		if is_put: request.get_method =  lambda: 'PUT'
 		request.add_unredirected_header('Content-Type', content_type)
 		for k, v in headers.items():
 			request.add_unredirected_header(k, v)
-		
+
 		buf = StringIO()
 		with open(source_file, "rb") as fd:
 			base64.encode(fd, buf)
 		data = buf.getvalue()
-		
+
 		# add and execure request
 		request.add_data(data)
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
-	
+
 	def _get_mime_type(self, source):
 		filename = os.path.basename(source)
 		return mimetypes.guess_type(filename)[0] or 'application/octet-stream'
-	
+
 	# -----------------------------------
-	
+
 	def do_upload_resources(self, url, credentials, files, default_content_type=None, headers={} ):
-		""" 
+		"""
 		Implements multipart resource upload.
 		This is not currently supported by the dataserver
 		"""
@@ -169,30 +190,28 @@ class URLHttpLib(object):
 		request.add_unredirected_header('Content-Type', content_type)
 		for k, v in headers.items():
 			request.add_unredirected_header(k, v)
-			
+
 		request.add_data(data)
 		rp = self._do_request(request, **locals())
 		self._do_debug(url, rp, credentials)
 		return rp
-		
+
 	def multipart_encode(self, files, default_content_type=None, boundary=None, buf=None):
 
 		buf = buf or StringIO()
 		boundary = boundary or mimetools.choose_boundary()
-		
+
 		for n, source in enumerate(files):
 			filename = os.path.basename(source)
 			content_type = default_content_type if default_content_type else self._get_mime_type(filename)
-		
+
 			key = 'updloaded_%s' % n
 			buf.write('--%s\r\n' % boundary)
 			buf.write('Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (key, filename))
 			buf.write('Content-Type: %s\r\n' % content_type)
 			with open(source, "rb") as fd:
 				buf.write('\r\n' + fd.read() + '\r\n')
-			
+
 		buf.write('--' + boundary + '--\r\n\r\n')
 		buf = buf.getvalue()
 		return boundary, buf
-	
-

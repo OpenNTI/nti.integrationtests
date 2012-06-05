@@ -34,6 +34,18 @@ def generate_ntiid(date=None, provider='nti', nttype=None, specific=None):
 	return result
 
 
+# When invoked through runners/__init__.py, these setup methods seem to get called twice
+# for no reason that's entirely clear. So make them idempotent.
+# (That module handles the actual setup and teardown anyway)
+def setup_package():
+	if DataServerTestCase.start_server():
+		time.sleep(5)
+
+def teardown_package():
+	if DataServerTestCase.process is not None:
+		DataServerTestCase.process.terminate_server()
+		DataServerTestCase.process = None
+
 class DataServerTestCase(unittest.TestCase):
 
 	# well-known IDs
@@ -72,12 +84,7 @@ class DataServerTestCase(unittest.TestCase):
 	# if there is not already one running
 	@classmethod
 	def setUpClass(cls):
-		cls.start_server()
 		cls.static_initialization()
-
-	@classmethod
-	def tearDownClass(cls):
-		cls.process.terminate_server()
 
 	def setUp(self):
 		endpoint = self.get_endpoint()
@@ -105,12 +112,14 @@ class DataServerTestCase(unittest.TestCase):
 			clt.set_credentials(credentials)
 		return clt
 
-	# ======================
+	process = None
 
 	@classmethod
 	def start_server(cls):
-		cls.process = DataserverProcess(port=cls.port, root_dir=cls.root_dir)
-		cls.process.start_server()
+		if cls.process is None:
+			cls.process = DataserverProcess(port=cls.port, root_dir=cls.root_dir)
+			cls.process.start_server()
+			return True
 
 	@classmethod
 	def static_initialization(cls):
