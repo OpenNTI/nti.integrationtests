@@ -52,6 +52,8 @@ class _Host(BasicHost):
             else:
                 raise Exception('%s did not enter a chat room' % self.username)
 
+            print self.username, 'done posting messages'
+             
             # process messages
             self.wait_heart_beats(max_heart_beats)
             
@@ -82,6 +84,8 @@ class _Invitee(BasicInvitee):
             else:
                 raise Exception('%s did not enter a chat room' % self.username)
 
+            print self.username, 'done posting messages'
+            
             # get any message
             self.wait_heart_beats(max_heart_beats)
             
@@ -111,11 +115,18 @@ def simulate(users, containerId, entries=None, min_delay=15, max_delay=45,
     return result
 
 if __name__ == '__main__':
-    users = 2
+    users = 30
     port = 8081 # 443
     messages = 10
+    min_delay = 15
+    max_delay = 45
+    is_secure = port==443
     server = 'localhost' #'alpha.nextthought.com'
     containerId = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.addition'
-    result = simulate(users, containerId, messages, server=server, port=port, is_secure=False)
+    
+    # run
+    result = simulate(users, containerId, messages, server=server, port=port, is_secure=is_secure,
+                      min_delay=min_delay, max_delay=max_delay)
+    
     for r in result:
         print r.username, len(list(r.sent)), len(list(r.received)), r.elapsed_recv, r.traceback
