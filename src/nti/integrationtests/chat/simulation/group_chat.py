@@ -1,6 +1,7 @@
 import time
 import random
 
+
 from nti.integrationtests.chat import phrases
 from nti.integrationtests.chat.objects import run_chat
 from nti.integrationtests.chat.objects import Host as BasicHost
@@ -51,8 +52,6 @@ class _Host(BasicHost):
                 _post_messages(self, room_id, entries, min_delay, max_delay)
             else:
                 raise Exception('%s did not enter a chat room' % self.username)
-
-            print self.username, 'done posting messages'
              
             # process messages
             self.wait_heart_beats(max_heart_beats)
@@ -84,8 +83,6 @@ class _Invitee(BasicInvitee):
             else:
                 raise Exception('%s did not enter a chat room' % self.username)
 
-            print self.username, 'done posting messages'
-            
             # get any message
             self.wait_heart_beats(max_heart_beats)
             
@@ -115,13 +112,13 @@ def simulate(users, containerId, entries=None, min_delay=15, max_delay=45,
     return result
 
 if __name__ == '__main__':
-    users = 25
+    users = 10
     port = 8081 # 443
-    messages = 10
+    messages = 20
     min_delay = 15
     max_delay = 45
     is_secure = port==443
-    server = 'localhost' #'alpha.nextthought.com'
+    server = 'greg.local' #'alpha.nextthought.com'
     containerId = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.addition'
     
     # run
