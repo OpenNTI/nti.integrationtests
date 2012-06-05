@@ -6,7 +6,7 @@ import threading
 import multiprocessing
 from StringIO import StringIO
 
-from nti.integrationtests.chat import generate_message
+from nti.integrationtests.chat import generate_message, phrases
 from nti.integrationtests.chat import (SOCKET_IO_HOST, SOCKET_IO_PORT)
 
 from nti.integrationtests.chat.websocket_interface import Graph
@@ -54,8 +54,8 @@ class BasicUser(Graph):
 
 	# ======================
 
-	def generate_message(self, aMin=1, aMax=4):
-		return generate_message(aMin, aMax)
+	def generate_message(self, aMin=1, aMax=4, phrases=phrases):
+		return generate_message(aMin, aMax, phrases=phrases)
 
 	def post_random_messages(self, room_id, entries=None, a_min=3, a_max=10, delay=None):
 		entries = entries or random.randint(a_min, a_max)
@@ -64,6 +64,15 @@ class BasicUser(Graph):
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
 			if delay is not None and delay > 0:
 				time.sleep(delay)
+				
+				
+	def save_traceback(self, e=None):
+		sio = StringIO()
+		exc_type, exc_value, exc_traceback = sys.exc_info()
+		traceback.print_exception(exc_type, exc_value, exc_traceback, file=sio)
+		sio.seek(0)
+		self.exception = e
+		self.traceback = sio.read()
 
 # ----------------------------
 
@@ -150,6 +159,11 @@ class Host(OneRoomUser):
 			self.online.add(username)
 			self.heart_beats = 0
 
+	def wait_for_invitees_to_connect(self, max_heart_beats=3):
+		self.heart_beats = 0
+		while self.heart_beats < max_heart_beats and len(self.online) < len(self.occupants):
+			self.nextEvent()
+			
 	def __call__(self, *arg, **kwargs):
 
 		delay = kwargs.get('delay', 0.25)
@@ -163,11 +177,7 @@ class Host(OneRoomUser):
 		try:
 			self.ws_connect()
 
-			# wait users are connected
-
-			self.heart_beats = 0
-			while self.heart_beats < max_heart_beats and len(self.online) < len(self.occupants):
-				self.nextEvent()
+			self.wait_for_invitees_to_connect(max_heart_beats)
 			
 			self.enterRoom(	occupants=self.occupants, containerId=containerId,
 							inReplyTo=inReplyTo, references=references)
@@ -184,13 +194,7 @@ class Host(OneRoomUser):
 			self.wait_heart_beats(max_heart_beats)
 			
 		except Exception, e:
-			sio = StringIO()
-			exc_type, exc_value, exc_traceback = sys.exc_info()
-			traceback.print_exception(exc_type, exc_value, exc_traceback, file=sio)
-			sio.seek(0)
-
-			self.exception = e
-			self.traceback = sio.read()
+			self.save_traceback(e)
 		finally:
 			self.ws_capture_and_close()
 
@@ -224,14 +228,7 @@ class Invitee(OneRoomUser):
 			self.wait_heart_beats(max_heart_beats)
 			
 		except Exception, e:
-			sio = StringIO()
-			exc_type, exc_value, exc_traceback = sys.exc_info()
-			traceback.print_exception(exc_type, exc_value, exc_traceback, file=sio)
-			sio.seek(0)
-
-			self.exception = e
-			self.traceback = sio.read()
-			# print self.traceback 
+			self.save_traceback(e)
 		finally:
 			self.ws_capture_and_close()
 
@@ -251,8 +248,10 @@ def run_chat(containerId, host_user, invitees, entries=None, delay=0.25,
 	users = [invitee_class(username=name, host=server, port=port, is_secure=is_secure) for name in invitees]
 
 	required_args = {'entries':entries, 'containerId':containerId, 'connect_event':connect_event,
-					 'delay':delay, 'max_heart_beats':max_heart_beats}
-
+					 'max_heart_beats':max_heart_beats}
+	
+	required_args['delay'] = kwargs.get('delay', delay)
+	
 	runnable_args = dict(kwargs)
 	runnable_args.update(required_args)
 	

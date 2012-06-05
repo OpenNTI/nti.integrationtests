@@ -11,12 +11,10 @@ class TestChatTranscript(HostUserChatTest):
 
 	def setUp(self):
 		super(TestChatTranscript, self).setUp()
-
 		self.user_one = self.user_names[0]
 		self.user_two = self.user_names[1]
 
 	def test_transcript(self):
-
 		entries = 50
 		one, two = self._run_chat(self.container, entries, self.user_one, self.user_two)
 		for u in (one, two):

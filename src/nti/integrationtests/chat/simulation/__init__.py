@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import uuid
 
 from nti.integrationtests.dataserver.server import DataserverProcess
@@ -51,13 +49,3 @@ def simulate(users, containerId, entries=None, delay=2, server='localhost', port
                       invitee_class=Invitee, is_secure=is_secure)
     
     return result
-
-if __name__ == '__main__':
-    users = 2
-    port = 8081 # 443
-    messages = 50
-    server = 'localhost' #'alpha.nextthought.com'
-    containerId = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.addition'
-    result = simulate(users, containerId, messages, delay=2, server=server, port=port, is_secure=False)
-    for r in result:
-        print r.username, len(list(r.sent)), len(list(r.received)), r.elapsed_recv, r.traceback
