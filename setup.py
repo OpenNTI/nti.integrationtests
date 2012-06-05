@@ -23,11 +23,12 @@ setup(
 
 	install_requires = [ 'nti.dataserver',
 						 'coverage',
+						 'httpie',
 						 'mmstats',
-						 'pyobjc-core',
 						 'pyobjc',
+						 'pyobjc-core',
 						 'selenium',
-						 'httpie'
+						 'sst'
 						],
 	
 	packages = find_packages('src'),
