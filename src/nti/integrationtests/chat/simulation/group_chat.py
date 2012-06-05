@@ -115,7 +115,7 @@ def simulate(users, containerId, entries=None, min_delay=15, max_delay=45,
     return result
 
 if __name__ == '__main__':
-    users = 30
+    users = 25
     port = 8081 # 443
     messages = 10
     min_delay = 15
