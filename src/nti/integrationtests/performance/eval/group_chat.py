@@ -2,12 +2,15 @@ import os
 import uuid
 import random
 
+from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.chat.simulation.group_chat import simulate
 
 import logging
 logger = logging.getLogger(__name__)
 	
 # -----------------------------------
+
+_max_users = MAX_TEST_USERS
 
 def chat(*args, **kwargs):
 	context = kwargs['__context__']
@@ -26,12 +29,20 @@ def chat(*args, **kwargs):
 	
 	min_users = context.as_int( "min_users", 2)
 	max_users = context.as_int( "max_users", 10)
-	users = random.randint(min_users, max_users)
+	users = min(random.randint(min_users, max_users), _max_users)
 	containerId = getattr(context, "containerId",  str(uuid.uuid4()))
+	
+	start_user = (int(runner)-1) * users + 1
+	if start_user + users > _max_users:
+		start_user = start_user + users - _max_users
+	start_user  = max(1, start_user)
+	
+	logger.info('runner %s host is user %s' % (runner, start_user))
 	
 	result = simulate(	users=users, containerId=containerId, entries=entries,
 			 			min_delay=min_delay, max_delay=max_delay,
-			 			server=server, port=port, use_threads=use_threads, is_secure=is_secure)
+			 			server=server, port=port, use_threads=use_threads, is_secure=is_secure,
+			 			start_user=start_user)
 	
 	# gather results
 	items = []
