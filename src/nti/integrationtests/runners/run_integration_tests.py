@@ -19,7 +19,8 @@ def main(args = None):
 	parser.add_argument('-p', '--port', help='server port', type=int, required=False, default=None)
 	parser.add_argument('-sc', '--sync_changes', help='sync_changes', action='store_true', default = False)
 
-	opts, _ = parser.parse_known_args(args) # Let Nose have the remainder of the args
+	opts, rem_args = parser.parse_known_args(args) # Let Nose have the remainder of the args
+	sys.argv = sys.argv[:1] + rem_args
 
 	sync_changes = opts.sync_changes
 	use_coverage = True if opts.use_coverage else False
