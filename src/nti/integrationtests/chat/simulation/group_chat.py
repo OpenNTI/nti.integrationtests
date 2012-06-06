@@ -1,9 +1,9 @@
 import time
 import random
 
-
 from nti.integrationtests.chat import phrases
 from nti.integrationtests.chat.objects import run_chat
+from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.chat.objects import Host as BasicHost
 from nti.integrationtests.chat.objects import Invitee as BasicInvitee
 from nti.integrationtests.chat.simulation import create_test_friends_lists
@@ -93,16 +93,17 @@ class _Invitee(BasicInvitee):
             
 def simulate(users, containerId, entries=None, min_delay=15, max_delay=45,
              server='localhost', port=8081,
-             max_heart_beats=3, use_threads=True, create_test_lists=True, is_secure=False):
+             max_heart_beats=3, use_threads=True, create_test_lists=True, is_secure=False,
+             start_user=1):
     
-    users = max(min(abs(users), 50), 2)
+    users = max(min(abs(users), MAX_TEST_USERS), 2)
     entries = abs(entries) if entries else 50
             
     if create_test_lists:
-        create_test_friends_lists(users, server, port, is_secure)
+        create_test_friends_lists(users, server, port, is_secure,start_user=start_user)
         
-    host = 'test.user.1@nextthought.com'
-    users =['test.user.%s@nextthought.com' % s for s in range(2, users+1)]
+    host = 'test.user.%s@nextthought.com' % start_user
+    users =['test.user.%s@nextthought.com' % s for s in range(start_user+1, users+start_user)]
     
     result = run_chat(containerId, host, users, entries=entries, use_threads=use_threads,
                       server=server, port=port, max_heart_beats=max_heart_beats, host_class=_Host, 
