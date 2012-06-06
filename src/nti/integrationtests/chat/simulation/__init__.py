@@ -16,14 +16,14 @@ def create_friends_list(username, friends, list_name=None, server='localhost', p
     password = password or DEFAULT_USER_PASSWORD
     endpoint = DataserverProcess.resolve_endpoint(server, port, is_secure)
     ds = DataserverClient(endpoint=endpoint, credentials=(username, DEFAULT_USER_PASSWORD))
-    list_name = list_name or 'cfl-%s-%s' % (username, str(uuid.uuid4()).split('-')[0])
+    list_name = list_name or 'cfl-%s' % str(uuid.uuid4())
             
     # prepare friends 
     users = set(friends)
     users.remove(username)
     
     # create friends list
-    ds.create_friends_list_with_name_and_friends(list_name, list(users))
+    ds.create_friends_list_with_name_and_friends(list_name, sorted(users))
     
 def create_test_friends_lists(users, server='localhost', port=8081, is_secure=False, start_user=1):
     host = 'test.user.%s@nextthought.com' % start_user
