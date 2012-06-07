@@ -34,13 +34,13 @@ def create_test_friends_lists(users, server='localhost', port=8081, is_secure=Fa
         
 def simulate(users, containerId, entries=None, delay=2, server='localhost', port=8081,
              max_heart_beats=3, use_threads=True, host_class=Host, invitee_class=Invitee,
-             create_test_lists=False, is_secure=False):
+             create_test_lists=False, is_secure=False, start_user=1):
     
     users = max(min(abs(users), 50), 2)
     entries = abs(entries) if entries else 50
             
     if create_test_lists:
-        create_test_friends_lists(users, server, port, is_secure)
+        create_test_friends_lists(users, server, port, is_secure, start_user=start_user)
         
     host = 'test.user.1@nextthought.com'
     users =['test.user.%s@nextthought.com' % s for s in range(2, users+1)]
@@ -48,6 +48,6 @@ def simulate(users, containerId, entries=None, delay=2, server='localhost', port
     result = run_chat(containerId, host, users, entries=entries, delay=delay,
                       use_threads=use_threads, server=server, port=port,
                       max_heart_beats=max_heart_beats, host_class=host_class,
-                      invitee_class=Invitee, is_secure=is_secure)
+                      invitee_class=Invitee, is_secure=is_secure, start_user=start_user)
     
     return result
