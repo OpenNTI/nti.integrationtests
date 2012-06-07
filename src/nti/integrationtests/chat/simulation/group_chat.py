@@ -28,6 +28,7 @@ def pprint_graph(self, lock=None, stream=None, **kwargs):
 			 'sent' : len(list(self.sent)),
 			 'received': len(list(self.received)),
 			 'moderated': len(list(self.moderated)),
+			 'elapsed_recv': self.elapsed_recv,
 			 'traceback': self.traceback,
 			 'params' : kwargs }
 			
