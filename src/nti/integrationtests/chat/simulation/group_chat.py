@@ -88,7 +88,7 @@ class Host(_Host):
 		finally:
 			self.ws_capture_and_close()
 			outdir = kwargs.pop('outdir', None)
-			pprint_graph(self, outdir=outdir, **kwargs)
+			pprint_to_file(self, outdir=outdir, **kwargs)
 			
 class Guest(_Guest):
 	
@@ -120,7 +120,7 @@ class Guest(_Guest):
 		finally:
 			self.ws_capture_and_close()
 			outdir = kwargs.pop('outdir', None)
-			pprint_graph(self, outdir=outdir, **kwargs)
+			pprint_to_file(self, outdir=outdir, **kwargs)
 			
 def simulate(users, containerId, entries=None, min_delay=15, max_delay=45, outdir=None,
 			 server='localhost', port=8081,
