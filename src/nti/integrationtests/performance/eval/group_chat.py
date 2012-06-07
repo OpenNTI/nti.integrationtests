@@ -37,12 +37,13 @@ def chat(*args, **kwargs):
 		start_user = start_user + users - _max_users
 	start_user  = max(1, start_user)
 	
-	logger.info('runner %s host is user %s' % (runner, start_user))
+	outdir = getattr(context, "result_output_dir", '/tmp')
+	outdir = os.path.join(outdir, str(runner))
 	
 	result = simulate(	users=users, containerId=containerId, entries=entries,
 			 			min_delay=min_delay, max_delay=max_delay,
 			 			server=server, port=port, use_threads=use_threads, is_secure=is_secure,
-			 			start_user=start_user)
+			 			start_user=start_user, outdir=outdir)
 	
 	# gather results
 	items = []
