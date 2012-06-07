@@ -103,6 +103,15 @@ class Context(DataMixin):
 
     def as_float(self, key, default=None):
         return self._as(float, key, default)
+    
+    def as_bool(self, key, default=None):
+        result = self._as(str, key, default)
+        if result is not None:
+            result = result.lower() in ('true', '1', 'yes')
+        return result
+    
+    def as_str(self, key, default=None):
+        return self._as(str, key, default)
 
 class DelegateContext(Context):
 
