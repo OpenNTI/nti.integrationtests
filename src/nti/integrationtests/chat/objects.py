@@ -159,7 +159,7 @@ class Host(OneRoomUser):
 			self.online.add(username)
 			self.heart_beats = 0
 
-	def wait_for_invitees_to_connect(self, max_heart_beats=3):
+	def wait_for_guests_to_connect(self, max_heart_beats=3):
 		self.heart_beats = 0
 		while self.heart_beats < max_heart_beats and len(self.online) < len(self.occupants):
 			self.nextEvent()
@@ -177,7 +177,7 @@ class Host(OneRoomUser):
 		try:
 			self.ws_connect()
 
-			self.wait_for_invitees_to_connect(max_heart_beats)
+			self.wait_for_guests_to_connect(max_heart_beats)
 			
 			self.enterRoom(	occupants=self.occupants, containerId=containerId,
 							inReplyTo=inReplyTo, references=references)
@@ -200,7 +200,7 @@ class Host(OneRoomUser):
 
 # ----------------------------
 
-class Invitee(OneRoomUser):
+class Guest(OneRoomUser):
 
 	def __call__(self, *args, **kwargs):
 		try:
@@ -232,7 +232,8 @@ class Invitee(OneRoomUser):
 		finally:
 			self.ws_capture_and_close()
 
-User = Invitee
+User = Guest
+Invitee = Guest
 
 # ----------------------------
 

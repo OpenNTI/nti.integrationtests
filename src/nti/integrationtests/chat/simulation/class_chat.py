@@ -4,13 +4,14 @@ import threading
 import multiprocessing
 
 from nti.integrationtests.chat import phrases
+from nti.integrationtests.chat.objects import Host
+from nti.integrationtests.chat.objects import Guest
 from nti.integrationtests.chat.objects import run_chat
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
-from nti.integrationtests.chat.objects import Host as BasicHost
-from nti.integrationtests.chat.objects import Invitee as BasicInvitee
+from nti.integrationtests.chat.simulation.group_chat import pprint_to_file
 from nti.integrationtests.chat.simulation import create_test_friends_lists
-		
-class Moderator(BasicHost):
+	
+class Moderator(Host):
 
 	def __init__(self, *args, **kwargs):
 		super(Moderator, self).__init__(*args, **kwargs)
@@ -39,12 +40,12 @@ class Moderator(BasicHost):
 		min_delay = kwargs.get('min_delay', 15)
 		self.approval_percentage =  kwargs.get('approval_percentage', self.approval_percentage)
 		
-		exit_event = kwargs['exit_event']
-		connect_event = kwargs['connect_event']
+		exit_event = kwargs.pop('exit_event')
+		connect_event = kwargs.pop('connect_event')
 		try:
 			self.ws_connect()
 
-			self.wait_for_invitees_to_connect(max_heart_beats)
+			self.wait_for_guests_to_connect(max_heart_beats)
 			
 			self.enterRoom( occupants=self.occupants, containerId=containerId,
 							inReplyTo=inReplyTo, references=references)
@@ -68,6 +69,8 @@ class Moderator(BasicHost):
 			self.save_traceback(e)
 		finally:
 			self.ws_capture_and_close()
+			out_dir = kwargs.pop('out_dir', None)
+			pprint_to_file(self, out_dir=out_dir, **kwargs)
 			
 	def post_messages(self, room_id, entries, post_event, min_delay=15, max_delay=45, phrases=phrases):
 		for i in xrange(entries):
@@ -87,11 +90,11 @@ class Moderator(BasicHost):
 			post_event.set()
 			post_event.clear()
 			
-class Student(BasicInvitee):
+class Student(Guest):
 
 	def __call__(self, *arg, **kwargs):
-		exit_event = kwargs['exit_event']
-		connect_event = kwargs['connect_event']
+		exit_event = kwargs.pop('exit_event')
+		connect_event = kwargs.pop('connect_event')
 		max_delay = kwargs.get('max_delay', 45) * 2 
 		max_heart_beats = kwargs.get('max_heart_beats', 2)
 		response_percentage =  kwargs.get('response_percentage', 0.3)
@@ -121,12 +124,15 @@ class Student(BasicInvitee):
 			self.save_traceback(e)
 		finally:
 			self.ws_capture_and_close()
+			outdir = kwargs.pop('outdir', None)
+			pprint_to_file(self, outdir=outdir, **kwargs)
 			
 	
-def simulate(users, containerId, entries=None, min_delay=15, max_delay=45,
-			 approval_percentage=0.3, response_percentage=0.3,
-			 server='localhost', port=8081,
-			 max_heart_beats=3, use_threads=True, create_test_lists=True, is_secure=False,
+def simulate(users, containerId, entries=None,
+			 server='localhost', port=8081, is_secure=False,
+			 approval_percentage=0.3, response_percentage=0.4,
+			 min_delay=15, max_delay=45, outdir=None,
+			 max_heart_beats=3, use_threads=False, create_test_lists=True,
 			 start_user=1):
 	
 	users = max(min(abs(users), MAX_TEST_USERS), 2)
@@ -143,24 +149,21 @@ def simulate(users, containerId, entries=None, min_delay=15, max_delay=45,
 	result = run_chat(containerId, host, users, entries=entries, use_threads=use_threads,
 					  server=server, port=port, is_secure=is_secure,
 					  max_heart_beats=max_heart_beats, host_class=Moderator, invitee_class=Student,
-					  min_delay=min_delay, max_delay=max_delay, exit_event=exit_event,
+					  min_delay=min_delay, max_delay=max_delay, exit_event=exit_event, outdir=outdir,
 					  approval_percentage=approval_percentage, response_percentage=response_percentage)
 	
 	return result
 
 if __name__ == '__main__':
-	users = 3
+	users = 10
 	port = 8081 # 443
 	messages = 5
-	min_delay = 15
-	max_delay = 45
+	min_delay = 5
+	max_delay = 25
 	is_secure = port==443
 	server = 'csanchez.local' #'alpha.nextthought.com'
 	containerId = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.addition'
 	
-	# run
-	result = simulate(users, containerId, messages, server=server, port=port, is_secure=is_secure,
-					  min_delay=min_delay, max_delay=max_delay)
-	
-	for r in result:
-		print r.username, len(list(r.sent)), len(list(r.received)), r.elapsed_recv, r.traceback
+	simulate(users, containerId, messages, server=server, port=port, is_secure=is_secure,
+			 min_delay=min_delay, max_delay=max_delay)
+

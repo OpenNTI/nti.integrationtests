@@ -1,13 +1,40 @@
+import os
+import sys
 import time
+import pprint
 import random
 
 from nti.integrationtests.chat import phrases
 from nti.integrationtests.chat.objects import run_chat
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
-from nti.integrationtests.chat.objects import Host as BasicHost
-from nti.integrationtests.chat.objects import Invitee as BasicInvitee
+from nti.integrationtests.chat.objects import Host as _Host
+from nti.integrationtests.chat.objects import Guest as _Guest
 from nti.integrationtests.chat.simulation import create_test_friends_lists
 
+def pprint_to_file(self, outdir=None, **kwargs):
+	outdir = os.path.expanduser(outdir or '/tmp')
+	if not os.path.exists(outdir):
+		os.makedirs(outdir) 
+	out_name = os.path.join(outdir, self.username + ".txt")
+	with open(out_name, "w") as s:
+		pprint_graph(self, stream=s, **kwargs)
+	
+def pprint_graph(self, lock=None, stream=None, **kwargs):
+	stream = stream or sys.stderr
+	try:
+		if lock: lock.acquire()
+		
+		d = {'username' : self.username,
+			 'sent' : len(list(self.sent)),
+			 'received': len(list(self.received)),
+			 'moderated': len(list(self.moderated)),
+			 'traceback': self.traceback,
+			 'params' : kwargs }
+			
+		pprint.pprint(d, stream=stream, indent=2)
+	finally:
+		if lock: lock.release()
+	
 def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=phrases):
 	for i in xrange(entries):
 		if i == 0: # wait less for the first message
@@ -24,7 +51,7 @@ def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=ph
 		content = self.generate_message(phrases=phrases)
 		self.chat_postMessage(message=unicode(content), containerId=room_id)
 		
-class _Host(BasicHost):
+class Host(_Host):
 
 	def __call__(self, *arg, **kwargs):
 		entries = kwargs.get('entries', 50)
@@ -39,7 +66,7 @@ class _Host(BasicHost):
 		try:
 			self.ws_connect()
 
-			self.wait_for_invitees_to_connect(max_heart_beats)
+			self.wait_for_guests_to_connect(max_heart_beats)
 			
 			self.enterRoom( occupants=self.occupants, containerId=containerId,
 							inReplyTo=inReplyTo, references=references)
@@ -60,8 +87,10 @@ class _Host(BasicHost):
 			self.save_traceback(e)
 		finally:
 			self.ws_capture_and_close()
+			outdir = kwargs.pop('outdir', None)
+			pprint_graph(self, outdir=outdir, **kwargs)
 			
-class _Invitee(BasicInvitee):
+class Guest(_Guest):
 	
 	def __call__(self, *arg, **kwargs):
 		entries = kwargs.get('entries', 50)
@@ -90,8 +119,10 @@ class _Invitee(BasicInvitee):
 			self.save_traceback(e)
 		finally:
 			self.ws_capture_and_close()
+			outdir = kwargs.pop('outdir', None)
+			pprint_graph(self, outdir=outdir, **kwargs)
 			
-def simulate(users, containerId, entries=None, min_delay=15, max_delay=45,
+def simulate(users, containerId, entries=None, min_delay=15, max_delay=45, outdir=None,
 			 server='localhost', port=8081,
 			 max_heart_beats=3, use_threads=True, create_test_lists=True, is_secure=False,
 			 start_user=1):
@@ -106,8 +137,8 @@ def simulate(users, containerId, entries=None, min_delay=15, max_delay=45,
 	users =['test.user.%s@nextthought.com' % s for s in range(start_user+1, users+start_user)]
 	
 	result = run_chat(containerId, host, users, entries=entries, use_threads=use_threads,
-					  server=server, port=port, max_heart_beats=max_heart_beats, host_class=_Host, 
-					  invitee_class=_Invitee, is_secure=is_secure, 
-					  min_delay=min_delay, max_delay=max_delay)
+					  server=server, port=port, is_secure=is_secure, 
+					  max_heart_beats=max_heart_beats, host_class=Host, invitee_class=Guest, 
+					  min_delay=min_delay, max_delay=max_delay, outdir=outdir)
 	
 	return result
