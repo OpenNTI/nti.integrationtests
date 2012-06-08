@@ -86,6 +86,7 @@ class Moderator(Host):
 				self.nextEvent() # process any message while waiting
 				elapsed = elapsed + 1
 			
+			# post a question
 			content = self.generate_message(k=3, phrases=phrases)
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
 			post_event.set()
@@ -113,7 +114,7 @@ class Student(Guest):
 			while not exit_event.is_set():
 				self.nextEvent()
 				connect_event.wait(max_delay)
-				time.sleep(1)
+				time.sleep(0.4) # time to wait for answer
 				if random.random() <= response_percentage:
 					content = self.generate_message(k=3, phrases=phrases)
 					self.chat_postMessage(message=unicode(content), containerId=room_id)
