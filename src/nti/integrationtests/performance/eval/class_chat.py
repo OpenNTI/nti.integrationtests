@@ -2,6 +2,7 @@ import os
 import uuid
 import random
 
+from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.chat.simulation.class_chat import simulate
 
@@ -42,27 +43,13 @@ def chat(*args, **kwargs):
 	outdir = context.as_str("result_output_dir", '/tmp')
 	outdir = os.path.join(outdir, str(runner))
 	
-	result = simulate(	users=users, containerId=containerId, entries=entries,
-			 			min_delay=min_delay, max_delay=max_delay, outdir=outdir,
-			 			approval_percentage=approval_percentage, response_percentage=response_percentage,
-			 			server=server, port=port, use_threads=use_threads, is_secure=is_secure,
-			 			start_user=start_user, )
-	
-	# gather results
-	items = []
-	for r in result:
-		trb = r.traceback.replace('\n','') if r.traceback else ''
-		d = {'username': r.username, 
-			 'sent': len(list(r.sent)),
-			 'recv': len(list(r.received)),
-			 'elapsed_recv': r.elapsed_recv,
-			 'traceback' : trb}
-		items.append(d)
-		
-	# pretty print results 
-	d = {runner : items,'containerId': containerId }
-	result = str(d)
-	return result
+	simulate(users=users, containerId=containerId, entries=entries,
+	 		 min_delay=min_delay, max_delay=max_delay, outdir=outdir,
+	 		 approval_percentage=approval_percentage, response_percentage=response_percentage,
+	 		 server=server, port=port, use_threads=use_threads, is_secure=is_secure,
+	 		 start_user=start_user)
+
+	return IGNORE_RESULT
 
 def _set_logger():
 	logging.basicConfig(level=logging.INFO,
