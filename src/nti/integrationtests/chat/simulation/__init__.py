@@ -36,7 +36,7 @@ def simulate(users, containerId, entries=None, delay=2, server='localhost', port
              max_heart_beats=3, use_threads=True, host_class=Host, invitee_class=Invitee,
              create_test_lists=False, is_secure=False, start_user=1):
     
-    users = max(min(abs(users), 50), 2)
+    users = max(min(abs(users), MAX_TEST_USERS), 2)
     entries = abs(entries) if entries else 50
             
     if create_test_lists:
