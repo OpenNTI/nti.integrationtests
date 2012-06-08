@@ -8,7 +8,7 @@ from nti.integrationtests.chat.objects import Host
 from nti.integrationtests.chat.objects import Invitee
 from nti.integrationtests.chat.objects import run_chat
 
-MAX_TEST_USERS = 50
+MAX_TEST_USERS = 100
 
 def create_friends_list(username, friends, list_name=None, server='localhost', port=8081, is_secure=False,
                         password=DEFAULT_USER_PASSWORD):
