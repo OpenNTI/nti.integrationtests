@@ -28,10 +28,12 @@ def create_friends_list(username, friends, list_name=None, server='localhost', p
 def create_test_friends_lists(users, server='localhost', port=8081, is_secure=False, start_user=1, for_all=False):
     host = 'test.user.%s@nextthought.com' % start_user
     users =['test.user.%s@nextthought.com' % s for s in range(start_user+1, users+start_user)]
-    all_users = [host] + users
-    for username in all_users:
-        create_friends_list(username, all_users, server=server, port=port, is_secure=is_secure)
-        if not for_all: break
+    if for_all:
+        all_users = [host] + users
+        for username in all_users:
+            create_friends_list(username, all_users, server=server, port=port, is_secure=is_secure)
+    else:
+        create_friends_list(host, users, server=server, port=port, is_secure=is_secure)
         
 def simulate(users, containerId, entries=None, delay=2, server='localhost', port=8081,
              max_heart_beats=3, use_threads=True, host_class=Host, invitee_class=Invitee,
