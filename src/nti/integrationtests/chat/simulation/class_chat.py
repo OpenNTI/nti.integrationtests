@@ -1,3 +1,4 @@
+import os
 import time
 import random
 import threading
@@ -145,6 +146,9 @@ def simulate(users, containerId, entries=None,
 	users =['test.user.%s@nextthought.com' % s for s in range(start_user+1, users+start_user)]
 	
 	exit_event = threading.Event() if use_threads else multiprocessing.Event()
+		
+	if outdir and not os.path.exists(outdir):
+		os.makedirs(outdir)
 		
 	result = run_chat(containerId, host, users, entries=entries, use_threads=use_threads,
 					  server=server, port=port, is_secure=is_secure,

@@ -135,7 +135,7 @@ def simulate(users, containerId, entries=None, min_delay=15, max_delay=45, outdi
 	host = 'test.user.%s@nextthought.com' % start_user
 	users =['test.user.%s@nextthought.com' % s for s in range(start_user+1, users+start_user)]
 	
-	if not os.path.exists(outdir):
+	if outdir and not os.path.exists(outdir):
 		os.makedirs(outdir)
 		
 	result = run_chat(containerId, host, users, entries=entries, use_threads=use_threads,
