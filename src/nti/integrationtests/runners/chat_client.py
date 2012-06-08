@@ -11,7 +11,7 @@ import argparse
 import threading
 from datetime import datetime
 
-from nti.integrationtests.chat.websocket_interface import Graph
+from nti.integrationtests.chat.websocket_interface import DSUser
 from nti.integrationtests.chat.websocket_interface import CHANNELS
 from nti.integrationtests.chat.websocket_interface import DEFAULT_CHANNEL
 from nti.integrationtests.chat.websocket_interface import MessageContext
@@ -22,7 +22,7 @@ _commands = {}
 
 #########################
 
-class User(Graph):
+class User(DSUser):
 	
 	def __str__(self):
 		return self.username

@@ -224,7 +224,7 @@ class _PostMessage(_Message):
 		else:
 			return False
 
-class Graph(object):
+class DSUser(object):
 
 	def __init__(self, *args, **kwargs):
 
@@ -473,6 +473,8 @@ class Graph(object):
 	@property
 	def ws_last_sent(self):
 		return self.message_context.last_sent
+
+Graph = DSUser
 
 # -----------------------------
 

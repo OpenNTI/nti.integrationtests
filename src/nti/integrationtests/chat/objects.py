@@ -9,7 +9,7 @@ from StringIO import StringIO
 from nti.integrationtests.chat import generate_message, phrases
 from nti.integrationtests.chat import (SOCKET_IO_HOST, SOCKET_IO_PORT)
 
-from nti.integrationtests.chat.websocket_interface import Graph
+from nti.integrationtests.chat.websocket_interface import DSUser
 from nti.integrationtests.chat.websocket_interface import Serverkill
 from nti.integrationtests.chat.websocket_interface import InActiveRoom
 from nti.integrationtests.chat.websocket_interface import CouldNotEnterRoom
@@ -17,11 +17,11 @@ from nti.integrationtests.chat.websocket_interface import NotEnoughOccupants
 
 # ----------------------------
 
-class BasicUser(Graph):
+class BasicUser(DSUser):
 	def __init__(self, *args, **kwargs):
 		kwargs['host'] = kwargs.get('host', SOCKET_IO_HOST)
 		kwargs['port'] = kwargs.get('port', SOCKET_IO_PORT)
-		Graph.__init__(self, *args, **kwargs)
+		DSUser.__init__(self, *args, **kwargs)
 		self.exception = None
 		self.traceback = None
 
