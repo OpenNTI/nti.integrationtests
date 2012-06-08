@@ -18,12 +18,12 @@ from nti.integrationtests.generalpurpose import PATH_TO_TESTS
 from nti.integrationtests.generalpurpose.utils.response_assert import MIME_TYPE_REGISTRY
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 
+# have the import below to allow nose to run all tests
 from nti.integrationtests.generalpurpose.testrunner.get_runner import GetObject
 from nti.integrationtests.generalpurpose.testrunner.put_runner import PutObject
 from nti.integrationtests.generalpurpose.testrunner.post_runner import PostObject
 from nti.integrationtests.generalpurpose.testrunner.delete_runner import DeleteObject
 from nti.integrationtests.generalpurpose.testrunner.get_collection_runner import GetGroupObject
-
 
 host = None
 port = None
@@ -33,7 +33,6 @@ password = None
 root_dir = None
 dataserver = None
 use_coverage = None
-
 
 def get_env_vars():
 	global host, port, endpoint, username, password, root_dir, use_coverage
@@ -188,21 +187,20 @@ def main(args = None):
 	parser.add_argument('-cr', '--coverage_report', help='create coverage report', action='store_true', default = False)
 	parser.add_argument('-rd', '--root_dir', help='root directory', required=False)
 	parser.add_argument('-p', '--port', help='server port', type=int, required=False, default=None)
-	opts = parser.parse_args(args)
+	parser.add_argument('-sc', '--sync_changes', help='sync_changes', action='store_true', default = False)
+	opts, rem_args = parser.parse_known_args(args) # Let Nose have the remainder of the args
+	sys.argv = sys.argv[:1] + rem_args
 
+	sync_changes = opts.sync_changes
 	root_dir = opts.root_dir if opts.root_dir else tempfile.mktemp(prefix="ds.data.gpt.", dir="/tmp")
 
 	os.environ['root_dir'] = os.path.expanduser(root_dir)
 	os.environ['use_coverage'] = 'True' if opts.use_coverage else 'False'
 	os.environ['port'] = str(opts.port if opts.port else get_open_port())
 
-	print "Running options...."
-	print "\tServer port = %s" % os.environ['port']
-	print "\tUsing coverage = %s" % opts.use_coverage
-	print "\tRoot dir = %s\n" % root_dir
+	if sync_changes:
+		os.environ['DATASERVER_SYNC_CHANGES'] = 'True'
 
-	# simply ignore the nose parameters # XXX Why?
-	sys.argv = [sys.argv[0]]
 	nose.run()
 
 if __name__ == '__main__':
