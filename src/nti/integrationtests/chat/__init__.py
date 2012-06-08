@@ -27,7 +27,10 @@ phrases = (	"Yellow brown",
 			"Sting All Enemies To Death",
 			"Reduce All Creation to Ash",
 			"Sit Upon the Frozen Heavens",
-			"Call forth the Twilight")
+			"Call forth the Twilight",
+			"Sprint Dust, Call and Rise",
+			"Flute of the Falling Tiger",
+			'Shiver in Fear')
 
 def generate_message(a_min=1, a_max=4, phrases=phrases):
 	return " ".join(random.sample(phrases, random.randint(a_min, a_max)))
