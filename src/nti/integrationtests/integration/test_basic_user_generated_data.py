@@ -86,7 +86,7 @@ class TestBasicUserGeneratedData(DataServerTestCase):
 		
 	def test_created_75_show_in_ugd(self):
 		for _ in xrange(75):
-			message = generate_message(1, 4)
+			message = generate_message(k=3)
 			self.created_note = self.ds.create_note(message, self.container)
 		
 		ugd = self.ds.get_user_generated_data(self.container)

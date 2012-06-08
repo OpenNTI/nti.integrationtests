@@ -2,6 +2,7 @@ import time
 
 from concurrent.futures import ProcessPoolExecutor
 
+from nti.integrationtests.chat import generate_message
 from nti.integrationtests.dataserver.client import DataserverClient
 
 from nti.integrationtests.performance import IGNORE_RESULT
@@ -9,7 +10,6 @@ from nti.integrationtests.performance.eval import init_server
 from nti.integrationtests.performance.eval import stop_server
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import generate_ntiid
-from nti.integrationtests.performance.eval import generate_message
 from nti.integrationtests.performance.eval import generate_random_text
 
 from hamcrest import assert_that
@@ -35,7 +35,7 @@ def prepare_container(endpoint, user, notes):
 	container = generate_ntiid(provider=user, nttype=generate_random_text())
 	client = DataserverClient(endpoint, credentials=credentials)
 	for _ in xrange(notes):
-		message = generate_message(3,3)
+		message = generate_message(k=3)
 		client.create_note(message, container=container, credentials=credentials)
 	return notes, container
 

@@ -85,7 +85,7 @@ class Moderator(Host):
 				self.nextEvent() # process any message while waiting
 				elapsed = elapsed + 1
 			
-			content = self.generate_message(phrases=phrases)
+			content = self.generate_message(k=3, phrases=phrases)
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
 			post_event.set()
 			post_event.clear()
@@ -114,7 +114,7 @@ class Student(Guest):
 				connect_event.wait(max_delay)
 				time.sleep(1)
 				if random.random() <= response_percentage:
-					content = self.generate_message(phrases=phrases)
+					content = self.generate_message(k=3, phrases=phrases)
 					self.chat_postMessage(message=unicode(content), containerId=room_id)
 				
 			# get any message
@@ -154,16 +154,4 @@ def simulate(users, containerId, entries=None,
 	
 	return result
 
-if __name__ == '__main__':
-	users = 10
-	port = 8081 # 443
-	messages = 5
-	min_delay = 5
-	max_delay = 25
-	is_secure = port==443
-	server = 'csanchez.local' #'alpha.nextthought.com'
-	containerId = 'tag:nextthought.com,2011-10:AOPS-HTML-prealgebra.addition'
-	
-	simulate(users, containerId, messages, server=server, port=port, is_secure=is_secure,
-			 min_delay=min_delay, max_delay=max_delay)
 

@@ -13,8 +13,6 @@ from nti.integrationtests.chat.simulation import create_test_friends_lists
 
 def pprint_to_file(self, outdir=None, **kwargs):
 	outdir = os.path.expanduser(outdir or '/tmp')
-	if not os.path.exists(outdir):
-		os.makedirs(outdir) 
 	out_name = os.path.join(outdir, self.username + ".txt")
 	with open(out_name, "w") as s:
 		pprint_graph(self, stream=s, **kwargs)
@@ -49,7 +47,7 @@ def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=ph
 			self.nextEvent() # process any message while waiting
 			elapsed = elapsed + 1
 		
-		content = self.generate_message(phrases=phrases)
+		content = self.generate_message(k=3, phrases=phrases)
 		self.chat_postMessage(message=unicode(content), containerId=room_id)
 		
 class Host(_Host):
@@ -137,6 +135,9 @@ def simulate(users, containerId, entries=None, min_delay=15, max_delay=45, outdi
 	host = 'test.user.%s@nextthought.com' % start_user
 	users =['test.user.%s@nextthought.com' % s for s in range(start_user+1, users+start_user)]
 	
+	if not os.path.exists(outdir):
+		os.makedirs(outdir)
+		
 	result = run_chat(containerId, host, users, entries=entries, use_threads=use_threads,
 					  server=server, port=port, is_secure=is_secure, 
 					  max_heart_beats=max_heart_beats, host_class=Host, invitee_class=Guest, 

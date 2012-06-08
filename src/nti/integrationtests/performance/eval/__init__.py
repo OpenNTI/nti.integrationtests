@@ -9,16 +9,15 @@ from nti.integrationtests.performance import Subscriber
 from nti.integrationtests.dataserver.client import DataserverClient
 from nti.integrationtests.dataserver.server import DataserverProcess
 
-from nti.integrationtests.chat import generate_message
-
 # -----------------------------------
 
 def init_server(context):
-	port = int(getattr(context, "port", get_open_port()))
-	base_path = getattr(context, "base_path", None)
+	
+	port = context.as_int("port", get_open_port())
+	base_path = context.as_str("base_path", None)
 	
 	tmp_dir = tempfile.mktemp(prefix="ds.data.", dir="/tmp")
-	root_dir = os.path.expanduser(getattr(context, "root_dir", tmp_dir))
+	root_dir = os.path.expanduser(context.as_str("root_dir", tmp_dir))
 	if base_path:
 		root_dir = os.path.join(base_path, root_dir)
 		

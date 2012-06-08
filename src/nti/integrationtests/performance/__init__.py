@@ -9,6 +9,8 @@ import traceback
 import multiprocessing
 from StringIO import StringIO
 
+from nti.integrationtests.utils import boolean_states
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -107,7 +109,7 @@ class Context(DataMixin):
     def as_bool(self, key, default=None):
         result = self._as(str, key, default)
         if result is not None:
-            result = result.lower() in ('true', '1', 'yes')
+            result = boolean_states[result.lower()]
         return result
     
     def as_str(self, key, default=None):

@@ -54,8 +54,8 @@ class BasicUser(Graph):
 
 	# ======================
 
-	def generate_message(self, aMin=1, aMax=4, phrases=phrases):
-		return generate_message(aMin, aMax, phrases=phrases)
+	def generate_message(self, k=4, phrases=phrases):
+		return generate_message(k=4, phrases=phrases)
 
 	def post_random_messages(self, room_id, entries=None, a_min=3, a_max=10, delay=None):
 		entries = entries or random.randint(a_min, a_max)

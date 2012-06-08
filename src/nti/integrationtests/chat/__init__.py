@@ -32,5 +32,5 @@ phrases = (	"Yellow brown",
 			"Flute of the Falling Tiger",
 			'Shiver in Fear')
 
-def generate_message(a_min=1, a_max=4, phrases=phrases):
-	return " ".join(random.sample(phrases, random.randint(a_min, a_max)))
+def generate_message(k=3, phrases=phrases):
+	return ' '.join(random.sample(phrases, k))

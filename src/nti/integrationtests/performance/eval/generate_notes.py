@@ -1,10 +1,11 @@
 from nti.integrationtests.dataserver.client import DataserverClient
 
+from nti.integrationtests.chat import generate_message
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.performance.eval import init_server
 from nti.integrationtests.performance.eval import stop_server
 from nti.integrationtests.performance.eval import generate_ntiid
-from nti.integrationtests.performance.eval import generate_message
+
 from nti.integrationtests.performance.eval import generate_random_text
 
 import logging
@@ -35,7 +36,7 @@ def create_note(*args, **kwargs):
 		container = generate_ntiid(nttype=nttype)
 	
 	client = DataserverClient(endpoint, credentials=credentials)
-	message = generate_message(1,4)
+	message = generate_message(k=3)
 	note = client.create_note(message, container=container)
 	assert note, 'could  not create note'	
 	return IGNORE_RESULT

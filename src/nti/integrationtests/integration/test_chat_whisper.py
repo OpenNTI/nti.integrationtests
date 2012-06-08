@@ -40,7 +40,7 @@ class Host(objects.Host):
 	def post_messages(self, room_id, *args, **kwargs):
 		entries = random.randint(20, 30)
 		for _ in range(entries):
-			msg = self.generate_message(5, 10)
+			msg = self.generate_message(k=5)
 			if random.random() <= 0.4:
 				whisper_to = random.choice(self.users_online)
 				self.chat_postMessage(message=msg, containerId=room_id,\

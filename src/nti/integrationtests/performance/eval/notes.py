@@ -1,12 +1,12 @@
 import time
 
+from nti.integrationtests.chat import generate_message
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.performance import TimerResultMixin 
 from nti.integrationtests.performance.eval import init_server
 from nti.integrationtests.performance.eval import stop_server
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import generate_ntiid
-from nti.integrationtests.performance.eval import generate_message
 from nti.integrationtests.performance.eval import generate_random_text
 
 def script_setup(context):
@@ -40,7 +40,7 @@ def create_note(*args, **kwargs):
 	
 	# create a note
 	nttype = generate_random_text()
-	message = generate_message(1,4)
+	message = generate_message(k=3)
 	container = generate_ntiid(nttype=nttype)
 	result = TimerResultMixin()
 	
@@ -63,7 +63,7 @@ def update_note(*args, **kwargs):
 	
 	# update note
 	client = new_client(context)
-	note['body']=[generate_message(1,4)]
+	note['body']=[generate_message(k=3)]
 	result = TimerResultMixin()
 	
 	now = time.time()

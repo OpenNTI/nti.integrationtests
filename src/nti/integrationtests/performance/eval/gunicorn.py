@@ -2,12 +2,12 @@ import os
 import tempfile
 import ConfigParser
 
+from nti.integrationtests.chat import generate_message
 from nti.integrationtests.utils import get_int_option
 from nti.integrationtests.performance.eval import init_server
 from nti.integrationtests.performance.eval import stop_server
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import generate_ntiid
-from nti.integrationtests.performance.eval import generate_message
 from nti.integrationtests.performance.eval import generate_random_text
 from nti.integrationtests.performance.eval import SimpleStatSubscriber
 
@@ -85,7 +85,7 @@ def create_note(*args, **kwargs):
 	
 	# create a note
 	nttype = generate_random_text()
-	message = generate_message(4,4)
+	message = generate_message(k=4)
 	container = generate_ntiid(nttype=nttype)
 	
 	note = client.create_note(message, container=container)
