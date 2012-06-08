@@ -13,8 +13,8 @@ from nti.integrationtests.chat.simulation import create_test_friends_lists
 
 def pprint_to_file(self, outdir=None, **kwargs):
 	outdir = os.path.expanduser(outdir or '/tmp')
-	out_name = os.path.join(outdir, self.username + ".txt")
-	with open(out_name, "w") as s:
+	outname = os.path.join(outdir, self.username + ".txt")
+	with open(outname, "w") as s:
 		pprint_graph(self, stream=s, **kwargs)
 	
 def pprint_graph(self, lock=None, stream=None, **kwargs):

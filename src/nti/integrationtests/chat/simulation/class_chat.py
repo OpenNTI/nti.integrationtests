@@ -35,7 +35,7 @@ class Moderator(Host):
 		inReplyTo = kwargs.get("inReplyTo", None)
 		references = kwargs.get("references", None)
 		containerId = kwargs.get('containerId', None)
-		max_heart_beats = kwargs.get('max_heart_beats', 2)
+		max_heart_beats = kwargs.get('max_heart_beats', 3)
 		
 		max_delay = kwargs.get('max_delay', 45)
 		min_delay = kwargs.get('min_delay', 15)
@@ -70,8 +70,8 @@ class Moderator(Host):
 			self.save_traceback(e)
 		finally:
 			self.ws_capture_and_close()
-			out_dir = kwargs.pop('out_dir', None)
-			pprint_to_file(self, out_dir=out_dir, **kwargs)
+			outdir = kwargs.pop('outdir', None)
+			pprint_to_file(self, outdir=outdir, **kwargs)
 			
 	def post_messages(self, room_id, entries, post_event, min_delay=15, max_delay=45, phrases=phrases):
 		for i in xrange(entries):
@@ -98,7 +98,7 @@ class Student(Guest):
 		exit_event = kwargs.pop('exit_event')
 		connect_event = kwargs.pop('connect_event')
 		max_delay = kwargs.get('max_delay', 45) * 2 
-		max_heart_beats = kwargs.get('max_heart_beats', 2)
+		max_heart_beats = kwargs.get('max_heart_beats', 3)
 		response_percentage =  kwargs.get('response_percentage', 0.3)
 		
 		try:
