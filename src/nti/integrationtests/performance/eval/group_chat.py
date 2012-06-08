@@ -40,7 +40,9 @@ def chat(*args, **kwargs):
 	
 	outdir = getattr(context, "result_output_dir", '/tmp')
 	outdir = os.path.join(outdir, str(runner))
-	
+	if not os.path.exists(outdir):
+		os.makedirs(outdir)
+		
 	simulate(users=users, containerId=containerId, entries=entries,
 	 		 min_delay=min_delay, max_delay=max_delay,
 			 server=server, port=port, use_threads=use_threads, is_secure=is_secure,

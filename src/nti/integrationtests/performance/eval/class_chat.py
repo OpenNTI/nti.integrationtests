@@ -42,7 +42,9 @@ def chat(*args, **kwargs):
 	
 	outdir = context.as_str("result_output_dir", '/tmp')
 	outdir = os.path.join(outdir, str(runner))
-	
+	if not os.path.exists(outdir):
+		os.makedirs(outdir)
+		
 	simulate(users=users, containerId=containerId, entries=entries,
 	 		 min_delay=min_delay, max_delay=max_delay, outdir=outdir,
 	 		 approval_percentage=approval_percentage, response_percentage=response_percentage,
