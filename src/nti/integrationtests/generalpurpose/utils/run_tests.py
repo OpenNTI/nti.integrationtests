@@ -1,12 +1,12 @@
+#!/usr/bin/env python
+
 import os
+import sys
 import glob
 import json
+import nose
 import time
 import tempfile
-
-import sys
-import nose
-import argparse
 
 from nose.util import resolve_name
 
@@ -49,19 +49,24 @@ def setup():
 	global dataserver
 
 	get_env_vars()
-
+	
 	dataserver = DataserverProcess(port=port, root_dir=root_dir)
-	if use_coverage:
-		dataserver.start_server_with_coverage()
+	if not dataserver.is_running():
+		if use_coverage:
+			dataserver.start_server_with_coverage()
+		else:
+			dataserver.start_server()
+		time.sleep(5)
 	else:
-		dataserver.start_server()
+		dataserver = None
 
 def teardown():
-	if use_coverage:
-		dataserver.terminate_server_with_coverage()
-	else:
-		dataserver.terminate_server()
-
+	global dataserver
+	if dataserver:
+		if use_coverage:
+			dataserver.terminate_server_with_coverage()
+		else:
+			dataserver.terminate_server()
 
 def open_data_file(file_path):
 	with open(file_path,"r") as f:
@@ -91,9 +96,6 @@ def get_workspaces(url, username, password):
 	return workspace
 
 def test_generator():
-	if not dataserver.is_running():
-		print "Waiting for server to come-up"
-		time.sleep(5)
 
 	workspace = get_workspaces(endpoint, username, password)
 
@@ -178,29 +180,7 @@ def terminate(error, test):
 		message = None
 	assert False, message
 
-
 def main(args = None):
-	args = args or sys.argv[1:]
-
-	parser = argparse.ArgumentParser(prog='General Purpose Tests')
-	parser.add_argument('-uc', '--use_coverage', help='use coverage', action='store_true', default = False)
-	parser.add_argument('-cr', '--coverage_report', help='create coverage report', action='store_true', default = False)
-	parser.add_argument('-rd', '--root_dir', help='root directory', required=False)
-	parser.add_argument('-p', '--port', help='server port', type=int, required=False, default=None)
-	parser.add_argument('-sc', '--sync_changes', help='sync_changes', action='store_true', default = False)
-	opts, rem_args = parser.parse_known_args(args) # Let Nose have the remainder of the args
-	sys.argv = sys.argv[:1] + rem_args
-
-	sync_changes = opts.sync_changes
-	root_dir = opts.root_dir if opts.root_dir else tempfile.mktemp(prefix="ds.data.gpt.", dir="/tmp")
-
-	os.environ['root_dir'] = os.path.expanduser(root_dir)
-	os.environ['use_coverage'] = 'True' if opts.use_coverage else 'False'
-	os.environ['port'] = str(opts.port if opts.port else get_open_port())
-
-	if sync_changes:
-		os.environ['DATASERVER_SYNC_CHANGES'] = 'True'
-
 	nose.run()
 
 if __name__ == '__main__':

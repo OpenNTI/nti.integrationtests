@@ -2,8 +2,8 @@
 
 import os
 import sys
-import tempfile
 import argparse
+import tempfile
 
 from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.runners import test_runner
