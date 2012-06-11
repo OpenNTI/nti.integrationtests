@@ -347,7 +347,7 @@ class Highlight(Sharable):
 	_ds_field_mapping = {}
 	_ds_field_mapping.update(Sharable._ds_field_mapping)
 
-	_fields = {'startHighlightedText': False}
+	_fields = {'highlightedText': False}
 	_fields.update(Sharable._fields)
 
 # -----------------------------------
