@@ -18,7 +18,7 @@ class HighlightBodyTester(BodyTester):
 	
 	def testBody(self, parsedBody, mimeType, info):
 		assert parsedBody['MimeType'] == mimeType
-		assert parsedBody['startHighlightedText'] == info
+		assert parsedBody['highlightedText'] == info
 		
 class FriendsListBodyTester(BodyTester):
 	
