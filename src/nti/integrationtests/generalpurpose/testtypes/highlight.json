@@ -10,7 +10,7 @@
 					"OID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a68:5573657273",
 					"ID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a68:5573657273",
 					"Class": "Highlight",
-					"startHighlightedText": "a setup highlight"
+					"highlightedText": "a setup highlight"
 				},
 			"put_data":
 				{
@@ -20,7 +20,7 @@
 					"OID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a68:5573657273",
 					"ID": "tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x5a68:5573657273",
 					"Class": "Highlight",
-					"startHighlightedText": "a test highlight"
+					"highlightedText": "a test highlight"
 				}
 		},
 	"expected_return": 
