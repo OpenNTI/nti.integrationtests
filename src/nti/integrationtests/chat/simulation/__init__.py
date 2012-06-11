@@ -20,7 +20,8 @@ def create_friends_list(username, friends, list_name=None, server='localhost', p
             
     # prepare friends 
     users = set(friends)
-    users.remove(username)
+    if username in users:
+        users.remove(username)
     
     # create friends list
     ds.create_friends_list_with_name_and_friends(list_name, sorted(users))
