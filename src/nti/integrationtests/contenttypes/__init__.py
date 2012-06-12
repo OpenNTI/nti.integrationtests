@@ -377,7 +377,10 @@ class ElementDomContentPointer(DomContentPointer):
 	_fields.update(DomContentPointer._fields)
 	
 def create_artificial_applicable_range():
-	result = DomContentRangeDescription()
+	s = ElementDomContentPointer(elementId='foo', elementTagName='foo',  role='start' )
+	e = ElementDomContentPointer(elementId='foo', elementTagName='foo',  role='end' )
+	a = ElementDomContentPointer(elementId='foo', elementTagName='foo',  role='ancestor' )
+	result = DomContentRangeDescription(start=s, end=e, ancestor=a)
 	return result
 
 class Highlight(Sharable):
@@ -546,7 +549,6 @@ class Quiz(DSObject):
 			self.__setitem__('questions', questions)
 		questions[question.ID] = question
 	
-	
 class QuizQuestionResponse(DSObject):
 
 	DATASERVER_CLASS = 'QuizQuestionResponse'
@@ -556,7 +558,6 @@ class QuizQuestionResponse(DSObject):
 
 	_fields = {'assessment': True, 'question': True, 'response': False}
 	_fields.update(DSObject._fields)
-	
 	
 class QuizResult(DSObject):
 
