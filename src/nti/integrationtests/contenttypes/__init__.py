@@ -377,10 +377,7 @@ class ElementDomContentPointer(DomContentPointer):
 	_fields.update(DomContentPointer._fields)
 	
 def create_artificial_applicable_range():
-	s = ElementDomContentPointer(elementId='foo', elementTagName='foo',  role='start' )
-	e = ElementDomContentPointer(elementId='foo', elementTagName='foo',  role='end' )
-	a = ElementDomContentPointer(elementId='foo', elementTagName='foo',  role='ancestor' )
-	result = DomContentRangeDescription(start=s, end=e, ancestor=a)
+	result = ContentRangeDescription()
 	return result
 
 class Highlight(Sharable):
@@ -391,7 +388,7 @@ class Highlight(Sharable):
 	_ds_field_mapping = {'applicableRange':'applicableRange'}
 	_ds_field_mapping.update(Sharable._ds_field_mapping)
 
-	_fields = {'highlightedText': False, 'applicableRange': False}
+	_fields = {'selectedText': False, 'applicableRange': False}
 	_fields.update(Sharable._fields)
 
 # -----------------------------------
