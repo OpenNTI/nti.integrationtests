@@ -25,6 +25,7 @@ from nti.integrationtests.contenttypes import FriendsList
 from nti.integrationtests.contenttypes import adapt_ds_object
 from nti.integrationtests.contenttypes import TranscriptSummary
 from nti.integrationtests.contenttypes import CanvasPolygonShape
+from nti.integrationtests.contenttypes import create_artificial_applicable_range
 
 from hamcrest import assert_that, is_, is_not, none, instance_of
 
@@ -93,9 +94,11 @@ class DataserverClient(object):
 	def clear_credentials(self):
 		self.credentials = None
 
-	def create_note(self, data, container, inReplyTo=None, sharedWith=None, adapt=True, **kwargs):
+	def create_note(self, data, container, inReplyTo=None, sharedWith=None, applicableRange=None, adapt=True, **kwargs):
 		body = self.create_text_and_body(data)
-		note = Note(body=body, container=container, inReplyTo=inReplyTo, sharedWith=sharedWith, **kwargs)
+		applicableRange = applicableRange or create_artificial_applicable_range()
+		note = Note(body=body, container=container, inReplyTo=inReplyTo, sharedWith=sharedWith,
+					applicableRange=applicableRange, **kwargs)
 		return self.create_object(note, adapt=adapt, **kwargs)
 
 	def create_text_and_body(self, data):
@@ -112,8 +115,9 @@ class DataserverClient(object):
 	createNote = create_note
 
 
-	def create_highlight(self, startHighlightedText, container, adapt=True, **kwargs):
-		highlight = Highlight(startHighlightedText=startHighlightedText, container=container, **kwargs)
+	def create_highlight(self, highlightedText, container, applicableRange=None, adapt=True, **kwargs):
+		applicableRange = applicableRange or create_artificial_applicable_range()
+		highlight = Highlight(highlightedText=highlightedText, container=container, applicableRange=applicableRange, **kwargs)
 		return self.create_object(highlight, adapt=adapt, **kwargs)
 
 	def create_canvas(self, sides, tx, ty, container, store=False, adapt=True, **kwargs):

@@ -339,15 +339,56 @@ class Threadable(DSObject):
 		else:
 			super(Threadable, self).__setitem__(key, val)
 
+class ContentRangeDescription(DSObject):
+	DATASERVER_CLASS = 'ContentRangeDescription'
+	pass
+
+class DomContentRangeDescription(ContentRangeDescription):
+	
+	DATASERVER_CLASS = 'DomContentRangeDescription'
+	
+	_ds_field_mapping = {'start' : 'start', 'end':'end', 'ancestor':'ancestor'}
+	_ds_field_mapping.update(ContentRangeDescription._ds_field_mapping)
+
+	_fields = {'start' : False, 'end' : False, 'ancestor' : False}
+	_fields.update(ContentRangeDescription._fields)
+	
+	
+class ContentPointer(DSObject):
+	pass
+
+class DomContentPointer(ContentPointer):
+	DATASERVER_CLASS = 'DomContentPointer'
+	
+	_ds_field_mapping = {'role' : 'role'}
+	_ds_field_mapping.update(ContentPointer._ds_field_mapping)
+
+	_fields = {'role' : False}
+	_fields.update(ContentPointer._fields)
+
+class ElementDomContentPointer(DomContentPointer):
+	
+	DATASERVER_CLASS = 'ElementDomContentPointer'
+	
+	_ds_field_mapping = {'elementId' : 'elementId', 'elementTagName':'elementTagName'}
+	_ds_field_mapping.update(DomContentPointer._ds_field_mapping)
+
+	_fields = {'elementId' : False, 'elementTagName': False}
+	_fields.update(DomContentPointer._fields)
+	
+def create_artificial_applicable_range():
+	result = DomContentRangeDescription()
+	return result
+
 class Highlight(Sharable):
 	
 	DATASERVER_CLASS = 'Highlight'
 	MIME_TYPE = 'application/vnd.nextthought.highlight'
 	
-	_ds_field_mapping = {}
+	_ds_field_mapping = {'applicableRange':'applicableRange'}
 	_ds_field_mapping.update(Sharable._ds_field_mapping)
 
-	_fields = {'highlightedText': False}
+	_fields = {'highlightedText': False, 'applicableRange': False}
 	_fields.update(Sharable._fields)
 
 # -----------------------------------
@@ -357,11 +398,11 @@ class Note(Sharable, Threadable):
 	DATASERVER_CLASS = "Note"
 	MIME_TYPE = 'application/vnd.nextthought.note'
 
-	_ds_field_mapping = {'href':'href'}
+	_ds_field_mapping = {'href':'href', 'applicableRange':'applicableRange'}
 	_ds_field_mapping.update(Sharable._ds_field_mapping)
 	_ds_field_mapping.update(Threadable._ds_field_mapping)
 
-	_fields = {'text': False, 'body': False, 'href':True}
+	_fields = {'text': False, 'body': False, 'href':True, 'applicableRange': False}
 	_fields.update(Sharable._fields)
 	_fields.update(Threadable._fields)
 
