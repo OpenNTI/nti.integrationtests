@@ -1,55 +1,14 @@
 import os
-import sys
-import time
-import pprint
 import random
 
 from nti.integrationtests.chat import phrases
 from nti.integrationtests.chat.objects import run_chat
-from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.chat.objects import Host as _Host
 from nti.integrationtests.chat.objects import Guest as _Guest
+from nti.integrationtests.chat.simulation import pprint_to_file
+from nti.integrationtests.chat.simulation import MAX_TEST_USERS
+from nti.integrationtests.chat.simulation import wait_and_process
 from nti.integrationtests.chat.simulation import create_test_friends_lists
-
-def pprint_to_file(self, outdir=None, full=False, **kwargs):
-	outdir = os.path.expanduser(outdir or '/tmp')
-	outname = os.path.join(outdir, self.username + ".txt")
-	with open(outname, "w") as s:
-		pprint_graph(self, stream=s, full=full, **kwargs)
-	
-def pprint_graph(self, lock=None, stream=None, full=False, **kwargs):
-	stream = stream or sys.stderr
-	try:
-		if lock: lock.acquire()
-		
-		def get_messages(messages, is_recv=True):
-			result = []
-			result.append(len(messages))
-			for m in messages:
-				t = (m.ID or '', m.creator, m.text) if is_recv else m.text
-				result.append(t)
-			return result
-		
-		if full:
-			_sent = get_messages(self.get_sent_messages(), False)
-			_recv = get_messages(self.get_received_messages())
-			_mode = get_messages(self.get_moderated_messages())
-		else:
-			_sent = len(list(self.sent))
-			_recv = len(list(self.received))
-			_mode = len(list(self.moderated))
-			
-		d = {'username' : self.username,
-			 'sent' : _sent,
-			 'received': _recv,
-			 'moderated':_mode,
-			 'elapsed_recv': self.elapsed_recv,
-			 'traceback': self.traceback,
-			 'params' : kwargs }
-			
-		pprint.pprint(d, stream=stream, indent=2)
-	finally:
-		if lock: lock.release()
 	
 def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=phrases):
 	for i in xrange(entries):
@@ -58,12 +17,7 @@ def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=ph
 		else:
 			delay = random.randint(min_delay, min_delay)
 	
-		elapsed = 0
-		while elapsed < delay:
-			time.sleep(1)
-			self.nextEvent() # process any message while waiting
-			elapsed = elapsed + 1
-		
+		wait_and_process(self, delay)		
 		content = self.generate_message(k=3, phrases=phrases)
 		self.chat_postMessage(message=unicode(content), containerId=room_id)
 		

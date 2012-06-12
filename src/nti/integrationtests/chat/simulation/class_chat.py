@@ -8,8 +8,9 @@ from nti.integrationtests.chat import phrases
 from nti.integrationtests.chat.objects import Host
 from nti.integrationtests.chat.objects import Guest
 from nti.integrationtests.chat.objects import run_chat
+from nti.integrationtests.chat.simulation import pprint_to_file
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
-from nti.integrationtests.chat.simulation.group_chat import pprint_to_file
+from nti.integrationtests.chat.simulation import wait_and_process
 from nti.integrationtests.chat.simulation import create_test_friends_lists
 	
 class Moderator(Host):
@@ -78,15 +79,6 @@ class Moderator(Host):
 					  min_delay=15, max_delay=45, phrases=phrases):
 		
 		post_event.clear()
-		
-		def _wait(delay, condf=lambda : True):
-			elapsed = 0
-			while elapsed < delay and condf():
-				t = time.time()
-				self.nextEvent() # process any message while waiting
-				t = max(time.time() - t, 0.01)
-				elapsed = elapsed + t
-			return elapsed
 				
 		for i in xrange(entries):
 			if i == 0: # wait less for the first message
@@ -94,14 +86,14 @@ class Moderator(Host):
 			else:
 				delay = random.randint(min_delay, max_delay)
 	
-			_wait(delay)
+			wait_and_process(self, delay)
 			
 			# post a question
 			content = self.generate_message(k=2, phrases=phrases)
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
 			
 			f = lambda : reply_counter.value < len(self.online)
-			_wait(60, f)
+			wait_and_process(self, 60, f)
 			reply_counter.value = 0 # reset
 			
 class Student(Guest):
