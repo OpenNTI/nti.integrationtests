@@ -115,9 +115,9 @@ class DataserverClient(object):
 	createNote = create_note
 
 
-	def create_highlight(self, highlightedText, container, applicableRange=None, adapt=True, **kwargs):
+	def create_highlight(self, selectedText, container, applicableRange=None, adapt=True, **kwargs):
 		applicableRange = applicableRange or create_artificial_applicable_range()
-		highlight = Highlight(highlightedText=highlightedText, container=container, applicableRange=applicableRange, **kwargs)
+		highlight = Highlight(selectedText=selectedText, container=container, applicableRange=applicableRange, **kwargs)
 		return self.create_object(highlight, adapt=adapt, **kwargs)
 
 	def create_canvas(self, sides, tx, ty, container, store=False, adapt=True, **kwargs):
