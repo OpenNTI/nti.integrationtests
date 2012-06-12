@@ -168,10 +168,12 @@ class _Room():
 
 class _Message(object):
 	def __init__(self, **kwargs):
+		self.ID = kwargs.get('ID', None)
 		self.message = kwargs['message']
 		self.inReplyTo = kwargs.get('inReplyTo', None)
 		self.recipients = kwargs.get('recipients', None)
 		self.channel = kwargs.get('channel', DEFAULT_CHANNEL)
+		self.creator = kwargs.get('Creator', kwargs.get('creator',None))
 		self.containerId = kwargs.get('ContainerId', kwargs.get('containerId',None))
 
 	@property
@@ -192,13 +194,11 @@ class _Message(object):
 		return self.message
 
 	def __repr__(self):
-		return "<%s,%s>" % (self.__class__.__name__, self.message)
+		return "<%r,%r>" % (self.__class__.__name__, self.message)
 
 class _RecvMessage(_Message):
 	def __init__(self, **kwargs):
 		super(_RecvMessage, self).__init__(**kwargs)
-		self.ID = kwargs['ID']
-		self.creator = kwargs['creator']
 		self.lastModified = kwargs.get('lastModified', 0)
 
 	def __eq__( self, other ):
@@ -286,18 +286,23 @@ class DSUser(object):
 			if m.channel == channel:
 				yield m
 
-	def get_received_messages(self):
-		return self._get_and_clear(self.recv_messages)
+	def get_sent_messages(self, clear=False):
+		result = list(self.sent_messages)
+		if clear: self.sent_messages.clear()
+		return result
+		
+	def get_received_messages(self, clear=False):
+		return self._get_and_clear(self.recv_messages, clear)
 
-	def get_shadowed_messages(self):
-		return self._get_and_clear(self.shadowed_messages)
+	def get_shadowed_messages(self, clear=False):
+		return self._get_and_clear(self.shadowed_messages, clear)
 
-	def get_moderated_messages(self):
-		return self._get_and_clear(self.moderated_messages)
+	def get_moderated_messages(self, clear=False):
+		return self._get_and_clear(self.moderated_messages, clear)
 
-	def _get_and_clear(self, messages):
+	def _get_and_clear(self, messages, clear=False):
 		result = list(messages.itervalues())
-		messages.clear()
+		if clear: messages.clear()
 		return result
 
 	# ---- Callbacks ----
@@ -369,6 +374,8 @@ class DSUser(object):
 
 	def chat_postMessage(self, **kwargs):
 		d = dict(kwargs)
+		if not 'creator' in d:
+			d['creator'] = self.username
 		d['message_context'] = self.message_context
 		d['message'] = _create_message_body(kwargs['message'])
 		_postMessage(ws=self.ws, data_format=self.data_format, **d)
@@ -393,18 +400,21 @@ class DSUser(object):
 
 	def chat_recvMessage(self, **kwargs):
 		d = self._msg_params(**kwargs)
-		self.recv_messages[d['ID']] = _RecvMessage(**d)
-		return self.recv_messages[d['ID']]
+		message = _RecvMessage(**d)
+		self.recv_messages[d['ID']] = message
+		return message
 
 	def chat_recvMessageForModeration(self, **kwargs):
 		d = self._msg_params(**kwargs)
-		self.moderated_messages[d['ID']] = _RecvMessage(**d)
-		return self.moderated_messages[d['ID']]
+		message = _RecvMessage(**d)
+		self.moderated_messages[d['ID']] = message
+		return message
 
 	def chat_recvMessageForShadow(self, **kwargs):
 		d = self._msg_params(**kwargs)
-		self.shadowed_messages[d['ID']] = _RecvMessage(**d)
-		return self.shadowed_messages[d['ID']]
+		message = _RecvMessage(**d)
+		self.shadowed_messages[d['ID']] = message
+		return message
 
 	recvMessage = chat_recvMessage
 	recvMessageForModeration = chat_recvMessageForModeration

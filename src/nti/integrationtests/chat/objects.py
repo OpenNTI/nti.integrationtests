@@ -103,7 +103,7 @@ class OneRoomUser(BasicUser):
 		self.last_post_time = time.time()
 		
 	def chat_recvMessage(self, **kwargs):
-		super(OneRoomUser, self).chat_recvMessage(**kwargs)
+		message = super(OneRoomUser, self).chat_recvMessage(**kwargs)
 		creator = kwargs.get('Creator',  kwargs.get('creator', None))
 		cid = kwargs.get('ContainerId',  kwargs.get('containerId', None))
 		if cid == self.room and creator != self.username:
@@ -111,6 +111,7 @@ class OneRoomUser(BasicUser):
 		else:
 			self.recv_messages.pop(kwargs['ID'] , None)
 		self.last_recv_time = time.time()
+		return message
 
 	def wait_4_room(self, max_beats=5):
 		self.heart_beats = 0
@@ -280,5 +281,3 @@ def run_chat(containerId, host_user, invitees, entries=None, delay=0.25,
 	result.extend(users)
 
 	return result
-
-
