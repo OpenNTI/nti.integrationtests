@@ -13,6 +13,9 @@ from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.chat.simulation import wait_and_process
 from nti.integrationtests.chat.simulation import create_test_friends_lists
 	
+import logging
+logger = logging.getLogger( __name__ )
+
 class Moderator(Host):
 
 	def __init__(self, *args, **kwargs):
@@ -86,14 +89,17 @@ class Moderator(Host):
 			else:
 				delay = random.randint(min_delay, max_delay)
 	
-			wait_and_process(self, delay)
-			
+			_waited = wait_and_process(self, delay)
+			logger.debug("asked to wait %s, waited %s" % (delay,_waited))
+				
 			# post a question
 			content = self.generate_message(k=2, phrases=phrases)
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
+			logger.debug("Moderator posted '%s'" % content)
 			
 			f = lambda : reply_counter.value < len(self.online)
-			wait_and_process(self, max_delay, f)
+			_waited = wait_and_process(self, max_delay, f)
+			logger.debug("Moderator waited %s for %s students" % (_waited, reply_counter.value))
 			reply_counter.value = 0 # reset
 			
 class Student(Guest):
@@ -112,6 +118,7 @@ class Student(Guest):
 				content = self.generate_message(k=2, phrases=phrases)
 				self.chat_postMessage(message=unicode(content), containerId=self.room)
 			self.reply_counter.value += 1 
+			logger.debug("\t%s got question -> %s" % (self.username, self.reply_counter.value))
 		
 	def __call__(self, *arg, **kwargs):
 		
