@@ -93,7 +93,7 @@ class Moderator(Host):
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
 			
 			f = lambda : reply_counter.value < len(self.online)
-			wait_and_process(self, 60, f)
+			wait_and_process(self, max_delay, f)
 			reply_counter.value = 0 # reset
 			
 class Student(Guest):
