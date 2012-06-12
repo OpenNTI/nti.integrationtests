@@ -39,12 +39,12 @@ class Moderator(Host):
 		inReplyTo = kwargs.get("inReplyTo", None)
 		references = kwargs.get("references", None)
 		containerId = kwargs.get('containerId', None)
-		reply_counter = kwargs.get('reply_counter', None)
+		reply_queue = kwargs.get('reply_queue', None)
 		max_heart_beats = kwargs.get('max_heart_beats', 3)
 		
 		max_delay = kwargs.get('max_delay', 45)
 		min_delay = kwargs.get('min_delay', 15)
-		self.approval_percentage =  kwargs.get('approval_percentage', self.approval_percentage)
+		self.approval_percentage = kwargs.get('approval_percentage', self.approval_percentage)
 		
 		exit_event = kwargs.pop('exit_event')
 		connect_event = kwargs.pop('connect_event')
@@ -62,7 +62,7 @@ class Moderator(Host):
 			try:
 				room_id = self.room
 				if room_id:
-					self.post_messages(room_id, entries, connect_event, reply_counter, min_delay, max_delay)
+					self.post_messages(room_id, entries, connect_event, reply_queue, min_delay, max_delay)
 				else:
 					raise Exception('%s did not enter a chat room' % self.username)
 			finally:
@@ -76,9 +76,10 @@ class Moderator(Host):
 		finally:
 			self.ws_capture_and_close()
 			outdir = kwargs.pop('outdir', None)
-			pprint_to_file(self, outdir=outdir, full=True, **kwargs)
+			extended_report = kwargs.pop('extended_report', True)
+			pprint_to_file(self, outdir=outdir, full=extended_report, **kwargs)
 			
-	def post_messages(self, room_id, entries, post_event, reply_counter,
+	def post_messages(self, room_id, entries, post_event, reply_queue,
 					  min_delay=15, max_delay=45, phrases=phrases):
 		
 		post_event.clear()
@@ -97,10 +98,16 @@ class Moderator(Host):
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
 			logger.debug("Moderator posted '%s'" % content)
 			
-			f = lambda : reply_counter.value < len(self.online)
+			f = lambda : not reply_queue.full()
 			_waited = wait_and_process(self, max_delay, f)
-			logger.debug("Moderator waited %s for %s students" % (_waited, reply_counter.value))
-			reply_counter.value = 0 # reset
+			
+			# reset
+			counter = 0
+			while not reply_queue.empty():
+				reply_queue.get_nowait()
+				counter += 1
+			
+			logger.debug("Moderator waited %s for %s students" % (_waited, counter))
 			
 class Student(Guest):
 
@@ -117,13 +124,13 @@ class Student(Guest):
 			if random.random() <= self.response_percentage:
 				content = self.generate_message(k=2, phrases=phrases)
 				self.chat_postMessage(message=unicode(content), containerId=self.room)
-			self.reply_counter.value += 1 
-			logger.debug("\t%s got question -> %s" % (self.username, self.reply_counter.value))
+			self.reply_queue.put_nowait(True)
+			logger.debug("\t%s got question" % self.username)
 		
 	def __call__(self, *arg, **kwargs):
 		
 		self.moderator = kwargs.pop('moderator')
-		self.reply_counter = kwargs.pop('reply_counter')
+		self.reply_queue = kwargs.pop('reply_queue')
 		self.response_percentage =  kwargs.get('response_percentage', 0.3)
 		
 		exit_event = kwargs.pop('exit_event')
@@ -147,10 +154,12 @@ class Student(Guest):
 			
 		except Exception, e:
 			self.save_traceback(e)
+			print self.traceback
 		finally:
 			self.ws_capture_and_close()
 			outdir = kwargs.pop('outdir', None)
-			pprint_to_file(self, outdir=outdir, full=True, **kwargs)
+			extended_report = kwargs.pop('extended_report', True)
+			pprint_to_file(self, outdir=outdir, full=extended_report, **kwargs)
 			
 def simulate(users, containerId, entries=None,
 			 server='localhost', port=8081, is_secure=False,
@@ -174,13 +183,14 @@ def simulate(users, containerId, entries=None,
 	if outdir and not os.path.exists(outdir):
 		os.makedirs(outdir)
 		
-	reply_counter = multiprocessing.Value('i', 0)
+	extended_report = False
+	reply_queue = multiprocessing.Queue(len(users))
 	result = run_chat(containerId, host, users, entries=entries, use_threads=use_threads,
 					  server=server, port=port, is_secure=is_secure,
 					  max_heart_beats=max_heart_beats, host_class=Moderator, invitee_class=Student,
 					  min_delay=min_delay, max_delay=max_delay, exit_event=exit_event, outdir=outdir,
 					  approval_percentage=approval_percentage, response_percentage=response_percentage,
-					  reply_counter=reply_counter, moderator=host)
+					  reply_queue=reply_queue, moderator=host, extended_report=extended_report)
 	
 	return result
 
