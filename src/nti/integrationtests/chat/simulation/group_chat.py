@@ -17,15 +17,31 @@ def pprint_to_file(self, outdir=None, **kwargs):
 	with open(outname, "w") as s:
 		pprint_graph(self, stream=s, **kwargs)
 	
-def pprint_graph(self, lock=None, stream=None, **kwargs):
+def pprint_graph(self, lock=None, stream=None, full=False, **kwargs):
 	stream = stream or sys.stderr
 	try:
 		if lock: lock.acquire()
 		
+		def get_messages(messages):
+			result = []
+			for m in messages:
+				t = (m.ID or '', m.creator, m.text)
+				result.append(t)
+			return result
+		
+		if full:
+			_sent = get_messages(self.get_sent_messages())
+			_recv = get_messages(self.get_received_messages())
+			_mode = get_messages(self.get_moderated_messages())
+		else:
+			_sent = len(list(self.sent))
+			_recv = len(list(self.received))
+			_mode = len(list(self.moderated))
+			
 		d = {'username' : self.username,
-			 'sent' : len(list(self.sent)),
-			 'received': len(list(self.received)),
-			 'moderated': len(list(self.moderated)),
+			 'sent' : _sent,
+			 'received': _recv,
+			 'moderated':_mode,
 			 'elapsed_recv': self.elapsed_recv,
 			 'traceback': self.traceback,
 			 'params' : kwargs }
