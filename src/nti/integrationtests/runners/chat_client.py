@@ -250,17 +250,17 @@ class Retrieve(Command):
 		if not self.client or not self.client.connected:
 			raise Exception("Not connected") 
 		
-		messages = self.client.get_received_messages()
+		messages = self.client.get_received_messages(True)
 		self._display(messages)
 		
 		if ns.all or ns.shadowed:
-			messages = self.client.get_shadowed_messages()
+			messages = self.client.get_shadowed_messages(True)
 			if messages:
 				print 'Shadowed Messages'
 				self._display(messages)
 				
 		if ns.all or ns.moderated:
-			messages = self.client.get_moderated_messages()
+			messages = self.client.get_moderated_messages(True)
 			if messages:
 				print 'Moderated Messages'
 				self._display(messages)
