@@ -1,7 +1,7 @@
 import os
 import six
-import json
 import time
+import anyjson
 import warnings
 import collections
 from urlparse import urljoin
@@ -383,7 +383,7 @@ class DataserverClient(object):
 	def object_to_persist(self, obj, encoding='utf-8'):
 		if hasattr(obj, 'toDataServerObject'):
 			obj = obj.toDataServerObject()
-		result = json.dumps(obj, encoding=encoding)
+		result = anyjson.dumps(obj, encoding=encoding)
 		return result
 
 	# --------------

@@ -1,8 +1,8 @@
 import os
 import sys
-import json
 import base64
 import pprint
+import anyjson
 import httplib
 import urllib2
 import mimetools
@@ -118,7 +118,7 @@ class URLHttpLib(object):
 			pprint.pprint(d)
 
 	def deserialize(self, rp):
-		return json.loads(rp.body, encoding=rp.charset)
+		return anyjson.loads(rp.body, encoding=rp.charset)
 
 	def _prune(self, d):
 		result = {}
