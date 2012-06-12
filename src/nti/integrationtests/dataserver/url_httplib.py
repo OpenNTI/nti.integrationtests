@@ -118,7 +118,7 @@ class URLHttpLib(object):
 			pprint.pprint(d)
 
 	def deserialize(self, rp):
-		return anyjson.loads(rp.body, encoding=rp.charset)
+		return anyjson.loads(rp.body)
 
 	def _prune(self, d):
 		result = {}

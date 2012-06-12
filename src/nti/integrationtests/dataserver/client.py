@@ -380,10 +380,10 @@ class DataserverClient(object):
 			ws.add_collection(collection)
 		return collection
 
-	def object_to_persist(self, obj, encoding='utf-8'):
+	def object_to_persist(self, obj):
 		if hasattr(obj, 'toDataServerObject'):
 			obj = obj.toDataServerObject()
-		result = anyjson.dumps(obj, encoding=encoding)
+		result = anyjson.dumps(obj)
 		return result
 
 	# --------------
