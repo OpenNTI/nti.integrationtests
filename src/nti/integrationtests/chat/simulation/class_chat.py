@@ -35,6 +35,7 @@ class Moderator(Host):
 		inReplyTo = kwargs.get("inReplyTo", None)
 		references = kwargs.get("references", None)
 		containerId = kwargs.get('containerId', None)
+		reply_counter = kwargs.get('reply_counter', None)
 		max_heart_beats = kwargs.get('max_heart_beats', 3)
 		
 		max_delay = kwargs.get('max_delay', 45)
@@ -57,13 +58,13 @@ class Moderator(Host):
 			try:
 				room_id = self.room
 				if room_id:
-					self.post_messages(room_id, entries, connect_event, min_delay, max_delay)
+					self.post_messages(room_id, entries, connect_event, reply_counter, min_delay, max_delay)
 				else:
 					raise Exception('%s did not enter a chat room' % self.username)
 			finally:
 				exit_event.set()
 
-			# process messages
+			# process any remaning message
 			self.wait_heart_beats(max_heart_beats)
 			
 		except Exception, e:
@@ -71,36 +72,64 @@ class Moderator(Host):
 		finally:
 			self.ws_capture_and_close()
 			outdir = kwargs.pop('outdir', None)
-			pprint_to_file(self, outdir=outdir, **kwargs)
+			pprint_to_file(self, outdir=outdir, full=True, **kwargs)
 			
-	def post_messages(self, room_id, entries, post_event, min_delay=15, max_delay=45, phrases=phrases):
+	def post_messages(self, room_id, entries, post_event, reply_counter,
+					  min_delay=15, max_delay=45, phrases=phrases):
+		
+		post_event.clear()
+		
+		def _wait(delay, condf=lambda : True):
+			elapsed = 0
+			while elapsed < delay and condf():
+				t = time.time()
+				self.nextEvent() # process any message while waiting
+				t = max(time.time() - t, 0.01)
+				elapsed = elapsed + t
+			return elapsed
+				
 		for i in xrange(entries):
 			if i == 0: # wait less for the first message
 				delay = random.uniform(1,3)
 			else:
-				delay = random.randint(min_delay, min_delay)
+				delay = random.randint(min_delay, max_delay)
 	
-			elapsed = 0
-			while elapsed < delay:
-				time.sleep(1)
-				self.nextEvent() # process any message while waiting
-				elapsed = elapsed + 1
+			_wait(delay)
 			
 			# post a question
-			content = self.generate_message(k=3, phrases=phrases)
+			content = self.generate_message(k=2, phrases=phrases)
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
-			post_event.set()
-			post_event.clear()
+			
+			f = lambda : reply_counter.value < len(self.online)
+			_wait(60, f)
+			reply_counter.value = 0 # reset
 			
 class Student(Guest):
 
+	def __init__(self, *args, **kwargs):
+		super(Student, self).__init__(*args, **kwargs)
+		self.moderator = None
+		self.reply_counter = 0
+		self.response_percentage = 0.3
+		
+	def chat_recvMessage(self, **kwargs):
+		super(Student, self).chat_recvMessage(**kwargs)
+		creator = kwargs.get('Creator', kwargs.get('creator', None))
+		if creator == self.moderator:
+			if random.random() <= self.response_percentage:
+				content = self.generate_message(k=2, phrases=phrases)
+				self.chat_postMessage(message=unicode(content), containerId=self.room)
+			self.reply_counter.value += 1 
+		
 	def __call__(self, *arg, **kwargs):
+		
+		self.moderator = kwargs.pop('moderator')
+		self.reply_counter = kwargs.pop('reply_counter')
+		self.response_percentage =  kwargs.get('response_percentage', 0.3)
+		
 		exit_event = kwargs.pop('exit_event')
 		connect_event = kwargs.pop('connect_event')
-		max_delay = kwargs.get('max_delay', 45) * 2 
 		max_heart_beats = kwargs.get('max_heart_beats', 3)
-		response_percentage =  kwargs.get('response_percentage', 0.3)
-		
 		try:
 			self.ws_connect()
 			connect_event.wait(60)
@@ -113,13 +142,8 @@ class Student(Guest):
 			time.sleep(1)
 			while not exit_event.is_set():
 				self.nextEvent()
-				connect_event.wait(max_delay)
-				time.sleep(0.4) # time to wait for answer
-				if random.random() <= response_percentage:
-					content = self.generate_message(k=3, phrases=phrases)
-					self.chat_postMessage(message=unicode(content), containerId=room_id)
-				
-			# get any message
+
+			# process any remaning message
 			self.wait_heart_beats(max_heart_beats)
 			
 		except Exception, e:
@@ -127,9 +151,8 @@ class Student(Guest):
 		finally:
 			self.ws_capture_and_close()
 			outdir = kwargs.pop('outdir', None)
-			pprint_to_file(self, outdir=outdir, **kwargs)
+			pprint_to_file(self, outdir=outdir, full=True, **kwargs)
 			
-	
 def simulate(users, containerId, entries=None,
 			 server='localhost', port=8081, is_secure=False,
 			 approval_percentage=0.3, response_percentage=0.4,
@@ -147,15 +170,18 @@ def simulate(users, containerId, entries=None,
 	users =['test.user.%s@nextthought.com' % s for s in range(start_user+1, users+start_user)]
 	
 	exit_event = threading.Event() if use_threads else multiprocessing.Event()
-		
+	exit_event.clear()
+	
 	if outdir and not os.path.exists(outdir):
 		os.makedirs(outdir)
 		
+	reply_counter = multiprocessing.Value('i', 0)
 	result = run_chat(containerId, host, users, entries=entries, use_threads=use_threads,
 					  server=server, port=port, is_secure=is_secure,
 					  max_heart_beats=max_heart_beats, host_class=Moderator, invitee_class=Student,
 					  min_delay=min_delay, max_delay=max_delay, exit_event=exit_event, outdir=outdir,
-					  approval_percentage=approval_percentage, response_percentage=response_percentage)
+					  approval_percentage=approval_percentage, response_percentage=response_percentage,
+					  reply_counter=reply_counter, moderator=host)
 	
 	return result
 

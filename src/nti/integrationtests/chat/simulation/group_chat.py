@@ -11,26 +11,27 @@ from nti.integrationtests.chat.objects import Host as _Host
 from nti.integrationtests.chat.objects import Guest as _Guest
 from nti.integrationtests.chat.simulation import create_test_friends_lists
 
-def pprint_to_file(self, outdir=None, **kwargs):
+def pprint_to_file(self, outdir=None, full=False, **kwargs):
 	outdir = os.path.expanduser(outdir or '/tmp')
 	outname = os.path.join(outdir, self.username + ".txt")
 	with open(outname, "w") as s:
-		pprint_graph(self, stream=s, **kwargs)
+		pprint_graph(self, stream=s, full=full, **kwargs)
 	
 def pprint_graph(self, lock=None, stream=None, full=False, **kwargs):
 	stream = stream or sys.stderr
 	try:
 		if lock: lock.acquire()
 		
-		def get_messages(messages):
+		def get_messages(messages, is_recv=True):
 			result = []
+			result.append(len(messages))
 			for m in messages:
-				t = (m.ID or '', m.creator, m.text)
+				t = (m.ID or '', m.creator, m.text) if is_recv else m.text
 				result.append(t)
 			return result
 		
 		if full:
-			_sent = get_messages(self.get_sent_messages())
+			_sent = get_messages(self.get_sent_messages(), False)
 			_recv = get_messages(self.get_received_messages())
 			_mode = get_messages(self.get_moderated_messages())
 		else:
