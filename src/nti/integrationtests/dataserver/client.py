@@ -39,7 +39,6 @@ def get_link_from_dict(data):
 def get_item_from_dict(data):
 	return Item.new_from_dict(data)
 
-
 def get_workspaces(url, username, password='temp001'):
 	"""
 	Return the Workspace objects from the specified url
@@ -381,10 +380,10 @@ class DataserverClient(object):
 			ws.add_collection(collection)
 		return collection
 
-	def object_to_persist(self, obj):
+	def object_to_persist(self, obj, encoding='utf-8'):
 		if hasattr(obj, 'toDataServerObject'):
 			obj = obj.toDataServerObject()
-		result = json.dumps(obj)
+		result = json.dumps(obj, encoding=encoding)
 		return result
 
 	# --------------
