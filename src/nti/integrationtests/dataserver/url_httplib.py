@@ -11,6 +11,48 @@ from cStringIO import StringIO
 
 from webob import Response
 
+def urlopen( request, *args, **kwargs):
+	try:
+		return urllib2.urlopen(request)
+	except urllib2.HTTPError as http:
+
+		# If the server sent us anything,
+		# try to use it
+		_, _, tb = sys.exc_info()
+		try:
+			http.msg += ' URL: ' + http.geturl()
+			body = http.read()
+			# The last 20 or so lines
+			http.msg += ' Body: ' + str( body )[-1600:]
+		except (AttributeError, IOError):
+			pass
+
+		http.msg += '\n Args: ' + str(args)
+		http.msg += '\n KWArgs: ' + str(kwargs)
+
+		# re-raise the original exception object
+		# with the original traceback
+		raise http, None, tb
+	except urllib2.URLError as http:
+		# Probably a connection problem
+		_, _, tb = sys.exc_info()
+
+		try:
+			http.message += ' URL: ' + str(request)
+		except (AttributeError, IOError):
+			pass
+
+		http.message += '\n Args: ' + str(args)
+		http.message += '\n KWArgs: ' + str(kwargs)
+
+		# Stupid URLError doesn't print its message, just the underlying reason,
+		# which is usually a useless socket error
+		http.reason = "%s %s" % (http.reason, http.message)
+
+		# re-raise the original exception object
+		# with the original traceback
+		raise http, None, tb
+
 class URLHttpLib(object):
 
 	def __init__(self, debug=False):
@@ -41,9 +83,9 @@ class URLHttpLib(object):
 		charset = cls._get_encoding(headers)
 		return Response(body=body, status=status, headerlist=headerlist, charset=charset)
 
-	# -----------------------------------
 
-	def _create_request(self, credentials, url, data=None, headers={}):
+	def _create_request(self, credentials, url, data=None, headers=None):
+		if headers is None: headers = {}
 		request = urllib2.Request(url=url, data=data, headers=headers)
 		auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
 		auth.add_password(None, url, credentials[0], credentials[1])
@@ -54,51 +96,15 @@ class URLHttpLib(object):
 
 	def _do_request(self, request, *args, **kwargs):
 		try:
-			rp = urllib2.urlopen(request)
+			rp = urlopen(request)
 			return self._create_response(rp=rp)
 		except urllib2.HTTPError as http:
 
 			# handle 404s differently
 			if http.code == 404:
 				return URLHttpLib._create_response(code=404)
-
-			# If the server sent us anything,
-			# try to use it
-			_, _, tb = sys.exc_info()
-			try:
-				http.msg += ' URL: ' + http.geturl()
-				body = http.read()
-				# The last 20 or so lines
-				http.msg += ' Body: ' + str( body )[-1600:]
-			except (AttributeError, IOError):
-				pass
-
-			http.msg += '\n Args: ' + str(args)
-			http.msg += '\n KWArgs: ' + str(kwargs)
-
-			# re-raise the original exception object
-			# with the original traceback
-			raise http, None, tb
-		except urllib2.URLError as http:
-			# Probably a connection problem
-			_, _, tb = sys.exc_info()
-			from IPython.core.debugger import Tracer; debug_here = Tracer()() ## DEBUG ##
-
-			try:
-				http.message += ' URL: ' + str(request)
-			except (AttributeError, IOError):
-				pass
-
-			http.message += '\n Args: ' + str(args)
-			http.message += '\n KWArgs: ' + str(kwargs)
-
-			# Stupid URLError doesn't print its message, just the underlying reason,
-			# which is usually a useless socket error
-			http.reason = "%s %s" % (http.reason, http.message)
-
-			# re-raise the original exception object
-			# with the original traceback
-			raise http, None, tb
+			exc_info = sys.exc_info()
+			raise exc_info[0], exc_info[1], exc_info[2]
 
 
 	def _do_debug(self, url, rp, credentials):
@@ -110,8 +116,6 @@ class URLHttpLib(object):
 				dt = {'Exception': e}
 			d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
 			pprint.pprint(d)
-
-	# -----------------------------------
 
 	def deserialize(self, rp):
 		return json.loads(rp.body, encoding=rp.charset)
