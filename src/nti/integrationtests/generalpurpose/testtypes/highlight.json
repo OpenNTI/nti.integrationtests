@@ -31,7 +31,7 @@
 			"postExpectedResponse":"a setup highlight", 
 			"putExpectedResponse":"a test highlight"
 		},
-	"input_formats" : ["JsonFormat","PlistFormat","NoFormat"],
+	"input_formats" : ["JsonFormat", "NoFormat"],
 	"test_types" : ["Post", "Get", "GetGroup", "Put", "Delete"],
 	"response_types" : 
 		{

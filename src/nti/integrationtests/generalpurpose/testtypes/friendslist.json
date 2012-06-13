@@ -49,7 +49,7 @@
 			"postExpectedResponse":"setUpFriendsList", 
 			"putExpectedResponse":"testFriendsList"
 		},
-	"input_formats" : ["JsonFormat","PlistFormat","NoFormat"],
+	"input_formats" : ["JsonFormat", "NoFormat"],
 	"test_types" : ["Post", "Get", "GetGroup", "Put", "Delete"],
 	"response_types" : 
 		{

@@ -83,7 +83,7 @@
 					}
 				]
 		},
-	"input_formats" : ["JsonFormat", "PlistFormat", "NoFormat"],
+	"input_formats" : ["JsonFormat", "NoFormat"],
 	"test_types" : ["Post"],
 	"response_types" : 
 		{

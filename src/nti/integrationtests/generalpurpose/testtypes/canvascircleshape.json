@@ -58,7 +58,7 @@
 					"ty": 0.06280193236714976
 				}
 		},
-	"input_formats" : ["JsonFormat","PlistFormat","NoFormat"],
+	"input_formats" : ["JsonFormat", "NoFormat"],
 	"test_types" : ["Post"],
 	"response_types" : 
 		{

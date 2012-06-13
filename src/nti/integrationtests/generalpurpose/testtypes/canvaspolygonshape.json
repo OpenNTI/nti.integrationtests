@@ -57,7 +57,7 @@
 			"postExpectedResponse":"1.000 1.000 1.000", 
 			"putExpectedResponse":"0.500 0.500 0.500"
 		},
-	"input_formats" : ["JsonFormat","PlistFormat","NoFormat"],
+	"input_formats" : ["JsonFormat", "NoFormat"],
 	"test_types" : ["Post"],
 	"response_types" : 
 		{
