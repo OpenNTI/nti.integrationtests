@@ -68,7 +68,7 @@ class TestBasicUserGeneratedData(DataServerTestCase):
 		assert_that(ugd, contains(self.created_note))
 		assert_that(ugd, contains(self.created_highlight))
 
-		self.created_highlight['highlightedText'] = 'new'
+		self.created_highlight['selectedText'] = 'new'
 		updated_highlight = self.ds.update_object(self.created_highlight)
 
 		ugd = self.ds.get_user_generated_data(self.container)
@@ -78,7 +78,7 @@ class TestBasicUserGeneratedData(DataServerTestCase):
 		assert_that(ugd, contains(self.created_highlight))
 
 		ugdHighlight = object_from_container(ugd, updated_highlight)
-		assert_that(ugdHighlight, has_entry('highlightedText', 'new'))
+		assert_that(ugdHighlight, has_entry('selectedText', 'new'))
 
 		# cleanup
 		self.ds.delete_object(self.created_note)
