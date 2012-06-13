@@ -2,7 +2,6 @@ import uuid
 
 from nti.integrationtests import DataServerTestCase
 
-from nti.integrationtests.contenttypes import Note
 from nti.integrationtests.contenttypes import FriendsList
 
 from nti.integrationtests.integration import has_same_oid_as
@@ -35,10 +34,10 @@ class TestFriendsSharing(DataServerTestCase):
 		for f in self.friends:
 			username = f[0]
 			container = str(uuid.uuid1())
-			note = Note(body=['Fake note owned by %s' % username], container=container)
 			self.ds.clear_credentials()
 			self.ds.set_credentials(f)
-			objects.append(self.ds.create_object(note, adapt=True))
+			note = self.ds.create_note('Fake note owned by %s' % username, container=container)
+			objects.append(note)
 		return objects
 
 	def _delete_friends_fake_notes(self, objects):
@@ -68,8 +67,7 @@ class TestFriendsSharing(DataServerTestCase):
 		self.assertTrue(friendsList is not None)
 
 		# create an object to share
-		note = Note(body=[self.note], container=self.container)
-		created_obj = self.ds.create_object(note, adapt=True)
+		created_obj = self.ds.create_note(self.note, container=self.container)
 		self.assertTrue(created_obj is not None)
 
 		# do the actual sharing
@@ -107,9 +105,7 @@ class TestFriendsSharing(DataServerTestCase):
 		friendsList = self._create_friend_list(self.ds, self.list_name, friends)
 
 		# create and share
-		note = Note(body=[self.note], container=self.container)
-		note.shareWith(  friends )
-		created_obj = self.ds.create_object(note, adapt=True)
+		created_obj = self.ds.create_note(self.note, container=self.container, sharedWith=friends)
 		assert_that(created_obj, shared_with(friends))
 
 		self.ds.wait_for_event(max_wait_seconds=7)
@@ -144,9 +140,7 @@ class TestFriendsSharing(DataServerTestCase):
 		friendsList = self._create_friend_list(self.ds, self.list_name, friends)
 
 		# create and share
-		note = Note(body=[self.note], container=self.container)
-		note.shareWith( friends )
-		created_obj = self.ds.create_object(note, adapt=True)
+		created_obj = self.ds.create_note(self.note, container=self.container, sharedWith=friends)
 		assert_that(created_obj, shared_with(friends))
 
 		self.ds.wait_for_event(max_wait_seconds=7)
