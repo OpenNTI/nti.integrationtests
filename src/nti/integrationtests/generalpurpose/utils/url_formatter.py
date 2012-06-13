@@ -1,4 +1,4 @@
-import json
+import anyjson
 import plistlib
 import cStringIO
 
@@ -17,10 +17,10 @@ class NoFormat(FormatFunctionality):
 		return URL
 
 	def write(self, data):
-		return json.dumps(data)
+		return anyjson.dumps(data)
 
 	def read(self, request):
-		return json.loads(request.read())
+		return anyjson.loads(request.read())
 
 class JsonFormat(FormatFunctionality):
 
@@ -28,10 +28,10 @@ class JsonFormat(FormatFunctionality):
 		return self.urlFormat(URL, 'json')
 	
 	def write(self, data):
-		return json.dumps(data)
+		return anyjson.dumps(data)
 
 	def read(self, request):
-		return json.loads(request.read())
+		return anyjson.loads(request.read())
 	
 class PlistFormat(FormatFunctionality):
 
