@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals
+
 import six
 import json
 import plistlib
@@ -13,12 +15,12 @@ from nti.integrationtests.wsclient import ConnectionClosedException
 
 # -----------------------------
 
-WS_ACK			= "6::"
-WS_CONNECT		= "1::"
-WS_DISCONNECT	= "0::"
-WS_HEART_BEAT	= "2::"
-WS_MESSAGE		= "3::"
-WS_BROADCAST	= "5:::"
+WS_ACK			= '6::'
+WS_CONNECT		= '1::'
+WS_DISCONNECT	= '0::'
+WS_HEART_BEAT	= '2::'
+WS_MESSAGE		= '3::'
+WS_BROADCAST	= '5:::'
 
 SERVER_KILL		= 'serverkill'
 
@@ -37,8 +39,8 @@ EVT_RECV_MSG_SHADOW = 'chat_recvMessageForShadow'
 EVT_ROOM_MEMBERSHIP_CHANGED = "chat_roomMembershipChanged"
 EVT_PRESENCE_OF_USER_CHANGE_TO = 'chat_presenceOfUserChangedTo'
 
-DEFAULT_CHANNEL = "DEFAULT"
-WHISPER_CHANNEL	= "WHISPER"
+DEFAULT_CHANNEL = 'DEFAULT'
+WHISPER_CHANNEL	= 'WHISPER'
 META_CHANNEL	= 'META'
 CONTENT_CHANNEL = 'CONTENT'
 POLL_CHANNEL	= 'POLL'
@@ -655,7 +657,7 @@ def _enterRoom(ws, **kwargs):
 
 	data_format = kwargs.get("data_format", 'json')
 
-	assert containerId," must specify either valid container id"
+	assert containerId, 'must specify either valid container id'
 
 	args = {"Occupants": occupants}
 	if containerId:
@@ -685,7 +687,7 @@ def _postMessage(ws, **kwargs):
 	channel = kwargs.get("channel", DEFAULT_CHANNEL)
 	containerId = kwargs.get("containerId", kwargs.get("ContainerId", None))
 
-	assert containerId," must specify a valid container"
+	assert containerId,'must specify a valid container'
 
 	data_format = kwargs.get("data_format", 'json')
 	message_context = kwargs.get('message_context', default_message_context)
