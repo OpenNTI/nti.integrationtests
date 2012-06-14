@@ -6,6 +6,10 @@ import ConfigParser
 boolean_states = {	'1': True, 'yes': True, 'true': True, 'on': True,
 					'0': False, 'no': False, 'false': False, 'off': False}
 
+def eval_bool(s):
+	s = str(s).lower()
+	return boolean_states.get(s, None)
+
 # -----------------------------------
 
 def get_open_port():
