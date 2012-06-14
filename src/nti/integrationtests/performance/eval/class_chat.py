@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import print_function, unicode_literals
 
 import os
 import uuid
@@ -54,16 +54,3 @@ def chat(*args, **kwargs):
 	 		 start_user=start_user)
 
 	return IGNORE_RESULT
-
-def _set_logger():
-	logging.basicConfig(level=logging.INFO,
-						format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
-	
-def main():
-	from nti.integrationtests.performance.runner import run
-	_set_logger()
-	config_file = os.path.join(os.path.dirname(__file__), "class_chat.cfg")
-	run(config_file)
-	
-if __name__ == '__main__':
-	main()

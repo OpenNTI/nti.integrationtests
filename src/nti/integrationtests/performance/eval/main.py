@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function, unicode_literals
+
 import os
 import sys
 
@@ -13,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def set_logger(debug=False):
 	level = logging.INFO if not debug else logging.DEBUG
-	logging.basicConfig(level, format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
+	logging.basicConfig(level=level, format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
 	
 def main():
 	argv = sys.argv[1:]

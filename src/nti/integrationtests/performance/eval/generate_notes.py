@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals
+
 from nti.integrationtests.dataserver.client import DataserverClient
 
 from nti.integrationtests.chat import generate_message
@@ -40,15 +42,3 @@ def create_note(*args, **kwargs):
 	note = client.create_note(message, container=container)
 	assert note, 'could  not create note'	
 	return IGNORE_RESULT
-
-
-if __name__ == '__main__':
-	import os
-	logger = logging.getLogger('')
-	
-	logging.basicConfig(level=logging.INFO,
-						format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
-
-	from nti.integrationtests.performance.runner import run
-	config_file = os.path.join(os.path.dirname(__file__), "generate_notes.cfg")
-	run(config_file)

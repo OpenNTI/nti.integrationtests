@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals
+
 import os
 import ConfigParser
 import multiprocessing
@@ -5,8 +7,8 @@ import multiprocessing
 from zope.dottedname.resolve import resolve
 
 from nti.integrationtests.utils import get_option
-from nti.integrationtests.utils import get_bool_option
 from nti.integrationtests.utils import get_int_option
+from nti.integrationtests.utils import get_bool_option
 from nti.integrationtests.utils import get_float_option
 
 from nti.integrationtests.performance import noop
@@ -18,24 +20,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 # ====================
-
-def _get_option(method, section, name, default):
-	try:
-		return method(section, name)
-	except:
-		return default
-	
-def get_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
-	return _get_option(config.get, section, name, default)
-
-def get_bool_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=False):
-	return _get_option(config.getboolean, section, name, default)
-
-def get_int_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
-	return _get_option(config.getint, section, name, default)
-
-def get_float_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
-	return _get_option(config.getfloat, section, name, default)
 		
 def is_default_value(config, section, name):
 	def_val = config.defaults()[name] if name in config.defaults() else None

@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals
+
 import os
 
 from nti.integrationtests.performance import RunnerResult
@@ -58,6 +60,3 @@ def read_config_and_results(path, on_record=None):
 	context, groups = read_config(config_file, False)
 	
 	return context, groups, results
-
-if __name__ == '__main__':
-	read_config_and_results('/Users/csanchez/Downloads/test')
