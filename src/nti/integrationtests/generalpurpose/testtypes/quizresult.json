@@ -4,21 +4,21 @@
 		{
 			"post_data":
 				{
-					"MimeType":"application/vnd.nextthought.quiz", 
-					"ContainerId": "test.user.container.1324420216.04", 
-					"Class": "Quiz", 
-					"Items": 
+					"MimeType":"application/vnd.nextthought.quiz",
+					"ContainerId": "test.user.container.1324420216.04",
+					"Class": "Quiz",
+					"Items":
 						{
-							"1" : 
-								{ 
+							"1" :
+								{
 									"Class": "QuizQuestion",
-									"Answers": 
+									"Answers":
 										[
-											"$1$", 
+											"$1$",
 											"$1.0$"
-										],  
+										],
 									"MimeType": "application/vnd.nextthought.quizquestion",
-									"ID": "1", 
+									"ID": "1",
 									"Text": "This is a quiz"
 								}
 						}
@@ -28,17 +28,17 @@
 		{
 			"post_data":
 				{
-					"MimeType":"application/vnd.nextthought.quizresult", 
-					"ContainerId": "test.user.container.1324420216.04", 
-					"Class": "QuizResult", 
-					"ID": "mathcounts-2011-0", 
+					"MimeType":"application/vnd.nextthought.quizresult",
+					"ContainerId": "test.user.container.1324420216.04",
+					"Class": "QuizResult",
+					"ID": "mathcounts-2011-0",
 					"QuizID":"tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x051c:5573657273",
-					"Items": 
+					"Items":
 						{
-							"1" : 
-								{ 
+							"1" :
+								{
 									"Class": "QuizQuestionResponse",
-									"Assessment":"True",
+									"Assessment": 1.0,
 									"Question":"This is a quiz",
 									"Response":"$1$"
 								}
@@ -46,56 +46,56 @@
 				},
 			"put_data":
 				{
-					"MimeType":"application/vnd.nextthought.quizresult", 
-					"ContainerId": "test.user.container.1324420216.04", 
-					"Class": "QuizResult", 
-					"ID": "mathcounts-2011-0", 
+					"MimeType":"application/vnd.nextthought.quizresult",
+					"ContainerId": "test.user.container.1324420216.04",
+					"Class": "QuizResult",
+					"ID": "mathcounts-2011-0",
 					"QuizID":"tag:nextthought.com,2011-10:test.user.1@nextthought.com-OID-0x051c:5573657273",
-					"Items": 
+					"Items":
 						{
-							"1" : 
-								{ 
+							"1" :
+								{
 									"Class": "QuizQuestionResponse",
-									"Assessment":"False",
+									"Assessment": 1.0,
 									"Question":"This is a quiz",
 									"Response":"$0$"
 								}
 						}
 				}
 		},
-	"expected_return": 
+	"expected_return":
 		{
-			"MimeType":"application/vnd.nextthought.quizresult", 
+			"MimeType":"application/vnd.nextthought.quizresult",
 			"postExpectedResponse":
 				[
 					{
-						"1": 
+						"1":
 							{
-								"Text": "This is a quiz", 
-								"Assessment":"True", 
+								"Text": "This is a quiz",
+								"Assessment": 1.0,
 								"Response":"$1$",
-								"Answers": 
+								"Answers":
 									[
-										"$1$", 
+										"$1$",
 										"$1.0$"
-									], 
+									],
 								"ID": "1"
 							}
 					}
-				], 
-			"putExpectedResponse":		
+				],
+			"putExpectedResponse":
 				[
 					{
-						"1": 
+						"1":
 							{
-								"Text": "This is not a quizresult", 
-								"Assessment":"False", 
+								"Text": "This is not a quizresult",
+								"Assessment": 0.0,
 								"Response":"$0$",
-								"Answers": 
+								"Answers":
 									[
-										"$0$", 
+										"$0$",
 										"$0.0$"
-									], 
+									],
 								"ID": "1"
 							}
 					}
@@ -103,9 +103,9 @@
 		},
 	"input_formats" : ["JsonFormat", "NoFormat"],
 	"test_types" : ["Post"],
-	"response_types" : 
+	"response_types" :
 		{
-			"Successful": 
+			"Successful":
 					{
 						"classification": "Successful",
 						"input_info" :{},
@@ -115,7 +115,7 @@
 						"post": 201,
 						"put": 200,
 						"delete": 204
-					}, 
+					},
 			"Unauthorized":
 					{
 						"classification": "Unauthorized",
@@ -130,7 +130,7 @@
 			"NotFound":
 					{
 						"classification": "NotFound",
-						"input_info" :{"id":"/dataserver2/users/test.user.1%40nextthought.com/Objects/tag%3Anextthought.com%2C2011-10%3Atest.user.1%40nextthought.com-OID-0x03", 
+						"input_info" :{"id":"/dataserver2/users/test.user.1%40nextthought.com/Objects/tag%3Anextthought.com%2C2011-10%3Atest.user.1%40nextthought.com-OID-0x03",
 							"href":"/dataserver2/users/test.user.1%40nextthought.com/doesNotExist"},
 						"if_modified_since_no" : 304,
 						"if_modified_since_yes" : 200,
@@ -138,7 +138,7 @@
 						"post": 201,
 						"put": 200,
 						"delete": 204
-					}, 
+					},
 			"BadData" :
 					{
 						"classification": "BadData",

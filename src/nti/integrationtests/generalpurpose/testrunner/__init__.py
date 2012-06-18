@@ -3,13 +3,13 @@ import json
 import time
 import urllib2
 from urlparse import urljoin
-
+import functools
 from hamcrest import assert_that, greater_than_or_equal_to, less_than_or_equal_to, has_entry
-
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 
 def _http_ise_error_logging(f):
+	@functools.wraps(f)
 	def to_call( *args, **kwargs ):
 		try:
 			return f( *args, **kwargs )
