@@ -144,8 +144,8 @@ class _Room():
 		moderated = kwargs.get('Moderated',  kwargs.get('moderated', False))
 		containerId = kwargs.get('ContainerId',  kwargs.get('containerId', None))
 
-		assert ID, "must specify a valid room ID"
-		assert occupants != None,"must specify valid room occupants"
+		assert ID, ("must specify a valid room ID", kwargs)
+		assert occupants != None, ("must specify valid room occupants", kwargs)
 
 		self.ID = ID
 		self.active = active
@@ -162,10 +162,10 @@ class _Room():
 	def __eq__( self, other ):
 		if isinstance(other, six.string_types):
 			return self.ID == other
-		elif isinstance(other, _Room):
+		if isinstance(other, _Room):
 			return self.ID == other.ID
-		else:
-			return False
+
+		return False
 
 
 class _Message(object):
@@ -292,7 +292,7 @@ class DSUser(object):
 		result = list(self.sent_messages)
 		if clear: self.sent_messages.clear()
 		return result
-		
+
 	def get_received_messages(self, clear=False):
 		return self._get_and_clear(self.recv_messages, clear)
 
@@ -691,7 +691,7 @@ def _postMessage(ws, **kwargs):
 
 	data_format = kwargs.get("data_format", 'json')
 	message_context = kwargs.get('message_context', default_message_context)
-		
+
 	args = {"ContainerId": containerId, "Body": message, "Class":"MessageInfo"}
 	if channel and channel != DEFAULT_CHANNEL:
 		args['channel'] = channel
