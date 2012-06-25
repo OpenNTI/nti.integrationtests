@@ -54,6 +54,10 @@ class BasicSeverOperation(object):
 	lastModifiedCollection = None
 	preRequestTime = None
 
+	# Methods called by the generator should copy this data
+	# into their local frame's __traceback_info__ variable
+	_traceback_info_ = None
+
 	@_http_ise_error_logging
 	def setValues(self, kwargs):
 

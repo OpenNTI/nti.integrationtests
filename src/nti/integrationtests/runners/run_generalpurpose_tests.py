@@ -35,7 +35,7 @@ def main(args = None):
 		os.environ['DATASERVER_SYNC_CHANGES'] = 'True'
 
 	import nti.integrationtests.generalpurpose.utils
-	test_runner(module=nti.integrationtests.generalpurpose.utils, pattern="run_*.py", use_coverage=use_coverage, 
+	test_runner(module=nti.integrationtests.generalpurpose.utils, pattern="run_*.py", use_coverage=use_coverage,
 				coverage_report=coverage_report, port=port, root_dir=root_dir)
 
 if __name__ == '__main__':

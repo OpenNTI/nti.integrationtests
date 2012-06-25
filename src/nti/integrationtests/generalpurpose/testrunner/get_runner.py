@@ -5,6 +5,7 @@ from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
 class GetObject(BasicSeverOperation):
 
 	def makeRequest(self, kwargs):
+		__traceback_info__ = self._traceback_info_
 		self.setValues(kwargs)
 
 		test_args = self.obj_setUp()

@@ -6,6 +6,7 @@ import sys
 class PostObject(BasicSeverOperation):
 
 	def makeRequest(self, kwargs):
+		__traceback_info__ = self._traceback_info_
 		self.setValues(kwargs)
 
 		url = self.format.formatURL(self.testHrefUrl)

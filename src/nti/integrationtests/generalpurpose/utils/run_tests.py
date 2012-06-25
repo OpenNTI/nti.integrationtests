@@ -49,7 +49,7 @@ def setup():
 	global dataserver
 
 	get_env_vars()
-	
+
 	dataserver = DataserverProcess(port=port, root_dir=root_dir)
 	if not dataserver.is_running():
 		if use_coverage:
@@ -114,7 +114,6 @@ def test_generator():
 				# other tests from running
 				error = None
 				bad_test = False
-
 				test_values = open_data_file(test_path)
 
 				if accept == test_values['data_type']:
@@ -146,7 +145,8 @@ def test_generator():
 										if not kwargs[test_parameter] and not bad_test:
 											bad_test = True
 											error = test_parameter
-
+									# Because this is a generator, it's not on the stack when exceptions occur
+									__traceback_info__ = test_path, test_type, responseType
 									if bad_test:
 										bad_test = False
 										yield terminate, error, test_path
@@ -158,6 +158,7 @@ def test_generator():
 									elif accept == 'application/vnd.nextthought.quizresult':
 										yield test_type_obj.makeQuizResultRequest, kwargs
 									else:
+										test_type_obj._traceback_info_ = __traceback_info__
 										yield test_type_obj.makeRequest, kwargs
 
 					# if a TypeError is caught for a nonexistant file,
