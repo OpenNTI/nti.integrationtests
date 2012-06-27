@@ -149,6 +149,7 @@ def wraps_item(item):
 	return any_of(has_entry('Item', has_same_oid_as(item)), has_entry('item', has_same_oid_as(item)))
 
 def accepting(user, name):
+	__traceback_info__ = user, name
 	for u in user.accepting:
 		if u.name == name:
 			return True
@@ -179,6 +180,7 @@ def unwrap_object(w):
 unwrapObject = unwrap_object
 
 def get_notification_count(userObj):
+	__traceback_info__ = userObj
 	return userObj['NotificationCount']
 
 def setup_package():

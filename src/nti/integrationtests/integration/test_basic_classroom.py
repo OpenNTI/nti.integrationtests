@@ -17,6 +17,7 @@ from hamcrest import is_
 from hamcrest import has_length
 from hamcrest import contains
 from hamcrest import has_entry
+from hamcrest import has_property
 from hamcrest import greater_than_or_equal_to
 
 class TestBasicClassRoom(DataServerTestCase):
@@ -65,8 +66,9 @@ class TestBasicClassRoom(DataServerTestCase):
 		class_name = ci.ID
 		
 		obj = self.ds.create_class(ci, provider)
+		__traceback_info__ = obj
 		assert_that(obj.ID, is_(class_name))
-		assert_that(obj.creator, is_('OU'))
+		assert_that(obj, has_property( 'creator', is_('OU')))
 		assert_that(obj.links, has_length(greater_than_or_equal_to(1)))
 		assert_that(obj.links[0], has_entry('rel', 'edit'))
 		assert_that(obj.ntiid, not_none())

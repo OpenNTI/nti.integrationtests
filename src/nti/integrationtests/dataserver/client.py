@@ -195,7 +195,7 @@ class DataserverClient(object):
 		href = link or obj.get_edit_link()
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
-
+		__traceback_info__ = url, credentials, obj
 		rp = self.httplib.do_put(url, credentials=credentials, data=self.object_to_persist(obj))
 		assert_that(rp.status_int, is_(200), 'invalid status code while updating an object')
 
