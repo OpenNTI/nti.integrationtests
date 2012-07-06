@@ -59,7 +59,13 @@ def stop_server(context):
 # -----------------------------------
 			
 def new_client(context):
-	endpoint = getattr(context, "endpoint")
+	endpoint = context.as_str("endpoint", None)
+	if not endpoint:
+		port =  context.as_int( "port", 8081)
+		server =  context.as_str("server", 'localhost')
+		is_secure = context.as_bool("is_secure", False)
+		endpoint = DataserverProcess.resolve_endpoint(server, port, is_secure)
+	
 	credentials = getattr(context, "credentials", None)
 	client = DataserverClient(endpoint=endpoint, credentials=credentials)
 	return client
