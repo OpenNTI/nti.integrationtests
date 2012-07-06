@@ -56,6 +56,6 @@ def share(users, *args, **kwargs):
 		assert shared_obj, 'could  not share note'
 		
 		# record time
-		result['share.op.%s' % no] = elpased
+		result['sop.%s' % no] = elpased
 		
 	return result
