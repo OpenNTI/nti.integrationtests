@@ -46,7 +46,7 @@ def share(users, *args, **kwargs):
 	note = client.create_note(message, container=container)
 	for no in users:
 		no = min(no, MAX_TEST_USERS-1) 
-		sw = ['test.user.%s' % x for x in range(2, no+2)]
+		sw = ['test.user.%s@nextthought.com' % x for x in range(2, no+2)]
 		note['sharedWith'] = sw
 		
 		# share note
