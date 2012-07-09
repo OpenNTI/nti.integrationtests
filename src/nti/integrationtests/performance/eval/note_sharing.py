@@ -34,18 +34,8 @@ def script_teardown(context):
 
 _max_users = MAX_TEST_USERS
 
-def share(users, *args, **kwargs):
-	context = kwargs['__context__']
-	client = new_client(context)
-		
-	nttype = generate_random_text()
-	message = generate_message(k=3)
-	container = generate_ntiid(nttype=nttype)
-	note = client.create_note(message, container=container)
-	assert note, 'could  not create note'	
-	
-	result = TimerResultMixin()
-	note = client.create_note(message, container=container)
+
+def _users_loop(users):
 	for no in users:
 		if isinstance(no, numbers.Integral):
 			no = min(no, MAX_TEST_USERS-1) 
@@ -54,6 +44,43 @@ def share(users, *args, **kwargs):
 			sw = [no]
 		else:
 			continue
+		yield no, sw
+		
+def create_share(users, *args, **kwargs):
+	context = kwargs['__context__']
+	client = new_client(context)
+	result = TimerResultMixin()
+	
+	for t in _users_loop(users):
+		no, sw = t
+		
+		# create note
+		nttype = generate_random_text()
+		message = generate_message(k=3)
+		container = generate_ntiid(nttype=nttype)
+		now = time.time()
+		note = client.create_note(message, container=container, sharedWith=sw)
+		elpased = time.time() - now
+		assert note, 'could  not create note'
+		
+		# record time
+		result['sop.%s' % no] = elpased
+		
+	return result
+
+def share_note(users, *args, **kwargs):
+	context = kwargs['__context__']
+	client = new_client(context)
+	result = TimerResultMixin()
+	
+	nttype = generate_random_text()
+	message = generate_message(k=3)
+	container = generate_ntiid(nttype=nttype)
+	note = client.create_note(message, container=container)
+	assert note, 'could  not create note'	
+	
+	for t in _users_loop(users):
+		no, sw  = t
 		note['sharedWith'] = sw
 		
 		# share note
