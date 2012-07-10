@@ -1,5 +1,6 @@
 from __future__ import print_function, unicode_literals
 
+import os
 import six
 import time
 import numbers
@@ -32,13 +33,13 @@ def script_teardown(context):
 	
 # -----------------------------------
 
-_max_users = MAX_TEST_USERS
+_max_users = 2015
 
 
 def _users_loop(users):
 	for no in users:
 		if isinstance(no, numbers.Integral):
-			no = min(no, MAX_TEST_USERS-1) 
+			no = min(no, _max_users-1) 
 			sw = ['test.user.%s@nextthought.com' % x for x in range(2, no+2)]
 		elif isinstance(no, six.string_types):
 			sw = [no]
@@ -71,25 +72,33 @@ def create_share(users, *args, **kwargs):
 def share_note(users, *args, **kwargs):
 	context = kwargs['__context__']
 	client = new_client(context)
-	result = TimerResultMixin()
+	runner = kwargs['__runner__']
 	
 	nttype = generate_random_text()
-	message = generate_message(k=3)
 	container = generate_ntiid(nttype=nttype)
-	note = client.create_note(message, container=container)
-	assert note, 'could  not create note'	
 	
-	for t in _users_loop(users):
-		no, sw  = t
-		note['sharedWith'] = sw
-		
-		# share note
-		now = time.time()
-		shared_obj = client.update_object(note)
-		elpased = time.time() - now
-		assert shared_obj, 'could  not share note'
-		
-		# record time
-		result['sop.%s' % no] = elpased
-		
-	return result
+	outdir = getattr(context, "result_output_dir", '/tmp')
+	if not os.path.exists(outdir):
+		os.makedirs(outdir)
+	outfile = os.path.join(outdir, str(runner) + ".csv")
+	
+	with open(outfile,"w") as f:
+		users = range(10, 2010, 10) + ['Everyone']
+		for t in _users_loop(users):
+			message = generate_message(k=3)
+			note = client.create_note(message, container=container)
+			assert note, 'could  not create note'
+			
+			no, sw = t
+			note['sharedWith'] = sw
+			
+			# share note
+			now = time.time()
+			shared_obj = client.update_object(note)
+			elpased = time.time() - now
+			assert shared_obj, 'could  not share note'
+			
+			f.write("%s,%s\n" % (no, elpased))
+			f.flush()
+			
+	return None
