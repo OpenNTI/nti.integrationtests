@@ -2,6 +2,7 @@ import os
 import sys
 import base64
 import pprint
+import urllib
 import anyjson
 import httplib
 import urllib2
@@ -83,9 +84,12 @@ class URLHttpLib(object):
 		charset = cls._get_encoding(headers)
 		return Response(body=body, status=status, headerlist=headerlist, charset=charset)
 
-
-	def _create_request(self, credentials, url, data=None, headers=None):
-		if headers is None: headers = {}
+	def _create_request(self, credentials, url, data=None, headers=None, *args, **kwargs):
+		headers = {} if not headers else headers
+		if kwargs:
+			params =  urllib.urlencode(kwargs)
+			url = url if '?' in url else url + '?'
+			url = '%s%s' % (url, params)
 		request = urllib2.Request(url=url, data=data, headers=headers)
 		auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
 		auth.add_password(None, url, credentials[0], credentials[1])
@@ -105,7 +109,6 @@ class URLHttpLib(object):
 				return URLHttpLib._create_response(code=404)
 			exc_info = sys.exc_info()
 			raise exc_info[0], exc_info[1], exc_info[2]
-
 
 	def _do_debug(self, url, rp, credentials):
 		if self.debug:
@@ -128,21 +131,21 @@ class URLHttpLib(object):
 
 	def do_get(self, url, credentials, *args, **kwargs):
 		call_args = self._prune(locals())
-		request = self._create_request(credentials, url)
+		request = self._create_request(credentials, url, *args, **kwargs)
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
 
 	def do_post(self, url, credentials, data, *args, **kwargs):
 		call_args = self._prune(locals())
-		request = self._create_request(credentials, url, data)
+		request = self._create_request(credentials, url, data, *args, **kwargs)
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
 
 	def do_put(self, url, credentials, data, *args, **kwargs):
 		call_args = self._prune(locals())
-		request = self._create_request(credentials, url, data)
+		request = self._create_request(credentials, url, data, *args, **kwargs)
 		request.get_method = lambda: 'PUT'
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
@@ -150,17 +153,18 @@ class URLHttpLib(object):
 
 	def do_delete(self, url, credentials, *args, **kwargs):
 		call_args = self._prune(locals())
-		request = self._create_request(credentials, url)
+		request = self._create_request(credentials, url, *args, **kwargs)
 		request.get_method = lambda: 'DELETE'
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
 
-	def do_upload_resource(self, url, credentials, source_file, content_type=None, headers={}, is_put=False):
+	def do_upload_resource(	self, url, credentials, source_file, 
+							content_type=None, headers={}, is_put=False, *args, **kwargs):
 		call_args = self._prune(locals())
 
 		content_type = content_type if content_type else self._get_mime_type(source_file)
-		request = self._create_request(credentials, url, headers={'Content-Type': content_type})
+		request = self._create_request(credentials, url, headers={'Content-Type': content_type}, *args, **kwargs)
 		if is_put: request.get_method =  lambda: 'PUT'
 		request.add_unredirected_header('Content-Type', content_type)
 		for k, v in headers.items():
@@ -183,12 +187,12 @@ class URLHttpLib(object):
 
 	# -----------------------------------
 
-	def do_upload_resources(self, url, credentials, files, default_content_type=None, headers={} ):
+	def do_upload_resources(self, url, credentials, files, default_content_type=None, headers={}, *args, **kwargs ):
 		"""
 		Implements multipart resource upload.
 		This is not currently supported by the dataserver
 		"""
-		request = self._create_request(credentials, url)
+		request = self._create_request(credentials, url, *args, **kwargs)
 		boundary, data = self.multipart_encode(files, default_content_type)
 		content_type = 'multipart/form-data; boundary=%s' % boundary
 		request.add_unredirected_header('Content-Type', content_type)
@@ -196,7 +200,7 @@ class URLHttpLib(object):
 			request.add_unredirected_header(k, v)
 
 		request.add_data(data)
-		rp = self._do_request(request, **locals())
+		rp = self._do_request(request)
 		self._do_debug(url, rp, credentials)
 		return rp
 
