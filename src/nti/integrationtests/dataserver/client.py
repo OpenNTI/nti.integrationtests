@@ -244,8 +244,49 @@ class DataserverClient(object):
 				obj['sharedWith'].remove(target)
 
 		return self.update_object(obj, credentials=credentials, adapt=adapt, **kwargs)
+	
+	def like_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
+		if not link:
+			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
+			
+		href = link or obj.get_like_link()
+		return self._like_fav_op(href, 'like', credentials=credentials, adapt=adapt, **kwargs)
+	
+	def unlike_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
+		if not link:
+			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
+			
+		href = link or obj.get_unlike_link()
+		return self._like_fav_op(href, 'unlike', credentials=credentials, adapt=adapt, **kwargs)
+				
+	def fav_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
+		if not link:
+			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
+			
+		href = link or obj.get_favorite_link()
+		return self._like_fav_op(href, 'favorite', credentials=credentials, adapt=adapt, **kwargs)
+	
+	def unfav_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
+		if not link:
+			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
+			
+		href = link or obj.get_unfavorite_link()
+		return self._like_fav_op(href, 'unfavorite', credentials=credentials, adapt=adapt, **kwargs)
+	
+	def _like_fav_op(self, href, operation, credentials=None, adapt=True, **kwargs):
+		assert_that(href, is_not(none()), "no '%s' href was provided" % operation)
+		credentials = self._credentials_to_use(credentials)
+		url = urljoin(self.endpoint, href)
 
+		rp = self.httplib.do_post(url, credentials=credentials, **kwargs)
+		assert_that(rp.status_int, is_(200), "invalid status code object in '%s' operation" % operation)
+
+		data = self.httplib.deserialize(rp)
+		return adapt_ds_object(data) if adapt else data
+	
+	likeObject = like_object
 	shareObject = share_object
+	unlikeObject = unlike_object
 	createObject = create_object
 
 	# ------------------------

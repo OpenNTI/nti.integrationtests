@@ -202,6 +202,18 @@ class DSObject(Persistent, UserDict.DictMixin):
 	def get_delete_link(self):
 		return self.get_edit_link()
 	
+	def get_like_link(self):
+		return self.get_link('like')
+	
+	def get_favorite_link(self):
+		return self.get_link('favorite')
+	
+	def get_unlike_link(self):
+		return self.get_link('unlike')
+	
+	def get_unfavorite_link(self):
+		return self.get_link('unfavorite')
+	
 	def get_link(self, link_type = None):
 		if link_type and hasattr(self, 'links'):
 			links = self.links or []

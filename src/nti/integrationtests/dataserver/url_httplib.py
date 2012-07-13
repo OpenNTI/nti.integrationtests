@@ -136,14 +136,15 @@ class URLHttpLib(object):
 		self._do_debug(url, rp, credentials)
 		return rp
 
-	def do_post(self, url, credentials, data, *args, **kwargs):
+	def do_post(self, url, credentials, data=None, *args, **kwargs):
 		call_args = self._prune(locals())
 		request = self._create_request(credentials, url, data, *args, **kwargs)
+		request.get_method = lambda: 'POST'
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
 
-	def do_put(self, url, credentials, data, *args, **kwargs):
+	def do_put(self, url, credentials, data=None, *args, **kwargs):
 		call_args = self._prune(locals())
 		request = self._create_request(credentials, url, data, *args, **kwargs)
 		request.get_method = lambda: 'PUT'
