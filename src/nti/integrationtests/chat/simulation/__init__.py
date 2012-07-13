@@ -14,7 +14,7 @@ from nti.integrationtests.chat.objects import run_chat
 
 # ----------------------------------
 
-MAX_TEST_USERS = 200
+MAX_TEST_USERS = 100
 
 # ----------------------------------
 

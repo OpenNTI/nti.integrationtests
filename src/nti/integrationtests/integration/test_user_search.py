@@ -47,7 +47,7 @@ class TestUserSearch(DataServerTestCase):
 		self.assertGreaterEqual(len(result['Items']), 3)
 
 		result = self.ds.execute_user_search("%s.15" % self.prefix)
-		assert_that(result, container_of_length(11))
+		assert_that(result, container_of_length(1))
 
 		# not a reg exp
 		result = self.ds.execute_user_search("%s.2*" % self.prefix)
