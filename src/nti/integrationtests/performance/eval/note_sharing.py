@@ -6,7 +6,7 @@ import time
 import numbers
 
 from nti.integrationtests.chat import generate_message
-from nti.integrationtests.chat.simulation import MAX_TEST_USERS
+#from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.performance import TimerResultMixin 
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import init_server
@@ -33,7 +33,7 @@ def script_teardown(context):
 	
 # -----------------------------------
 
-_max_users = 2015
+_max_users = 2000
 
 
 def _users_loop(users):
@@ -83,7 +83,7 @@ def share_note(users, *args, **kwargs):
 	outfile = os.path.join(outdir, str(runner) + ".csv")
 	
 	with open(outfile,"w") as f:
-		users = range(10, 2010, 10) + ['Everyone']
+		users = range(10, 2010, 50) + ['Everyone']
 		for t in _users_loop(users):
 			message = generate_message(k=3)
 			note = client.create_note(message, container=container)
@@ -97,6 +97,7 @@ def share_note(users, *args, **kwargs):
 			shared_obj = client.update_object(note)
 			elpased = time.time() - now
 			assert shared_obj, 'could  not share note'
+			assert len(shared_obj['sharedWith']) == no, 'did not share w/ all users'
 			
 			f.write("%s,%s\n" % (no, elpased))
 			f.flush()
