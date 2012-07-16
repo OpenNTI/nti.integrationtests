@@ -97,7 +97,7 @@ def share_note(users, *args, **kwargs):
 			shared_obj = client.update_object(note)
 			elpased = time.time() - now
 			assert shared_obj, 'could  not share note'
-			assert len(shared_obj['sharedWith']) == no, 'did not share w/ all users'
+			assert len(shared_obj['sharedWith']) == len(sw), 'did not share w/ all users'
 			
 			f.write("%s,%s\n" % (no, elpased))
 			f.flush()
