@@ -4,6 +4,7 @@ import unittest
 from hamcrest import is_
 from hamcrest import is_not
 from hamcrest import assert_that
+from hamcrest import greater_than
 
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.chat import generate_message
@@ -18,7 +19,7 @@ class TestLikeFavorite(DataServerTestCase):
 		self.container = 'test.user.container.%s' % time.time()
 		self.ds.set_credentials(self.owner)
 
-	def test_like_unlike_note(self):
+	def xtest_like_unlike_note(self):
 		msg = generate_message(k=3)
 		created_obj = self.ds.create_note(msg, self.container, adapt=True)
 		assert_that(created_obj.get_like_link(), is_not(None) )
@@ -34,7 +35,7 @@ class TestLikeFavorite(DataServerTestCase):
 		assert_that(unliked_object, is_not(None))
 		assert_that(unliked_object.get_unlike_link(), is_(None) )
 		
-	def test_fav_unfav_note(self):
+	def xtest_fav_unfav_note(self):
 		msg = generate_message(k=3)
 		created_obj = self.ds.create_note(msg, self.container, adapt=True)
 		assert_that(created_obj.get_favorite_link(), is_not(None) )
@@ -50,6 +51,18 @@ class TestLikeFavorite(DataServerTestCase):
 		assert_that(unfav_object, is_not(None))
 		assert_that(unfav_object.get_unfavorite_link(), is_(None) )
 		
-
+	def test_like_moddate(self):
+		msg = generate_message(k=3)
+		created_obj = self.ds.create_note(msg, self.container, adapt=True)
+		lm = created_obj.lastModified
+		
+		time.sleep(2)
+		
+		liked_object = self.ds.like_object(created_obj)
+		assert_that(liked_object, is_not(None))
+		
+		lm2 = liked_object.lastModified
+		assert_that(lm2, greater_than(lm))
+		
 if __name__ == '__main__':
 	unittest.main()
