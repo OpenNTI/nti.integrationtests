@@ -19,7 +19,7 @@ class TestLikeFavorite(DataServerTestCase):
 		self.container = 'test.user.container.%s' % time.time()
 		self.ds.set_credentials(self.owner)
 
-	def xtest_like_unlike_note(self):
+	def test_like_unlike_note(self):
 		msg = generate_message(k=3)
 		created_obj = self.ds.create_note(msg, self.container, adapt=True)
 		assert_that(created_obj.get_like_link(), is_not(None) )
@@ -35,7 +35,7 @@ class TestLikeFavorite(DataServerTestCase):
 		assert_that(unliked_object, is_not(None))
 		assert_that(unliked_object.get_unlike_link(), is_(None) )
 		
-	def xtest_fav_unfav_note(self):
+	def test_fav_unfav_note(self):
 		msg = generate_message(k=3)
 		created_obj = self.ds.create_note(msg, self.container, adapt=True)
 		assert_that(created_obj.get_favorite_link(), is_not(None) )
