@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals
+
 import pdb
 import six
 import pprint
@@ -6,16 +8,12 @@ import UserDict
 import collections
 from persistent import Persistent
 
-#########################
-
 def toExternalObject(obj):
 	if isinstance(obj, DSObject):
 		return obj.toDataServerObject()
 	return obj if isinstance(obj, collections.Mapping) else None
 
 to_external_object = toExternalObject
-
-#########################
 
 def getter(name, def_value=None):
 	def function(self):
@@ -60,11 +58,8 @@ class MetaDSObject(type):
 			t._inverted_ds_field_mapping = inverted
 		return t
 
-# -----------------------------------
-
-link_types = ('edit', )
+link_types = ('edit', 'like', 'unlike', 'favorite', 'unfavorite')
 	
-
 class DSObject(Persistent, UserDict.DictMixin):
 
 	__metaclass__ = MetaDSObject
@@ -234,8 +229,6 @@ class DSObject(Persistent, UserDict.DictMixin):
 
 collections.MutableMapping.register( DSObject )
 
-# -----------------------------------
-
 class Community(DSObject):
 	
 	DATASERVER_CLASS = 'Community'
@@ -302,8 +295,6 @@ class User(Community):
 		else:
 			super(User, self).__setitem__(key, val)
 			
-# -----------------------------------
-
 class Sharable(DSObject):
 
 	_ds_field_mapping = {'sharedWith' : 'sharedWith'}
@@ -335,8 +326,6 @@ class Sharable(DSObject):
 	share_with = shareWith
 	revoke_sharing = revokeSharing
 	
-# -----------------------------------
-
 class Threadable(DSObject):
 	
 	_ds_field_mapping = {'references':'references', 'inReplyTo':'inReplyTo'}
@@ -364,7 +353,6 @@ class DomContentRangeDescription(ContentRangeDescription):
 
 	_fields = {'start' : False, 'end' : False, 'ancestor' : False}
 	_fields.update(ContentRangeDescription._fields)
-	
 	
 class ContentPointer(DSObject):
 	pass
@@ -403,8 +391,18 @@ class Highlight(Sharable):
 	_fields = {'selectedText': False, 'applicableRange': False}
 	_fields.update(Sharable._fields)
 
-# -----------------------------------
-
+class Redaction(Highlight):
+	
+	DATASERVER_CLASS = 'Redaction'
+	MIME_TYPE = 'application/vnd.nextthought.redaction'
+	
+	_ds_field_mapping = {'redactionExplanation':'redactionExplanation', 
+						 'replacementContent' : 'replacementContent'}
+	_ds_field_mapping.update(Highlight._ds_field_mapping)
+	
+	_fields = {'redactionExplanation': False, 'replacementContent': False}
+	_fields.update(Highlight._fields)
+	
 class Note(Sharable, Threadable):
 
 	DATASERVER_CLASS = "Note"
@@ -418,8 +416,6 @@ class Note(Sharable, Threadable):
 	_fields.update(Sharable._fields)
 	_fields.update(Threadable._fields)
 
-# -----------------------------------
-
 class Change(DSObject):
 	
 	DATASERVER_CLASS = 'Change'
@@ -431,8 +427,6 @@ class Change(DSObject):
 	_fields = {'changeType': True, 'item': True}
 	_fields.update(DSObject._fields)
 
-# -----------------------------------
-
 class Canvas(DSObject):
 	
 	DATASERVER_CLASS = 'Canvas'
@@ -443,9 +437,7 @@ class Canvas(DSObject):
 
 	_fields = {'shapeList':False}
 	_fields.update(DSObject._fields)
-
-# -----------------------------------
-
+	
 class CanvasAffineTransform(DSObject):
 	
 	DATASERVER_CLASS = 'CanvasAffineTransform'
@@ -455,8 +447,6 @@ class CanvasAffineTransform(DSObject):
 	
 	_fields = {'a' : False, 'b' : False, 'c' : False, 'd' : False, 'tx' : False, 'ty' : False}
 	
-# -----------------------------------
-
 class CanvasShape(DSObject):
 	
 	DATASERVER_CLASS = 'CanvasShape'
@@ -468,8 +458,6 @@ class CanvasShape(DSObject):
 	_fields = {'transform' : False}
 	_fields.update(DSObject._fields)
 
-# -----------------------------------
-
 class CanvasPolygonShape(CanvasShape):
 	
 	DATASERVER_CLASS = 'CanvasPolygonShape'
@@ -480,8 +468,6 @@ class CanvasPolygonShape(CanvasShape):
 
 	_fields = {'sides' : False}
 	_fields.update(CanvasShape._fields)
-
-# -----------------------------------
 
 class RoomInfo(Threadable):
 	
@@ -520,9 +506,6 @@ class TranscriptSummary(DSObject):
 			self._assign_to_list(self._ds_field_mapping[key], val)
 		else:
 			super(TranscriptSummary, self).__setitem__(key, val)
-	
-	
-# -----------------------------------
 	
 class QuizQuestion(DSObject):
 
@@ -603,8 +586,6 @@ class QuizResult(DSObject):
 		else:
 			answers[qid] = response
 	
-# -----------------------------------
-
 class InstructorInfo(DSObject):
 	
 	DATASERVER_CLASS = 'InstructorInfo'
@@ -701,7 +682,6 @@ class Provider(DSObject):
 	_fields = {	'name' :  False }
 	_fields.update(DSObject._fields)
 			
-# -----------------------------------
 
 DS_TYPE_REGISTRY = {}
 MIME_TYPE_REGISTRY = {}
