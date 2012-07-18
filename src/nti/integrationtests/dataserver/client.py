@@ -21,6 +21,7 @@ from nti.integrationtests.contenttypes import DSObject
 from nti.integrationtests.contenttypes import Sharable
 from nti.integrationtests.contenttypes import Provider
 from nti.integrationtests.contenttypes import Highlight
+from nti.integrationtests.contenttypes import Redaction
 from nti.integrationtests.contenttypes import FriendsList
 from nti.integrationtests.contenttypes import adapt_ds_object
 from nti.integrationtests.contenttypes import TranscriptSummary
@@ -116,6 +117,13 @@ class DataserverClient(object):
 		highlight = Highlight(selectedText=selectedText, container=container, applicableRange=applicableRange, **kwargs)
 		return self.create_object(highlight, adapt=adapt, **kwargs)
 
+	def create_redaction(self, selectedText, container, applicableRange=None, 
+						 replacementContent=None, redactionExplanation=None, adapt=True, credentials=None, **kwargs):
+		applicableRange = applicableRange or create_artificial_applicable_range()
+		redaction = Redaction(selectedText=selectedText, container=container, replacementContent=replacementContent,
+							  redactionExplanation=redactionExplanation, applicableRange=applicableRange)
+		return self.create_object(redaction, adapt=adapt, **kwargs)
+	
 	def create_canvas(self, sides, tx, ty, container, store=False, adapt=True, credentials=None, **kwargs):
 		shape = CanvasPolygonShape(sides=sides, container=container, **kwargs)
 		canvas = Canvas(shapeList=[shape], container=container, **kwargs)
@@ -262,7 +270,6 @@ class DataserverClient(object):
 	def fav_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
 		if not link:
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
-			
 		href = link or obj.get_favorite_link()
 		return self._like_fav_op(href, 'favorite', credentials=credentials, adapt=adapt, **kwargs)
 	
