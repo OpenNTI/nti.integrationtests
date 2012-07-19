@@ -1,14 +1,16 @@
+from __future__ import print_function, unicode_literals
+
 import time
 import unittest
-
-from hamcrest import assert_that
-from hamcrest import is_not
-from hamcrest import is_
 
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
+
+from hamcrest import is_
+from hamcrest import is_not
+from hamcrest import assert_that
 
 class TestBasicNotes(DataServerTestCase):
 	
@@ -21,8 +23,6 @@ class TestBasicNotes(DataServerTestCase):
 		
 		self.container = 'test.user.container.%s' % time.time()
 		self.ds.set_credentials(self.owner)
-
-# ----------------------
 
 	# tests the five different types of notes that can be made
 	
@@ -72,8 +72,6 @@ class TestBasicNotes(DataServerTestCase):
 		# asserts that the object created has a canvas object
 		assert_that(created_obj['body'][0], is_(Canvas))
 
-# ----------------------
-
 	def create_canvas(self):
 		
 		# creates a canvas
@@ -84,8 +82,6 @@ class TestBasicNotes(DataServerTestCase):
 
 	createCanvas = create_canvas
 	
-# ----------------------
-
 	def test_create_empty_note(self):
 		try:
 			self.ds.create_note(u'', self.container, adapt=True)
