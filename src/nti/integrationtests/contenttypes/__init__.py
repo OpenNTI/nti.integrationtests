@@ -10,4 +10,4 @@ from nti.integrationtests.contenttypes.users import *
 from nti.integrationtests.contenttypes.ugdata import *
 from nti.integrationtests.contenttypes.quizzes import *
 from nti.integrationtests.contenttypes.classes import *
-
+from nti.integrationtests.contenttypes.contentlibrary_views import *
