@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals
+
 import warnings
 
 ROOT_ITEM = u'tag:nextthought.com,2011-10:Root'
