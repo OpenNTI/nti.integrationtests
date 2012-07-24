@@ -1,3 +1,4 @@
+logger = __import__('logging').getLogger(__name__)
 import sys
 import json
 import time
@@ -122,8 +123,12 @@ class BasicSeverOperation(object):
 	def obj_tearDown(self, objref=None):
 		try:
 			url = urljoin(self.endpoint, objref) if objref else self.testArgs['url_id']
+			__traceback_info__ = url, objref, self
 			self.requests.delete(url=url, username=self.username, password=self.password)
 		except urllib2.HTTPError:
+			# Normally this will be swallowed. But if we fail later, and logcapture is on
+			# this might be handy
+			logger.exception( "Failed to delete during cleanup" )
 			pass
 
 	@classmethod
