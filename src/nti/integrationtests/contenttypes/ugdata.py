@@ -177,5 +177,14 @@ class CanvasPolygonShape(CanvasShape):
 	_fields = {'sides' : False}
 	_fields.update(CanvasShape._fields)
 
+class CanvasTextShape(CanvasShape):
+	
+	DATASERVER_CLASS = 'CanvasTextShape'
+	MIME_TYPE = 'application/vnd.nextthought.canvastextshape'
+	
+	_ds_field_mapping = {'modified':'Modified'}
+
+	_fields = {	'text' : False, 'transform' : False, 'modified' : False, 'strokeOpacity' : 0,
+				'strokeWidth' : False, 'fillRGBAColor': False }
 
 do_register_dsobjecs(dict(locals()).itervalues())
