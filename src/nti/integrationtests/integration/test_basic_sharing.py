@@ -87,7 +87,7 @@ class TestBasicSharing(DataServerTestCase):
 
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
-
+		__traceback_info__ = ugd, created_obj, other_obj, shared_obj
 		assert_that(ugd, contains(other_obj))
 		assert_that(ugd, contains(created_obj))
 
@@ -167,14 +167,15 @@ class TestBasicSharing(DataServerTestCase):
 
 		# do the actual sharing
 		try:
-			shared_obj1 = self.ds.share_object(created_obj, self.target[0], adapt=True)
-		except Exception: 
+			self.ds.share_object(created_obj, self.target[0], adapt=True)
+		except AssertionError as expected:
 			pass
+		else:
+			self.fail("Expected 404 exception")
 
-		# check that the user can now see it
+		# Now it should no longer exist
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
 
-		assert_that(shared_obj1, is_(None))
 		assert_that(ugd, is_not(contains(created_obj)))
 
 	def test_unauthorized_sharing(self):

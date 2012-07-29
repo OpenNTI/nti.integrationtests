@@ -150,6 +150,7 @@ class TestBasicStream(DataServerTestCase):
 		assert_that(stream, is_(container()))
 
 		sortedchanges = sortchanges(objects_from_container(stream))			
+		__traceback_info__ = createdlist, stream
 		assert_that( sortedchanges, has_length( greater_than_or_equal_to( 1 ) ) )
 		assert_that( has_circled_event(sortedchanges))
 
