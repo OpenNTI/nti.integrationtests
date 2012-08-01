@@ -197,7 +197,7 @@ class DataserverProcess(object):
 		command = os.path.join(os.path.dirname(sys.executable), 'nti_init_env')
 		args = [command, root_dir, pserve_ini_file]
 		if subprocess.call(args) != 0:
-			raise OSError('Error while creating configurations')
+			raise OSError('Error while creating configurations', args)
 
 		command_prefix = os.path.dirname(sys.executable) + '/'
 		visord = os.path.join(os.path.expanduser(root_dir), 'etc', 'supervisord_dev.conf')
