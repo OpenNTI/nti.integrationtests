@@ -4,6 +4,7 @@ import time
 import anyjson
 import warnings
 import collections
+from urllib import quote
 from urlparse import urljoin
 from url_httplib import URLHttpLib
 
@@ -325,21 +326,35 @@ class DataserverClient(object):
 
 	# ------------------------
 
-	def search_user_content(self, query, credentials=None, adapt=True, **kwargs):
+	def _do_search(self, link, query, ntiid=None, credentials=None, adapt=True, **kwargs):
+		
 		credentials = self._credentials_to_use(credentials)
 		collection, _ = self._get_collection(credentials=credentials)
 
-		link = collection.get_link('UGDSearch')
-		url = _check_url(urljoin(self.endpoint, link.href)) + query
+		link = collection.get_link(link)
+		url = _check_url(urljoin(self.endpoint, link.href))
+		if ntiid:
+			url = _check_url(url + quote(ntiid))  
+		url = url + query
 
 		rp = self.httplib.do_get(url, credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status code while searching user data')
+		assert_that(rp.status_int, is_(200), 'invalid status code while searching content')
 
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
+	
+	def search_user_content(self, query, credentials=None, adapt=True, **kwargs):
+		result = self._do_search('UGDSearch', query, None, credentials, adapt, **kwargs)
+		return result
 
 	searchUserContent = search_user_content
-
+	
+	def unified_search(self, query, ntiid=None, credentials=None, adapt=True, **kwargs):
+		result = self._do_search('UnifiedSearch', query, ntiid, credentials, adapt, **kwargs)
+		return result
+	
+	unifiedSearch = unified_search
+	
 	def get_user_object(self, user=None, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		user = user or credentials[0]

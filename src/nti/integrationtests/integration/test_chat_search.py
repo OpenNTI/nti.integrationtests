@@ -28,15 +28,15 @@ class TestChatSearch(HostUserChatTest):
 		user_1_host_snippet = self.get_snippet(self.ds.search_user_content("town"))
 		user_1_user_snippet = self.get_snippet(self.ds.search_user_content("extreme"))
 
-		self.assertEqual(user_1_host_snippet, 'Every red TOWN', 'The host cant find his/her own message in search')
-		self.assertEqual(user_1_user_snippet, 'Preserving EXTREME', 'The host cant find the users message in search')
+		self.assertEqual(user_1_host_snippet, 'every red TOWN', 'The host cant find his/her own message in search')
+		self.assertEqual(user_1_user_snippet, 'preserving EXTREME', 'The host cant find the users message in search')
 		
 		self.ds.set_credentials((self.user_two, self.default_user_password))
 		
 		user_2_host_snippet = self.get_snippet(self.ds.search_user_content("brown"))
 		user_2_user_snippet = self.get_snippet(self.ds.search_user_content("chicken"))
 
-		self.assertEqual(user_2_host_snippet, 'Yellow BROWN', 'The user cant find his/her own message in search')
+		self.assertEqual(user_2_host_snippet, 'yellow BROWN', 'The user cant find his/her own message in search')
 		self.assertEqual(user_2_user_snippet, 'CHICKEN hacker', 'The user cant find the hosts message in search')
 			
 		self.ds.set_credentials((self.user_eight, self.default_user_password))
