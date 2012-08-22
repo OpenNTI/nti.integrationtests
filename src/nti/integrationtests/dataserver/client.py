@@ -4,7 +4,6 @@ import time
 import anyjson
 import warnings
 import collections
-from urllib import quote
 from urlparse import urljoin
 from url_httplib import URLHttpLib
 
@@ -334,7 +333,7 @@ class DataserverClient(object):
 		link = collection.get_link(link)
 		url = _check_url(urljoin(self.endpoint, link.href))
 		if ntiid:
-			url = _check_url(url + quote(ntiid))  
+			url = _check_url(url + ntiid)  
 		url = url + query
 
 		rp = self.httplib.do_get(url, credentials, **kwargs)
