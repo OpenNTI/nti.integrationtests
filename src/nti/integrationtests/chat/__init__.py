@@ -22,7 +22,7 @@ phrases = (	b'Yellow brown',
 			b'Shoot To Kill',
 			b'Bloom, Split and Deviate',
 			b'Rankle the Seas and the Skies',
-			b'Lightning Flash Flame Shell',
+			b'Lightning Flash Flame',
 			b'Flower Wind Rage and Flower God Roar, Heavenly Wind Rage and Heavenly Demon Sneer',
 			b'All Waves, Rise now and Become my Shield, Lightning, Strike now and Become my Blade',
 			b'Cry, Raise Your Head, Rain Without end.',
@@ -50,4 +50,4 @@ phrases = (	b'Yellow brown',
 			b'Thousand Cherry Blossoms')
 
 def generate_message(k=3, phrases=phrases):
-	return ' '.join(random.sample(phrases, k))
+	return ' $$$$$ '.join(random.sample(phrases, k))
