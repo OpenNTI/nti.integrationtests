@@ -10,8 +10,6 @@ from nti.integrationtests.chat.simulation.group_chat import simulate
 
 import logging
 logger = logging.getLogger(__name__)
-	
-# -----------------------------------
 
 _max_users = MAX_TEST_USERS
 
