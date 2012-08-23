@@ -4,21 +4,17 @@ import time
 
 from nti.integrationtests.chat import generate_message
 from nti.integrationtests.performance import IGNORE_RESULT
-from nti.integrationtests.performance import TimerResultMixin 
-from nti.integrationtests.performance.eval import init_server
-from nti.integrationtests.performance.eval import stop_server
 from nti.integrationtests.performance.eval import new_client
+from nti.integrationtests.performance import TimerResultMixin 
 from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.performance.eval import generate_random_text
 
 def script_setup(context):
-	init_server(context)
 	context['list.lock'] = context.manager.Lock()
 	context['created_notes'] = context.manager.list()
 	context['updated_notes'] = context.manager.list()
 	
 def script_teardown(context):
-	stop_server(context)
 	del context['list.lock']
 	del context['created_notes']
 	del context['updated_notes']
@@ -83,7 +79,7 @@ def delete_note(*args, **kwargs):
 	
 	# get updated note
 	note = pop_queue(context, 'updated_notes')
-	if not note: return 'shit'
+	if not note: return 'bad'
 	
 	# delete note
 	client = new_client(context)

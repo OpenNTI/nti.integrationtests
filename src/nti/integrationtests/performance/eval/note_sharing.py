@@ -6,13 +6,12 @@ import time
 import numbers
 
 from nti.integrationtests.chat import generate_message
-#from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.performance import TimerResultMixin 
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import init_server
 from nti.integrationtests.performance.eval import stop_server
 from nti.integrationtests.performance.eval import generate_ntiid
-
+from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 
 from nti.integrationtests.performance.eval import generate_random_text
 
@@ -33,8 +32,7 @@ def script_teardown(context):
 	
 # -----------------------------------
 
-_max_users = 2000
-
+_max_users = MAX_TEST_USERS
 
 def _users_loop(users):
 	for no in users:
