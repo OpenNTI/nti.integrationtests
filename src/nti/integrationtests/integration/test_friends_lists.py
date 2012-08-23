@@ -21,15 +21,11 @@ class TestBasicFriendsLists(DataServerTestCase):
 
 	def setUp(self):
 		super(TestBasicFriendsLists, self).setUp()
-		
-		self.ds.set_credentials(self.owner)		
+
+		self.ds.set_credentials(self.owner)
 		self.list_name = 'test_friend_list-%s@nextthought.com' % time.time()
 
 	#TODO: add test resolved vs. unresolved
-
-	def test_has_everyone_by_default(self):
-		lists = self.ds.get_friends_lists()
-		assert_that(lists, contains_friendslist('Everyone'))
 
 	def test_can_create_empty_friendslist(self):
 		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, [])
@@ -55,9 +51,9 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 		lists = self.ds.get_friends_lists()
 		assert_that(lists, is_not(contains_friendslist(self.list_name)))
-		
+
 	def test_can_create_friendslist_with_friends(self):
-		
+
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
 		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, friends)
 
@@ -66,11 +62,11 @@ class TestBasicFriendsLists(DataServerTestCase):
 
 		friendsList = friends_list_from_friends_lists(lists, self.list_name)
 		assert_that(containing_friends(friendsList, friends))
-		
+
 		self.ds.delete_object(createdlist)
 
 	def test_can_delete_from_friendslist(self):
-		
+
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
 		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, friends)
 
@@ -89,11 +85,11 @@ class TestBasicFriendsLists(DataServerTestCase):
 		friendsList = friends_list_from_friends_lists(lists, self.list_name)
 		assert_that(containing_friend(friendsList, friends[0]))
 		assert_that(not containing_friend(friendsList, friends[1]))
-		
+
 		self.ds.delete_object(createdlist)
 
 	def test_can_add_to_friendslists(self):
-		
+
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
 		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, [])
 

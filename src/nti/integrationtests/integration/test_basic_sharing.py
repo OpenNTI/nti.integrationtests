@@ -27,7 +27,7 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.set_credentials(self.owner)
 
 	def test_basic_sharing(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
 
@@ -47,7 +47,7 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.delete_object(created_obj)
 
 	def test_basic_sharing_incorrect_data(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
 		other_obj =  self.ds.create_note('A note not to share', self.container, adapt=True)
@@ -69,7 +69,7 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.delete_object(other_obj)
 
 	def test_sharing_multiple_data(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
 		other_obj =  self.ds.create_note('A note not to share', self.container, adapt=True)
@@ -96,7 +96,7 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.delete_object(other_obj)
 
 	def test_revoke_sharing(self):
-		
+
 		# create the object to share
 		created_obj = self.ds.create_note('A note to share', self.container)
 
@@ -126,7 +126,7 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.delete_object(created_obj)
 
 	def test_revoke_selected_share(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
 		other_obj =  self.ds.create_note('A note not to share', self.container, adapt=True)
@@ -157,7 +157,7 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.delete_object(other_obj)
 
 	def test_share_not_found(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
 
@@ -179,16 +179,16 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(ugd, is_not(contains(created_obj)))
 
 	def test_unauthorized_sharing(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
 		shared_obj = None
-		
+
 		try:
 			shared_obj = self.ds.share_object(created_obj, self.unauthorized_target[0], credentials=self.unauthorized_target, adapt=True)
 		except Exception:
 			pass
-		
+
 		# check that the user can not see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
 
@@ -199,7 +199,7 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.delete_object(created_obj)
 
 	def test_deleting_shared_note_removes_from_target(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
 
@@ -222,7 +222,7 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(ugd, is_not(contains(shared_obj)))
 
 	def test_create_and_share_note(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, sharedWith=[self.owner[0], self.target[0]], adapt=True)
 
@@ -235,7 +235,7 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.delete_object(created_obj)
 
 	def test_share_note_through_dict(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, sharedWith=[self.owner[0], self.target[0]], adapt=True)
 
@@ -249,19 +249,18 @@ class TestBasicSharing(DataServerTestCase):
 		note = self.ds.create_note("kyoka suigetsu", self.container, adapt=True)
 		note = self.ds.share_object(note, self.target[0], adapt=True)
 		time.sleep(2)
-		
+
 		self.ds.set_credentials(self.target)
 		result = self.ds.search_user_content("kyoka")
 		assert_that(result, container_of_length(1))
-		
+
 		self.ds.set_credentials(self.owner)
 		self.ds.delete_object(note)
 		time.sleep(2)
-		
+
 		self.ds.set_credentials(self.target)
 		result = self.ds.search_user_content("kyoka")
 		assert_that(result, container_of_length(0))
-		
+
 if __name__ == '__main__':
 	unittest.main()
-
