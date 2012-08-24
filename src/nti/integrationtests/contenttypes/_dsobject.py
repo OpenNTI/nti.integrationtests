@@ -15,11 +15,13 @@ MIME_TYPE_REGISTRY = {}
 def do_register_dsobjecs(classes):
 	for v in classes:
 		if inspect.isclass(v) and issubclass(v, DSObject):
-			if hasattr(v, 'DATASERVER_CLASS'):
-				DS_TYPE_REGISTRY[v.DATASERVER_CLASS] = v
+			clazz = getattr(v, 'DATASERVER_CLASS', None)
+			if clazz and clazz not in DS_TYPE_REGISTRY:
+				DS_TYPE_REGISTRY[clazz] = v
 			
-			if hasattr(v, 'MIME_TYPE'):
-				MIME_TYPE_REGISTRY[v.MIME_TYPE] = v
+			mt = getattr(v, 'MIME_TYPE', None)
+			if mt:
+				MIME_TYPE_REGISTRY[mt] = v
 				
 # Externalization
 

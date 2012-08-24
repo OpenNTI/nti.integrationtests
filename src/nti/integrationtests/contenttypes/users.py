@@ -41,6 +41,17 @@ class FriendsList(Community):
         else:
             super(FriendsList, self).__setitem__(key, val)
 
+class DynamicFriendsList(FriendsList):
+    
+    # DATASERVER_CLASS = 'DynamicFriendsList'
+    MIME_TYPE = 'application/vnd.nextthought.dynamicfriendslist'
+    
+    _ds_field_mapping = {'creator':'creator', 'ntiid':'NTIID'}
+    _ds_field_mapping.update(FriendsList._ds_field_mapping)
+
+    _fields = {'creator':False, 'ntiid':False}
+    _fields.update(FriendsList._fields)
+            
 class User(Community):
     
     DATASERVER_CLASS = 'User'
@@ -70,5 +81,5 @@ class User(Community):
             super(User, self).__setitem__(key, val)
 
 
-do_register_dsobjecs((Community, FriendsList, User))
+do_register_dsobjecs((Community, FriendsList, DynamicFriendsList, User))
 
