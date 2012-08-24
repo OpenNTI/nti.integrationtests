@@ -22,7 +22,7 @@ def script_teardown(context):
 def add_in_queue(context, result, queue_name='created_notes'):
 	lock = context['list.lock']
 	with lock:
-		context['created_notes'].append(result)
+		context[queue_name].append(result)
 
 def pop_queue(context, queue_name='created_notes'):
 	lock = context['list.lock']
