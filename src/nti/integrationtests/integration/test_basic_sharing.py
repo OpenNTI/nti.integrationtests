@@ -163,12 +163,11 @@ class TestBasicSharing(DataServerTestCase):
 
 		# delete note
 		self.ds.delete_object(created_obj)
-		shared_obj1 = None
 
 		# do the actual sharing
 		try:
 			self.ds.share_object(created_obj, self.target[0], adapt=True)
-		except AssertionError as expected:
+		except AssertionError:
 			pass
 		else:
 			self.fail("Expected 404 exception")
