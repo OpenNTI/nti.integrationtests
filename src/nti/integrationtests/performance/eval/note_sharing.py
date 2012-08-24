@@ -17,8 +17,6 @@ from nti.integrationtests.performance.eval import generate_random_text
 
 import logging
 logger = logging.getLogger(__name__)
-	
-# -----------------------------------
 
 def script_setup(context):
 	server = context.as_str("server", None)
@@ -30,8 +28,6 @@ def script_teardown(context):
 	if not server:
 		stop_server(context)
 	
-# -----------------------------------
-
 _max_users = MAX_TEST_USERS
 
 def _users_loop(users):

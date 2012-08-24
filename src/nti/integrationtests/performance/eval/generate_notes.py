@@ -13,8 +13,6 @@ from nti.integrationtests.performance.eval import generate_random_text
 import logging
 logger = logging.getLogger(__name__)
 	
-# -----------------------------------
-
 def script_setup(context):
 	init_server(context)
 	
