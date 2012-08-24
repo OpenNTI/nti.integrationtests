@@ -4,26 +4,20 @@ import random
 
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.performance.eval import new_client
-from nti.integrationtests.performance.eval import init_server
-from nti.integrationtests.performance.eval import stop_server
+from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.performance.eval import generate_random_text
 
-def script_setup(context):
-	server = context.as_str("server", None)
-	if not server:
-		init_server(context)
-	
-def script_teardown(context):
-	server = context.as_str("server", None)
-	if not server:
-		stop_server(context)
+_max_users = MAX_TEST_USERS
 		
 def search(*args, **kwargs):
 	context = kwargs['__context__']
 	#runner = kwargs['__runner__']
-	ntiid = context.as_str('ntiid')
+	ntiids = context.ntiids
 	
+	idx = random.randint(1, _max_users)
+	credentials = ("test.user.%s@nextthought.com" % idx, 'temp001')
 	client = new_client(context)
+	client.set_credentials(credentials)
 	text = generate_random_text(random.randint(5, 15))
-	client.unified_search(text, ntiid)	
+	client.unified_search(text, random.choice(ntiids))	
 	return IGNORE_RESULT
