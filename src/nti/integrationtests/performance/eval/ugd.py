@@ -66,7 +66,10 @@ def get_ugd(container_size, **kwargs):
 	client = new_client(context)
 	client.set_credentials(credentials)
 	
-	ugd = client.get_user_generated_data(container)
+	func = client.get_user_generated_data
+	if context.as_bool('recursive', False):
+		func = client.get_recursive_user_generated_data
+	ugd = func(container)
 	assert_that(ugd['Items'], has_length(greater_than_or_equal_to(container_size)))
 
 
