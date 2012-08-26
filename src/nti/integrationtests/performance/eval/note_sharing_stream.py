@@ -40,9 +40,9 @@ def create_share(*args, **kwargs):
 		user = random.choice(sharedWith)
 		credentials = (user, 'temp001')
 		
-		d = client.get_recursive_stream_data(container, credentials=credentials)
-		items = d['Items']
 		found = False
+		stream = client.get_recursive_stream_data(container, credentials=credentials)
+		items = stream['Items']
 		for c in items:
 			if c.cid == note.id:
 				found = True
