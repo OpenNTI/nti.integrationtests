@@ -23,13 +23,14 @@ def create_share(*args, **kwargs):
 	credentials = (user, 'temp001')
 	client.set_credentials(credentials)
 	
-	sharedWith = []
+	sharedWith = set()
 	for _ in xrange(random.randint(3, 10)):
 		idx = random.randint(1,_max_users)
 		if idx != runner:
 			user = 'test.user.%s@nextthought.com' % idx
-			sharedWith.append(user)
-			
+			sharedWith.add(user)
+		
+	sharedWith = list(sharedWith)
 	nttype = generate_random_text()
 	message = generate_message(k=3)
 	container = generate_ntiid(nttype=nttype)
