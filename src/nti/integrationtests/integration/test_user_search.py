@@ -44,7 +44,7 @@ class TestUserSearch(DataServerTestCase):
 
 		result = self.ds.execute_user_search(self.prefix)
 		assert_that(result, container())
-		self.assertGreaterEqual(len(result['Items']), 3)
+		self.assertGreaterEqual(len(result['Items']), 1)
 
 		result = self.ds.execute_user_search("%s.15" % self.prefix)
 		assert_that(result, container_of_length(1))
