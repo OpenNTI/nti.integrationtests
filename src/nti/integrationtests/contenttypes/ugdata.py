@@ -129,10 +129,10 @@ class Change(DSObject):
 	DATASERVER_CLASS = 'Change'
 	MIME_TYPE = 'application/vnd.nextthought.change'
 
-	_ds_field_mapping = {'changeType': 'ChangeType', 'item': 'Item'}
+	_ds_field_mapping = {'changeType': 'ChangeType', 'item': 'Item', 'cid':'ID'}
 	_ds_field_mapping.update(DSObject._ds_field_mapping)
 
-	_fields = {'changeType': True, 'item': True}
+	_fields = {'changeType': True, 'item': True, 'cid': True}
 	_fields.update(DSObject._fields)
 
 class Canvas(DSObject):
