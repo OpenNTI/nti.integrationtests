@@ -17,8 +17,6 @@ from nti.integrationtests.chat.websocket_interface import InActiveRoom
 from nti.integrationtests.chat.websocket_interface import CouldNotEnterRoom
 from nti.integrationtests.chat.websocket_interface import NotEnoughOccupants
 
-# ----------------------------
-
 class BasicUser(DSUser):
 	def __init__(self, *args, **kwargs):
 		kwargs['host'] = kwargs.get('host', SOCKET_IO_HOST)
@@ -75,8 +73,6 @@ class BasicUser(DSUser):
 		sio.seek(0)
 		self.exception = e
 		self.traceback = sio.read()
-
-# ----------------------------
 
 class OneRoomUser(BasicUser):
 
@@ -144,8 +140,6 @@ class OneRoomUser(BasicUser):
 	def elapsed_post(self):
 		return self.last_post_time - self.creation_time if self.last_post_time else None
 
-# ----------------------------
-
 class Host(OneRoomUser):
 
 	def __init__(self, username, occupants, *args, **kwargs):
@@ -201,8 +195,6 @@ class Host(OneRoomUser):
 		finally:
 			self.ws_capture_and_close()
 
-# ----------------------------
-
 class Guest(OneRoomUser):
 
 	def __call__(self, *args, **kwargs):
@@ -238,17 +230,17 @@ class Guest(OneRoomUser):
 User = Guest
 Invitee = Guest
 
-# ----------------------------
-
 def run_chat(containerId, host_user, invitees, entries=None, delay=0.25, 
 			 max_heart_beats=3, use_threads=True, host_class=Host, invitee_class=Invitee, 
-			 server=SOCKET_IO_HOST, port=SOCKET_IO_PORT, is_secure=False, **kwargs):
+			 server=SOCKET_IO_HOST, port=SOCKET_IO_PORT, is_secure=False,
+			 occupants=None, **kwargs):
 
 	runnables = []
 	entries = entries or random.randint(5, 20)
 	connect_event = threading.Event() if use_threads else multiprocessing.Event()
 
-	host = host_class(host_user, invitees, host=server, port=port, is_secure=is_secure)
+	occupants = occupants or invitees
+	host = host_class(host_user, occupants, host=server, port=port, is_secure=is_secure)
 	users = [invitee_class(username=name, host=server, port=port, is_secure=is_secure) for name in invitees]
 
 	required_args = {'entries':entries, 'containerId':containerId, 'connect_event':connect_event,
