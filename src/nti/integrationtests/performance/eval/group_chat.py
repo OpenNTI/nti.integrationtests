@@ -18,11 +18,11 @@ def chat(*args, **kwargs):
 	runner = kwargs['__runner__']
 	
 	port =  context.as_int( "port", 8081)
-	server =  getattr(context, "server", 'localhost')
-	is_secure = bool(getattr(context, "is_secure", False))
+	server =  context.as_str("server", 'localhost')
+	is_secure = context.as_bool("is_secure", False)
 	
-	use_procs =  getattr(context, "use_procs", 'False')
-	use_threads = use_procs.lower() == 'false'
+	use_procs =  context.as_bool("use_procs", False)
+	use_threads = not use_procs
 	
 	min_delay = context.as_int( "min_delay", 15)
 	max_delay = context.as_int( "max_delay", 45)
