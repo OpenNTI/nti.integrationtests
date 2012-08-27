@@ -8,10 +8,7 @@ from nti.integrationtests.chat.objects import Host
 from nti.integrationtests.chat.objects import User
 
 from nti.integrationtests import DataServerTestCase
-from nti.integrationtests.dataserver.client import DataserverClient
 from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
-
-# ----------------------------
 
 class BasicChatTest(DataServerTestCase):
 
@@ -23,11 +20,10 @@ class BasicChatTest(DataServerTestCase):
 
 	@classmethod
 	def static_initialization(cls):
-		ds_client = DataserverClient(endpoint = cls.resolve_endpoint(port=cls.port))
-		cls.create_users(ds_client=ds_client)
+		cls.create_users()
 
 	@classmethod
-	def create_users(cls, max_users=10, create_friends_lists=True, ds_client=None):
+	def create_users(cls, max_users=10, create_friends_lists=False, ds_client=None):
 		for x in range(1, max_users):
 			name = 'test.user.%s@nextthought.com' % x
 			cls.user_names.append(name)
@@ -62,7 +58,6 @@ class BasicChatTest(DataServerTestCase):
 
 		return list_name
 
-# ---------------------------
 
 class HostUserChatTest(BasicChatTest):
 

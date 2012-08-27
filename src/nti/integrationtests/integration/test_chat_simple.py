@@ -10,7 +10,6 @@ class TestSimpleChat(HostUserChatTest):
 
 	@classmethod
 	def static_initialization(cls):
-
 		ds_client = DataserverClient(endpoint = cls.resolve_endpoint(port=cls.port))
 		cls.create_users(create_friends_lists=False, ds_client=ds_client)
 
