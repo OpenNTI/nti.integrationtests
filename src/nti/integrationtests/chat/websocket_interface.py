@@ -5,7 +5,7 @@ import json
 import plistlib
 import threading
 import collections
-from collections import OrderedDict
+from collections import OrderedDict, Mapping
 
 from nti.integrationtests.contenttypes import toExternalObject
 
@@ -27,17 +27,19 @@ SERVER_KILL		= 'serverkill'
 EVT_MESSAGE			= 'message'
 EVT_EXIT_ROOM		= 'chat_exitRoom'
 EVT_ENTER_ROOM		= 'chat_enterRoom'
-EVT_ENTERED_ROOM	= 'chat_enteredRoom'
 EVT_EXITED_ROOM		= 'chat_exitedRoom'
+EVT_ENTERED_ROOM	= 'chat_enteredRoom'
+EVT_SHADOW_USERS	= 'chat_shadowUsers'
 EVT_POST_MESSOGE	= 'chat_postMessage'
 EVT_RECV_MESSAGE	= 'chat_recvMessage'
 EVT_MAKE_MODERATED	= 'chat_makeModerated'
-EVT_RECV_MSG_MOD	= 'chat_recvMessageForModeration'
 EVT_APPROVE_MSGS	= 'chat_approveMessages'
-EVT_SHADOW_USERS	= 'chat_shadowUsers'
 EVT_RECV_MSG_SHADOW = 'chat_recvMessageForShadow'
+EVT_RECV_MSG_MOD	= 'chat_recvMessageForModeration'
 EVT_ROOM_MEMBERSHIP_CHANGED = "chat_roomMembershipChanged"
 EVT_PRESENCE_OF_USER_CHANGE_TO = 'chat_presenceOfUserChangedTo'
+
+EVT_NOTICE_INCOMING_CHANGE = 'data_noticeIncomingChange'
 
 DEFAULT_CHANNEL = 'DEFAULT'
 WHISPER_CHANNEL	= 'WHISPER'
@@ -389,6 +391,11 @@ class DSUser(object):
 	postMessage = chat_postMessage
 
 	# ---- ----- ----
+	
+	def data_noticeIncomingChange(self, change):
+		pass
+		
+	# ---- ----- ----
 
 	def _msg_params(self, **kwargs):
 		return {'message'		: kwargs['Body'],
@@ -561,7 +568,7 @@ def decode(msg, data_format='json'):
 def isEvent(data, event, data_format='json'):
 	if isinstance(data, six.string_types):
 		data = decode(data, data_format)
-	if isinstance(data, dict):
+	if isinstance(data, Mapping):
 		return data.get('name',None) == event
 	return False
 
@@ -592,10 +599,12 @@ def isRecvMessageForShadow(data, data_format='json'):
 def isApproveMessages(data, data_format='json'):
 	return isEvent(data, EVT_APPROVE_MSGS, data_format)
 
+def isDataIncomingChange(data, data_format='json'):
+	return isEvent(data, EVT_NOTICE_INCOMING_CHANGE, data_format)
+	
 def _next_event(ws, graph=None, message_context=default_message_context):
 	msg = message_context.recv(ws)
-	if graph and isinstance(graph, Graph):
-
+	if graph and isinstance(graph, DSUser):
 		if isConnect(msg):
 			graph.connect()
 		elif isHeartBeat(msg):
@@ -634,6 +643,9 @@ def _next_event(ws, graph=None, message_context=default_message_context):
 			elif isRoomMembershipChanged(d):
 				room_info = d['args'][0]
 				graph.chat_roomMembershipChanged(room_info)
+			elif isDataIncomingChange(d):
+				change = d['args'][0]
+				graph.data_noticeIncomingChange(change)
 
 	return msg
 
