@@ -10,6 +10,9 @@ from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.chat.simulation import wait_and_process
 from nti.integrationtests.chat.simulation import create_test_friends_lists
 	
+import logging
+logger = logging.getLogger(__name__)
+	
 def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=phrases):
 	for i in xrange(entries):
 		if i == 0: # wait less for the first message
@@ -20,6 +23,8 @@ def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=ph
 		wait_and_process(self, delay)		
 		content = self.generate_message(k=3, phrases=phrases)
 		self.chat_postMessage(message=unicode(content), containerId=room_id)
+		
+		logging.info("message %s was posted from %s" % (i+1, self))
 		
 class Host(_Host):
 
