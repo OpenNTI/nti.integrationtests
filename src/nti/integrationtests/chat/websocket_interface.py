@@ -432,7 +432,7 @@ class DSUser(object):
 				self.connected = getattr(self.ws, "connected", False)
 
 			while self.connected or not self.killed:
-				_next_event(self.ws, self, message_context=self.message_context)
+				self.nextEvent()
 		except ConnectionClosedException:
 			pass
 		finally:
