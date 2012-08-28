@@ -148,7 +148,8 @@ class DataserverClient(object):
 
 		data = self.httplib.deserialize(rp)
 		data = data.get('Items', {})
-		return adapt_ds_object(data) if adapt else data
+		result = adapt_ds_object(data) if adapt else data
+		return result
 
 	createFriendsListWithNameAndFriends = create_friends_list_with_name_and_friends
 
