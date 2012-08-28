@@ -39,7 +39,16 @@ class TestNotifications(DataServerTestCase):
 		super(TestNotifications, self).setUp()
 		self.ds.set_credentials(self.owner)
 
-	def test_circled_event(self):
+	def _delete_all_friends_lists(self, credentials):
+		lists = self.ds.get_friends_lists(credentials=credentials)
+		for fl in lists.values():
+			self.ds.delete_object(fl, credentials=credentials)
+		
+	def xtest_circled_event(self):
+		
+		self._delete_all_friends_lists(self.owner)
+		self._delete_all_friends_lists(self.target)
+		
 		usr = _User(username=self.target[0], pasword=self.target[1], port=self.port)
 		t = threading.Thread(target=usr)
 		t.start()
