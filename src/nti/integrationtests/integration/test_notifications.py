@@ -44,7 +44,11 @@ class TestNotifications(DataServerTestCase):
 		for fl in lists.values():
 			self.ds.delete_object(fl, credentials=credentials)
 		
-	def xtest_circled_event(self):
+	def test_circled_event(self):
+		
+		usr = self.ds.get_user_object(self.target[0], credentials=self.target)
+		usr.accepting = []
+		usr = self.ds.update_object(usr, credentials=self.target)
 		
 		self._delete_all_friends_lists(self.owner)
 		self._delete_all_friends_lists(self.target)
