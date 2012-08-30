@@ -23,6 +23,7 @@ class NLTKMessageGenerator:
 	
 _default_message_generator = None
 def default_message_generator():
+	global _default_message_generator
 	if not _default_message_generator:
 		name = os.path.join(os.path.dirname(__name__), "DanielDeronda.txt");
 		_default_message_generator = NLTKMessageGenerator(name)
