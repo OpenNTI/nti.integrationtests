@@ -30,6 +30,10 @@ def chat(*args, **kwargs):
 	
 	min_users = context.as_int( "min_users", 2)
 	max_users = context.as_int( "max_users", 10)
+	
+	min_words = context.as_int( "min_words", 10)
+	max_words = context.as_int( "max_words", 40)
+	
 	users = min(random.randint(min_users, max_users), _max_users)
 	containerId = getattr(context, "containerId",  str(uuid.uuid4()))
 	
@@ -46,7 +50,8 @@ def chat(*args, **kwargs):
 	simulate(users=users, containerId=containerId, entries=entries,
 	 		 min_delay=min_delay, max_delay=max_delay,
 			 server=server, port=port, use_threads=use_threads, is_secure=is_secure,
-			 start_user=start_user, outdir=outdir)
+			 start_user=start_user, outdir=outdir, min_words=min_words,
+			 max_words=max_words)
 	
 	return IGNORE_RESULT
 
