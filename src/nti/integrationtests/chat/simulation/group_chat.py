@@ -108,7 +108,7 @@ class Guest(_Guest):
 def simulate(users, containerId, entries=None, min_delay=15, max_delay=45, outdir=None,
 			 server='localhost', port=8081,
 			 max_heart_beats=3, use_threads=True, create_test_lists=True, is_secure=False,
-			 start_user=1):
+			 start_user=1, min_words=10, max_words=40):
 	
 	global message_generator
 	message_generator = default_message_generator()
@@ -128,6 +128,7 @@ def simulate(users, containerId, entries=None, min_delay=15, max_delay=45, outdi
 	result = run_chat(containerId, host, users, entries=entries, use_threads=use_threads,
 					  server=server, port=port, is_secure=is_secure, 
 					  max_heart_beats=max_heart_beats, host_class=Host, invitee_class=Guest, 
-					  min_delay=min_delay, max_delay=max_delay, outdir=outdir)
+					  min_delay=min_delay, max_delay=max_delay, min_words=min_words, 
+					  max_words=max_words, outdir=outdir)
 	
 	return result
