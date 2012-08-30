@@ -5,6 +5,7 @@ from nti.integrationtests.chat import phrases
 from nti.integrationtests.chat.objects import run_chat
 from nti.integrationtests.chat.objects import Host as _Host
 from nti.integrationtests.chat.objects import Guest as _Guest
+from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.chat.simulation import pprint_to_file
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.chat.simulation import wait_and_process
@@ -13,6 +14,8 @@ from nti.integrationtests.chat.simulation import create_test_friends_lists
 import logging
 logger = logging.getLogger(__name__)
 	
+message_generator = None
+
 def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=phrases):
 	for i in xrange(entries):
 		if i == 0: # wait less for the first message
@@ -21,7 +24,7 @@ def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=ph
 			delay = random.uniform(min_delay, min_delay)
 	
 		wait_and_process(self, delay)		
-		content = self.generate_message(k=3, phrases=phrases)
+		content = message_generator.generate(random.randint(10, 40))
 		self.chat_postMessage(message=unicode(content), containerId=room_id)
 		
 		logging.info("message %s was posted from %s" % (i+1, self))
@@ -101,6 +104,9 @@ def simulate(users, containerId, entries=None, min_delay=15, max_delay=45, outdi
 			 server='localhost', port=8081,
 			 max_heart_beats=3, use_threads=True, create_test_lists=True, is_secure=False,
 			 start_user=1):
+	
+	global message_generator
+	message_generator = default_message_generator()
 	
 	users = max(min(abs(users), MAX_TEST_USERS), 2)
 	entries = abs(entries) if entries else 50
