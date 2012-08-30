@@ -1,7 +1,6 @@
 import os
 import random
 
-from nti.integrationtests.chat import phrases
 from nti.integrationtests.chat.objects import run_chat
 from nti.integrationtests.chat.objects import Host as _Host
 from nti.integrationtests.chat.objects import Guest as _Guest
@@ -16,7 +15,11 @@ logger = logging.getLogger(__name__)
 	
 message_generator = None
 
-def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=phrases):
+def post_messages(self, room_id, entries, min_delay=15, max_delay=45, min_words=10, max_words=40):
+	
+	min_words = min_words or 10
+	max_words = max_words or 40
+	
 	for i in xrange(entries):
 		if i == 0: # wait less for the first message
 			delay = random.uniform(1,5)
@@ -24,7 +27,7 @@ def post_messages(self, room_id, entries, min_delay=15, max_delay=45, phrases=ph
 			delay = random.uniform(min_delay, min_delay)
 	
 		wait_and_process(self, delay)		
-		content = message_generator.generate(random.randint(10, 40))
+		content = message_generator.generate(random.randint(min_words, max_words))
 		self.chat_postMessage(message=unicode(content), containerId=room_id)
 		
 		logging.info("message %s was posted from %s" % (i+1, self))
@@ -40,7 +43,8 @@ class Host(_Host):
 		containerId = kwargs.get('containerId', None)
 		connect_event = kwargs.get('connect_event', None)
 		max_heart_beats = kwargs.get('max_heart_beats', 3)
-		
+		min_words = kwargs.get('min_words', 10)
+		max_words = kwargs.get('max_words', 40)
 		try:
 			self.ws_connect()
 
@@ -54,7 +58,8 @@ class Host(_Host):
 			# start pos
 			room_id = self.room
 			if room_id:
-				post_messages(self, room_id, entries, min_delay, max_delay)
+				post_messages(self, room_id, entries, min_delay, max_delay,
+							  min_words=min_words, max_words=max_words)
 			else:
 				raise Exception('%s did not enter a chat room' % self.username)
 
