@@ -34,7 +34,7 @@ def get_users(host, user, password):
 			result.append((row[0], row[1]))
 		return result
 		
-def create_user(host, user, password, username='Users', upass='Users'):
+def create_db_user(host, user, password, username='Users', upass='Users'):
 	users = get_users(host, user, password)
 	found = False
 	for host, uname in users:
@@ -51,7 +51,7 @@ def create_user(host, user, password, username='Users', upass='Users'):
 			
 	return not found
 		
-def create_shards(host, user, password, shards=5, prefix='Users', uname='Users'):
+def create_shards(host, user, password, shards=4, prefix='Users', uname='Users'):
 	con = mdb.connect(host, user, password)
 	with con:
 		cur = con.cursor()
@@ -61,9 +61,10 @@ def create_shards(host, user, password, shards=5, prefix='Users', uname='Users')
 			if uname:
 				cur.execute('grant all privileges on ' + db +'.* to ' + uname)
 			
-if __name__ == '__main__':
-	create_user('localhost', 'root', 'saulo213')
-	clean_dbs('localhost', 'root', 'saulo213')
-	create_shards('localhost', 'root', 'saulo213')
-	
+def prepare(user, password, host='localhost', shards=4):
+	create_db_user(host, user, password)
+	clean_dbs(host, user, password)
+	create_shards(host, user, password, shards=shards)
+
+
 	
