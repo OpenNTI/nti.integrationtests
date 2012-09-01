@@ -83,7 +83,7 @@ def init_shards(env_dir, shards=4, prefix='Users'):
 	with ThreadPoolExecutor(multiprocessing.cpu_count()) as pool:
 		for x in range(1, shards+1):
 			shard_name = '%s_%s' % (prefix, x)
-			pool.submit( init_shard, shard_name)
+			pool.submit( init_shard, env_dir, shard_name)
 
 def _wait_for(host='localhost', port=8081, for_running=True, max_wait=30):
 	elapsed = 0
@@ -103,13 +103,16 @@ def prepare(user, password, shards=4, port=8081, workers=1, users=10, env_dir=No
 		prepare_db(user=user, password=password, shards=shards)
 		# start dataserver
 		process = start_server(config=config, env_dir=env_dir, port=port)
-		if _wait_for(port=port):
-			time.sleep(2)
-			# init shards
-			init_shards(env_dir, shards=shards)
-			#create users
-			
-		
+		try:
+			if _wait_for(port=port):
+				time.sleep(2) # wait a bit
+				# init shards
+				init_shards(env_dir, shards=shards)
+				#create users
+				create_users(env_dir, users)
+		except:
+			if process: process.terminate()
+			raise
 		return process
 	else:
 		return None

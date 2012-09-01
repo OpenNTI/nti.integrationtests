@@ -4,6 +4,7 @@ import os
 import tempfile
 import ConfigParser
 
+from nti.dataserver.config import write_configs 
 from nti.integrationtests.utils import get_int_option
 
 def get_port(config):	
@@ -86,43 +87,70 @@ def write_relstorage_config(out_dir,
 	"""
 	
 	template = template_1 + template_2 if db_socket else template_1 + template_3
-	zeo_conf_config = """
+	zeo_conf_config = ["""
 		%import relstorage
 		%import zc.zlibstorage
-	"""
-	zeo_uri_config = "[ZODB]\nuris = "
+	"""]
+	zeo_uri_config = ["[ZODB]\nuris ="]
 	for x in range(0, shards+1):
 		# conf
 		db_name = db_prefix if x == 0 else db_prefix + "_" + str(x)
 		params = dict(locals())
 		params['db_name'] = db_name
 		s = template % params
-		zeo_conf_config += s
+		zeo_conf_config.append(s)
 		
 		# uri
-		if x != 0:
-			zeo_uri_config += ";"
-		zeo_uri_config += "zconfig://%s/zeo_conf.xml#%s" % (out_dir, db_name) 
+		zeo_uri_config.append("zconfig://%s/zeo_conf.xml#%s" % (out_dir, db_name.lower()))
 	
 	# time to save
 	name = os.path.join(out_dir, "zeo_conf.xml")
+	zeo_conf_config = ''.join(zeo_conf_config)
 	with open(name, "w") as tgt:
 		tgt.write(zeo_conf_config)
 	
+	zeo_uri_config = ' '.join(zeo_uri_config)
 	name = os.path.join(out_dir, "zeo_uris.ini")
 	with open(name, "w") as tgt:
 		tgt.write(zeo_uri_config)
+		tgt.write("\n")
 		
 def get_default_config():
 	config = os.path.join(os.path.dirname(__name__), "development.ini")
 	return config
 
+def write_base_configs(root_dir, config):
+	# write base confi from the server
+	write_configs(root_dir, config, update_existing=True, write_supervisord=True)
+	
+	def _remove_sections(sconf):
+		if os.path.exists(sconf):
+			ini = ConfigParser.SafeConfigParser()
+			ini.read(sconf)
+			ini.remove_section('program:zeo')
+			ini.remove_section('program:nti_sharing_listener')
+			ini.remove_section('program:nti_index_listener')
+			with open(sconf, "wb") as fp:
+				ini.write(fp)
+			
+	_remove_sections(os.path.join(os.path.join(root_dir, 'etc'), 'supervisord.conf'))
+	_remove_sections(os.path.join(os.path.join(root_dir, 'etc'), 'supervisord_dev.conf'))
+	_remove_sections(os.path.join(os.path.join(root_dir, 'etc'), 'supervisord_demo.conf'))
+
 def prepare(port=8081, workers=1, shards=4, config=None, out_dir=None):
 	out_dir = out_dir or tempfile.mkdtemp(prefix="ntids.", dir="/tmp")
 	etc_dir = os.path.join(out_dir, 'etc')
-	config = config or get_default_config()		
-	write_pserve_config(config, port, workers, out_dir=etc_dir)
+	config = config or get_default_config()
+	
+	# write pserve config
+	config = write_pserve_config(config, port, workers, out_dir=etc_dir)
+	
+	# write base confi from the server
+	write_base_configs(out_dir, config)
+	
+	# overide
 	write_relstorage_config(etc_dir, shards=shards)
+	
 	return config
 
 if __name__ == '__main__':
