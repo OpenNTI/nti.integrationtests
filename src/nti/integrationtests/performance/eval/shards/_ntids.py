@@ -18,6 +18,9 @@ from nti.integrationtests.performance.eval.shards._config import get_default_con
 from nti.integrationtests.performance.eval.shards._dao import prepare as prepare_db
 from nti.integrationtests.performance.eval.shards._config import prepare as prepare_config
 
+import logging
+logger = logging.getLogger(__name__)
+
 def send_message(host='localhost', port=8081, message=None, do_shutdown=True):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	try:
@@ -41,6 +44,8 @@ def start_server(config=None, env_dir=None, port=None):
 	config = config or get_default_config()
 	port = port or get_port(config)
 	if not is_running(port=port):
+		logger.info("starting server")
+		
 		assert env_dir, 'no env directory'
 		env_dir = os.path.expanduser(env_dir)
 		os.environ['DATASERVER_DIR'] = env_dir
@@ -58,32 +63,40 @@ def start_server(config=None, env_dir=None, port=None):
 def terminate_server(process=None, config=None, port=None, max_wait_secs=30):
 	result = False
 	if process:
+		logger.info("terminating server")
 		elapsed = 0
 		port = port or get_port(config)
 		process.terminate()
 		while  elapsed <= max_wait_secs and is_running(port=port):
 			time.sleep(1)
 			elapsed = elapsed + 1
-		result = elapsed <= max_wait_secs		
+		result = elapsed <= max_wait_secs
+		
+		if result:
+			logger.info("server terminated successfully")
+		else:
+			logger.info("could not terminate server")
+			
 	return result
 
 def create_user(env_dir, username, password='temp001'):
+	logger.info("creating user %s" % username)
 	create_ds_user(env_dir, username, password)
 	
 def create_users(env_dir, users):
 	with ThreadPoolExecutor(multiprocessing.cpu_count()) as pool:
 		for x in range(1, users+1):
 			username = 'test.user.%s@nextthought.com' % x
-			pool.submit( create_user, username)
+			pool.submit( create_user,  env_dir, username)
 	
 def init_shard(env_dir, shard_name):
+	logger.info("initializing shard %s" % shard_name)
 	init_ds_shard(env_dir, shard_name)
 
 def init_shards(env_dir, shards=4, prefix='Users'):
-	with ThreadPoolExecutor(multiprocessing.cpu_count()) as pool:
-		for x in range(1, shards+1):
-			shard_name = '%s_%s' % (prefix, x)
-			pool.submit( init_shard, env_dir, shard_name)
+	for x in range(1, shards+1):
+		shard_name = '%s_%s' % (prefix, x)
+		init_shard(env_dir, shard_name)
 
 def _wait_for(host='localhost', port=8081, for_running=True, max_wait=30):
 	elapsed = 0
@@ -118,5 +131,6 @@ def prepare(user, password, shards=4, port=8081, workers=1, users=10, env_dir=No
 		return None
 	
 if __name__ == '__main__':
+	logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
 	prepare('root', 'saulo213')
 	

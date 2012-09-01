@@ -16,8 +16,6 @@ from nti.integrationtests.utils import boolean_states
 import logging
 logger = logging.getLogger(__name__)
 
-# -----------------------------------
-
 read_only_attributes = ('script_setup', 'script_teardown', 'output_dir',
                         'database_file', 'db_batch', 'base_path', 'script_subscriber')
 
@@ -31,12 +29,8 @@ all_attributes = default_attributes +  group_attributes
 result_headers = (    'counter','group_name', 'runner_num', 'iteration', 'epoch', 'run_time', 
                     'elapsed','error','output', 'timers')
 
-# -----------------------------------
-
 def noop(*args, **kwargs): pass
 IGNORE_RESULT = object()
-
-# -----------------------------------
 
 class DataMixin(object, UserDict.DictMixin):
     def __init__(self, data=None):
@@ -69,8 +63,6 @@ class DataMixin(object, UserDict.DictMixin):
     def __repr__( self ):
         return self.__str__()
     
-# -----------------------------------
-
 class TimerResultMixin(DataMixin):
     def __init__(self, data=None, result=None):
         super(TimerResultMixin, self).__init__(data=data)
@@ -87,8 +79,6 @@ class TimerResultMixin(DataMixin):
     def timers(self):
         return self._data
     
-# -----------------------------------
-
 class Context(DataMixin):
     
     manager = multiprocessing.Manager()
@@ -150,13 +140,11 @@ class DelegateContext(Context):
                 
         return external
             
-# -----------------------------------
-
 def validate_context(context):
     
-    assert     isinstance(context, DelegateContext), 'must specify a valid context'
-    assert     context.run_time or context.max_iterations, \
-            "must specify a valid run time in secs or max number of iterations"
+    assert isinstance(context, DelegateContext), 'must specify a valid context'
+    assert context.run_time or context.max_iterations, \
+           "must specify a valid run time in secs or max number of iterations"
     
     if context.run_time:
         assert context.run_time > 0, "must specify a valid run time in secs"
@@ -171,8 +159,6 @@ def validate_context(context):
         assert tuple(context.target_args),  "must specify a valid target arguments"
             
     assert context.group_name,  "must specify a valid runner group name"
-
-# -----------------------------------
 
 class RunnerGroup(multiprocessing.Process):
     def __init__(self, context, queue=None, validate=True, *args, **kwargs):
@@ -259,8 +245,6 @@ class RunnerGroup(multiprocessing.Process):
             self.teardown(self.context)
             elapsed = time.time() - t
             logging.info("group '%s' completed in (%.3f)s", self.group_name, elapsed)
-
-# -----------------------------------
 
 class TargetRunner(object):
     def __init__(self, runner_num, context, queue=None):
@@ -390,9 +374,7 @@ class TargetRunner(object):
                     self._results.append(runner_result)
             
         logger.info("runner '%s' completed. Time=%s, iterations=%s", self.runner_num, elapsed, iterations)
-        
-# -----------------------------------
-    
+
 class RunnerResult(object):
     
     def __init__(self, group_name, runner_num, run_time, elapsed, iteration, 
@@ -442,8 +424,6 @@ class RunnerResult(object):
         external['custom_timers'] = dict(self.custom_timers)
         return external
             
-# -----------------------------------
-
 class Subscriber(object):
     
     def setup(self, *args, **kwargs):

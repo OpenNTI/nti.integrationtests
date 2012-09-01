@@ -22,6 +22,7 @@ def clean_dbs(host, user, password, prefix='Users'):
 			cur = con.cursor()
 			for db in databases:
 				cur.execute("drop database " + db)
+			con.commit()
 
 def get_users(host, user, password):
 	con = mdb.connect(host, user, password)
@@ -48,6 +49,7 @@ def create_db_user(host, user, password, username='Users', upass='Users'):
 		with con:
 			cur = con.cursor()
 			cur.execute('create user %s@%s identified by %s', (username, host, upass))
+			con.commit()
 			
 	return not found
 		
@@ -60,6 +62,7 @@ def create_shards(host, user, password, shards=4, prefix='Users', uname='Users')
 			cur.execute('create database ' + db)
 			if uname:
 				cur.execute('grant all privileges on ' + db +'.* to ' + uname)
+			con.commit()
 			
 def prepare(user, password, host='localhost', shards=4):
 	create_db_user(host, user, password)

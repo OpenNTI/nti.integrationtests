@@ -11,8 +11,6 @@ from nti.integrationtests.performance.runner import run
 import logging
 logger = logging.getLogger(__name__)
 	
-# -----------------------------------
-
 def set_logger(debug=False):
 	level = logging.INFO if not debug else logging.DEBUG
 	logging.basicConfig(level=level, format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
