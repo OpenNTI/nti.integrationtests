@@ -6,6 +6,12 @@ import ConfigParser
 
 from nti.integrationtests.utils import get_int_option
 
+def get_port(config):	
+	ini = ConfigParser.SafeConfigParser()
+	ini.read(config)
+	config_port = get_int_option(ini, name='http_port', default=8081)
+	return config_port
+
 def write_pserve_config(config,
 						port=8081,
 						workers=1,
@@ -107,15 +113,18 @@ def write_relstorage_config(out_dir,
 	with open(name, "w") as tgt:
 		tgt.write(zeo_uri_config)
 		
+def get_default_config():
+	config = os.path.join(os.path.dirname(__name__), "development.ini")
+	return config
+
 def prepare(port=8081, workers=1, shards=4, config=None, out_dir=None):
 	out_dir = out_dir or tempfile.mkdtemp(prefix="ntids.", dir="/tmp")
 	etc_dir = os.path.join(out_dir, 'etc')
-	if not config:
-		config = os.path.join(os.path.dirname(__name__), "development.ini")
-		
+	config = config or get_default_config()		
 	write_pserve_config(config, port, workers, out_dir=etc_dir)
 	write_relstorage_config(etc_dir, shards=shards)
-	
+	return config
+
 if __name__ == '__main__':
 	prepare(out_dir='/tmp')
 	
