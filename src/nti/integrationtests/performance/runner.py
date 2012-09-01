@@ -17,8 +17,6 @@ from nti.integrationtests.performance.datastore import ResultBatchDbLoader
 import logging
 logger = logging.getLogger(__name__)
 
-# -----------------------------------
-
 class ResultEventNotifier(threading.Thread):
 	def __init__(self, queue, timestamp, groups, subscribers=[]):
 		super(ResultEventNotifier, self).__init__(name="ResultEventNotifier")
@@ -46,9 +44,6 @@ class ResultEventNotifier(threading.Thread):
 				self.queue.task_done()
 				logger.exception("While running group result '%s' through event subscribers" % result)
 				
-
-# -----------------------------------
-
 class ResultFileWriter(Subscriber):
 	
 	def __init__(self, output_file):
@@ -82,8 +77,6 @@ class ResultFileWriter(Subscriber):
 											result.timers_to_string()))
 		self.stream.write('\n')
 		self.stream.flush()
-		
-# -----------------------------------
 
 def _call_subscribers_method(subscribers, method_name):
 	for s in subscribers:
