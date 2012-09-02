@@ -7,9 +7,6 @@ import socket
 import tempfile
 import subprocess
 
-from nti.dataserver.utils.nti_init_shard import init_shard  as init_ds_shard
-from nti.dataserver.utils.nti_create_user import create_user as create_ds_user
-
 from nti.integrationtests.performance.eval.shards._config import get_port
 from nti.integrationtests.performance.eval.shards._config import get_default_config
 from nti.integrationtests.performance.eval.shards._dao import prepare as prepare_db
@@ -79,7 +76,9 @@ def terminate_server(process=None, config=None, port=None, max_wait_secs=30):
 
 def create_user(env_dir, username, password='temp001'):
 	logger.info("creating user %s" % username)
-	create_ds_user([env_dir, username, password])
+	command = os.path.join(os.path.dirname(sys.executable), 'nti_create_user')
+	args = [command, env_dir, username, password]
+	subprocess.call(args)
 	
 def create_users(env_dir, users):
 	for x in range(1, users+1):
@@ -88,7 +87,9 @@ def create_users(env_dir, users):
 	
 def init_shard(env_dir, shard_name):
 	logger.info("initializing shard %s" % shard_name)
-	init_ds_shard(env_dir, shard_name)
+	command = os.path.join(os.path.dirname(sys.executable), 'nti_init_shard')
+	args = [command, env_dir, shard_name]
+	subprocess.call(args)
 
 def init_shards(env_dir, shards=4, prefix='Users'):
 	for x in range(1, shards+1):
@@ -107,6 +108,7 @@ def _wait_for(host='localhost', port=8081, for_running=True, max_wait=30):
 		
 def prepare(user, password, shards=4, port=8081, workers=1, users=10, env_dir=None):
 	env_dir = env_dir or tempfile.mkdtemp(prefix="ntids.", dir="/tmp")
+	env_dir = os.path.expanduser(env_dir)
 	config = prepare_config(port=port, workers=workers, shards=shards, out_dir=env_dir)
 	if not is_running(port=port):
 		# initialize db
