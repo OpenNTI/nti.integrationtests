@@ -6,9 +6,6 @@ import time
 import socket
 import tempfile
 import subprocess
-import multiprocessing
-
-from concurrent.futures import ThreadPoolExecutor
 
 from nti.dataserver.utils.nti_init_shard import init_shard  as init_ds_shard
 from nti.dataserver.utils.nti_create_user import create_user as create_ds_user
@@ -85,10 +82,9 @@ def create_user(env_dir, username, password='temp001'):
 	create_ds_user([env_dir, username, password])
 	
 def create_users(env_dir, users):
-	with ThreadPoolExecutor(multiprocessing.cpu_count()) as pool:
-		for x in range(1, users+1):
-			username = 'test.user.%s@nextthought.com' % x
-			pool.submit(create_user,  env_dir, username)
+	for x in range(1, users+1):
+		username = 'test.user.%s@nextthought.com' % x
+		create_user(env_dir, username)
 	
 def init_shard(env_dir, shard_name):
 	logger.info("initializing shard %s" % shard_name)
