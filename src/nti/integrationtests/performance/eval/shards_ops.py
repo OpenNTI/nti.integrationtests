@@ -1,10 +1,11 @@
 from __future__ import print_function, unicode_literals
 
+import time
 import random
 
 from nti.integrationtests.chat import generate_message
-from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.performance.eval import new_client
+from nti.integrationtests.performance import TimerResultMixin
 from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.integration import object_from_container
 from nti.integrationtests.performance.eval.shards import is_running
@@ -53,31 +54,43 @@ def note_operations(*args, **kwargs):
 	nttype = generate_random_text()
 	message = generate_message()
 	container = generate_ntiid(nttype=nttype)
+	
+	result = TimerResultMixin()
+	now = time.time()
 	note = client.create_note(message, container=container)
+	result['nt.create'] = time.time() - now
 	assert note, 'could not create note'
 	
 	message = generate_message()
 	note['body']=[generate_message(k=3)]
+	now = time.time()
 	note = client.update_object(note)
+	result['nt.update'] = time.time() - now
 	assert note, 'could not update note'
 	
 	shared = None
 	while shared != username:
 		shared = 'test.user.%s@nextthought.com' % random.randint(1, max_users)
 	note['sharedWith'] = [shared]
+	now = time.time()
 	note = client.update_object(note)
+	result['nt.share'] = time.time() - now
 	assert note, 'could not share note'
 	
 	# check in stream
 	credentials = (shared, 'temp001')
+	now = time.time()
 	data = client.get_recursive_user_generated_data(container, credentials=credentials)
+	result['nt.ugd'] = time.time() - now
 	assert_that(data['Items'], has_length(greater_than_or_equal_to(1)))
 	shared_note = object_from_container(data, note)
 	assert shared_note, 'could not find shared note'
 	
 	# remove
 	credentials = (username, 'temp001')
+	now = time.time()
 	client.delete_object(note, credentials=credentials)
+	result['nt.delete'] = time.time() - now
 	
-	return IGNORE_RESULT
+	return result
 

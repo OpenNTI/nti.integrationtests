@@ -11,8 +11,6 @@ from nti.integrationtests.performance import Subscriber
 from nti.integrationtests.dataserver.client import DataserverClient
 from nti.integrationtests.dataserver.server import DataserverProcess
 
-# -----------------------------------
-
 def init_server(context):
 	
 	port = context.as_int("port", get_open_port())
@@ -43,8 +41,6 @@ def init_server(context):
 	else:
 		ds.start_server_with_coverage(sync_changes=sync_changes, pserve_ini_file=pserve_ini_file)
 
-# -----------------------------------
-
 def stop_server(context):
 	ds = getattr(context, "__dataserver__", None)
 	use_coverage = getattr(context, "use_coverage", 'False')
@@ -55,8 +51,6 @@ def stop_server(context):
 			ds.terminate_server()
 		else:
 			ds.terminate_server_with_coverage()
-
-# -----------------------------------
 			
 def new_client(context):
 	endpoint = context.as_str("endpoint", None)
@@ -70,15 +64,11 @@ def new_client(context):
 	client = DataserverClient(endpoint=endpoint, credentials=credentials)
 	return client
 
-# -----------------------------------
-
 def generate_random_text(a_max=5):
 	word = []
 	for _ in xrange(a_max+1):
 		word.append(chr(random.randint(ord('a'), ord('z'))))
 	return "".join(word)
-
-# -----------------------------------
 
 class SimpleStatSubscriber(Subscriber):
 	def __init__(self, *args, **kwargs):
