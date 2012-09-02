@@ -65,6 +65,7 @@ def terminate_server(process=None, config=None, port=None, max_wait_secs=30):
 	if process:
 		logger.info("terminating server")
 		elapsed = 0
+		config = config or get_default_config()
 		port = port or get_port(config)
 		process.terminate()
 		while  elapsed <= max_wait_secs and is_running(port=port):
@@ -81,13 +82,13 @@ def terminate_server(process=None, config=None, port=None, max_wait_secs=30):
 
 def create_user(env_dir, username, password='temp001'):
 	logger.info("creating user %s" % username)
-	create_ds_user(env_dir, username, password)
+	create_ds_user([env_dir, username, password])
 	
 def create_users(env_dir, users):
 	with ThreadPoolExecutor(multiprocessing.cpu_count()) as pool:
 		for x in range(1, users+1):
 			username = 'test.user.%s@nextthought.com' % x
-			pool.submit( create_user,  env_dir, username)
+			pool.submit(create_user,  env_dir, username)
 	
 def init_shard(env_dir, shard_name):
 	logger.info("initializing shard %s" % shard_name)

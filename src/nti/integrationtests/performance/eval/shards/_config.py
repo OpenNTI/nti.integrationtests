@@ -116,7 +116,7 @@ def write_relstorage_config(out_dir,
 		tgt.write("\n")
 		
 def get_default_config():
-	config = os.path.join(os.path.dirname(__name__), "development.ini")
+	config = os.path.join(os.path.dirname(__file__), "development.ini")
 	return config
 
 def write_base_configs(root_dir, config):
