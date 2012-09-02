@@ -1,5 +1,9 @@
 from __future__ import print_function, unicode_literals
 
+# avoid monkey patching
+import gevent
+setattr( gevent, 'version_info', (0,) )
+
 import os
 import tempfile
 import ConfigParser
