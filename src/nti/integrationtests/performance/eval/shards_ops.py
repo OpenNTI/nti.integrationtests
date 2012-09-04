@@ -4,14 +4,15 @@ from __future__ import print_function, unicode_literals
 import gevent
 setattr( gevent, 'version_info', (0,) )
 	
-	
 import time
+import uuid
 import random
 
 from nti.integrationtests.chat import generate_message
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance import TimerResultMixin
 from nti.integrationtests.performance.eval import generate_ntiid
+from nti.integrationtests.integration import container_of_length
 from nti.integrationtests.integration import object_from_container
 from nti.integrationtests.performance.eval.shards import is_running
 from nti.integrationtests.performance.eval.shards import start_server
@@ -73,8 +74,8 @@ def note_operations(*args, **kwargs):
 	result['nt.update'] = time.time() - now
 	assert note, 'could not update note'
 	
-	shared = None
-	while shared != username:
+	shared = username
+	while shared == username:
 		shared = 'test.user.%s@nextthought.com' % random.randint(1, max_users)
 	note['sharedWith'] = [shared]
 	now = time.time()
@@ -85,7 +86,7 @@ def note_operations(*args, **kwargs):
 	# check in stream
 	credentials = (shared, 'temp001')
 	now = time.time()
-	data = client.get_recursive_user_generated_data(container, credentials=credentials)
+	data = client.get_ugd_and_recursive_stream_ata(container, credentials=credentials)
 	result['nt.ugd'] = time.time() - now
 	assert_that(data['Items'], has_length(greater_than_or_equal_to(1)))
 	shared_note = object_from_container(data, note)
@@ -96,6 +97,37 @@ def note_operations(*args, **kwargs):
 	now = time.time()
 	client.delete_object(note, credentials=credentials)
 	result['nt.delete'] = time.time() - now
+	
+	return result
+
+def fl_operations(*args, **kwargs):
+	context = kwargs['__context__']
+	max_users = context.as_int('users', default_users)
+	username = 'test.user.%s@nextthought.com' % random.randint(1, max_users)
+	credentials = (username, 'temp001')
+	
+	result = TimerResultMixin()
+	friends = set()
+	for _ in range(1, random.randint(1, max_users)+1):
+		shared = username
+		while shared == username:
+			shared = 'test.user.%s@nextthought.com' % random.randint(1, max_users)
+		friends.add(shared)
+	result['nt.friends'] = len(friends)
+	
+	client = new_client(context)
+	client.set_credentials(credentials)
+	name = unicode(str(uuid.uuid4()).split('-')[-1])
+	
+	now = time.time()
+	fl = client.create_friends_list_with_name_and_friends(name, list(friends))
+	result['nt.create'] = time.time() - now
+	assert fl, 'could not create friend lists'
+	
+	now = time.time()
+	hit = client.execute_user_search(username)
+	result['nt.usrsearch'] = time.time() - now
+	assert_that(hit, container_of_length(1))
 	
 	return result
 

@@ -165,7 +165,11 @@ class DataserverClient(object):
 											 credentials=credentials, validate=True)
 		return adapt_ds_object(data) if adapt else data
 
-
+	def get_ugd_and_recursive_stream_ata(self, container, workspace=None, credentials=None, adapt=True):
+		data = self._get_container_item_data(container=container, link_rel='UserGeneratedDataAndRecursiveStream', workspace=workspace,
+											 credentials=credentials, validate=True)
+		return adapt_ds_object(data) if adapt else data
+	
 	def get_recursive_user_generated_data(self, container, workspace=None, credentials=None, adapt=True):
 		data = self._get_container_item_data(container=container, link_rel='RecursiveUserGeneratedData', workspace=workspace,
 											 credentials=credentials, validate=True)
