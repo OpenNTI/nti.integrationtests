@@ -26,6 +26,7 @@ class TestLikeFavorite(DataServerTestCase):
 		
 		liked_object = self.ds.like_object(created_obj)
 		assert_that(liked_object, is_not(None))
+		assert_that(liked_object.likeCount, is_(1))
 		
 		unlike = liked_object.get_unlike_link()
 		assert_that(unlike, is_not(None))
@@ -34,6 +35,7 @@ class TestLikeFavorite(DataServerTestCase):
 		unliked_object = self.ds.unlike_object(liked_object)
 		assert_that(unliked_object, is_not(None))
 		assert_that(unliked_object.get_unlike_link(), is_(None) )
+		assert_that(unliked_object.likeCount, is_(0))
 		
 	def test_fav_unfav_note(self):
 		msg = generate_message(k=3)
