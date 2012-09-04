@@ -1,5 +1,7 @@
 import os
 import gzip
+import threading
+
 
 from nltk import Text
 from nltk import word_tokenize
@@ -24,10 +26,15 @@ class NLTKMessageGenerator:
 	generate = generate_message
 	
 _default_message_generator = None
+lock = threading.Lock()
+
 def default_message_generator():
 	global _default_message_generator
-	if not _default_message_generator:
-		name = os.path.join(os.path.dirname(__file__), "DanielDeronda.txt.gz");
-		with gzip.open(name, "rb") as src:
-			_default_message_generator = NLTKMessageGenerator(src)
+	global lock
+	with lock:
+		if not _default_message_generator:
+			name = os.path.join(os.path.dirname(__file__), "DanielDeronda.txt.gz");
+			with gzip.open(name, "rb") as src:
+				_default_message_generator = NLTKMessageGenerator(src)
+			
 	return _default_message_generator
