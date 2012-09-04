@@ -5,10 +5,10 @@ from nti.integrationtests.contenttypes._dsobject import do_register_dsobjecs
 			
 class Sharable(DSObject):
 
-	_ds_field_mapping = {'sharedWith' : 'sharedWith'}
+	_ds_field_mapping = {'sharedWith' : 'sharedWith', 'likeCount':'LikeCount'}
 	_ds_field_mapping.update(DSObject._ds_field_mapping)
 
-	_fields = {'sharedWith' : (False,list)}
+	_fields = {'sharedWith' : (False,list), 'likeCount':True}
 	_fields.update(DSObject._fields)
 
 	def __setitem__(self, key, val):
