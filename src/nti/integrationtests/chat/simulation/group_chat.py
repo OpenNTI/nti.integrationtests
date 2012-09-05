@@ -24,7 +24,7 @@ def post_messages(self, room_id, entries, min_delay=15, max_delay=45, min_words=
 		if i == 0: # wait less for the first message
 			delay = random.uniform(1,5)
 		else:
-			delay = random.uniform(min_delay, min_delay)
+			delay = random.uniform(min_delay, max_delay)
 	
 		wait_and_process(self, delay)		
 		content = message_generator.generate(random.randint(min_words, max_words))
