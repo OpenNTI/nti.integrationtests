@@ -83,7 +83,7 @@ class Guest(_Guest):
 		max_heart_beats = kwargs.get('max_heart_beats', 3)
 
 		try:
-			time.sleep(random.uniform(0.5, 1.5))
+			time.sleep(random.uniform(1, 2))
 			
 			self.ws_connect()
 			event = kwargs.get('connect_event', None)
