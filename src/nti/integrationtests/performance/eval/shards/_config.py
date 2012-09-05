@@ -53,7 +53,7 @@ def write_relstorage_config(out_dir,
 							shards=4,
 							db_user='Users',
 							db_pwd='Users',
-							db_socket='/opt/local/var/run/mysql55/mysqld.sock',
+							db_socket=None, #'/opt/local/var/run/mysql55/mysqld.sock',
 							db_host='localhost',
 							db_prefix='Users',
 							cache_servers='localhost:11211'):
