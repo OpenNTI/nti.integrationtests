@@ -1,4 +1,5 @@
 import os
+import time
 import random
 
 from nti.integrationtests.chat.objects import run_chat
@@ -82,6 +83,8 @@ class Guest(_Guest):
 		max_heart_beats = kwargs.get('max_heart_beats', 3)
 
 		try:
+			time.sleep(random.uniform(0.5, 1.5))
+			
 			self.ws_connect()
 			event = kwargs.get('connect_event', None)
 			event.wait(60)
