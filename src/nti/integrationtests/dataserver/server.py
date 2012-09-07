@@ -114,6 +114,12 @@ class DataserverProcess(object):
 			else:
 				self._write_supervisor_config(root_dir, pserve_ini_file)
 
+			# init the environment
+			command = os.path.join(os.path.dirname(sys.executable), 'nti_init_env')
+			args = [command, root_dir, pserve_ini_file, '--with-example']
+			subprocess.call(args)
+			
+			# start server		
 			command = os.path.join(os.path.dirname(sys.executable), 'supervisord')
 			args = [command, '-c', os.path.join(root_dir, 'etc', 'supervisord_dev.conf')]
 			devnull = open("/dev/null", 'w') if 'DATASERVER_NO_REDIRECT' not in os.environ else None
