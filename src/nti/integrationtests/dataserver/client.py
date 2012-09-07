@@ -91,7 +91,7 @@ class DataserverClient(object):
 	def clear_credentials(self):
 		self.credentials = None
 
-	def create_note(self, data, container, inReplyTo=None, sharedWith=None, references=None, applicableRange=None, 
+	def create_note(self, data, container, inReplyTo=None, sharedWith=None, references=None, applicableRange=None,
 					adapt=True, credentials=None, **kwargs):
 		body = self.create_text_and_body(data)
 		applicableRange = applicableRange or create_artificial_applicable_range()
@@ -117,13 +117,13 @@ class DataserverClient(object):
 		highlight = Highlight(selectedText=selectedText, container=container, applicableRange=applicableRange, **kwargs)
 		return self.create_object(highlight, adapt=adapt, **kwargs)
 
-	def create_redaction(self, selectedText, container, applicableRange=None, 
+	def create_redaction(self, selectedText, container, applicableRange=None,
 						 replacementContent=None, redactionExplanation=None, adapt=True, credentials=None, **kwargs):
 		applicableRange = applicableRange or create_artificial_applicable_range()
 		redaction = Redaction(selectedText=selectedText, container=container, replacementContent=replacementContent,
 							  redactionExplanation=redactionExplanation, applicableRange=applicableRange)
 		return self.create_object(redaction, adapt=adapt, **kwargs)
-	
+
 	def create_canvas(self, sides, tx, ty, container, store=False, adapt=True, credentials=None, **kwargs):
 		shape = CanvasPolygonShape(sides=sides, container=container, **kwargs)
 		canvas = Canvas(shapeList=[shape], container=container, **kwargs)
@@ -169,7 +169,7 @@ class DataserverClient(object):
 		data = self._get_container_item_data(container=container, link_rel='UserGeneratedDataAndRecursiveStream', workspace=workspace,
 											 credentials=credentials, validate=True)
 		return adapt_ds_object(data) if adapt else data
-	
+
 	def get_recursive_user_generated_data(self, container, workspace=None, credentials=None, adapt=True):
 		data = self._get_container_item_data(container=container, link_rel='RecursiveUserGeneratedData', workspace=workspace,
 											 credentials=credentials, validate=True)
@@ -257,34 +257,34 @@ class DataserverClient(object):
 				obj['sharedWith'].remove(target)
 
 		return self.update_object(obj, credentials=credentials, adapt=adapt, **kwargs)
-	
+
 	def like_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
 		if not link:
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
-			
+
 		href = link or obj.get_like_link()
 		return self._like_fav_op(href, 'like', credentials=credentials, adapt=adapt, **kwargs)
-	
+
 	def unlike_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
 		if not link:
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
-			
+
 		href = link or obj.get_unlike_link()
 		return self._like_fav_op(href, 'unlike', credentials=credentials, adapt=adapt, **kwargs)
-				
+
 	def fav_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
 		if not link:
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
 		href = link or obj.get_favorite_link()
 		return self._like_fav_op(href, 'favorite', credentials=credentials, adapt=adapt, **kwargs)
-	
+
 	def unfav_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
 		if not link:
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
-			
+
 		href = link or obj.get_unfavorite_link()
 		return self._like_fav_op(href, 'unfavorite', credentials=credentials, adapt=adapt, **kwargs)
-	
+
 	def _like_fav_op(self, href, operation, credentials=None, adapt=True, **kwargs):
 		assert_that(href, is_not(none()), "no '%s' href was provided" % operation)
 		credentials = self._credentials_to_use(credentials)
@@ -295,7 +295,7 @@ class DataserverClient(object):
 
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
-	
+
 	likeObject = like_object
 	shareObject = share_object
 	unlikeObject = unlike_object
@@ -331,14 +331,14 @@ class DataserverClient(object):
 	# ------------------------
 
 	def _do_search(self, link, query, ntiid=None, credentials=None, adapt=True, **kwargs):
-		
+
 		credentials = self._credentials_to_use(credentials)
 		collection, _ = self._get_collection(credentials=credentials)
 
 		link = collection.get_link(link)
 		url = _check_url(urljoin(self.endpoint, link.href))
 		if ntiid:
-			url = _check_url(url + ntiid)  
+			url = _check_url(url + ntiid)
 		url = url + query
 
 		rp = self.httplib.do_get(url, credentials, **kwargs)
@@ -346,19 +346,19 @@ class DataserverClient(object):
 
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
-	
+
 	def search_user_content(self, query, credentials=None, adapt=True, **kwargs):
 		result = self._do_search('UGDSearch', query, None, credentials, adapt, **kwargs)
 		return result
 
 	searchUserContent = search_user_content
-	
+
 	def unified_search(self, query, ntiid=None, credentials=None, adapt=True, **kwargs):
 		result = self._do_search('UnifiedSearch', query, ntiid, credentials, adapt, **kwargs)
 		return result
-	
+
 	unifiedSearch = unified_search
-	
+
 	def get_user_object(self, user=None, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		user = user or credentials[0]
@@ -491,7 +491,7 @@ class DataserverClient(object):
 		item = collection.get_item(container)
 		return item
 
-	def _get_container_item_data(self, container, link_rel, name='Pages', workspace=None, credentials=None, 
+	def _get_container_item_data(self, container, link_rel, name='Pages', workspace=None, credentials=None,
 								 validate=True, **kwargs):
 		"""
 		return raw data (dict) associated withe specified workspace/collection for the specified container using
@@ -577,10 +577,9 @@ class DataserverClient(object):
 	def wait_for_event(self, event=None, max_wait_seconds=3):
 		if 'DATASERVER_SYNC_CHANGES' in os.environ:
 			# In this case, there should be no need to wait.
-			# To help ensure against race conditions on our side,
-			# we mimic the old behaviour and wait briefly.
-			time.sleep( 0.2 )
 			return
+
+		raise Exception( "Non sync changes should not be the case anymore; not supported.")
 
 		if max_wait_seconds and max_wait_seconds > 0:
 			time.sleep(max_wait_seconds)

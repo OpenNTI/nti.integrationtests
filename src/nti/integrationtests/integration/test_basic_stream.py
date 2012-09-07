@@ -16,6 +16,7 @@ from nti.integrationtests.integration import has_same_oid_as
 import unittest
 from hamcrest import (assert_that, has_entry, is_, is_not, less_than_or_equal_to,
 					  not_none, greater_than_or_equal_to, has_length)
+does_not = is_not
 
 class TestBasicStream(DataServerTestCase):
 
@@ -30,7 +31,7 @@ class TestBasicStream(DataServerTestCase):
 		self.ds.set_credentials(self.owner)
 
 	def test_sharing_goes_to_stream(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container)
 
@@ -75,7 +76,7 @@ class TestBasicStream(DataServerTestCase):
 		self.ds.delete_object(created_obj3)
 
 	def test_update_goes_to_stream(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share 3', self.container)
 
@@ -109,7 +110,7 @@ class TestBasicStream(DataServerTestCase):
 		self.ds.delete_object(created_obj)
 
 	def test_delete_doesnt_goes_to_stream(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share 3', self.container)
 
@@ -118,7 +119,7 @@ class TestBasicStream(DataServerTestCase):
 		assert_that(shared_obj, not_none())
 
 		self.ds.wait_for_event()
-			
+
 		# now delete it
 		self.ds.delete_object(created_obj)
 
@@ -127,18 +128,15 @@ class TestBasicStream(DataServerTestCase):
 		# check that it is in the stream
 		stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
 
-		# things that are deleted don't show up in the stream.  Verify that
+		# things that are deleted don't show up in the stream at all.  Verify that
 		assert_that(stream, is_(container()))
 
 		sortedchanges = sortchanges(objects_from_container(stream))
-		assert_that( sortedchanges, has_length( greater_than_or_equal_to( 1 ) ) )
-		
-		created_change = sortedchanges[0]
-		assert_that(created_change, of_change_type_shared())
-		assert_that(created_change, wraps_item(created_obj))
+		for change in sortedchanges:
+			assert_that(change, does_not(wraps_item(created_obj)))
 
 	def test_creating_friendslist_goes_to_stream(self):
-		
+
 		# lazy and use the container name
 		createdlist = self.ds.create_friends_list_with_name_and_friends(self.container, [self.target[0]])
 
@@ -149,7 +147,7 @@ class TestBasicStream(DataServerTestCase):
 
 		assert_that(stream, is_(container()))
 
-		sortedchanges = sortchanges(objects_from_container(stream))			
+		sortedchanges = sortchanges(objects_from_container(stream))
 		__traceback_info__ = createdlist, stream
 		assert_that( sortedchanges, has_length( greater_than_or_equal_to( 1 ) ) )
 		assert_that( has_circled_event(sortedchanges))
@@ -158,10 +156,10 @@ class TestBasicStream(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 
 	def test_adding_to_friendslist_goes_to_stream(self):
-		
+
 		createdlist = self.ds.create_friends_list_with_name_and_friends(self.container, [])
 		createdlist.friends = [self.target[0]]
-		
+
 		updatedlist = self.ds.update_object(createdlist)
 		assert_that(updatedlist, not_none())
 
@@ -175,14 +173,14 @@ class TestBasicStream(DataServerTestCase):
 
 		sortedchanges = sortchanges(objects_from_container(stream))
 		assert_that( sortedchanges, has_length( greater_than_or_equal_to( 1 ) ) )
-		
+
 		assert_that( has_circled_event(sortedchanges))
 
 		# cleanup
 		self.ds.delete_object(createdlist)
 
 	def test_stream_increments_user_notification_count(self):
-		
+
 		target_user_object = self.ds.get_user_object(credentials=self.target)
 		starting_count = get_notification_count(target_user_object)
 
@@ -195,18 +193,18 @@ class TestBasicStream(DataServerTestCase):
 		# Notice, however, that because of background processes still finishing,
 		# the count may not be exact. It may be higher.
 		target_notification_count = starting_count + 1
-		user_not_count= target_user_object.notificationCount
+		user_not_count = target_user_object.notificationCount
 		assert_that(user_not_count, greater_than_or_equal_to(target_notification_count))
 
 		created_obj['body'] = ['junk']
 		self.ds.update_object(created_obj)
 		self.ds.wait_for_event()
-		
+
 		# we want to circle but we have already circled target so we get no notification
 		createdlist = self.ds.create_friends_list_with_name_and_friends(self.container, [self.target[0]], credentials=self.three)
 		target_user_object = self.ds.get_user_object(credentials=self.target)
 		target_notification_count = starting_count + 1
-		user_not_count= target_user_object.notificationCount
+		user_not_count = target_user_object.notificationCount
 		assert_that(user_not_count, greater_than_or_equal_to(target_notification_count))
 
 		# cleanup
@@ -214,7 +212,7 @@ class TestBasicStream(DataServerTestCase):
 		self.ds.delete_object(createdlist, credentials=self.three)
 
 	def test_user_keeps_deleting_note(self):
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
 
@@ -254,12 +252,12 @@ class TestBasicStream(DataServerTestCase):
 
 		initial_stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
 		initial_sortedchanges = sortchanges(objects_from_container(initial_stream))
-		
+
 		assert_that(initial_stream, is_(container()))
 		initial_sortedchanges = [c for c in initial_sortedchanges if c.changeType != 'Circled']
 		assert_that( initial_sortedchanges, has_length( less_than_or_equal_to( NUMBER_OF_SHARES ) ) )
 		assert_that( initial_sortedchanges, has_length( less_than_or_equal_to( MAX_SHARES_P1 ) ) )
-		
+
 		# create the object to share
 		created_obj =  self.ds.create_note('Note number %s' % notes, self.container, adapt=True)
 
@@ -273,14 +271,13 @@ class TestBasicStream(DataServerTestCase):
 
 		final_stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
 		final_sortedchanges = sortchanges(objects_from_container(final_stream))
-		
+
 		assert_that(final_stream, is_(container()))
 		final_sortedchanges = [c for c in final_sortedchanges if c.changeType != 'Circled']
 		assert_that( final_sortedchanges, has_length( less_than_or_equal_to( NUMBER_OF_SHARES ) ) )
 		assert_that( final_sortedchanges, has_length( less_than_or_equal_to( MAX_SHARES_P1 ) ) )
-		
-		assert_that(final_sortedchanges[1], has_same_oid_as( initial_sortedchanges[0] ) ) 
+
+		assert_that(final_sortedchanges[1], has_same_oid_as( initial_sortedchanges[0] ) )
 
 if __name__ == '__main__':
 	unittest.main()
-
