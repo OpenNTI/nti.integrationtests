@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import sys
 import argparse
 import tempfile
@@ -18,7 +17,9 @@ def main(args = None):
 	parser.add_argument('-cr', '--coverage_report', help='create coverage report', action='store_true', default = False)
 	parser.add_argument('-rd', '--root_dir', help='root directory', required=False)
 	parser.add_argument('-p', '--port', help='server port', type=int, required=False, default=None)
-
+	parser.add_argument('--verbose', dest='verbose', action='store_true', default=False,
+						help="Creating a user to whom COPPA applies (under 13)" )
+	
 	opts, rem_args = parser.parse_known_args(args) # Let Nose have the remainder of the args
 	sys.argv = sys.argv[:1] + rem_args
 
@@ -29,7 +30,7 @@ def main(args = None):
 
 	import nti.integrationtests.integration
 	test_runner(module=nti.integrationtests.integration, use_coverage=use_coverage, coverage_report=coverage_report,
-				port=port, root_dir=root_dir)
+				port=port, root_dir=root_dir, verbose=opts.verbose)
 
 if __name__ == '__main__':
 	main()
