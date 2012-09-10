@@ -7,6 +7,7 @@ import tempfile
 
 from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.runners import test_runner
+import nti.dataserver # gevent monkey patches ASAP
 
 def main(args = None):
 

@@ -14,6 +14,7 @@ from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
 from nti.integrationtests.dataserver.client import DataserverClient
 from nti.integrationtests.dataserver.client import ROOT_ITEM
 
+import nti.dataserver # Gevent monkey patches
 
 def generate_ntiid(date=None, provider='nti', nttype=None, specific=None):
 
