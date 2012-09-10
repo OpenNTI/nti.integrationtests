@@ -1,6 +1,5 @@
 import os
 import six
-import time
 import anyjson
 import warnings
 import collections
@@ -29,7 +28,6 @@ from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import create_artificial_applicable_range
 
 from hamcrest import assert_that, is_, is_not, none, instance_of
-
 
 def get_root_item():
 	return ROOT_ITEM
@@ -575,14 +573,7 @@ class DataserverClient(object):
 	# time but it will most certainly change.
 	# Some things still take longer than we were waiting
 	def wait_for_event(self, event=None, max_wait_seconds=3):
-		if 'DATASERVER_SYNC_CHANGES' in os.environ:
-			# In this case, there should be no need to wait.
-			return
-
-		raise Exception( "Non sync changes should not be the case anymore; not supported.")
-
-		if max_wait_seconds and max_wait_seconds > 0:
-			time.sleep(max_wait_seconds)
+		return
 
 	# ------------------------
 

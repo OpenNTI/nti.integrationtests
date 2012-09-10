@@ -18,19 +18,14 @@ def main(args = None):
 	parser.add_argument('-cr', '--coverage_report', help='create coverage report', action='store_true', default = False)
 	parser.add_argument('-rd', '--root_dir', help='root directory', required=False)
 	parser.add_argument('-p', '--port', help='server port', type=int, required=False, default=None)
-	parser.add_argument('-sc', '--sync_changes', help='sync_changes', action='store_true', default = False)
 
 	opts, rem_args = parser.parse_known_args(args) # Let Nose have the remainder of the args
 	sys.argv = sys.argv[:1] + rem_args
 
-	sync_changes = opts.sync_changes
 	use_coverage = True if opts.use_coverage else False
 	coverage_report = True if opts.coverage_report else False
 	root_dir = opts.root_dir if opts.root_dir else tempfile.mkdtemp(prefix="ds.data.int.", dir="/tmp")
 	port = opts.port if opts.port else get_open_port()
-
-	if sync_changes:
-		os.environ['DATASERVER_SYNC_CHANGES'] = 'True'
 
 	import nti.integrationtests.integration
 	test_runner(module=nti.integrationtests.integration, use_coverage=use_coverage, coverage_report=coverage_report,
