@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-# avoid monkey patching
-import gevent
-setattr( gevent, 'version_info', (0,) )
+import nti.dataserver # Yes, monkey patch immediately
 
 import sys
 import argparse
