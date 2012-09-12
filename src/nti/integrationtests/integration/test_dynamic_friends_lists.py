@@ -6,9 +6,7 @@ from nti.integrationtests.utils import generate_ntiid
 from nti.integrationtests.utils import generate_random_text
 from nti.integrationtests.contenttypes.users import DynamicFriendsList
 
-#from hamcrest import is_
-from hamcrest import is_not
-from hamcrest import assert_that
+from hamcrest import (is_not, assert_that)
 
 class TestDynamicFriendsLists(DataServerTestCase):
 

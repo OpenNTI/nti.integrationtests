@@ -15,8 +15,6 @@ from nti.integrationtests.dataserver.server import DATASERVER_DIR
 from nti.integrationtests.dataserver.server import DataserverProcess
 from nti.integrationtests.dataserver.client import DataserverClient
 
-import nti.dataserver # Gevent monkey patches
-
 # When invoked through runners/__init__.py, these setup methods seem to get called twice
 # for no reason that's entirely clear. So make them idempotent.
 # (That module handles the actual setup and teardown anyway)

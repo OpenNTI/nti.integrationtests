@@ -6,9 +6,9 @@ import unittest
 import collections
 
 from nti.integrationtests import DataServerTestCase
-from nti.integrationtests.contenttypes import InstructorInfo
-from nti.integrationtests.contenttypes import SectionInfo
 from nti.integrationtests.contenttypes import ClassInfo
+from nti.integrationtests.contenttypes import SectionInfo
+from nti.integrationtests.contenttypes import InstructorInfo
 from nti.integrationtests.contenttypes.servicedoc import Link
 
 from hamcrest import is_

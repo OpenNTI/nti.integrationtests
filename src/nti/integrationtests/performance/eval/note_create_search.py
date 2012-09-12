@@ -13,7 +13,7 @@ from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 
-_maxusers = MAX_TEST_USERS
+_maxusers = 40
 _generator = default_message_generator()
 
 def script_setup(context):

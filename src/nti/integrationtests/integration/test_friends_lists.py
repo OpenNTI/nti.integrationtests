@@ -1,13 +1,12 @@
 import time
 
 from nti.integrationtests import DataServerTestCase
-
+from nti.integrationtests.integration import accepting
 from nti.integrationtests.integration import containing_friend
 from nti.integrationtests.integration import containing_friends
 from nti.integrationtests.integration import containing_no_friends
 from nti.integrationtests.integration import contains_friendslist
 from nti.integrationtests.integration import friends_list_from_friends_lists
-from nti.integrationtests.integration import accepting
 
 from hamcrest import (is_not, has_key, assert_that)
 

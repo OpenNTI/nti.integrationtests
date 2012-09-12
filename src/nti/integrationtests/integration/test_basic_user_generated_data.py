@@ -2,10 +2,8 @@ import time
 import unittest
 	
 from nti.integrationtests import DataServerTestCase
-
-from nti.integrationtests.utils import generate_message
-
 from nti.integrationtests.integration import contains
+from nti.integrationtests.utils import generate_message
 from nti.integrationtests.integration import contained_in
 from nti.integrationtests.integration import container_of_length
 from nti.integrationtests.integration import object_from_container

@@ -1,13 +1,13 @@
 import time
 import unittest
 
+from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.utils import generate_message
+
 from hamcrest import is_
 from hamcrest import is_not
 from hamcrest import assert_that
 from hamcrest import greater_than
-
-from nti.integrationtests import DataServerTestCase
-from nti.integrationtests.utils import generate_message
 
 class TestLikeFavorite(DataServerTestCase):
 	
