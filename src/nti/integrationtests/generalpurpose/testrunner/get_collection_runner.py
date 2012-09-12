@@ -1,9 +1,6 @@
 import urllib2
 
 from hamcrest import (assert_that, is_)
-import time
-
-#from . import BasicSeverOperation
 
 from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
 

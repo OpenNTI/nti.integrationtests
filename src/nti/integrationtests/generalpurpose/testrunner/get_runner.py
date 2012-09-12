@@ -1,13 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-$Id: test_evolve15.py 8820 2012-07-15 17:34:42Z jason.madden $
-"""
 from __future__ import print_function, unicode_literals
 
 import urllib2
 
 from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
+
 from hamcrest import assert_that, is_
 
 class GetObject(BasicSeverOperation):

@@ -1,7 +1,7 @@
+import sys
 import urllib2
 
 from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
-import sys
 
 class PostObject(BasicSeverOperation):
 
