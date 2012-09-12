@@ -21,8 +21,6 @@ from nti.integrationtests.performance.loader import process_record
 import logging
 logger = logging.getLogger(__name__)
 
-# -----------------------------------
-
 class _NoOpCM(object):	
 	
 	def __enter__(self):
@@ -30,8 +28,6 @@ class _NoOpCM(object):
 		
 	def __exit__(self, t, v, tb):
 		pass
-	
-# =====================
 
 class DataStore():
 	
@@ -139,8 +135,6 @@ def batch_load(store, results_file, timestamp=None, groups=None):
 		load_results(results_file, inserter)
 	
 	return inserter.counter
-
-# -----------------------------------
 
 class ResultDbWriter(object):
 	

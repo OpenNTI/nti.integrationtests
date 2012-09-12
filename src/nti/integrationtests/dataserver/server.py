@@ -25,7 +25,6 @@ DATASERVER_DIR = os.getenv('DATASERVER_DIR') or os.path.join( tempfile.gettempdi
 SERVER_CONFIG = os.getenv('SERVER_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/development.ini"))
 COVERAGE_CONFIG = os.getenv('COVERAGE_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/coverage_run.cfg"))
 
-
 class DataserverProcess(object):
 
 	ENDPOINT = 'http://%s:%s/dataserver' % (SERVER_HOST, PORT)

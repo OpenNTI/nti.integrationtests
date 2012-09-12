@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import nti.dataserver # Yes, monkey patch immediately
-
 import sys
 import argparse
 import tempfile

@@ -18,8 +18,6 @@ from nti.integrationtests.performance import DelegateContext
 
 import logging
 logger = logging.getLogger(__name__)
-
-# ====================
 		
 def is_default_value(config, section, name):
 	def_val = config.defaults()[name] if name in config.defaults() else None

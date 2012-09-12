@@ -1,15 +1,15 @@
 from __future__ import print_function, unicode_literals
 
-# avoid monkey patching
-import gevent
-setattr( gevent, 'version_info', (0,) )
-
 import os
+import sys
 import tempfile
+import subprocess
 import ConfigParser
 
-from nti.dataserver.config import write_configs 
 from nti.integrationtests.utils import get_int_option
+
+import logging
+logger = logging.getLogger(__name__)
 
 def get_port(config):	
 	ini = ConfigParser.SafeConfigParser()
@@ -124,8 +124,11 @@ def get_default_config():
 	return config
 
 def write_base_configs(root_dir, config):
-	# write base confi from the server
-	write_configs(root_dir, config, update_existing=True, write_supervisord=True)
+	
+	logger.info("write base config for server")
+	command = os.path.join(os.path.dirname(sys.executable), 'nti_init_env')
+	args = [command, root_dir, config, '--update-existing', '--write-supervisord']
+	subprocess.call(args)
 	
 	def _remove_sections(sconf):
 		if os.path.exists(sconf):

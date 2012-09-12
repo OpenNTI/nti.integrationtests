@@ -3,9 +3,6 @@
 from __future__ import print_function, unicode_literals
 
 import os
-# don't monkey patch
-os.environ['DS_SKIP_GEVENT_MONKEY_PATCHING'] = 'True'
-
 import sys
 
 from nti.integrationtests.utils import eval_bool
