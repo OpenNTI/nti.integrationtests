@@ -1,13 +1,16 @@
 from __future__ import print_function, unicode_literals
 
 import time
+import random
 
-from nti.integrationtests.chat import generate_message
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance import TimerResultMixin 
+from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.performance.eval import generate_random_text
+
+_generator = default_message_generator()
 
 def script_setup(context):
 	context['list.lock'] = context.manager.Lock()
@@ -38,7 +41,7 @@ def create_note(*args, **kwargs):
 	
 	# create a note
 	nttype = generate_random_text()
-	message = generate_message(k=3)
+	message = _generator.generate(random.randint(10, 20))
 	container = generate_ntiid(nttype=nttype)
 	result = TimerResultMixin()
 	
@@ -61,7 +64,7 @@ def update_note(*args, **kwargs):
 	
 	# update note
 	client = new_client(context)
-	note['body']=[generate_message(k=3)]
+	note['body']=[_generator.generate(random.randint(10, 20))]
 	result = TimerResultMixin()
 	
 	now = time.time()

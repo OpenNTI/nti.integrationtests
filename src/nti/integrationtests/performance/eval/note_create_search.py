@@ -2,14 +2,17 @@ from __future__ import print_function, unicode_literals
 
 import random
 
-from nti.integrationtests.chat import generate_message
+from whoosh.analysis import STOP_WORDS
+
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.performance.eval import new_client
+from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.performance.eval import generate_random_text
 
 _maxusers = MAX_TEST_USERS
+_generator = default_message_generator()
 
 def script_setup(context):
 	context['list.lock'] = context.manager.Lock()
@@ -41,7 +44,7 @@ def create_note(*args, **kwargs):
 	
 	# create a note
 	nttype = generate_random_text()
-	message = generate_message(k=3)
+	message = _generator.generate(random.randint(10, 30))
 	
 	container = None
 	ntiids = getattr(context,'ntiids',None)
@@ -70,7 +73,7 @@ def search_note(*args, **kwargs):
 	
 	query = None
 	splits = message.split() 
-	while not query and query not in ('and', 'or', 'in', 'of'):
+	while not query and query not in STOP_WORDS:
 		query = random.choice(splits)
 
 	d = client.unified_search(query, ntiid)

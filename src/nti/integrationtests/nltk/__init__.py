@@ -2,7 +2,6 @@ import os
 import gzip
 import threading
 
-
 from nltk import Text
 from nltk import word_tokenize
 from nltk.model import NgramModel
@@ -21,17 +20,18 @@ class NLTKMessageGenerator:
 		
 	def generate_message(self, length):
 		ntext = self.trigram_model.generate(length + BUFFER)
-		return ' '.join(ntext[BUFFER:length - 1])
+		result = ' '.join(ntext[BUFFER:length - 1])
+		return unicode(result)
 	
 	generate = generate_message
 	
 _default_message_generator = None
-lock = threading.Lock()
+_lock = threading.Lock()
 
 def default_message_generator():
 	global _default_message_generator
-	global lock
-	with lock:
+	global _lock
+	with _lock:
 		if not _default_message_generator:
 			name = os.path.join(os.path.dirname(__file__), "DanielDeronda.txt.gz");
 			with gzip.open(name, "rb") as src:

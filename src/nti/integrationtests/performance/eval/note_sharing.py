@@ -3,16 +3,16 @@ from __future__ import print_function, unicode_literals
 import os
 import six
 import time
+import random
 import numbers
 
-from nti.integrationtests.chat import generate_message
-from nti.integrationtests.performance import TimerResultMixin 
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import init_server
 from nti.integrationtests.performance.eval import stop_server
-from nti.integrationtests.performance.eval import generate_ntiid
+from nti.integrationtests.performance import TimerResultMixin 
+from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
-
+from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.performance.eval import generate_random_text
 
 import logging
@@ -29,6 +29,7 @@ def script_teardown(context):
 		stop_server(context)
 	
 _max_users = MAX_TEST_USERS
+_generator = default_message_generator()
 
 def _users_loop(users):
 	for no in users:
@@ -51,7 +52,7 @@ def create_share(users, *args, **kwargs):
 		
 		# create note
 		nttype = generate_random_text()
-		message = generate_message(k=3)
+		message = _generator.generate(random.randint(10, 30))
 		container = generate_ntiid(nttype=nttype)
 		now = time.time()
 		note = client.create_note(message, container=container, sharedWith=sw)
@@ -79,7 +80,7 @@ def share_note(users, *args, **kwargs):
 	with open(outfile,"w") as f:
 		users = range(10, 2010, 50) + ['Everyone']
 		for t in _users_loop(users):
-			message = generate_message(k=3)
+			message = _generator.generate(random.randint(10, 30))
 			note = client.create_note(message, container=container)
 			assert note, 'could  not create note'
 			

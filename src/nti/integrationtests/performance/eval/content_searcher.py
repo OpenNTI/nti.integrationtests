@@ -1,6 +1,7 @@
 from __future__ import print_function, unicode_literals
 
 import random
+from whoosh.analysis import STOP_WORDS
 
 from nti.integrationtests.chat import generate_message
 from nti.integrationtests.performance import IGNORE_RESULT
@@ -20,7 +21,7 @@ def search(*args, **kwargs):
 	
 	text = None
 	splits = generate_message(k=3).split() 
-	while not text and text not in ('and', 'or', 'in', 'of'):
+	while not text and text not in STOP_WORDS:
 		text = random.choice(splits)
 		
 	client.unified_search(text, random.choice(ntiids))	

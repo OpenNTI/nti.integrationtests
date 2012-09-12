@@ -2,9 +2,9 @@ from __future__ import print_function, unicode_literals
 
 import random
 
-from nti.integrationtests.chat import generate_message
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.performance.eval import new_client
+from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.performance.eval import generate_random_text
@@ -13,6 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 	
 _max_users = MAX_TEST_USERS
+_generator = default_message_generator()
 		
 def create_share(*args, **kwargs):
 	context = kwargs['__context__']
@@ -32,7 +33,7 @@ def create_share(*args, **kwargs):
 		
 	sharedWith = list(sharedWith)
 	nttype = generate_random_text()
-	message = generate_message(k=3)
+	message = _generator.generate(random.randint(10, 30))
 	container = generate_ntiid(nttype=nttype)
 	note = client.create_note(message, container=container, sharedWith=sharedWith)
 	assert note, 'could not create note'
