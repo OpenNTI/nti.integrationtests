@@ -2,15 +2,13 @@ import collections
 
 from hamcrest import all_of
 from hamcrest import any_of
-from hamcrest import has_entry
-from hamcrest import has_item
-from hamcrest import has_items
 from hamcrest import has_key
+from hamcrest import has_item
+from hamcrest import has_entry
+from hamcrest import has_items
 from hamcrest import has_length
 from hamcrest.core.base_matcher import BaseMatcher
 from hamcrest.library.collection.issequence_containinginanyorder import contains_inanyorder
-
-##########################
 
 class ItemInChange(BaseMatcher):
 	def __init__(self, change):
@@ -52,9 +50,6 @@ class ContainedIn(BaseMatcher):
 
 	def describe_to( self, description ):
 		description.append_text( self._descr )
-
-
-##########################
 
 def container():
 	return has_key('Items')
@@ -154,8 +149,6 @@ def accepting(user, name):
 		if u.name == name:
 			return True
 	return False
-
-##########################
 
 def object_from_container(container, obj):
 	matcher = has_same_oid_as(obj)

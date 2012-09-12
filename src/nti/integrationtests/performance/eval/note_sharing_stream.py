@@ -2,12 +2,12 @@ from __future__ import print_function, unicode_literals
 
 import random
 
+from nti.integrationtests.utils import generate_ntiid
 from nti.integrationtests.performance import IGNORE_RESULT
+from nti.integrationtests.utils import generate_random_text
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.nltk import default_message_generator
-from nti.integrationtests.performance.eval import generate_ntiid
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
-from nti.integrationtests.performance.eval import generate_random_text
 
 import logging
 logger = logging.getLogger(__name__)

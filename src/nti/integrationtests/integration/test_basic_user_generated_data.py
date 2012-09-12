@@ -3,19 +3,14 @@ import unittest
 	
 from nti.integrationtests import DataServerTestCase
 
-from nti.integrationtests.chat import generate_message
+from nti.integrationtests.utils import generate_message
 
 from nti.integrationtests.integration import contains
 from nti.integrationtests.integration import contained_in
-from nti.integrationtests.integration import object_from_container
 from nti.integrationtests.integration import container_of_length
+from nti.integrationtests.integration import object_from_container
 
-from hamcrest import is_
-from hamcrest import is_not
-from hamcrest import has_entry
-from hamcrest import has_length
-from hamcrest import assert_that
-from hamcrest import greater_than_or_equal_to
+from hamcrest import (is_, is_not, has_entry, has_length, assert_that, greater_than_or_equal_to)
 
 class TestBasicUserGeneratedData(DataServerTestCase):
 

@@ -6,14 +6,14 @@ import time
 import random
 import numbers
 
+from nti.integrationtests.utils import generate_ntiid
+from nti.integrationtests.utils import generate_random_text
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance.eval import init_server
 from nti.integrationtests.performance.eval import stop_server
 from nti.integrationtests.performance import TimerResultMixin 
 from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
-from nti.integrationtests.performance.eval import generate_ntiid
-from nti.integrationtests.performance.eval import generate_random_text
 
 import logging
 logger = logging.getLogger(__name__)

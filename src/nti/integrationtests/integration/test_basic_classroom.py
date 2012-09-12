@@ -11,12 +11,12 @@ from nti.integrationtests.contenttypes import SectionInfo
 from nti.integrationtests.contenttypes import ClassInfo
 from nti.integrationtests.contenttypes.servicedoc import Link
 
-from hamcrest import not_none
-from hamcrest import assert_that
 from hamcrest import is_
-from hamcrest import has_length
+from hamcrest import not_none
 from hamcrest import contains
 from hamcrest import has_entry
+from hamcrest import assert_that
+from hamcrest import has_length
 from hamcrest import has_property
 from hamcrest import greater_than_or_equal_to
 

@@ -9,10 +9,7 @@ from nti.integrationtests.integration import contains_friendslist
 from nti.integrationtests.integration import friends_list_from_friends_lists
 from nti.integrationtests.integration import accepting
 
-from hamcrest import is_not
-from hamcrest import assert_that
-from hamcrest import has_key
-
+from hamcrest import (is_not, has_key, assert_that)
 
 class TestBasicFriendsLists(DataServerTestCase):
 

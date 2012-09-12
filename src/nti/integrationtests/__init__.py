@@ -6,34 +6,16 @@ import unittest
 import datetime
 import collections
 
+from nti.integrationtests.utils import PORT
 from nti.integrationtests.utils import get_open_port
-from nti.integrationtests.dataserver.server import PORT
+from nti.integrationtests.utils import generate_ntiid
+from nti.integrationtests.dataserver.client import ROOT_ITEM
+from nti.integrationtests.utils import DEFAULT_USER_PASSWORD
 from nti.integrationtests.dataserver.server import DATASERVER_DIR
 from nti.integrationtests.dataserver.server import DataserverProcess
-from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
 from nti.integrationtests.dataserver.client import DataserverClient
-from nti.integrationtests.dataserver.client import ROOT_ITEM
 
 import nti.dataserver # Gevent monkey patches
-
-def generate_ntiid(date=None, provider='nti', nttype=None, specific=None):
-
-	def escape_provider( provider ):
-		return provider.replace( ' ', '_' ).replace( '-', '_' )
-
-	if not nttype:
-		raise ValueError( 'Must supply type' )
-
-	date_seconds = date if isinstance( date, numbers.Real ) and date > 0 else time.time()
-	date = datetime.date( *time.gmtime(date_seconds)[0:3] )
-	date_string = date.isoformat()
-
-	provider = escape_provider( str(provider) ) + '-'
-	specific = '-' + specific if specific else '-' + str(time.clock())
-
-	result = 'tag:nextthought.com,%s:%s%s%s' % (date_string, provider, nttype, specific )
-	return result
-
 
 # When invoked through runners/__init__.py, these setup methods seem to get called twice
 # for no reason that's entirely clear. So make them idempotent.

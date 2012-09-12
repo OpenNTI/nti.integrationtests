@@ -3,7 +3,7 @@ import unittest
 from nti.integrationtests.chat import objects
 from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
-from hamcrest import assert_that, has_length, greater_than_or_equal_to, is_
+from hamcrest import (is_, assert_that, has_length, greater_than_or_equal_to )
 
 class TestChatUserleavesEarly(HostUserChatTest):
 

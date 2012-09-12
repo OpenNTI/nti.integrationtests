@@ -4,7 +4,7 @@ import time
 import unittest
 
 from nti.integrationtests import DataServerTestCase
-from nti.integrationtests.chat import generate_message
+from nti.integrationtests.utils import generate_message
 from nti.integrationtests.integration import container_of_length
 
 from hamcrest import is_

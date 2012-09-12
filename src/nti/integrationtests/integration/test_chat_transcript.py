@@ -5,7 +5,7 @@ import unittest
 
 from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
-from hamcrest import is_in, assert_that, is_, has_entry, not_none, has_property, has_key
+from hamcrest import (is_in, assert_that, is_, has_entry, not_none, has_property, has_key)
 
 class TestChatTranscript(HostUserChatTest):
 

@@ -4,9 +4,7 @@ import unittest
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import contains
 
-from hamcrest import assert_that
-from hamcrest import is_not
-from hamcrest import is_
+from hamcrest import (is_, is_not, assert_that)
 
 class TestBasicReplying(DataServerTestCase):
 

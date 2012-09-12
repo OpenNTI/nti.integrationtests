@@ -4,19 +4,14 @@ import time
 import uuid
 import pprint
 
-from nti.integrationtests.dataserver.server import DataserverProcess
-from nti.integrationtests.dataserver.client import DataserverClient
-from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
-
 from nti.integrationtests.chat.objects import Host
 from nti.integrationtests.chat.objects import Invitee
 from nti.integrationtests.chat.objects import run_chat
-
-# ----------------------------------
+from nti.integrationtests.utils import DEFAULT_USER_PASSWORD
+from nti.integrationtests.dataserver.client import DataserverClient
+from nti.integrationtests.dataserver.server import DataserverProcess
 
 MAX_TEST_USERS = 100
-
-# ----------------------------------
 
 def wait_and_process(self, delay, condf=lambda : True):
     elapsed = 0
@@ -26,9 +21,7 @@ def wait_and_process(self, delay, condf=lambda : True):
         t = max(time.time() - t, 0.01)
         elapsed = elapsed + t
     return elapsed
-   
-# ----------------------------------
-     
+        
 def pprint_to_file(self, outdir=None, full=False, **kwargs):
     outdir = os.path.expanduser(outdir or '/tmp')
     outname = os.path.join(outdir, self.username + ".txt")
@@ -69,8 +62,6 @@ def pprint_graph(self, lock=None, stream=None, full=False, **kwargs):
     finally:
         if lock: lock.release()
     
-# ----------------------------------
-    
 def create_friends_list(username, friends, list_name=None, server='localhost', port=8081, is_secure=False,
                         password=DEFAULT_USER_PASSWORD):
     
@@ -96,9 +87,7 @@ def create_test_friends_lists(users, server='localhost', port=8081, is_secure=Fa
             create_friends_list(username, all_users, server=server, port=port, is_secure=is_secure)
     else:
         create_friends_list(host, users, server=server, port=port, is_secure=is_secure)
-     
-# ----------------------------------   
-
+   
 def simulate(users, containerId, entries=None, delay=2, server='localhost', port=8081,
              max_heart_beats=3, use_threads=True, host_class=Host, invitee_class=Invitee,
              create_test_lists=False, is_secure=False, start_user=1):

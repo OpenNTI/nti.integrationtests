@@ -4,7 +4,7 @@ import unittest
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import get_notification_count
 
-from hamcrest import assert_that, has_property
+from hamcrest import (assert_that, has_property)
 
 class TestUserObject(DataServerTestCase):
 

@@ -4,9 +4,9 @@ import os
 import random
 import tempfile
 
-from nti.integrationtests import generate_ntiid
 from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.utils import boolean_states
+from nti.integrationtests.utils import generate_ntiid
 from nti.integrationtests.performance import Subscriber
 from nti.integrationtests.dataserver.client import DataserverClient
 from nti.integrationtests.dataserver.server import DataserverProcess
@@ -63,12 +63,6 @@ def new_client(context):
 	credentials = getattr(context, "credentials", None)
 	client = DataserverClient(endpoint=endpoint, credentials=credentials)
 	return client
-
-def generate_random_text(a_max=5):
-	word = []
-	for _ in xrange(a_max+1):
-		word.append(chr(random.randint(ord('a'), ord('z'))))
-	return "".join(word)
 
 class SimpleStatSubscriber(Subscriber):
 	def __init__(self, *args, **kwargs):

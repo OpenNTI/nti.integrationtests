@@ -4,19 +4,17 @@ import os
 import tempfile
 import ConfigParser
 
-from nti.integrationtests.chat import generate_message
+from nti.integrationtests.utils import generate_ntiid
 from nti.integrationtests.utils import get_int_option
+from nti.integrationtests.utils import generate_message
+from nti.integrationtests.utils import generate_random_text
 from nti.integrationtests.performance.eval import init_server
 from nti.integrationtests.performance.eval import stop_server
 from nti.integrationtests.performance.eval import new_client
-from nti.integrationtests.performance.eval import generate_ntiid
-from nti.integrationtests.performance.eval import generate_random_text
 from nti.integrationtests.performance.eval import SimpleStatSubscriber
 
 import logging
 logger = logging.getLogger(__name__)
-	
-# -----------------------------------
 
 def change_workers(config_file, workers):
 	config = ConfigParser.ConfigParser()
@@ -36,8 +34,6 @@ def change_workers(config_file, workers):
 	
 	return config_file
 
-# -----------------------------------
-
 def setup(context):
 	config_file = getattr(context, 'pserve_ini_file', None)
 	workers = getattr(context, 'workers', None)
@@ -51,8 +47,6 @@ def setup(context):
 	
 def teardown(context):
 	stop_server(context)
-	
-# ----------------------------------
 
 class StatSubscriber(SimpleStatSubscriber):
 	def __init__(self, context):
@@ -77,8 +71,6 @@ class StatSubscriber(SimpleStatSubscriber):
 		finally:
 			super(StatSubscriber, self).close()
 	
-# -----------------------------------
-
 def create_note(*args, **kwargs):
 	context = kwargs['__context__']
 	

@@ -8,15 +8,15 @@ import time
 import uuid
 import random
 
-from nti.integrationtests.chat import generate_message
+from nti.integrationtests.utils import generate_ntiid
+from nti.integrationtests.utils import generate_random_text
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance import TimerResultMixin
-from nti.integrationtests.performance.eval import generate_ntiid
+from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.integration import container_of_length
 from nti.integrationtests.integration import object_from_container
 from nti.integrationtests.performance.eval.shards import is_running
 from nti.integrationtests.performance.eval.shards import start_server
-from nti.integrationtests.performance.eval import generate_random_text
 from nti.integrationtests.performance.eval.shards import terminate_server
 
 from hamcrest import (assert_that, has_length, greater_than_or_equal_to)
@@ -24,6 +24,7 @@ from hamcrest import (assert_that, has_length, greater_than_or_equal_to)
 defaut_shards = 4
 default_users = 10
 default_workers = 1
+_generator = default_message_generator()
 
 def script_setup(context):
 	host = context.as_str('server', 'localhost')
@@ -46,7 +47,11 @@ def script_teardown(context):
 	if process:
 		port = context.as_int('port', 8081)
 		terminate_server(process, port=port)
-		
+	
+def _generate_message():
+	message = _generator.generate(random.randint(10, 30))
+	return message
+
 def note_operations(*args, **kwargs):
 	context = kwargs['__context__']
 	max_users = context.as_int('users', default_users)
@@ -58,7 +63,7 @@ def note_operations(*args, **kwargs):
 	
 	# create a note
 	nttype = generate_random_text()
-	message = generate_message()
+	message = _generate_message()
 	container = generate_ntiid(nttype=nttype)
 	
 	result = TimerResultMixin()
@@ -67,8 +72,8 @@ def note_operations(*args, **kwargs):
 	result['nt.create'] = time.time() - now
 	assert note, 'could not create note'
 	
-	message = generate_message()
-	note['body']=[generate_message(k=3)]
+	message = _generate_message()
+	note['body']=[_generate_message()]
 	now = time.time()
 	note = client.update_object(note)
 	result['nt.update'] = time.time() - now

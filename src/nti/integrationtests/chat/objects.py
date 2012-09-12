@@ -8,7 +8,7 @@ import threading
 import multiprocessing
 from StringIO import StringIO
 
-from nti.integrationtests.chat import generate_message, phrases
+from nti.integrationtests.utils import generate_message, phrases
 from nti.integrationtests.chat import (SOCKET_IO_HOST, SOCKET_IO_PORT)
 
 from nti.integrationtests.chat.websocket_interface import DSUser

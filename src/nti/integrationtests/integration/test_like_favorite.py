@@ -7,7 +7,7 @@ from hamcrest import assert_that
 from hamcrest import greater_than
 
 from nti.integrationtests import DataServerTestCase
-from nti.integrationtests.chat import generate_message
+from nti.integrationtests.utils import generate_message
 
 class TestLikeFavorite(DataServerTestCase):
 	

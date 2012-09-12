@@ -5,11 +5,11 @@ import random
 
 from concurrent.futures import ProcessPoolExecutor
 
+from nti.integrationtests.utils import generate_ntiid
 from nti.integrationtests.performance import IGNORE_RESULT
+from nti.integrationtests.utils import generate_random_text
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.nltk import default_message_generator
-from nti.integrationtests.performance.eval import generate_ntiid
-from nti.integrationtests.performance.eval import generate_random_text
 
 from hamcrest import (assert_that, has_length, greater_than_or_equal_to)
 

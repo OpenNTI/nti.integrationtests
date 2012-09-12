@@ -8,7 +8,7 @@ from nti.integrationtests.chat.objects import Host
 from nti.integrationtests.chat.objects import User
 
 from nti.integrationtests import DataServerTestCase
-from nti.integrationtests.dataserver.server import DEFAULT_USER_PASSWORD
+from nti.integrationtests.utils import DEFAULT_USER_PASSWORD
 
 class BasicChatTest(DataServerTestCase):
 

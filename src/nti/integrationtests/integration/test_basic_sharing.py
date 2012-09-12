@@ -2,15 +2,13 @@ import time
 import unittest
 
 from nti.integrationtests import DataServerTestCase
-from nti.integrationtests.integration import contained_in
-from nti.integrationtests.integration import shared_with
-from nti.integrationtests.integration import has_same_oid_as
 from nti.integrationtests.integration import contains
+from nti.integrationtests.integration import shared_with
+from nti.integrationtests.integration import contained_in
+from nti.integrationtests.integration import has_same_oid_as
 from nti.integrationtests.integration import container_of_length
 
-from hamcrest import assert_that
-from hamcrest import is_not
-from hamcrest import is_
+from hamcrest import (is_, assert_that, is_not)
 
 class TestBasicSharing(DataServerTestCase):
 

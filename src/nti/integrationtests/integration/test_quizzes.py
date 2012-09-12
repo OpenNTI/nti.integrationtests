@@ -1,14 +1,12 @@
 import unittest
-	
-from hamcrest import assert_that
-from hamcrest import is_not
-from hamcrest import is_
 
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.contenttypes import Quiz
 from nti.integrationtests.contenttypes import QuizQuestion
 from nti.integrationtests.contenttypes import QuizResult
 from nti.integrationtests.contenttypes import QuizQuestionResponse
+
+from hamcrest import (is_, is_not, assert_that)
 
 class TestQuizzes(DataServerTestCase):
 	

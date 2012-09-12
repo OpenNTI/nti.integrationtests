@@ -1,19 +1,19 @@
 import time
+import unittest
 
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import container
+from nti.integrationtests.integration import contains
 from nti.integrationtests.integration import sortchanges
-from nti.integrationtests.integration import has_circled_event
-from nti.integrationtests.integration import of_change_type_shared
-from nti.integrationtests.integration import of_change_type_modified
-from nti.integrationtests.integration import objects_from_container
 from nti.integrationtests.integration import wraps_item
 from nti.integrationtests.integration import unwrap_object
-from nti.integrationtests.integration import get_notification_count
-from nti.integrationtests.integration import contains
 from nti.integrationtests.integration import has_same_oid_as
+from nti.integrationtests.integration import has_circled_event
+from nti.integrationtests.integration import of_change_type_shared
+from nti.integrationtests.integration import objects_from_container
+from nti.integrationtests.integration import get_notification_count
+from nti.integrationtests.integration import of_change_type_modified
 
-import unittest
 from hamcrest import (assert_that, has_entry, is_, is_not, less_than_or_equal_to,
 					  not_none, greater_than_or_equal_to, has_length)
 does_not = is_not

@@ -13,14 +13,11 @@ from datetime import datetime
 import logging
 logger = logging.getLogger(__name__)
 
+from nti.integrationtests.utils import PORT
+from nti.integrationtests.utils import SERVER_HOST
 from nti.integrationtests.utils import get_int_option
 from nti.integrationtests.utils import get_bool_option
 
-
-DEFAULT_USER_PASSWORD = 'temp001'
-
-PORT = int(os.getenv('PORT', '8081'))
-SERVER_HOST = os.getenv('SERVER_HOST', 'localhost')
 # Must be extremely careful with this next one. Some clients
 # assume they own it and can delete the entire thing, clearly not right,
 # but cater to it by using a throw-away directory if one is not provided.

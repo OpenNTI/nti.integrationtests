@@ -5,8 +5,7 @@ from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import not_shared
 from nti.integrationtests.integration import only_shared_with
 
-from hamcrest import is_
-from hamcrest import assert_that
+from hamcrest import (is_, assert_that)
 
 class TestThreadedNotes(DataServerTestCase):
 

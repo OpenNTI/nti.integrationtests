@@ -13,8 +13,6 @@ from nti.integrationtests.wsclient import WebSocketException
 from nti.integrationtests.wsclient import create_ds_connection
 from nti.integrationtests.wsclient import ConnectionClosedException
 
-# -----------------------------
-
 WS_ACK			= '6::'
 WS_CONNECT		= '1::'
 WS_DISCONNECT	= '0::'
@@ -50,8 +48,6 @@ DEFAULT_USER_PASSWORD = 'temp001'
 DEAULT_TIMEOUT = 180
 
 CHANNELS = (DEFAULT_CHANNEL, WHISPER_CHANNEL, META_CHANNEL, CONTENT_CHANNEL, POLL_CHANNEL)
-
-# -----------------------------
 
 class BasicMessageContext(object):
 
@@ -123,7 +119,6 @@ class ThreadLocalMessageContext(threading.local, MessageContext):
 
 default_message_context = ThreadLocalMessageContext()
 
-# -----------------------------
 
 def _nonefy(s):
 	return None if s and str(s) == 'null' else s
@@ -495,7 +490,6 @@ class DSUser(object):
 
 Graph = DSUser
 
-# -----------------------------
 
 def _self_of_emtpy(s):
 	return ' ' + s if s else ''
@@ -536,8 +530,6 @@ def toList(data, unique=True):
 		elif not isinstance(data, list):
 			data = list(set(data)) if unique else list(data)
 	return data
-
-# -----------------------------
 
 def isConnect(msg):
 	return str(msg).startswith(WS_CONNECT)
@@ -751,8 +743,6 @@ def _shadowUsers(ws, containerId, users, data_format='json', message_context=def
 		message_context.send(ws, msg)
 	else:
 		raise InvalidDataFormat(data_format)
-
-# -----------------------------
 
 def _ws_disconnect(ws, data_format='json', message_context=default_message_context):
 	msg = b"0::"
