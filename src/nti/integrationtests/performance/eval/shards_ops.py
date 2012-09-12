@@ -1,9 +1,5 @@
 from __future__ import print_function, unicode_literals
 
-# avoid monkey patching
-import gevent
-setattr( gevent, 'version_info', (0,) )
-	
 import time
 import uuid
 import random
@@ -24,6 +20,7 @@ from hamcrest import (assert_that, has_length, greater_than_or_equal_to)
 defaut_shards = 4
 default_users = 10
 default_workers = 1
+
 _generator = default_message_generator()
 
 def script_setup(context):

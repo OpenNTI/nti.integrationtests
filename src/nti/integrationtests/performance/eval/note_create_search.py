@@ -2,6 +2,8 @@ from __future__ import print_function, unicode_literals
 
 import random
 
+from nltk import word_tokenize
+
 from whoosh.analysis import STOP_WORDS
 
 from nti.integrationtests.utils import generate_ntiid
@@ -44,7 +46,7 @@ def create_note(*args, **kwargs):
 	
 	# create a note
 	nttype = generate_random_text()
-	message = _generator.generate(random.randint(10, 30))
+	message = _generator.generate(random.randint(10, 40))
 	
 	container = None
 	ntiids = getattr(context,'ntiids',None)
@@ -72,8 +74,8 @@ def search_note(*args, **kwargs):
 	client.set_credentials(credentials)
 	
 	query = None
-	splits = message.split() 
-	while not query and query not in STOP_WORDS:
+	splits = word_tokenize(message) 
+	while not query or query in STOP_WORDS or len(query) < 3:
 		query = random.choice(splits)
 
 	d = client.unified_search(query, ntiid)
