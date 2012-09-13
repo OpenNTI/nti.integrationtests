@@ -147,6 +147,7 @@ def write_base_configs(root_dir, config):
 def prepare(port=8081, workers=1, shards=4, config=None, out_dir=None):
 	out_dir = out_dir or tempfile.mkdtemp(prefix="ntids.", dir="/tmp")
 	etc_dir = os.path.join(out_dir, 'etc')
+	var_log = os.path.join(out_dir, 'var/log')
 	config = config or get_default_config()
 	
 	# write pserve config
@@ -159,6 +160,9 @@ def prepare(port=8081, workers=1, shards=4, config=None, out_dir=None):
 	# overide
 	write_relstorage_config(etc_dir, shards=shards)
 
+	if not os.path.exists(var_log):
+		os.makedirs(var_log)
+		
 	return ps_config, s_dev_config
 
 if __name__ == '__main__':
