@@ -35,8 +35,6 @@ class BasicUser(DSUser):
 	def __call__(self, *args, **kwargs):
 		pass
 
-	# ======================
-
 	def serverKill(self, args=None):
 		super(BasicUser, self).serverKill(args)
 		raise Serverkill(args)
@@ -46,13 +44,9 @@ class BasicUser(DSUser):
 		while self.heart_beats < max_beats:
 			self.nextEvent()
 
-	# ======================
-
 	@property
 	def first_room(self):
 		return self.rooms.keys()[0] if len(self.rooms) > 0 else None
-
-	# ======================
 
 	def generate_message(self, k=4, phrases=phrases):
 		return generate_message(k=4, phrases=phrases)
@@ -64,8 +58,7 @@ class BasicUser(DSUser):
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
 			if delay is not None and delay > 0:
 				time.sleep(delay)
-				
-				
+
 	def save_traceback(self, e=None):
 		sio = StringIO()
 		exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -99,7 +92,7 @@ class OneRoomUser(BasicUser):
 	def chat_postMessage(self, **kwargs):
 		super(OneRoomUser, self).chat_postMessage(**kwargs)
 		self.last_post_time = time.time()
-		
+
 	def chat_recvMessage(self, **kwargs):
 		message = super(OneRoomUser, self).chat_recvMessage(**kwargs)
 		creator = kwargs.get('Creator',  kwargs.get('creator', None))
@@ -131,11 +124,11 @@ class OneRoomUser(BasicUser):
 		if not self._room and len(self.rooms) > 0:
 			self._room = self.first_room
 		return self._room
-	
+
 	@property
 	def elapsed_recv(self):
 		return self.last_recv_time - self.creation_time if self.last_recv_time else None
-	
+
 	@property
 	def elapsed_post(self):
 		return self.last_post_time - self.creation_time if self.last_post_time else None
@@ -160,22 +153,22 @@ class Host(OneRoomUser):
 		self.heart_beats = 0
 		while self.heart_beats < max_heart_beats and len(self.online) < len(self.occupants):
 			self.nextEvent()
-			
+
 	def __call__(self, *arg, **kwargs):
 
-		delay = kwargs.get('delay', 0.25)
+		delay = kwargs.get('delay', 0.05)
 		entries = kwargs.get('entries', None)
 		inReplyTo = kwargs.get("inReplyTo", None)
 		references = kwargs.get("references", None)
 		containerId = kwargs.get('containerId', None)
 		connect_event = kwargs.get('connect_event', None)
-		max_heart_beats = kwargs.get('max_heart_beats', 3)
-		
+		max_heart_beats = kwargs.get('max_heart_beats', 2)
+
 		try:
 			self.ws_connect()
 
 			self.wait_for_guests_to_connect(max_heart_beats)
-			
+
 			self.enterRoom(	occupants=self.occupants, containerId=containerId,
 							inReplyTo=inReplyTo, references=references)
 			self.wait_4_room()
@@ -189,7 +182,7 @@ class Host(OneRoomUser):
 
 			# process messages
 			self.wait_heart_beats(max_heart_beats)
-			
+
 		except Exception, e:
 			self.save_traceback(e)
 		finally:
@@ -199,7 +192,7 @@ class Guest(OneRoomUser):
 
 	def __call__(self, *args, **kwargs):
 		try:
-			delay = kwargs.get('delay', 0.25)
+			delay = kwargs.get('delay', 0.05)
 			entries = kwargs.get('entries', None)
 			max_heart_beats = kwargs.get('max_heart_beats', 2)
 
@@ -208,7 +201,7 @@ class Guest(OneRoomUser):
 
 			# check for an connect event
 			event = kwargs.get('connect_event', None)
-			event.wait(60)
+			event.wait(20)
 
 			self.wait_4_room()
 
@@ -221,7 +214,7 @@ class Guest(OneRoomUser):
 
 			# get any message
 			self.wait_heart_beats(max_heart_beats)
-			
+
 		except Exception, e:
 			self.save_traceback(e)
 		finally:
@@ -230,8 +223,8 @@ class Guest(OneRoomUser):
 User = Guest
 Invitee = Guest
 
-def run_chat(containerId, host_user, invitees, entries=None, delay=0.25, 
-			 max_heart_beats=3, use_threads=True, host_class=Host, invitee_class=Invitee, 
+def run_chat(containerId, host_user, invitees, entries=None, delay=0.05,
+			 max_heart_beats=2, use_threads=True, host_class=Host, invitee_class=Invitee,
 			 server=SOCKET_IO_HOST, port=SOCKET_IO_PORT, is_secure=False,
 			 occupants=None, **kwargs):
 
@@ -245,12 +238,12 @@ def run_chat(containerId, host_user, invitees, entries=None, delay=0.25,
 
 	required_args = {'entries':entries, 'containerId':containerId, 'connect_event':connect_event,
 					 'max_heart_beats':max_heart_beats}
-	
+
 	required_args['delay'] = kwargs.get('delay', delay)
-	
+
 	runnable_args = dict(kwargs)
 	runnable_args.update(required_args)
-	
+
 	# start host
 	runnable = 	threading.Thread(target=host, kwargs=dict(runnable_args)) if use_threads else \
 		 		multiprocessing.Process(target=host, kwargs=dict(runnable_args))

@@ -16,8 +16,6 @@ class BasicChatTest(DataServerTestCase):
 		super(BasicChatTest, self).setUp()
 		self.container = 'test.user.container.%s' % time.time()
 
-	# ======================
-
 	@classmethod
 	def static_initialization(cls):
 		cls.create_users()
@@ -90,7 +88,7 @@ class HostUserChatTest(BasicChatTest):
 		for u in users:
 			u_args = dict(kwargs)
 			u_args.update(required_args)
-			u_t=threading.Thread(target=u, kwargs=u_args)
+			u_t = threading.Thread(target=u, kwargs=u_args)
 			u_t.start()
 			runnables.append(u_t)
 
