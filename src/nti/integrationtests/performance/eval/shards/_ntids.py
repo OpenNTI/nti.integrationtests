@@ -42,8 +42,8 @@ def start_server(config, env_dir=None):
 		env_dir = os.path.expanduser(env_dir)
 		os.environ['DATASERVER_DIR'] = env_dir
 	
-	command = os.path.join(os.path.dirname(sys.executable), 'supervisord')
-	args = [command, '-c', config]
+	command = os.path.join(os.path.dirname(sys.executable), 'pserve')
+	args = [command, config]
 	devnull = open("/dev/null", 'w') if 'DATASERVER_NO_REDIRECT' not in os.environ else None
 	process = subprocess.Popen(args, stdin=devnull, stdout=devnull, stderr=devnull)
 	if devnull is not None:
@@ -105,12 +105,12 @@ def _wait_for(host='localhost', port=8081, for_running=True, max_wait=30):
 def prepare(user, password, shards=4, port=8081, workers=1, users=10, env_dir=None):
 	env_dir = env_dir or tempfile.mkdtemp(prefix="ntids.", dir="/tmp")
 	env_dir = os.path.expanduser(env_dir)
-	_, s_dev_config = prepare_config(port=port, workers=workers, shards=shards, out_dir=env_dir)
+	p_config,_ = prepare_config(port=port, workers=workers, shards=shards, out_dir=env_dir)
 	if not is_running(port=port):
 		# initialize db
 		prepare_db(user=user, password=password, shards=shards)
 		# start dataserver
-		process = start_server(config=s_dev_config, env_dir=env_dir)
+		process = start_server(config=p_config, env_dir=env_dir)
 		try:
 			if _wait_for(port=port):
 				time.sleep(2) # wait a bit
@@ -118,6 +118,8 @@ def prepare(user, password, shards=4, port=8081, workers=1, users=10, env_dir=No
 				init_shards(env_dir, shards=shards)
 				#create users
 				create_users(env_dir, users)
+			else:
+				raise Exception("Could not start server")
 		except:
 			if process: process.terminate()
 			raise
