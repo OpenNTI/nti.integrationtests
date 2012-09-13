@@ -1,24 +1,27 @@
 from __future__ import print_function, unicode_literals
 
 import random
+import multiprocessing
 
 from nltk import word_tokenize
 
 from whoosh.analysis import STOP_WORDS
 
 from nti.integrationtests.utils import generate_ntiid
+from nti.integrationtests.utils import generate_message
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.utils import generate_random_text
 from nti.integrationtests.performance.eval import new_client
-from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 
-_maxusers = 40
-_generator = default_message_generator()
+import logging
+logger = logging.getLogger(__name__)
+
+_maxusers = MAX_TEST_USERS
 
 def script_setup(context):
-	context['list.lock'] = context.manager.Lock()
-	context['created_notes'] = context.manager.list()
+	context['list.lock'] = multiprocessing.Lock()
+	context['created_notes'] = list()
 	
 def script_teardown(context):
 	del context['list.lock']
@@ -46,7 +49,7 @@ def create_note(*args, **kwargs):
 	
 	# create a note
 	nttype = generate_random_text()
-	message = _generator.generate(random.randint(10, 40))
+	message = generate_message()
 	
 	container = None
 	ntiids = getattr(context,'ntiids',None)
@@ -63,6 +66,8 @@ def create_note(*args, **kwargs):
 
 def search_note(*args, **kwargs):
 	context = kwargs['__context__']
+	iteration = kwargs['__iteration__']
+	runner = kwargs['__runner__'] 
 	
 	triplet = pop_queue(context)
 	if not triplet: return IGNORE_RESULT
@@ -77,7 +82,9 @@ def search_note(*args, **kwargs):
 	splits = word_tokenize(message) 
 	while not query or query in STOP_WORDS or len(query) < 3:
 		query = random.choice(splits)
-
+		query = query[0:-1] if query.endswith('.') else query
+	
+	logger.debug("runner %s, iteration %s, searching %s" % (runner, iteration, query))
 	d = client.unified_search(query, ntiid)
 	assert d['Hit Count'] >0, 'could not find content/note with query "%s"' % query
 	

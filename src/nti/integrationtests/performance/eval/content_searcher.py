@@ -27,6 +27,7 @@ def search(*args, **kwargs):
 	splits = word_tokenize(message)
 	while not text or text in STOP_WORDS or len(text) < 3:
 		text = random.choice(splits)
-		
+		text = text[0:-1] if text.endswith('.') else text
+	
 	client.unified_search(text, random.choice(ntiids))	
 	return IGNORE_RESULT

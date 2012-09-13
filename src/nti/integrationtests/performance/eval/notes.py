@@ -2,6 +2,7 @@ from __future__ import print_function, unicode_literals
 
 import time
 import random
+import multiprocessing
 
 from nti.integrationtests.utils import generate_ntiid
 from nti.integrationtests.performance import IGNORE_RESULT
@@ -13,9 +14,9 @@ from nti.integrationtests.nltk import default_message_generator
 _generator = default_message_generator()
 
 def script_setup(context):
-	context['list.lock'] = context.manager.Lock()
-	context['created_notes'] = context.manager.list()
-	context['updated_notes'] = context.manager.list()
+	context['list.lock'] = multiprocessing.Lock()
+	context['created_notes'] = list()
+	context['updated_notes'] = list()
 	
 def script_teardown(context):
 	del context['list.lock']

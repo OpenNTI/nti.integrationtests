@@ -81,8 +81,6 @@ class TimerResultMixin(DataMixin):
     
 class Context(DataMixin):
     
-    manager = multiprocessing.Manager()
-    
     def __getitem__(self, key):
         return self._data[key] if key in self._data else None
     
@@ -329,7 +327,10 @@ class TargetRunner(object):
             start = time.time()
             try:
                 if can_bind_any_keyword:
-                    result = self.target(*self.target_args, __context__=self.context, __runner__=self.runner_num)
+                    result = self.target(*self.target_args, 
+                                         __context__=self.context,
+                                         __runner__=self.runner_num,
+                                         __iteration__=iterations)
                 elif can_bind_context:
                     result = self.target(*self.target_args, __context__=self.context)
                 else:
