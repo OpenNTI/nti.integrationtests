@@ -34,25 +34,21 @@ def send_message(host='localhost', port=8081, message=None, do_shutdown=True):
 def is_running(host='localhost', port=8081):
 	return send_message(host, port)
 	
-def start_server(config=None, env_dir=None, port=None):
-	config = config or get_default_config()
-	port = port or get_port(config)
-	if not is_running(port=port):
-		logger.info("starting server")
-		
-		assert env_dir, 'no env directory'
+def start_server(config, env_dir=None):
+
+	logger.info("starting server")
+	
+	if env_dir:
 		env_dir = os.path.expanduser(env_dir)
 		os.environ['DATASERVER_DIR'] = env_dir
-		
-		command = os.path.join(os.path.dirname(sys.executable), 'pserve')
-		args = [command, config]
-		devnull = open("/dev/null", 'w') if 'DATASERVER_NO_REDIRECT' not in os.environ else None
-		process = subprocess.Popen(args, stdin=devnull, stdout=devnull, stderr=devnull)
-		if devnull is not None:
-			devnull.close()
-		return process
-	else:
-		return None
+	
+	command = os.path.join(os.path.dirname(sys.executable), 'supervisord')
+	args = [command, '-c', config]
+	devnull = open("/dev/null", 'w') if 'DATASERVER_NO_REDIRECT' not in os.environ else None
+	process = subprocess.Popen(args, stdin=devnull, stdout=devnull, stderr=devnull)
+	if devnull is not None:
+		devnull.close()
+	return process
 			
 def terminate_server(process=None, config=None, port=None, max_wait_secs=30):
 	result = False
@@ -109,12 +105,12 @@ def _wait_for(host='localhost', port=8081, for_running=True, max_wait=30):
 def prepare(user, password, shards=4, port=8081, workers=1, users=10, env_dir=None):
 	env_dir = env_dir or tempfile.mkdtemp(prefix="ntids.", dir="/tmp")
 	env_dir = os.path.expanduser(env_dir)
-	config = prepare_config(port=port, workers=workers, shards=shards, out_dir=env_dir)
+	_, s_dev_config = prepare_config(port=port, workers=workers, shards=shards, out_dir=env_dir)
 	if not is_running(port=port):
 		# initialize db
 		prepare_db(user=user, password=password, shards=shards)
 		# start dataserver
-		process = start_server(config=config, env_dir=env_dir, port=port)
+		process = start_server(config=s_dev_config, env_dir=env_dir)
 		try:
 			if _wait_for(port=port):
 				time.sleep(2) # wait a bit

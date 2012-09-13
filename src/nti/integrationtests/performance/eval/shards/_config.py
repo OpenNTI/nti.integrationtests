@@ -150,15 +150,16 @@ def prepare(port=8081, workers=1, shards=4, config=None, out_dir=None):
 	config = config or get_default_config()
 	
 	# write pserve config
-	config = write_pserve_config(config, port, workers, out_dir=etc_dir)
+	ps_config = write_pserve_config(config, port, workers, out_dir=etc_dir)
 	
 	# write base confi from the server
-	write_base_configs(out_dir, config)
+	write_base_configs(out_dir, ps_config)
+	s_dev_config = os.path.join(etc_dir, 'supervisord_dev.conf')
 	
 	# overide
 	write_relstorage_config(etc_dir, shards=shards)
-	
-	return config
+
+	return ps_config, s_dev_config
 
 if __name__ == '__main__':
 	prepare(out_dir='/tmp')
