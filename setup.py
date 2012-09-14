@@ -21,8 +21,7 @@ setup(
 			"Programming Language :: Python"
 		],
 
-	install_requires = [ 'nti.dataserver',
-						 'coverage',
+	install_requires = [ 'coverage',
 						 'httpie',
 						 'mmstats',
 						 'pyobjc',
