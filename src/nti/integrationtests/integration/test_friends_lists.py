@@ -1,4 +1,5 @@
 import time
+import uuid
 
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import accepting
@@ -19,7 +20,8 @@ class TestBasicFriendsLists(DataServerTestCase):
 		super(TestBasicFriendsLists, self).setUp()
 
 		self.ds.set_credentials(self.owner)
-		self.list_name = 'test_friend_list-%s@nextthought.com' % time.time()
+		uid = str(uuid.uuid4()).split('-')[0]
+		self.list_name = '%s-%s@nextthought.com' % (uid, time.time())
 
 	#TODO: add test resolved vs. unresolved
 

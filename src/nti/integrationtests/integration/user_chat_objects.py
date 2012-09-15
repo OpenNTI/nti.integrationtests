@@ -44,8 +44,7 @@ class BasicChatTest(DataServerTestCase):
 		elif not isinstance(friends, list):
 			friends = list(set(friends))
 
-		list_name = 'cfl-%s-%s' % (username, str(uuid.uuid4()).split('-')[0])
-
+		list_name = str(uuid.uuid4())
 		ds = cls.new_client((username, password)) if not ds_client else ds_client
 		credentials = ds.get_credentials()
 		try:

@@ -119,7 +119,7 @@ def fl_operations(*args, **kwargs):
 	
 	client = new_client(context)
 	client.set_credentials(credentials)
-	name = unicode(str(uuid.uuid4()).split('-')[-1])
+	name = unicode(str(uuid.uuid4()).split('-'))
 	
 	now = time.time()
 	fl = client.create_friends_list_with_name_and_friends(name, list(friends))

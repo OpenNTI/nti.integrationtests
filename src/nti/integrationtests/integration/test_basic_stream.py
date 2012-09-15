@@ -1,7 +1,8 @@
-import time
+import uuid
 import unittest
 
 from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.utils import generate_ntiid
 from nti.integrationtests.integration import container
 from nti.integrationtests.integration import contains
 from nti.integrationtests.integration import sortchanges
@@ -27,7 +28,7 @@ class TestBasicStream(DataServerTestCase):
 	def setUp(self):
 		super(TestBasicStream, self).setUp()
 
-		self.container = 'test_basic_stream-container-%s' % time.time()
+		self.container = generate_ntiid(nttype='stream')
 		self.ds.set_credentials(self.owner)
 
 	def test_sharing_goes_to_stream(self):
@@ -137,8 +138,8 @@ class TestBasicStream(DataServerTestCase):
 
 	def test_creating_friendslist_goes_to_stream(self):
 
-		# lazy and use the container name
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.container, [self.target[0]])
+		list_name = str(uuid.uuid4())
+		createdlist = self.ds.create_friends_list_with_name_and_friends(list_name, [self.target[0]])
 
 		self.ds.wait_for_event()
 
@@ -157,7 +158,8 @@ class TestBasicStream(DataServerTestCase):
 
 	def test_adding_to_friendslist_goes_to_stream(self):
 
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.container, [])
+		list_name = str(uuid.uuid4())
+		createdlist = self.ds.create_friends_list_with_name_and_friends(list_name, [])
 		createdlist.friends = [self.target[0]]
 
 		updatedlist = self.ds.update_object(createdlist)
@@ -201,7 +203,8 @@ class TestBasicStream(DataServerTestCase):
 		self.ds.wait_for_event()
 
 		# we want to circle but we have already circled target so we get no notification
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.container, [self.target[0]], credentials=self.three)
+		list_name = str(uuid.uuid4())
+		createdlist = self.ds.create_friends_list_with_name_and_friends(list_name, [self.target[0]], credentials=self.three)
 		target_user_object = self.ds.get_user_object(credentials=self.target)
 		target_notification_count = starting_count + 1
 		user_not_count = target_user_object.notificationCount

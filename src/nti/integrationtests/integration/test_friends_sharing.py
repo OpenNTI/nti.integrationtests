@@ -1,6 +1,7 @@
 import uuid
 
 from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.utils import generate_ntiid
 from nti.integrationtests.integration import shared_with
 from nti.integrationtests.contenttypes import FriendsList
 from nti.integrationtests.integration import contained_in
@@ -20,8 +21,8 @@ class TestFriendsSharing(DataServerTestCase):
 		super(TestFriendsSharing, self).setUp()
 		
 		self.ds.set_credentials(self.owner)
-		self.container = 'container-%s' % uuid.uuid1()
-		self.list_name = 'friends-%s' % uuid.uuid1()
+		self.container = generate_ntiid(nttype='friends')
+		self.list_name = '%s' % uuid.uuid1()
 
 	def _create_friend_list(self, client, name, friends):
 		fl = FriendsList(name=name, friends=friends)
