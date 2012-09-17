@@ -193,7 +193,8 @@ class DataserverClient(object):
 		assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
 		assert_that(obj.container, is_not(none()), 'must provide a valid container')
 		pages, _ = self._get_collection(name=name, workspace=workspace, credentials=credentials)
-		return self._post_to_collection(obj, pages, credentials, adapt=adapt, **kwargs)
+		result = self._post_to_collection(obj, pages, credentials, adapt=adapt, **kwargs)
+		return result
 
 	def update_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
 
@@ -533,7 +534,8 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(201), 'invalid status code while posting an object')
 
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data) if adapt else data
+		result = adapt_ds_object(data) if adapt else data
+		return result
 
 	def _post_raw_content(self, href, source, content_type=None, slug=None, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
