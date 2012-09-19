@@ -55,16 +55,13 @@ class TestChatSearch(HostUserChatTest):
 	
 	def get_snippet(self, result):
 		latest = 0
-		latest_oid = 0
+		snippet = None
 		items = result['Items']
-		for oid, d in items.items():
+		for d in items:
 			if latest < int(d['Last Modified']):
 				latest = int(d['Last Modified'])
-				latest_oid = oid
-		try:
-			return items[latest_oid]['Snippet']
-		except KeyError:
-			return None
+				snippet = d['Snippet']
+		return snippet
 		
 # ---------------------------
 
