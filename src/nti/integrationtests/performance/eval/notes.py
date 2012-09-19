@@ -11,12 +11,28 @@ from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance import TimerResultMixin 
 from nti.integrationtests.nltk import default_message_generator
 
+import logging
+logger = logging.getLogger(__name__)
+
 _generator = default_message_generator()
 
 def script_setup(context):
-	context['list.lock'] = multiprocessing.Lock()
-	context['created_notes'] = list()
-	context['updated_notes'] = list()
+	_list_1, _list_1 = _lock = None
+	use_threads = context.as_bool('use_threads', False)
+	if use_threads:
+		_lock = multiprocessing.Lock()
+		_list_1 = list()
+		_list_2 = list()
+	else:
+		logging.warn("Creating a new  multiprocessing Manager")
+		manager = multiprocessing.Manager()
+		_lock = manager.Lock()
+		_list_1 = manager.list()
+		_list_2 = manager.list()
+	
+	context['list.lock'] = _lock
+	context['created_notes'] = _list_1
+	context['updated_notes'] = _list_2
 	
 def script_teardown(context):
 	del context['list.lock']
