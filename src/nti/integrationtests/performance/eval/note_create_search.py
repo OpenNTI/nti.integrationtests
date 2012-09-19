@@ -20,8 +20,19 @@ logger = logging.getLogger(__name__)
 _maxusers = MAX_TEST_USERS
 
 def script_setup(context):
-	context['list.lock'] = multiprocessing.Lock()
-	context['created_notes'] = list()
+	_list = _lock = None
+	use_threads = context.as_bool('use_threads', False)
+	if use_threads:
+		_lock = multiprocessing.Lock()
+		_list = list()
+	else:
+		logging.warn("Creating a new  multiprocessing Manager")
+		manager = multiprocessing.Manager()
+		_lock = manager.Lock()
+		_list = manager.list()
+	
+	context['list.lock'] = _lock
+	context['created_notes'] = _list
 	
 def script_teardown(context):
 	del context['list.lock']
