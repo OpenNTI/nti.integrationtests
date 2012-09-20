@@ -1,10 +1,11 @@
 import time
 import unittest
 
+from nti.integrationtests.utils import phrases
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import contains
 
-from hamcrest import (is_, is_not, assert_that)
+from hamcrest import (is_, is_not, assert_that, has_length)
 
 class TestBasicReplying(DataServerTestCase):
 
@@ -242,6 +243,20 @@ class TestBasicReplying(DataServerTestCase):
 		# cleanup
 		self.ds.delete_object(created_obj)
 		self.ds.delete_object(created_reply)
+		
+	def test_multiple_replies(self):
+		notes = []
+		for x, txt in enumerate(phrases):
+			txt = unicode(txt)
+			if x == 0:
+				note = self.ds.create_note(txt, self.container, adapt=True)
+			else:
+				note = self.ds.create_note(txt, self.container, inReplyTo=notes[0].id, adapt=True)
+			notes.append(note)
 
+		replies = self.ds.replies(notes[0])
+		items = replies['Items']
+		assert_that(items, has_length(len(phrases)-1))
+		
 if __name__ == '__main__':
 	unittest.main()

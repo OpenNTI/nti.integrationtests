@@ -228,6 +228,9 @@ class DSObject(Persistent, UserDict.DictMixin):
 	def get_unfavorite_link(self):
 		return self.get_link('unfavorite')
 	
+	def get_replies_link(self):
+		return self.get_link('replies')
+	
 	def get_link(self, link_type = None):
 		if link_type and hasattr(self, 'links'):
 			links = self.links or []

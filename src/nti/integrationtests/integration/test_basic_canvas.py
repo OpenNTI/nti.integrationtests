@@ -4,10 +4,11 @@ import unittest
 
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.contenttypes import Canvas
-from nti.integrationtests.utils import image_to_data_url
+from nti.integrationtests.utils.dataurl import encode
 from nti.integrationtests.contenttypes import CanvasUrlShape
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
+
 
 from hamcrest import (is_, is_not, assert_that)
 
@@ -40,7 +41,10 @@ class TestBasicCanvas(DataServerTestCase):
 	def test_canvas_and_image(self):
 
 		source_file = os.path.join(os.path.dirname(__file__), "_class_image.jpg")
-		url = image_to_data_url(source_file)
+		with open(source_file, "rb") as fd:
+			raw_bytes = fd.read()
+		
+		url = encode(raw_bytes, 'image/jpg')
 		urlShape = CanvasUrlShape(url=url)
 		canvas = Canvas(shapeList=[urlShape], container=self.container)
 		created_obj = self.ds.create_object(canvas, adapt=True)
