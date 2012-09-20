@@ -1,10 +1,12 @@
 import os
 import time
+import base64
 import random
 import socket
 import numbers
 import datetime
 import ConfigParser
+from cStringIO import StringIO
 
 boolean_states = {	'1': True, 'yes': True, 'true': True, 'on': True,
 					'0': False, 'no': False, 'false': False, 'off': False}
@@ -113,3 +115,15 @@ def get_int_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=
 
 def get_float_option(config, section=ConfigParser.DEFAULTSECT, name=None, default=None):
 	return _get_option(config.getfloat, section, name, default)
+
+def image_to_data_url(source_file):
+	_, ext = os.path.splitext(source_file)
+	if ext:
+		buf = StringIO()
+		with open(source_file, "rb") as fd:
+			base64.encode(fd, buf)
+		data = buf.getvalue()
+		result = 'data:image/%s;base64,%s' % (ext[1:], data)
+	else:
+		result = None
+	return result
