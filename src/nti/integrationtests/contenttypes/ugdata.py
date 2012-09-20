@@ -186,5 +186,16 @@ class CanvasTextShape(CanvasShape):
 
 	_fields = {	'text' : False, 'transform' : False, 'modified' : False, 'strokeOpacity' : 0,
 				'strokeWidth' : False, 'fillRGBAColor': False }
+	
+class CanvasUrlShape(CanvasShape):
+	
+	DATASERVER_CLASS = 'CanvasUrlShape'
+	MIME_TYPE = 'application/vnd.nextthought.canvasurlshape'
+	
+	_ds_field_mapping = {}
+	_ds_field_mapping.update(DSObject._ds_field_mapping)
 
+	_fields = {'url' : False}
+	_fields.update(CanvasShape._fields)
+	
 do_register_dsobjecs(dict(locals()).itervalues())
