@@ -9,7 +9,6 @@ from nti.integrationtests.contenttypes import CanvasUrlShape
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
 
-
 from hamcrest import (is_, is_not, assert_that)
 
 class TestBasicCanvas(DataServerTestCase):
