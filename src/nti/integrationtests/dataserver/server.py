@@ -106,7 +106,7 @@ class DataserverProcess(object):
 															port=port,
 															sync_changes=sync_changes)
 			if use_coverage:
-				self._writer_supervisor_config_coverage(root_dir, pserve_ini_file, coverage_rcfile)
+				self._write_supervisor_config_coverage(root_dir, pserve_ini_file, coverage_rcfile)
 			else:
 				self._write_supervisor_config(root_dir, pserve_ini_file)
 
@@ -177,7 +177,8 @@ class DataserverProcess(object):
 		for section in ini.sections():
 			if section.startswith("program:"):
 				command = ini.get(section, 'command')
-				ini.set(section, 'command', command_prefix + command)
+				if not command.startswith( '/' ):
+					ini.set(section, 'command', command_prefix + command)
 
 		with open(config, "wb") as fp:
 			ini.write(fp)
@@ -200,7 +201,7 @@ class DataserverProcess(object):
 		visord = os.path.join(os.path.expanduser(root_dir), 'etc', 'supervisord_dev.conf')
 		self._rewrite_supervisor_config(visord, command_prefix)
 
-	def _writer_supervisor_config_coverage(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG,
+	def _write_supervisor_config_coverage(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG,
 										   rcfile=COVERAGE_CONFIG):
 
 		if not os.path.exists(rcfile):

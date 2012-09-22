@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from nti.monkey import gevent_patch_on_import
+gevent_patch_on_import.patch()
 
 import sys
 import argparse
@@ -6,7 +8,6 @@ import tempfile
 
 from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.runners import test_runner
-
 def main(args = None):
 
 	args = args or sys.argv[1:]
