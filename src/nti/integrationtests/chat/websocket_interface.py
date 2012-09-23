@@ -13,12 +13,12 @@ from nti.integrationtests.wsclient import WebSocketException
 from nti.integrationtests.wsclient import create_ds_connection
 from nti.integrationtests.wsclient import ConnectionClosedException
 
-WS_ACK			= '6::'
-WS_CONNECT		= '1::'
-WS_DISCONNECT	= '0::'
-WS_HEART_BEAT	= '2::'
-WS_MESSAGE		= '3::'
-WS_BROADCAST	= '5:::'
+WS_ACK			= b'6::'
+WS_CONNECT		= b'1::'
+WS_DISCONNECT	= b'0::'
+WS_HEART_BEAT	= b'2::'
+WS_MESSAGE		= b'3::'
+WS_BROADCAST	= b'5:::'
 
 SERVER_KILL		= 'serverkill'
 
@@ -385,6 +385,9 @@ class DSUser(object):
 
 	postMessage = chat_postMessage
 
+	def send_heartbeat(self):
+		_send_heartbeat(self.ws)
+		
 	# ---- ----- ----
 	
 	def data_noticeIncomingChange(self, change):
@@ -747,6 +750,9 @@ def _shadowUsers(ws, containerId, users, data_format='json', message_context=def
 def _ws_disconnect(ws, data_format='json', message_context=default_message_context):
 	msg = b"0::"
 	message_context.send(ws, msg)
+
+def _send_heartbeat(ws):
+	ws.send(WS_HEART_BEAT)
 
 def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, timeout=DEAULT_TIMEOUT, is_secure=False,
 				message_context=default_message_context):
