@@ -139,15 +139,11 @@ HEADERS_TO_EXIST_FOR_HYBI00 = ["sec-websocket-origin", "sec-websocket-location",
 
 HEADERS_TO_EXIST_FOR_HIXIE75 = ["websocket-origin", "websocket-location",]
 
-# ---------------------------------
-
 class WebSocketException(Exception):
 	pass
 
 class ConnectionClosedException(WebSocketException):
 	pass
-
-# ---------------------------------
 
 class _SSLSocketWrapper(object):
 	def __init__(self, sock):
@@ -453,8 +449,6 @@ class WebSocket(object):
 					return s
 		return None
 
-# ---------------------------------
-
 def create_connection(url, timeout=default_timeout, on_handshake=None, **options):
 	"""
 	connect to url and return websocket object.
@@ -467,8 +461,6 @@ def create_connection(url, timeout=default_timeout, on_handshake=None, **options
 	websock.settimeout(timeout)
 	websock.connect(url, on_handshake=on_handshake, **options)
 	return websock
-
-# ---------------------------------
 
 _msg_pat = re.compile('.+\\:15\\:10\\:.*websocket.*')
 

@@ -37,9 +37,11 @@ class TestWhisperChat(test_chat_multi_user.TestMultiUserChat):
 
 class Host(objects.Host):
 		
-	def post_messages(self, room_id, *args, **kwargs):
+	def post_messages(self, room_id, tick=5, *args, **kwargs):
+		counter = 0
 		entries = random.randint(20, 30)
 		for _ in range(entries):
+			counter + 1
 			msg = self.generate_message(k=5)
 			if random.random() <= 0.4:
 				whisper_to = random.choice(self.users_online)
@@ -48,6 +50,8 @@ class Host(objects.Host):
 			else:
 				self.chat_postMessage(message=msg, containerId=room_id)
 			time.sleep(0.25)
+			if counter % tick == 0:
+				self.send_heartbeat()
 			
 if __name__ == '__main__':
 	unittest.main()

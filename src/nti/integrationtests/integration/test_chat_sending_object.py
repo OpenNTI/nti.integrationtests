@@ -53,10 +53,14 @@ class Host(objects.Host):
 		super(Host, self).__init__(*args, **kwargs)
 		self.host_messages = host_messages
 		
-	def post_messages(self, room_id, *args, **kwargs):
+	def post_messages(self, room_id, tick=5, *args, **kwargs):
+		counter = 0
 		for m in self.host_messages:
+			counter += 1
 			self.chat_postMessage(message=m, containerId=room_id)
 			time.sleep(0.25)
+			if counter % tick == 0:
+				self.send_heartbeat()
 	
 if __name__ == '__main__':
 	unittest.main()

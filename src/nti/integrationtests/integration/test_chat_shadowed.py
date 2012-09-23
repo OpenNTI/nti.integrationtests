@@ -45,7 +45,7 @@ class Ghost(objects.Host):
 		self.shadowUsers(self.room, self.users_to_shadow)
 
 	def post_messages(self, room_id, *args, **kwargs):
-		pass
+		self.send_heartbeat()
 
 if __name__ == '__main__':
 	unittest.main()

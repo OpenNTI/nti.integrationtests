@@ -13,13 +13,17 @@ from nti.integrationtests.dataserver.server import DataserverProcess
 
 MAX_TEST_USERS = 100
 
-def wait_and_process(self, delay, condf=lambda : True):
+def wait_and_process(self, delay, condf=lambda : True, tick=5):
     elapsed = 0
+    counter = 0
     while elapsed < delay and condf():
         t = time.time()
         self.nextEvent() # process any message while waiting
         t = max(time.time() - t, 0.01)
         elapsed = elapsed + t
+        counter = counter + 1
+        if counter % tick == 0:
+            self.send_heartbeat()
     return elapsed
         
 def pprint_to_file(self, outdir=None, full=False, **kwargs):

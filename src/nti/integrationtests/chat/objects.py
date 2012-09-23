@@ -39,10 +39,14 @@ class BasicUser(DSUser):
 		super(BasicUser, self).serverKill(args)
 		raise Serverkill(args)
 
-	def wait_heart_beats(self, max_beats=3):
+	def wait_heart_beats(self, max_beats=3, tick=3):
+		counter = 0
 		self.heart_beats = 0
 		while self.heart_beats < max_beats:
+			counter +=1 
 			self.nextEvent()
+			if counter % tick == 0:
+				self.send_heartbeat()
 
 	@property
 	def first_room(self):
@@ -50,14 +54,18 @@ class BasicUser(DSUser):
 
 	def generate_message(self, k=4, phrases=phrases):
 		return generate_message(k=4, phrases=phrases)
-
-	def post_random_messages(self, room_id, entries=None, a_min=3, a_max=10, delay=None):
+			
+	def post_random_messages(self, room_id, entries=None, a_min=3, a_max=10, delay=None, tick=5):
+		counter = 0
 		entries = entries or random.randint(a_min, a_max)
 		for _ in xrange(entries):
+			counter += 1
 			content = self.generate_message()
 			self.chat_postMessage(message=unicode(content), containerId=room_id)
 			if delay is not None and delay > 0:
 				time.sleep(delay)
+			if counter % tick == 0:
+				self.send_heartbeat()
 
 	def save_traceback(self, e=None):
 		sio = StringIO()
@@ -104,10 +112,14 @@ class OneRoomUser(BasicUser):
 		self.last_recv_time = time.time()
 		return message
 
-	def wait_4_room(self, max_beats=5):
+	def wait_4_room(self, max_beats=5, tick=3):
+		counter = 0
 		self.heart_beats = 0
 		while self.heart_beats < max_beats and not self.room:
+			counter += 1
 			self.nextEvent()
+			if counter % tick == 0:
+				self.send_heartbeat()
 
 		if self.heart_beats >= max_beats and not self.room:
 			raise CouldNotEnterRoom()
@@ -149,11 +161,15 @@ class Host(OneRoomUser):
 			self.online.add(username)
 			self.heart_beats = 0
 
-	def wait_for_guests_to_connect(self, max_heart_beats=3):
+	def wait_for_guests_to_connect(self, max_heart_beats=3, tick=3):
+		counter = 0 
 		self.heart_beats = 0
 		while self.heart_beats < max_heart_beats and len(self.online) < len(self.occupants):
 			self.nextEvent()
-
+			counter = counter + 1
+			if counter % tick == 0:
+				self.send_heartbeat()
+			
 	def __call__(self, *arg, **kwargs):
 
 		delay = kwargs.get('delay', 0.05)
