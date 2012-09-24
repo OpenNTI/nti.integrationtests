@@ -41,8 +41,8 @@ class TestChatSearch(HostUserChatTest):
 			
 		self.ds.set_credentials((self.user_eight, self.default_user_password))
 		
-		user_3_host_snippet = self.get_snippet(self.ds.search_user_content("green"))
-		user_3_user_snippet = self.get_snippet(self.ds.search_user_content("four"))
+		user_3_host_snippet = self.get_snippet(self.ds.search_user_content("zankanotachi"))
+		user_3_user_snippet = self.get_snippet(self.ds.search_user_content("benihime"))
 
 		self.assertEqual(user_3_host_snippet, None, 'A user not involved in the chat found a message he shouldnt have')
 		self.assertEqual(user_3_user_snippet, None, 'A user not involved in the chat found a message he shouldnt have')
