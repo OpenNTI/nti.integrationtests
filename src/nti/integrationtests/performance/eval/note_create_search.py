@@ -8,16 +8,17 @@ from nltk import word_tokenize
 from whoosh.analysis import STOP_WORDS
 
 from nti.integrationtests.utils import generate_ntiid
-from nti.integrationtests.utils import generate_message
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.utils import generate_random_text
 from nti.integrationtests.performance.eval import new_client
+from nti.integrationtests.nltk import default_message_generator
 from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 
 import logging
 logger = logging.getLogger(__name__)
 
 _maxusers = MAX_TEST_USERS
+_generator = default_message_generator()
 
 def script_setup(context):
 	_list = _lock = None
@@ -60,7 +61,7 @@ def create_note(*args, **kwargs):
 	
 	# create a note
 	nttype = generate_random_text()
-	message = generate_message()
+	message = _generator.generate(random.randint(10, 40))
 	
 	container = None
 	ntiids = getattr(context,'ntiids',None)
