@@ -50,7 +50,8 @@ phrases = (	b'Yellow brown',
 			b'Flying Plum Tree',
 			b'Iron Fist Earth-Severing Wind',
 			b'Shine Brightly',
-			b'Thousand Cherry Blossoms')
+			b'Thousand Cherry Blossoms',
+			b'Prison Uniform of the Remaining Sun')
 
 DEFAULT_USER_PASSWORD = 'temp001'
 
