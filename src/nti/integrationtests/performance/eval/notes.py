@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 _generator = default_message_generator()
 
 def script_setup(context):
-	_list_1, _list_1 = _lock = None
 	use_threads = context.as_bool('use_threads', False)
 	if use_threads:
 		_lock = multiprocessing.Lock()
@@ -56,15 +55,20 @@ def create_note(*args, **kwargs):
 	# create a ds client
 	client = new_client(context)
 	
+	min_words = context.as_int('min_words', 10)
+	max_words = context.as_int('max_words', 20)
+	note_size = random.randint(min_words, max_words)
+	
 	# create a note
 	nttype = generate_random_text()
-	message = _generator.generate(random.randint(10, 20))
+	message = _generator.generate(note_size)
 	container = generate_ntiid(nttype=nttype)
 	result = TimerResultMixin()
 	
 	now = time.time()
 	note = client.create_note(message, container=container)
 	result['ds.op'] = time.time() - now
+	result['note.size'] = note_size
 	
 	# check and save
 	assert note, 'could  not create note'
@@ -79,14 +83,19 @@ def update_note(*args, **kwargs):
 	note = pop_queue(context, 'created_notes')
 	if not note: return IGNORE_RESULT
 	
+	min_words = context.as_int('min_words', 10)
+	max_words = context.as_int('max_words', 20)
+	note_size = random.randint(min_words, max_words)
+	
 	# update note
 	client = new_client(context)
-	note['body']=[_generator.generate(random.randint(10, 20))]
+	note['body']=[_generator.generate(note_size)]
 	result = TimerResultMixin()
 	
 	now = time.time()
 	note = client.update_object(note)
 	result['ds.op'] = time.time() - now
+	result['note.size'] = note_size
 	
 	# check and save
 	assert note, 'could not update note'

@@ -21,7 +21,6 @@ _maxusers = MAX_TEST_USERS
 _generator = default_message_generator()
 
 def script_setup(context):
-	_list = _lock = None
 	use_threads = context.as_bool('use_threads', False)
 	if use_threads:
 		_lock = multiprocessing.Lock()
