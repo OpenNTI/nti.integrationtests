@@ -119,7 +119,7 @@ def delete_note(*args, **kwargs):
 	
 	# get updated note
 	t = pop_queue(context, 'updated_notes')
-	if not t: return 'bad'
+	if not t: return IGNORE_RESULT
 	note, username, note_size = t
 	
 	# delete note
