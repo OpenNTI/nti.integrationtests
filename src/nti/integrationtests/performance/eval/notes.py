@@ -15,7 +15,6 @@ from nti.integrationtests.nltk import default_message_generator
 import logging
 logger = logging.getLogger(__name__)
 
-_maxusers = MAX_TEST_USERS
 _generator = default_message_generator()
 
 def script_setup(context):
@@ -54,8 +53,10 @@ def pop_queue(context, queue_name='created_notes'):
 def create_note(*args, **kwargs):
 	context = kwargs['__context__']
 	
+	maxusers = context.as_int('max_temp_users', MAX_TEST_USERS)
+	
 	# create a ds client
-	runner = kwargs['__runner__'] % _maxusers
+	runner = kwargs['__runner__'] % maxusers
 	username = 'test.user.%s@nextthought.com' % runner
 	credentials = (username, 'temp001')
 	
@@ -75,7 +76,7 @@ def create_note(*args, **kwargs):
 	now = time.time()
 	note = client.create_note(message, container=container)
 	result['ds.op'] = time.time() - now
-	result['note.size'] = note_size
+	result['words.note'] = note_size
 	
 	# check and save
 	assert note, 'could  not create note'
@@ -91,6 +92,16 @@ def update_note(*args, **kwargs):
 	if not t: return IGNORE_RESULT
 	note, username, _ = t
 	
+	max_update_users = context.as_int('max_update_users', 0)
+	if max_update_users:
+		maxusers = context.as_int('max_temp_users', MAX_TEST_USERS)
+		allusers = ['test.user.%s@nextthought.com' % x for x in range(1, maxusers+1)]
+		sharedWith = random.sample(allusers, random.randint(1, max_update_users))
+		if username in sharedWith:
+			sharedWith.remove(username)
+	else:
+		sharedWith = []
+		
 	min_words = context.as_int('min_words', 10)
 	max_words = context.as_int('max_words', 20)
 	note_size = random.randint(min_words, max_words)
@@ -101,12 +112,14 @@ def update_note(*args, **kwargs):
 	client.set_credentials(credentials)
 	
 	note['body']=[_generator.generate(note_size)]
+	note['sharedWith'] = sharedWith
 	result = TimerResultMixin()
 	
 	now = time.time()
 	note = client.update_object(note)
 	result['ds.op'] = time.time() - now
-	result['note.size'] = note_size
+	result['words.note'] = note_size
+	result['shared.with'] = len(sharedWith)
 	
 	# check and save
 	assert note, 'could not update note'
@@ -131,7 +144,7 @@ def delete_note(*args, **kwargs):
 	now = time.time()
 	client.delete_object(note)
 	result['ds.op'] = time.time() - now
-	result['note.size'] = note_size
+	result['words.note'] = note_size
 	
 	return result
 
