@@ -9,11 +9,13 @@ from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.utils import generate_random_text
 from nti.integrationtests.performance.eval import new_client
 from nti.integrationtests.performance import TimerResultMixin 
+from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.nltk import default_message_generator
 
 import logging
 logger = logging.getLogger(__name__)
 
+_maxusers = MAX_TEST_USERS
 _generator = default_message_generator()
 
 def script_setup(context):
@@ -53,7 +55,12 @@ def create_note(*args, **kwargs):
 	context = kwargs['__context__']
 	
 	# create a ds client
+	runner = kwargs['__runner__'] % _maxusers
+	username = 'test.user.%s@nextthought.com' % runner
+	credentials = (username, 'temp001')
+	
 	client = new_client(context)
+	client.set_credentials(credentials)
 	
 	min_words = context.as_int('min_words', 10)
 	max_words = context.as_int('max_words', 20)
@@ -72,7 +79,7 @@ def create_note(*args, **kwargs):
 	
 	# check and save
 	assert note, 'could  not create note'
-	add_in_queue(context, note, 'created_notes')
+	add_in_queue(context, (note, username, note_size), 'created_notes')
 	
 	return result
 
@@ -80,8 +87,9 @@ def update_note(*args, **kwargs):
 	context = kwargs['__context__']
 	
 	# get created note
-	note = pop_queue(context, 'created_notes')
-	if not note: return IGNORE_RESULT
+	t = pop_queue(context, 'created_notes')
+	if not t: return IGNORE_RESULT
+	note, username, _ = t
 	
 	min_words = context.as_int('min_words', 10)
 	max_words = context.as_int('max_words', 20)
@@ -89,6 +97,9 @@ def update_note(*args, **kwargs):
 	
 	# update note
 	client = new_client(context)
+	credentials = (username, 'temp001')
+	client.set_credentials(credentials)
+	
 	note['body']=[_generator.generate(note_size)]
 	result = TimerResultMixin()
 	
@@ -99,7 +110,7 @@ def update_note(*args, **kwargs):
 	
 	# check and save
 	assert note, 'could not update note'
-	add_in_queue(context, note, 'updated_notes')
+	add_in_queue(context,  (note, username, note_size), 'updated_notes')
 	
 	return result
 	
@@ -107,16 +118,20 @@ def delete_note(*args, **kwargs):
 	context = kwargs['__context__']
 	
 	# get updated note
-	note = pop_queue(context, 'updated_notes')
-	if not note: return 'bad'
+	t = pop_queue(context, 'updated_notes')
+	if not t: return 'bad'
+	note, username, note_size = t
 	
 	# delete note
 	client = new_client(context)
-	result = TimerResultMixin()
+	credentials = (username, 'temp001')
+	client.set_credentials(credentials)
 	
+	result = TimerResultMixin()
 	now = time.time()
 	client.delete_object(note)
 	result['ds.op'] = time.time() - now
+	result['note.size'] = note_size
 	
 	return result
 
