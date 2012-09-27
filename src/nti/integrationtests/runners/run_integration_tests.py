@@ -17,7 +17,7 @@ def main(args = None):
 	parser.add_argument('-cr', '--coverage_report', help='create coverage report', action='store_true', default = False)
 	parser.add_argument('-rd', '--root_dir', help='root directory', required=False)
 	parser.add_argument('-p', '--port', help='server port', type=int, required=False, default=None)
-	parser.add_argument('--verbose', dest='verbose', action='store_true', default=False,
+	parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', default=False,
 						help="Creating a user to whom COPPA applies (under 13)" )
 	
 	opts, rem_args = parser.parse_known_args(args) # Let Nose have the remainder of the args
