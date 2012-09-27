@@ -6,7 +6,7 @@ from nti.integrationtests.integration import contains
 from nti.integrationtests.integration import shared_with
 from nti.integrationtests.integration import contained_in
 from nti.integrationtests.integration import has_same_oid_as
-from nti.integrationtests.integration import container_of_length
+from nti.integrationtests.integration import container_of_length_greater_than_or_equal_to
 
 from hamcrest import (is_, assert_that, is_not)
 
@@ -245,19 +245,17 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.set_credentials(self.owner)
 		note = self.ds.create_note("kyoka suigetsu", self.container, adapt=True)
 		note = self.ds.share_object(note, self.target[0], adapt=True)
-		time.sleep(2)
 
 		self.ds.set_credentials(self.target)
 		result = self.ds.search_user_content("kyoka")
-		assert_that(result, container_of_length(1))
+		assert_that(result, container_of_length_greater_than_or_equal_to(1))
 
 		self.ds.set_credentials(self.owner)
 		self.ds.delete_object(note)
-		time.sleep(2)
-
+		
 		self.ds.set_credentials(self.target)
 		result = self.ds.search_user_content("kyoka")
-		assert_that(result, container_of_length(0))
+		assert_that(result, container_of_length_greater_than_or_equal_to(0))
 
 if __name__ == '__main__':
 	unittest.main()

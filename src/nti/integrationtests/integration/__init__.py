@@ -7,6 +7,7 @@ from hamcrest import has_item
 from hamcrest import has_entry
 from hamcrest import has_items
 from hamcrest import has_length
+from hamcrest import greater_than_or_equal_to
 from hamcrest.core.base_matcher import BaseMatcher
 from hamcrest.library.collection.issequence_containinginanyorder import contains_inanyorder
 
@@ -56,6 +57,9 @@ def container():
 
 def container_of_length(count):
 	return all_of(container(), has_entry('Items', has_length(count)))
+
+def container_of_length_greater_than_or_equal_to(count):
+	return all_of(container(), has_entry('Items', has_length(greater_than_or_equal_to(count))))
 
 def contained_in(container):
 	return ContainedIn(container)
