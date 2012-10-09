@@ -1,6 +1,7 @@
 import time
 import uuid
-
+import unittest
+	
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import accepting
 from nti.integrationtests.integration import containing_friend
@@ -35,6 +36,20 @@ class TestBasicFriendsLists(DataServerTestCase):
 
 		self.ds.delete_object(createdlist)
 
+	def test_can_create_duplicate_friendslist(self):
+		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, [])
+		lists = self.ds.get_friends_lists()
+		assert_that(lists, contains_friendslist(self.list_name))
+
+		try:
+			createdlist_2 = self.ds.create_friends_list_with_name_and_friends(self.list_name, [])
+			self.ds.delete_object(createdlist_2)
+			self.fail('Created a duplicate friend list')
+		except:
+			pass
+	
+		self.ds.delete_object(createdlist)
+		
 	def test_can_delete_friendslist(self):
 
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
@@ -131,5 +146,4 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 
 if __name__ == '__main__':
-	import unittest
 	unittest.main()
