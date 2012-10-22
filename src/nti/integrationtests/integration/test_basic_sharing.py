@@ -1,4 +1,3 @@
-import uuid
 import time
 import unittest
 
@@ -243,14 +242,13 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(shared_obj['sharedWith'], is_(['test.user.2@nextthought.com']))
 
 	def test_search_shared(self):
-		msg_split = str(uuid.uuid4()).split('-')
-		msg = ''.join(msg_split)
+		msg = 'Aizen using Hado #90: Kurohitsugi (Black Coffin).'
 		
 		self.ds.set_credentials(self.owner)
 		note = self.ds.create_note(msg, self.container, adapt=True)
 		note = self.ds.share_object(note, self.target[0], adapt=True)
 
-		to_search = unicode(msg)
+		to_search = 'Kurohitsugi'
 		self.ds.set_credentials(self.target)
 		result = self.ds.unified_search(to_search, self.container)
 		assert_that(result, container_of_length_greater_than_or_equal_to(1))
