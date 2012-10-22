@@ -1,3 +1,4 @@
+import uuid
 import time
 import unittest
 
@@ -242,19 +243,23 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(shared_obj['sharedWith'], is_(['test.user.2@nextthought.com']))
 
 	def test_search_shared(self):
+		msg_split = str(uuid.uuid4()).split('-')
+		msg = ''.join(msg_split)
+		
 		self.ds.set_credentials(self.owner)
-		note = self.ds.create_note("kyoka suigetsu", self.container, adapt=True)
+		note = self.ds.create_note(msg, self.container, adapt=True)
 		note = self.ds.share_object(note, self.target[0], adapt=True)
 
+		to_search = unicode(msg)
 		self.ds.set_credentials(self.target)
-		result = self.ds.search_user_content("kyoka")
+		result = self.ds.unified_search(to_search, self.container)
 		assert_that(result, container_of_length_greater_than_or_equal_to(1))
 
 		self.ds.set_credentials(self.owner)
 		self.ds.delete_object(note)
 		
 		self.ds.set_credentials(self.target)
-		result = self.ds.search_user_content("kyoka")
+		result = self.ds.unified_search(to_search, self.container)
 		assert_that(result, container_of_length_greater_than_or_equal_to(0))
 
 if __name__ == '__main__':
