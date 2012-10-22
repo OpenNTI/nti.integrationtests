@@ -1,5 +1,6 @@
 import os
 import six
+import urllib
 import anyjson
 import warnings
 import collections
@@ -338,8 +339,8 @@ class DataserverClient(object):
 		link = collection.get_link(link)
 		url = _check_url(urljoin(self.endpoint, link.href))
 		if ntiid:
-			url = _check_url(url + ntiid)
-		url = url + query
+			url = _check_url(url + urllib.quote(ntiid))
+		url = url + urllib.quote(query)
 
 		rp = self.httplib.do_get(url, credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), 'invalid status code while searching content')
