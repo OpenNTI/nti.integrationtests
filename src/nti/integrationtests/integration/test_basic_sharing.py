@@ -1,4 +1,5 @@
 import time
+import uuid
 import unittest
 
 from nti.integrationtests import DataServerTestCase
@@ -14,7 +15,8 @@ class TestBasicSharing(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
 	target = ('test.user.2@nextthought.com', DataServerTestCase.default_user_password)
-
+	user_3 = ('test.user.3@nextthought.com', DataServerTestCase.default_user_password)
+	
 	unauthorized_target = ('test.user.3@nextthought.com', 'incorrect')
 	noteToCreateAndShare = {'text': 'A note to share'}
 
@@ -241,7 +243,7 @@ class TestBasicSharing(DataServerTestCase):
 		shared_obj = self.ds.share_object(created_obj, [self.owner[0], self.target[0]])
 		assert_that(shared_obj['sharedWith'], is_(['test.user.2@nextthought.com']))
 
-	def test_search_shared(self):
+	def test_search_direct_shared(self):
 		msg = 'Aizen using Hado #90: Kurohitsugi (Black Coffin).'
 		
 		self.ds.set_credentials(self.owner)
@@ -259,6 +261,27 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.set_credentials(self.target)
 		result = self.ds.unified_search(to_search, self.container)
 		assert_that(result, container_of_length_greater_than_or_equal_to(0))
+		
+	def test_search_friend_list_shared(self):
+
+		uid = str(uuid.uuid4()).split('-')[0]
+		list_name = '%s-%s@nextthought.com' % (uid, time.time())
+		friends = ['test.user.2@nextthought.com', 'test.user.3@nextthought.com']
+		createdlist = self.ds.create_friends_list_with_name_and_friends(list_name, friends)
+
+		msg = 'Suzumebachi Hisagomaru'
+		self.ds.set_credentials(self.owner)
+		note = self.ds.create_note(msg, self.container, adapt=True)
+		note = self.ds.share_object(note, [list_name], adapt=True)
+		
+		to_search = 'Hisagomaru'
+		self.ds.set_credentials(self.user_3)
+		result = self.ds.unified_search(to_search, self.container)
+		assert_that(result, container_of_length_greater_than_or_equal_to(1))
+		
+		self.ds.set_credentials(self.owner)
+		self.ds.delete_object(note)
+		self.ds.delete_object(createdlist)
 
 if __name__ == '__main__':
 	unittest.main()
