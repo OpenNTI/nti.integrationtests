@@ -95,6 +95,12 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.delete_object(created_obj)
 		self.ds.delete_object(other_obj)
 
+	def get_object(self, link, credentials):
+		try:
+			return self.ds.get_object(link=link, credentials=self.target)
+		except:
+			return None
+		
 	def test_revoke_sharing(self):
 
 		# create the object to share
@@ -105,25 +111,29 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(shared_obj, has_same_oid_as(created_obj))
 		assert_that(shared_obj, shared_with(self.target[0]))
 
-		self.ds.wait_for_event()
-
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target)
 		assert_that(ugd, contains(shared_obj))
 
+		link = shared_obj.get_edit_link()
+		assert_that(self.ds.get_object(link=link, credentials=self.target), is_not(None))
+		
 		# unshare it
 		unshared_obj = self.ds.unshare_object(shared_obj, self.target[0])
 		assert_that(unshared_obj, has_same_oid_as(created_obj))
 		assert_that(unshared_obj, is_not(shared_with(self.target[0])))
 
-		self.ds.wait_for_event()
-
 		# check that the user can now see it
 		container = self.ds.get_user_generated_data(self.container, credentials=self.target)
 		assert_that(created_obj, is_not(contained_in(container)))
-
-		# cleanup
-		self.ds.delete_object(created_obj)
+		
+		try:
+			link = unshared_obj.get_edit_link()
+			obj = self.get_object(link=link, credentials=self.target)
+			if obj is not None:
+				self.fail("user can still access unshared object")
+		finally:
+			self.ds.delete_object(created_obj)
 
 	def test_revoke_selected_share(self):
 

@@ -179,13 +179,18 @@ class DataserverClient(object):
 
 	# ------------------------
 
-	def get_object(self, obj_id, credentials=None, adapt=True, **kwargs):
-		collection, _ = self._get_collection(name='Objects', workspace='Global', credentials=credentials)
+	def get_object(self, obj=None, link=None, credentials=None, adapt=True, **kwargs):
+		
+		if link is None:
+			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
+			
 		credentials = self._credentials_to_use(credentials)
-		url = _check_url(urljoin(self.endpoint, collection.href)) + obj_id
-
+		href = link or obj.get_edit_link()
+		url = urljoin(self.endpoint, href)
+		__traceback_info__ = url, credentials, obj
 		rp = self.httplib.do_get(url, credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), "invalid status code getting object with id '%s'" % obj_id)
+		
+		assert_that(rp.status_int, is_(200), "invalid status code getting object at '%s'" % href)
 
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
@@ -197,7 +202,7 @@ class DataserverClient(object):
 		result = self._post_to_collection(obj, pages, credentials, adapt=adapt, **kwargs)
 		return result
 
-	def update_object(self, obj, link=None, credentials=None, adapt=True, **kwargs):
+	def update_object(self, obj=None, link=None, credentials=None, adapt=True, **kwargs):
 
 		if not link:
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
@@ -213,7 +218,7 @@ class DataserverClient(object):
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 
-	def delete_object(self, obj, link=None, credentials=None, **kwargs):
+	def delete_object(self, obj=None, link=None, credentials=None, **kwargs):
 
 		if not link:
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
