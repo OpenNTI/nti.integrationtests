@@ -24,8 +24,8 @@ def chat(*args, **kwargs):
 	use_procs =  context.as_bool("use_procs", False)
 	use_threads = not use_procs
 	
-	min_delay = context.as_int( "min_delay", 15)
-	max_delay = context.as_int( "max_delay", 45)
+	min_delay = context.as_float("min_delay", 15)
+	max_delay = context.as_float("max_delay", 45)
 	entries = context.as_int( "entries", 10)
 	
 	min_users = context.as_int( "min_users", 2)
