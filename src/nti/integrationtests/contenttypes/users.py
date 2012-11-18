@@ -29,29 +29,28 @@ class FriendsList(Community):
     DATASERVER_CLASS = 'FriendsList'
     MIME_TYPE = 'application/vnd.nextthought.friendslist'
     
-    _ds_field_mapping = {'friends' : 'friends'}
+    _ds_field_mapping = {'friends' : 'friends', 'isDynamic':'IsDynamicSharing'}
     _ds_field_mapping.update(Community._ds_field_mapping)
 
-    _fields = {'friends' : False}
+    _fields = {'friends' : False, 'isDynamic':False}
     _fields.update(Community._fields)
 
+    def __init__(self, *args, **kwargs):
+        super(FriendsList, self).__init__(*args, **kwargs)
+            
     def __setitem__(self, key, val):
         if key == 'friends':
             self._assign_to_list(self._ds_field_mapping['friends'], val)
-        else:
+        elif key not in ('isDynamic', 'IsDynamicSharing'):
             super(FriendsList, self).__setitem__(key, val)
 
 class DynamicFriendsList(FriendsList):
     
-    # DATASERVER_CLASS = 'DynamicFriendsList'
-    MIME_TYPE = 'application/vnd.nextthought.dynamicfriendslist'
-    
-    _ds_field_mapping = {'creator':'creator', 'ntiid':'NTIID'}
-    _ds_field_mapping.update(FriendsList._ds_field_mapping)
-
-    _fields = {'creator':False, 'ntiid':False}
-    _fields.update(FriendsList._fields)
-            
+    def __init__(self, *args, **kwargs):
+        super(DynamicFriendsList, self).__init__(*args, **kwargs)
+        self._data['IsDynamicSharing'] = True
+        
+         
 class User(Community):
     
     DATASERVER_CLASS = 'User'

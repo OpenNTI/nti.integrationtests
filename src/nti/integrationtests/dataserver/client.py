@@ -26,6 +26,7 @@ from nti.integrationtests.contenttypes import FriendsList
 from nti.integrationtests.contenttypes import adapt_ds_object
 from nti.integrationtests.contenttypes import TranscriptSummary
 from nti.integrationtests.contenttypes import CanvasPolygonShape
+from nti.integrationtests.contenttypes import DynamicFriendsList
 from nti.integrationtests.contenttypes import create_artificial_applicable_range
 
 from hamcrest import assert_that, is_, is_not, none, instance_of
@@ -128,8 +129,9 @@ class DataserverClient(object):
 		canvas = Canvas(shapeList=[shape], container=container, **kwargs)
 		return self.create_object(canvas, credentials=credentials, adapt=adapt, **kwargs) if store else canvas
 
-	def create_friends_list_with_name_and_friends(self, name, friends, credentials=None, adapt=True, **kwargs):
-		return self.create_friends_list(FriendsList(name=name, friends=friends), credentials=credentials, adapt=adapt, **kwargs)
+	def create_friends_list_with_name_and_friends(self, name, friends, credentials=None, isDynamic=False, adapt=True, **kwargs):
+		clazz = DynamicFriendsList if isDynamic else FriendsList
+		return self.create_friends_list(clazz(name=name, friends=friends), credentials=credentials, adapt=adapt, **kwargs)
 
 	def create_friends_list(self, obj, credentials=None, adapt=True, **kwargs):
 		assert_that(obj, instance_of(FriendsList), 'must provide a valid DataServer object')
