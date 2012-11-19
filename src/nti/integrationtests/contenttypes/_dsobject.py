@@ -252,9 +252,13 @@ class DSObject(Persistent, UserDict.DictMixin):
 collections.MutableMapping.register( DSObject )
 				
 def do_adaptation(registry, dsobject, key):
+	mimetype = dsobject.get('MimeType', None)
 	value = dsobject.get(key, None)
-	clazz = registry.get(value, None) if value else None
-	return clazz(data=dsobject) if clazz else None
+	constructor = registry.get(value, None) if value else None
+	if mimetype == 'application/vnd.nextthought.friendslist':
+		from nti.integrationtests.contenttypes import FriendsList, DynamicFriendsList
+		constructor = DynamicFriendsList if dsobject.get('IsDynamicSharing', False) else FriendsList	
+	return constructor(data=dsobject) if constructor else None
 
 def adapt_ds_object(dsobject):
 

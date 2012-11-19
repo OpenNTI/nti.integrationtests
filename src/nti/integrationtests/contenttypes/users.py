@@ -46,22 +46,29 @@ class FriendsList(Community):
 
 class DynamicFriendsList(FriendsList):
     
+    _ds_field_mapping = {'realname' : 'realname'}
+    _ds_field_mapping.update(FriendsList._ds_field_mapping)
+
+    _fields = {'realname' : False}
+    _fields.update(FriendsList._fields)
+    
     def __init__(self, *args, **kwargs):
         super(DynamicFriendsList, self).__init__(*args, **kwargs)
         self._data['IsDynamicSharing'] = True
         
-         
 class User(Community):
     
     DATASERVER_CLASS = 'User'
     
     _ds_field_mapping = {'communities': 'Communities', 'notificationCount':'NotificationCount', 
                          'presence':'Presence', 'lastLoginTime':'lastLoginTime', 'accepting':'accepting', 
-                         'following': 'following', 'ignoring':'ignoring', 'realname':'realname' }
+                         'following': 'following', 'ignoring':'ignoring', 'realname':'realname',
+                         'dynamicMemberships':'DynamicMemberships' }
     _ds_field_mapping.update(Community._ds_field_mapping)
 
     _fields = { 'communities' : False, 'notificationCount':True, 'presence':True, 'lastLoginTime':False,
-                'accepting': False, 'following': False, 'ignoring':False, 'realname': False }
+                'accepting': False, 'following': False, 'ignoring':False, 'realname': False,
+                'dynamicMemberships': False }
     _fields.update(Community._fields)
 
     def __getitem__(self, key):
