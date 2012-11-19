@@ -51,7 +51,6 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 		
 	def test_can_delete_friendslist(self):
-
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
 		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
@@ -66,7 +65,6 @@ class TestBasicFriendsLists(DataServerTestCase):
 		assert_that(lists, is_not(contains_friendslist(self.list_name)))
 
 	def test_can_create_friendslist_with_friends(self):
-
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
 		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
@@ -79,7 +77,6 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 
 	def test_can_delete_from_friendslist(self):
-
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
 		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
@@ -102,7 +99,6 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 
 	def test_can_add_to_friendslists(self):
-
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
 		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, [])
 
@@ -133,9 +129,6 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 
 	def test_circling_causes_acceptance(self):
-		"""
-		When a user is circled they are automatically accepting the user that circled them
-		"""
 		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, [self.friend[0]])
 
 		friends_user_object = self.ds.get_user_object(credentials=self.friend)

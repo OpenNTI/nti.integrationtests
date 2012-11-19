@@ -86,11 +86,6 @@ class TestFriendsSharing(DataServerTestCase):
 		self._delete_friends_fake_notes(objects)
 
 	def test_share_with_friends_and_remove_friend(self):
-		"""
-		removing a friend from the friend list does not have
-		any effect w: the sharing
-		"""
-
 		objects = self._create_friends_fake_notes()
 		self.ds.set_credentials(self.owner)
 
