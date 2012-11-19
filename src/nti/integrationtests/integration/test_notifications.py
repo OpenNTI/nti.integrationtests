@@ -45,9 +45,8 @@ class TestNotifications(DataServerTestCase):
 			self.ds.delete_object(fl, credentials=credentials)
 		
 	def test_circled_event(self):
-		
 		usr = self.ds.get_user_object(self.target[0], credentials=self.target)
-		usr.accepting = []
+		usr.dynamicMemberships = usr.following = usr.communities = usr.accepting = []
 		usr = self.ds.update_object(usr, credentials=self.target)
 		
 		self._delete_all_friends_lists(self.owner)

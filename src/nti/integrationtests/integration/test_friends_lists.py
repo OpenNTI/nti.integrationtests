@@ -19,15 +19,15 @@ class TestBasicFriendsLists(DataServerTestCase):
 
 	def setUp(self):
 		super(TestBasicFriendsLists, self).setUp()
-
 		self.ds.set_credentials(self.owner)
 		uid = str(uuid.uuid4()).split('-')[0]
 		self.list_name = '%s-%s@nextthought.com' % (uid, time.time())
 
-	#TODO: add test resolved vs. unresolved
-
+	def create_friends_list_with_name_and_friends(self, name, friends):
+		return self.ds.create_friends_list_with_name_and_friends(name, friends)
+	
 	def test_can_create_empty_friendslist(self):
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, [])
+		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, [])
 		lists = self.ds.get_friends_lists()
 		assert_that(lists, contains_friendslist(self.list_name))
 
@@ -37,12 +37,12 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 
 	def test_can_create_duplicate_friendslist(self):
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, [])
+		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, [])
 		lists = self.ds.get_friends_lists()
 		assert_that(lists, contains_friendslist(self.list_name))
 
 		try:
-			createdlist_2 = self.ds.create_friends_list_with_name_and_friends(self.list_name, [])
+			createdlist_2 = self.create_friends_list_with_name_and_friends(self.list_name, [])
 			self.ds.delete_object(createdlist_2)
 			self.fail('Created a duplicate friend list')
 		except:
@@ -53,7 +53,7 @@ class TestBasicFriendsLists(DataServerTestCase):
 	def test_can_delete_friendslist(self):
 
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, friends)
+		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
 		lists = self.ds.get_friends_lists()
 		assert_that(lists, contains_friendslist(self.list_name))
@@ -68,7 +68,7 @@ class TestBasicFriendsLists(DataServerTestCase):
 	def test_can_create_friendslist_with_friends(self):
 
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, friends)
+		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
 		lists = self.ds.get_friends_lists()
 		assert_that(lists, contains_friendslist(self.list_name))
@@ -81,7 +81,7 @@ class TestBasicFriendsLists(DataServerTestCase):
 	def test_can_delete_from_friendslist(self):
 
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, friends)
+		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
 		lists = self.ds.get_friends_lists()
 		assert_that(lists, contains_friendslist(self.list_name))
@@ -104,7 +104,7 @@ class TestBasicFriendsLists(DataServerTestCase):
 	def test_can_add_to_friendslists(self):
 
 		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, [])
+		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, [])
 
 		lists = self.ds.get_friends_lists()
 		assert_that(lists, has_key(self.list_name))
@@ -136,9 +136,7 @@ class TestBasicFriendsLists(DataServerTestCase):
 		"""
 		When a user is circled they are automatically accepting the user that circled them
 		"""
-		createdlist = self.ds.create_friends_list_with_name_and_friends(self.list_name, [self.friend[0]])
-
-		self.ds.wait_for_event()
+		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, [self.friend[0]])
 
 		friends_user_object = self.ds.get_user_object(credentials=self.friend)
 		assert_that(accepting(friends_user_object, self.owner[0]))

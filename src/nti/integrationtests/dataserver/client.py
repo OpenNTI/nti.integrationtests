@@ -129,9 +129,13 @@ class DataserverClient(object):
 		canvas = Canvas(shapeList=[shape], container=container, **kwargs)
 		return self.create_object(canvas, credentials=credentials, adapt=adapt, **kwargs) if store else canvas
 
-	def create_friends_list_with_name_and_friends(self, name, friends, credentials=None, isDynamic=False, adapt=True, **kwargs):
-		clazz = DynamicFriendsList if isDynamic else FriendsList
-		return self.create_friends_list(clazz(name=name, friends=friends), credentials=credentials, adapt=adapt, **kwargs)
+	def create_DFL_with_name_and_friends(self, name, friends, realname=None, credentials=None, adapt=True, **kwargs):
+		dfl = DynamicFriendsList(name=name, friends=friends, realname=realname or name)
+		return self.create_friends_list(dfl, credentials=credentials, adapt=adapt, **kwargs)
+
+	def create_friends_list_with_name_and_friends(self, name, friends, credentials=None, adapt=True, **kwargs):
+		fl = FriendsList(name=name, friends=friends)
+		return self.create_friends_list(fl, credentials=credentials, adapt=adapt, **kwargs)
 
 	def create_friends_list(self, obj, credentials=None, adapt=True, **kwargs):
 		assert_that(obj, instance_of(FriendsList), 'must provide a valid DataServer object')
