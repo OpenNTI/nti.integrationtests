@@ -19,15 +19,16 @@ class TestQuizzes(DataServerTestCase):
 		self.container = self.generate_ntiid(provider=self.owner[0], nttype=self.TYPE_HTML)
 		self.ds.set_credentials(self.owner)
 		
-#	def test_creating_a_quizz(self):
-#		
-#		p = QNumericMathPart(content='MyPart', explanation='MyExplanation', 
-#							 solutions=[QNumericMathSolution(value=46.0, weight=1.0)],
-#							 hints=[QTextHint(value='MyHint')])
-#		qq  = QQuestion(content='MyQuestion.1', parts=[p])
-#		quiz = QQuestionSet(container=self.container, questions=[qq])
-#		#obj = self.ds.create_object(quiz)
-#		#print obj
+	@unittest.expectedFailure
+	def test_creating_a_quizz(self):
+		
+		p = QNumericMathPart(content='MyPart', explanation='MyExplanation', 
+							 solutions=[QNumericMathSolution(value=46.0, weight=1.0)],
+							 hints=[QTextHint(value='MyHint')])
+		qq  = QQuestion(content='MyQuestion.1', parts=[p])
+		quiz = QQuestionSet(container=self.container, questions=[qq])
+		self.ds.create_object(quiz)
+		#print obj
 		
 if __name__ == '__main__':
 	unittest.main()

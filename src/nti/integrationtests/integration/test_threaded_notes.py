@@ -24,23 +24,13 @@ class TestThreadedNotes(DataServerTestCase):
 		return self.ds.create_note(	text, container, credentials=credentials, \
 									inReplyTo=inReplyTo.id, references=[inReplyTo.id])
 
-	# FIXME: terrible names
-	def test_threaded_note_not_shared_reply_to_self(self):
-		"""
-		Verify replying to your own note is not shared with anyone, including yourself
-		"""
-
+	def test_not_shared_reply_to(self):
 		note_to_reply_to = self.ds.create_note("A note to reply to", self.container)
-
 		reply = self._replyToNote('The reply', self.container, note_to_reply_to)
-
 		assert_that(reply, is_(not_shared()))
 
-	def test_threaded_note_shared_reply_to_self(self):
-		"""
-		Verify replying to your own note is shared the same as the original note but
-		not yourself
-		"""
+	def test_shared_reply_to(self):
+
 		shareWith = [self.user_two[0], self.user_three[0]]
 
 		note_to_reply_to = self.ds.create_note("A note to reply to", self.container)
@@ -49,10 +39,7 @@ class TestThreadedNotes(DataServerTestCase):
 		reply = self._replyToNote('The reply', self.container, note_to_reply_to)
 		assert_that(reply, is_(only_shared_with(shareWith)))
 
-	def test_threaded_note_shared_reply_to_other(self):
-		"""
-		Replying to a note that has been shared and is owned by someone else
-		"""
+	def test_shared_reply_to_other(self):
 		shareWith = [self.user_two[0], self.user_three[0]]
 
 		note_to_reply_to = self.ds.create_note("A note to reply to", self.container)
