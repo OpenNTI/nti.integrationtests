@@ -63,12 +63,13 @@ class User(Community):
     _ds_field_mapping = {'communities': 'Communities', 'notificationCount':'NotificationCount', 
                          'presence':'Presence', 'lastLoginTime':'lastLoginTime', 'accepting':'accepting', 
                          'following': 'following', 'ignoring':'ignoring', 'realname':'realname',
-                         'dynamicMemberships':'DynamicMemberships' }
+                         'dynamicMemberships':'DynamicMemberships', 'email':'email', 
+                         'password':'password', 'opt_in_email_communication':'opt_in_email_communication' }
     _ds_field_mapping.update(Community._ds_field_mapping)
 
     _fields = { 'communities' : False, 'notificationCount':True, 'presence':True, 'lastLoginTime':False,
                 'accepting': False, 'following': False, 'ignoring':False, 'realname': False,
-                'dynamicMemberships': False }
+                'dynamicMemberships': False, 'email':False, 'password':False, 'opt_in_email_communication':False }
     _fields.update(Community._fields)
 
     def __getitem__(self, key):

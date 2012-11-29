@@ -584,7 +584,29 @@ class DataserverClient(object):
 
 	# ------------------------
 
-
+	def create_user(self, username, password, email, realname=None, opt_in_email_communication=False, **kwargs):
+		params = dict(kwargs)
+		params['email'] = email
+		params['Username'] = username
+		params['password'] = password
+		params['realname'] = realname or username
+		params['opt_in_email_communication'] = opt_in_email_communication
+		
+		# remove any None argument
+		for k,v in list(params.items()):
+			if v is None:
+				params.pop(k)
+				
+		payload = anyjson.dumps(params)
+		
+		href = "users/@@account.create"
+		url = urljoin(self.endpoint, href)
+		rp = self.httplib.do_post(url, data=payload)
+		assert_that(rp.status_int, is_(201), 'invalid status code while trying to create a user')
+		
+		data = self.httplib.deserialize(rp)
+		return adapt_ds_object(data)
+		
 	# ------------------------
 
 	createCanvas = create_canvas
