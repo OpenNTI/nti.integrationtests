@@ -40,8 +40,6 @@ class TestBasicStream(DataServerTestCase):
 		shared_obj = self.ds.share_object(created_obj, self.target[0])
 		assert_that(shared_obj, not_none())
 
-		self.ds.wait_for_event()
-
 		# check that it is in the stream
 		stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
 		assert_that(stream, is_(container()))
@@ -57,8 +55,6 @@ class TestBasicStream(DataServerTestCase):
 
 		created_obj3 =  self.ds.create_note('A note to share 3', self.container)
 		self.ds.share_object(created_obj3, self.target[0])
-
-		self.ds.wait_for_event()
 
 		# check that it is in the stream
 		stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
@@ -90,8 +86,6 @@ class TestBasicStream(DataServerTestCase):
 		shared_obj['body'] = [updatedText]
 		updatedObj = self.ds.update_object(shared_obj)
 
-		self.ds.wait_for_event()
-
 		# check that it is in the stream
 		stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
 
@@ -119,12 +113,8 @@ class TestBasicStream(DataServerTestCase):
 		shared_obj = self.ds.share_object(created_obj, self.target[0])
 		assert_that(shared_obj, not_none())
 
-		self.ds.wait_for_event()
-
 		# now delete it
 		self.ds.delete_object(created_obj)
-
-		self.ds.wait_for_event(max_wait_seconds=5)
 
 		# check that it is in the stream
 		stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
@@ -140,8 +130,6 @@ class TestBasicStream(DataServerTestCase):
 
 		list_name = str(uuid.uuid4())
 		createdlist = self.ds.create_friends_list_with_name_and_friends(list_name, [self.target[0]])
-
-		self.ds.wait_for_event()
 
 		# check that it is in the stream
 		stream = self.ds.get_recursive_stream_data(self.root_item, credentials=self.target)
@@ -165,8 +153,6 @@ class TestBasicStream(DataServerTestCase):
 		updatedlist = self.ds.update_object(createdlist)
 		assert_that(updatedlist, not_none())
 
-		self.ds.wait_for_event()
-
 		# check that it is in the stream
 		stream = self.ds.get_recursive_stream_data(self.root_item, credentials=self.target)
 
@@ -188,7 +174,6 @@ class TestBasicStream(DataServerTestCase):
 
 		created_obj =  self.ds.create_note('A note to share', self.container)
 		self.ds.share_object(created_obj, self.target[0])
-		self.ds.wait_for_event()
 
 		target_user_object = self.ds.get_user_object(credentials=self.target)
 
@@ -200,7 +185,6 @@ class TestBasicStream(DataServerTestCase):
 
 		created_obj['body'] = ['junk']
 		self.ds.update_object(created_obj)
-		self.ds.wait_for_event()
 
 		# we want to circle but we have already circled target so we get no notification
 		list_name = str(uuid.uuid4())
@@ -223,8 +207,6 @@ class TestBasicStream(DataServerTestCase):
 		shared_obj = self.ds.share_object(created_obj, self.target[0], adapt=True)
 
 		self.ds.delete_object(created_obj)
-
-		self.ds.wait_for_event()
 
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
 		assert_that(ugd, is_not(contains(shared_obj)))
@@ -251,8 +233,6 @@ class TestBasicStream(DataServerTestCase):
 			#increments the value of notes
 			notes += 1
 
-		self.ds.wait_for_event()
-
 		initial_stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
 		initial_sortedchanges = sortchanges(objects_from_container(initial_stream))
 
@@ -269,8 +249,6 @@ class TestBasicStream(DataServerTestCase):
 
 		# do the actual sharing
 		self.ds.share_object(created_obj, self.target[0], adapt=True)
-
-		self.ds.wait_for_event()
 
 		final_stream = self.ds.get_recursive_stream_data(self.container, credentials=self.target)
 		final_sortedchanges = sortchanges(objects_from_container(final_stream))

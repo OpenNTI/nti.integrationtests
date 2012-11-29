@@ -36,8 +36,6 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(shared_obj, has_same_oid_as(created_obj))
 		assert_that(shared_obj, shared_with(self.target[0]))
 
-		self.ds.wait_for_event()
-
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
 
@@ -56,8 +54,6 @@ class TestBasicSharing(DataServerTestCase):
 		shared_obj = self.ds.share_object(created_obj, self.target[0], adapt=True)
 		assert_that(shared_obj, has_same_oid_as(created_obj))
 		assert_that(shared_obj, shared_with(self.target[0]))
-
-		self.ds.wait_for_event()
 
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
@@ -82,8 +78,6 @@ class TestBasicSharing(DataServerTestCase):
 		shared_obj = self.ds.share_object(other_obj, self.target[0], adapt=True)
 		assert_that(shared_obj, has_same_oid_as(other_obj))
 		assert_that(shared_obj, shared_with(self.target[0]))
-
-		self.ds.wait_for_event()
 
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
@@ -156,8 +150,6 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(unshared_obj, has_same_oid_as(created_obj))
 		assert_that(unshared_obj, is_not(shared_with(self.target[0])))
 
-		self.ds.wait_for_event()
-
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
 
@@ -220,8 +212,6 @@ class TestBasicSharing(DataServerTestCase):
 		#removes the object after sharing
 		self.ds.delete_object(created_obj)
 
-		self.ds.wait_for_event()
-
 		#creates the variable ugd
 		ugd = None
 		try:
@@ -237,8 +227,6 @@ class TestBasicSharing(DataServerTestCase):
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, sharedWith=[self.owner[0], self.target[0]], adapt=True)
 
-		self.ds.wait_for_event()
-
 		assert_that(created_obj['body'][0], is_('A note to share'))
 		assert_that(created_obj['sharedWith'], is_([self.target[0]]))
 
@@ -249,8 +237,6 @@ class TestBasicSharing(DataServerTestCase):
 
 		# create the object to share
 		created_obj =  self.ds.create_note('A note to share', self.container, sharedWith=[self.owner[0], self.target[0]], adapt=True)
-
-		self.ds.wait_for_event()
 
 		shared_obj = self.ds.share_object(created_obj, [self.owner[0], self.target[0]])
 		assert_that(shared_obj['sharedWith'], is_(['test.user.2@nextthought.com']))

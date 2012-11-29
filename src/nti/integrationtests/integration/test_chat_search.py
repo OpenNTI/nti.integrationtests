@@ -21,9 +21,9 @@ class TestChatSearch(HostUserChatTest):
 		users = self._run_chat(self.container, 0, self.user_one, self.user_two)
 		for u in users:
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
-			
+		
+		#TODO: Should wwait?
 		self.ds.set_credentials((self.user_one, self.default_user_password))
-		self.ds.wait_for_event(max_wait_seconds=10)
 		
 		user_1_host_snippet = self.get_snippet(self.ds.search_user_content("town"))
 		user_1_user_snippet = self.get_snippet(self.ds.search_user_content("extreme"))

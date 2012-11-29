@@ -97,8 +97,6 @@ class TestFriendsSharing(DataServerTestCase):
 		created_obj = self.ds.create_note(self.note, container=self.container, sharedWith=friends)
 		assert_that(created_obj, shared_with(friends))
 
-		self.ds.wait_for_event(max_wait_seconds=7)
-
 		# check that the friends can now see it
 		self._check_object_in_friends(created_obj, self.container, self.friends)
 		self.ds.set_credentials(self.owner)
@@ -131,8 +129,6 @@ class TestFriendsSharing(DataServerTestCase):
 		# create and share
 		created_obj = self.ds.create_note(self.note, container=self.container, sharedWith=friends)
 		assert_that(created_obj, shared_with(friends))
-
-		self.ds.wait_for_event(max_wait_seconds=7)
 
 		# check that the friends can now see it
 		self._check_object_in_friends(created_obj, self.container, self.friends)

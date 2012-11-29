@@ -64,9 +64,6 @@ class TestChatOnNote(HostUserChatTest):
 		self.ds.set_credentials(user=one.username, password=one.password)
 		shared_note = self.ds.share_object(created_note, [self.user_three], adapt=True)
 		
-		# we aren't instant	Wait some arbitrary time.
-		self.ds.wait_for_event()
-		
 		# gets user three's user generated data
 		ugd = self.ds.get_user_generated_data(self.container, credentials=(self.user_three, self.default_user_password))
 		items = ugd['Items']

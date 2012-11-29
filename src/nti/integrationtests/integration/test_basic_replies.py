@@ -39,14 +39,10 @@ class TestBasicReplying(DataServerTestCase):
 		# do the actual sharing
 		self.ds.share_object(created_obj, self.target[0], adapt=True)
 
-		self.ds.wait_for_event()
-
 		# creates a reply to the note
 		created_reply = self.ds.create_note("A reply to note", self.container, inReplyTo=created_obj['id'], adapt=True)
 
 		self.ds.share_object(created_reply, self.target[0], adapt=True)
-
-		self.ds.wait_for_event()
 
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.owner, adapt=True)
@@ -67,16 +63,12 @@ class TestBasicReplying(DataServerTestCase):
 		# do the actual sharing
 		self.ds.share_object(created_obj, self.target[0], adapt=True)
 
-		self.ds.wait_for_event()
-
 		# creates a reply to the note
 		created_reply = self.ds.create_note("A reply to note", self.container, inReplyTo=created_obj['id'], adapt=True)
 
 		self.ds.share_object(created_reply, self.target[0], adapt=True)
 
 		self.ds.unshare_object(created_reply, self.target[0], adapt=True)
-
-		self.ds.wait_for_event()
 
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.owner, adapt=True)
@@ -97,16 +89,12 @@ class TestBasicReplying(DataServerTestCase):
 		# do the actual sharing
 		self.ds.share_object(created_obj, self.target[0], adapt=True)
 
-		self.ds.wait_for_event()
-
 		# creates a reply to the note
 		created_reply = self.ds.create_note("A reply to note", self.container, inReplyTo=created_obj['id'], adapt=True)
 
 		self.ds.share_object(created_reply, self.target[0], adapt=True)
 
 		self.ds.unshare_object(created_obj, self.target[0], adapt=True)
-
-		self.ds.wait_for_event()
 
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.owner, adapt=True)
@@ -135,8 +123,6 @@ class TestBasicReplying(DataServerTestCase):
 		# delete the test
 		self.ds.delete_object(created_reply)
 
-		self.ds.wait_for_event()
-
 		# check that the user can no longer see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.owner, adapt=True)
 		assert_that(ugd, is_not(contains(created_reply)))
@@ -155,8 +141,6 @@ class TestBasicReplying(DataServerTestCase):
 		# do the actual sharing
 		self.ds.share_object(created_obj, self.target[0], adapt=True)
 
-		self.ds.wait_for_event()
-
 		# creates a reply to the note
 		created_reply = self.ds.create_note("A reply to note", self.container, inReplyTo=created_obj['id'], adapt=True)
 
@@ -165,8 +149,6 @@ class TestBasicReplying(DataServerTestCase):
 		created_ps_reply = self.ds.create_note("PS. A reply to note", self.container, inReplyTo=created_obj['id'], adapt=True)
 
 		self.ds.share_object(created_ps_reply, self.target[0], adapt=True)
-
-		self.ds.wait_for_event()
 
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.owner, adapt=True)
 		assert_that(ugd, contains(created_ps_reply))
@@ -187,8 +169,6 @@ class TestBasicReplying(DataServerTestCase):
 		# do the actual sharing
 		self.ds.share_object(created_obj, self.target[0], adapt=True)
 
-		self.ds.wait_for_event()
-
 		# creates a reply to the note
 		created_reply = self.ds.create_note("A reply to note", self.container, inReplyTo=created_obj['id'], adapt=True)
 
@@ -197,8 +177,6 @@ class TestBasicReplying(DataServerTestCase):
 		created_response_reply = self.ds.create_note("A reply to a reply", self.container, inReplyTo=created_obj['id'], adapt=True)
 
 		self.ds.share_object(created_response_reply, self.owner[0], adapt=True)
-
-		self.ds.wait_for_event()
 
 		# check that the user can now see it
 		ugd = self.ds.get_user_generated_data(self.container, credentials=self.owner, adapt=True)
@@ -219,8 +197,6 @@ class TestBasicReplying(DataServerTestCase):
 
 		# do the actual sharing
 		self.ds.share_object(created_obj, self.target[0], adapt=True)
-
-		self.ds.wait_for_event()
 
 		# creates a reply to the note
 		created_reply = self.ds.create_note("A reply to note", self.container, inReplyTo=created_obj['id'], adapt=True)

@@ -584,17 +584,11 @@ class DataserverClient(object):
 
 	# ------------------------
 
-	# abstract away waiting.  Right now we just wait the max
-	# time but it will most certainly change.
-	# Some things still take longer than we were waiting
-	def wait_for_event(self, event=None, max_wait_seconds=3):
-		return
 
 	# ------------------------
 
 	createCanvas = create_canvas
 	updateObject = update_object
-	waitForEvent = wait_for_event
 	unshareObject = unshare_object
 	setCredentials = set_credentials
 	createHighlight = create_highlight
