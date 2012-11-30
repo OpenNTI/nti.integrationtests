@@ -41,10 +41,10 @@ class TestChatTranscript(HostUserChatTest):
 		messages = t['Messages']
 		for m in messages:
 			body = m['Body'][0]
-			assert_that( m, has_key( 'ID' ) )
 			assert_that( body, is_( not_none() ) )
-			assert_that( m, has_entry( 'ContainerId', room_id ) )
-			assert_that( m, has_entry( 'Status', 'st_POSTED' ) )
+			assert_that( m, has_entry( 'ID', not_none() ) )
+			assert_that( m, has_property( 'container', room_id ) )
+			assert_that( m, has_property( 'status', 'st_POSTED' ) )
 			assert_that( body, is_in( all_msgs ) )
 
 

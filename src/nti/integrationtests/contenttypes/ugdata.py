@@ -1,38 +1,19 @@
 from __future__ import print_function, unicode_literals
 
+
 from nti.integrationtests.contenttypes._dsobject import DSObject
+from nti.integrationtests.contenttypes._dsobject import SharableMixin
 from nti.integrationtests.contenttypes._dsobject import do_register_dsobjecs
 			
-class Sharable(DSObject):
-
-	_ds_field_mapping = {'sharedWith' : 'sharedWith', 'likeCount':'LikeCount'}
+class Sharable(DSObject, SharableMixin):
+	
+	_ds_field_mapping = {'likeCount':'LikeCount'}
 	_ds_field_mapping.update(DSObject._ds_field_mapping)
+	_ds_field_mapping.update(SharableMixin._ds_field_mapping)
 
-	_fields = {'sharedWith' : (False,list), 'likeCount':True}
+	_fields = {'likeCount':True}
 	_fields.update(DSObject._fields)
-
-	def __setitem__(self, key, val):
-		if key == 'sharedWith':
-			self._assign_to_list(self._ds_field_mapping['sharedWith'], val)
-		else:
-			super(Sharable, self).__setitem__(key, val)
-
-	def shareWith(self, targetOrTargets):
-		targets = targetOrTargets
-		if not isinstance(targets, list):
-			targets = [targets]
-		self.sharedWith.extend(targets)
-
-	def revokeSharing(self, targetOrTargets):
-		targets = targetOrTargets
-		if not isinstance(targets, list):
-			targets = [targets]
-
-		for target in targets:
-			self.sharedWith.remove(target)
-
-	share_with = shareWith
-	revoke_sharing = revokeSharing
+	_fields.update(SharableMixin._fields)
 	
 class Threadable(DSObject):
 	
@@ -44,7 +25,7 @@ class Threadable(DSObject):
 
 	def __setitem__(self, key, val):
 		if key == 'references':
-			self._assign_to_list(self._ds_field_mapping['references'], val)
+			self._assign_to_list(self._ds_field_mapping[key], val)
 		else:
 			super(Threadable, self).__setitem__(key, val)
 

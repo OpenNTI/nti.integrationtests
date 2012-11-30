@@ -79,6 +79,34 @@ class MetaDSObject(type):
 
 link_types = ('edit', 'like', 'unlike', 'favorite', 'unfavorite')
 	
+class SharableMixin(object):
+
+	_ds_field_mapping = {'sharedWith' : 'sharedWith'}
+	_fields = {'sharedWith' : (False, list)}
+
+	def __setitem__(self, key, val):
+		if key == 'sharedWith':
+			self._assign_to_list(self._ds_field_mapping['sharedWith'], val)
+		else:
+			super(SharableMixin, self).__setitem__(key, val)
+
+	def shareWith(self, targetOrTargets):
+		targets = targetOrTargets
+		if not isinstance(targets, list):
+			targets = [targets]
+		self.sharedWith.extend(targets)
+
+	def revokeSharing(self, targetOrTargets):
+		targets = targetOrTargets
+		if not isinstance(targets, list):
+			targets = [targets]
+
+		for target in targets:
+			self.sharedWith.remove(target)
+
+	share_with = shareWith
+	revoke_sharing = revokeSharing
+	
 class DSObject(Persistent, UserDict.DictMixin):
 
 	__metaclass__ = MetaDSObject
@@ -86,11 +114,11 @@ class DSObject(Persistent, UserDict.DictMixin):
 	# defines a mapping from testing framework fields -> internal dataserver fields
 	_ds_field_mapping = {'id' : 'OID', 'container': 'ContainerId', 'creator': 'Creator', 
 						 'lastModified': 'Last Modified', 'links':'Links', 'mimeType': 'MimeType',
-						 'ntiid': 'NTIID'}
+						 'ntiid': 'NTIID', 'createdTime':'CreatedTime'}
 
 	# mapping of fields we expose to readonly
 	_fields = {	'container': True, 'id' : True, 'creator' : True, 'lastModified' : True, 
-				'links' : True, 'mimeType': True, 'ntiid': True}
+				'links' : True, 'mimeType': True, 'ntiid': True, 'createdTime': True}
 
 	def __init__(self, data=None, **kwargs):
 		self._data = data or {}

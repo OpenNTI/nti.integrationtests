@@ -2,6 +2,7 @@ from __future__ import print_function, unicode_literals
 
 from nti.integrationtests.contenttypes.ugdata import Threadable
 from nti.integrationtests.contenttypes._dsobject import DSObject
+from nti.integrationtests.contenttypes._dsobject import SharableMixin
 from nti.integrationtests.contenttypes._dsobject import do_register_dsobjecs
 
 class RoomInfo(Threadable):
@@ -21,7 +22,7 @@ class RoomInfo(Threadable):
 	
 	def __setitem__(self, key, val):
 		if key == 'occupants' or key == 'Occupants':
-			self._assign_to_list(self._ds_field_mapping['occupants'], val)
+			self._assign_to_list(self._ds_field_mapping[key.lower()], val)
 		else:
 			super(RoomInfo, self).__setitem__(key, val)
 			
@@ -42,5 +43,24 @@ class TranscriptSummary(DSObject):
 		else:
 			super(TranscriptSummary, self).__setitem__(key, val)
 	
+class MessageInfo(DSObject, SharableMixin):
+	
+	DATASERVER_CLASS = 'MessageInfo'
+	MIME_TYPE = 'application/vnd.nextthought.messageinfo'
+	
+	_ds_field_mapping = {'status':'Status','recipients':'recipients', 'ID':'ID'}
+	_ds_field_mapping.update(DSObject._ds_field_mapping)
+	_ds_field_mapping.update(SharableMixin._ds_field_mapping)
 
+	_fields = {'recipients' : (True, list), 'status' : True, 'body': True, 'Body':True, 'ID':True}
+	_fields.update(DSObject._fields)
+	_fields.update(SharableMixin._fields)
+
+	def __setitem__(self, key, val):
+		if key == 'recipients':
+			self._assign_to_list(self._ds_field_mapping[key], val)
+		else:
+			super(MessageInfo, self).__setitem__(key, val)
+			
+			
 do_register_dsobjecs(dict(locals()).itervalues())
