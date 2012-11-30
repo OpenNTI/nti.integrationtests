@@ -5,7 +5,7 @@ import unittest
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import get_notification_count
 
-from hamcrest import (assert_that, has_property,is_, is_not)
+from hamcrest import (assert_that, has_property, has_entry, is_, is_not)
 
 class TestUserObject(DataServerTestCase):
 
@@ -30,7 +30,16 @@ class TestUserObject(DataServerTestCase):
 		assert_that(user_object.name, is_(username))
 		assert_that(user_object.realname, is_(realname))
 		assert_that(user_object.opt_in_email_communication, is_(opt_in_email_communication))
+	
+	def test_resolve_user(self):
+		self.ds.set_credentials(self.user_one)
+		user_object = self.ds.resolve_user(self.user_two[0])
+		assert_that(user_object, is_not(None))
 		
+		user_object = self.ds.resolve_user("idonotexists")
+		assert_that(user_object, is_not(None))
+		assert_that(user_object, has_entry('Items',is_([])))
+				
 	def test_notification_count_can_reset_by_changing_lastLoginTime(self):
 		user_object = self.ds.get_user_object()
 

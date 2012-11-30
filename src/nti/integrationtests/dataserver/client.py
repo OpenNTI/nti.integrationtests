@@ -584,7 +584,7 @@ class DataserverClient(object):
 
 	# ------------------------
 
-	def create_user(self, username, password, email, realname=None, opt_in_email_communication=False, **kwargs):
+	def create_user(self, username, password, email, realname=None, opt_in_email_communication=False, adapt=True, **kwargs):
 		params = dict(kwargs)
 		params['email'] = email
 		params['Username'] = username
@@ -605,7 +605,18 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(201), 'invalid status code while trying to create a user')
 		
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data)
+		return adapt_ds_object(data) if adapt else data
+		
+	def resolve_user(self, username, credentials=None, adapt=True, **kwargs):
+		credentials = self._credentials_to_use(credentials)
+		
+		href = "ResolveUser/%s" % username
+		url = urljoin(self.endpoint, href)
+		rp = self.httplib.do_get(url, credentials, **kwargs)
+		assert_that(rp.status_int, is_(200), 'invalid status while resolving user')
+			
+		data = self.httplib.deserialize(rp)
+		return adapt_ds_object(data) if adapt else data
 		
 	# ------------------------
 

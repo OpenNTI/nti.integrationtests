@@ -111,7 +111,7 @@ class URLHttpLib(object):
 			exc_info = sys.exc_info()
 			raise exc_info[0], exc_info[1], exc_info[2]
 
-	def _do_debug(self, url, rp, credentials):
+	def _do_debug(self, url, rp, credentials=None):
 		if self.debug:
 			raw_content = rp.body
 			try:
@@ -130,7 +130,7 @@ class URLHttpLib(object):
 		result.pop('self')
 		return result
 
-	def do_get(self, url, credentials, *args, **kwargs):
+	def do_get(self, url, credentials=None, *args, **kwargs):
 		call_args = self._prune(locals())
 		request = self._create_request(url, credentials, *args, **kwargs)
 		rp = self._do_request(request, **call_args)
