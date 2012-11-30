@@ -247,6 +247,9 @@ class DSObject(Persistent, UserDict.DictMixin):
 	def get_flag_link(self):
 		return self.get_link('flag')
 	
+	def get_flag_metoo_link(self):
+		return self.get_link('flag.metoo')
+	
 	def get_like_link(self):
 		return self.get_link('like')
 	

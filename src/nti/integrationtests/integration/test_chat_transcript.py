@@ -47,6 +47,9 @@ class TestChatTranscript(HostUserChatTest):
 			assert_that( m, has_property( 'status', 'st_POSTED' ) )
 			assert_that( body, is_in( all_msgs ) )
 
+		# flag last message
+		m = self.ds.flag_object(m)
+		assert_that(m.get_flag_metoo_link(), not_none())
 
 if __name__ == '__main__':
 	unittest.main()

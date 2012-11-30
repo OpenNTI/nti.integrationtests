@@ -285,6 +285,10 @@ class DataserverClient(object):
 		href = obj.get_unfavorite_link()
 		return self._like_fav_op(href, 'unfavorite', credentials=credentials, adapt=adapt, **kwargs)
 	
+	def flag_object(self, obj, credentials=None, adapt=True, **kwargs):
+		href = obj.get_flag_link()
+		return self._like_fav_op(href, 'flag', credentials=credentials, adapt=adapt, **kwargs)
+	
 	def replies(self, obj, credentials=None, adapt=True, **kwargs):
 		href = obj.get_replies_link()
 		assert_that(href, is_not(none()), "no '%s' href was provided for replies" )
