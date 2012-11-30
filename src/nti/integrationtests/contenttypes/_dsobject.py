@@ -216,6 +216,9 @@ class DSObject(Persistent, UserDict.DictMixin):
 	def get_delete_link(self):
 		return self.get_edit_link()
 	
+	def get_flag_link(self):
+		return self.get_link('flag')
+	
 	def get_like_link(self):
 		return self.get_link('like')
 	
@@ -233,7 +236,7 @@ class DSObject(Persistent, UserDict.DictMixin):
 	
 	def get_link(self, link_type = None):
 		if link_type and hasattr(self, 'links'):
-			links = self.links or []
+			links = self.links or ()
 			for link in links:
 				if link.get('rel', None) == link_type:
 					return link.get('href', None)
