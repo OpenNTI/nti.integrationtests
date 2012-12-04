@@ -51,7 +51,8 @@ class TestUserObject(DataServerTestCase):
 				created_objects.append(created_obj)
 
 		llt = user_object['lastLoginTime'] = time.time() + 5000
-		del user_object._data['NotificationCount'] # Because now the NC we send is respected, so don't send one
+		for key in ('NotificationCount', 'Communities', 'DynamicMemberships', 'ID', 'accepting', 'following'):
+			user_object._data.pop(key, None)
 		user_object = self.ds.update_object(user_object)
 		assert_that( user_object, has_property( 'lastLoginTime', llt ) )
 		assert_that( user_object, has_property( 'notificationCount', 0 ) )
