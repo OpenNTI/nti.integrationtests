@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from setuptools import setup, find_packages
 
 entry_points = {
@@ -24,10 +25,10 @@ setup(
 	install_requires = [ 'coverage',
 						 'httpie',
 						 'mmstats',
-						 'pyobjc',
-						 'pyobjc-core'
 						],
-	
+	extras_require = {
+		'PDF': ['pyobjc', 'pyobjc-core'] # Quartz is used for pdfs
+		},
 	packages = find_packages('src'),
 	package_dir = {'': 'src'},
 	include_package_data = True,

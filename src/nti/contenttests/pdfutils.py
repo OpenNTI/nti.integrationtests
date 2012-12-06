@@ -2,12 +2,11 @@ import os
 
 from Quartz import *
 
-#########################
 
 __all__ = ['extract_images']
 
-#########################
-		
+
+
 def _expand_and_create(outdir):
 	outdir = os.path.expanduser(outdir)
 	if not os.path.exists(outdir):
@@ -26,18 +25,18 @@ class _ImageApplierInfo():
 		self.outdir = outdir
 		self.xobj_dict = None
 		self.chart_ext = chart_ext = chart_ext or '.png'
-		
+
 def _save_raw_image(data_ref, strm_dict, key, info):
-	
+
 	rsp, width = CGPDFDictionaryGetInteger( strm_dict, "Width",	None )
 	if not rsp: return
-	
+
 	rsp, height = CGPDFDictionaryGetInteger( strm_dict, "Height", None )
 	if not rsp: return
-	
+
 	rsp, bps = CGPDFDictionaryGetInteger( strm_dict, "BitsPerComponent", None )
 	if not rsp: return
-	
+
 	rsp, interpolation = CGPDFDictionaryGetBoolean( strm_dict, "Interpolate", None )
 	if not rsp:
 		interpolation = 0
@@ -45,7 +44,7 @@ def _save_raw_image(data_ref, strm_dict, key, info):
 	rendering_intent = kCGRenderingIntentDefault;
 	data_provider = CGDataProviderCreateWithCFData(data_ref)
 	cg_color_space = None
-	
+
 	rsp, _ = CGPDFDictionaryGetArray(strm_dict, "ColorSpace", None)
 	if  rsp:
 		cg_color_space = CGColorSpaceCreateDeviceRGB()
@@ -64,24 +63,24 @@ def _save_raw_image(data_ref, strm_dict, key, info):
 				cg_color_space = CGColorSpaceCreateDeviceGray()
 			elif bps == 1:  # if there's no colorspace entry, there's still one we can infer from bps
 				cg_color_space = CGColorSpaceCreateDeviceGray()
-		
+
 	cg_color_space =  cg_color_space or CGColorSpaceCreateDeviceRGB()
-	decode_values = None 
-	
+	decode_values = None
+
 	row_bits = bps * spp * width;
 	row_bytes = row_bits / 8;
-	
+
 	# pdf image row lengths are padded to byte-alignment
 	if row_bits % 8 != 0:
 		row_bytes += 1
-	
+
 
 	type_name = CFSTR("public" +  info.chart_ext)
-	
+
 	cg_image = CGImageCreate(width, height, bps, bps * spp, row_bytes,\
 							cg_color_space, 0, data_provider, decode_values, interpolation,\
 							rendering_intent)
-	
+
 	key = "page-%s-%s-%s%s" % (info.page_idx, key, info.image_cnt, info.chart_ext)
 	path = os.path.join(info.outdir, key)
 	url = CFURLCreateFromFileSystemRepresentation(None, path, len(path), False )
@@ -90,27 +89,27 @@ def _save_raw_image(data_ref, strm_dict, key, info):
 	if dest:
 		CGImageDestinationAddImage(dest, cg_image, None)
 		CGImageDestinationFinalize(dest)
-			
+
 def _img_extracter_applier(key, value, info):
 	"""
 	key: dict key
 	value: object reference
 	info: context info
 	"""
-	
+
 	# There seems to be a bug where the value is None
 	# so we need to get the stream from the xObject dict
 	# which we are passing
-	
+
 	rsp, stream = CGPDFDictionaryGetStream( info.xobj_dict, key, None )
 	if not rsp:
 		return
-	
+
 	strm_dict = CGPDFStreamGetDictionary( stream );
 	rsp, subtype = CGPDFDictionaryGetName(strm_dict, "Subtype" , None)
 	if not rsp or subtype != "Image":
 		return
-	
+
 	dr, fmt = CGPDFStreamCopyData(stream, None)
 	if fmt == CGPDFDataFormatRaw:
 		_save_raw_image(dr, strm_dict, key, info)
@@ -120,28 +119,28 @@ def _img_extracter_applier(key, value, info):
 		path = os.path.join(info.outdir, key)
 		url = CFURLCreateFromFileSystemRepresentation(None, path, len(path), False )
 		CFURLWriteDataAndPropertiesToResource(url, dr, None, None);
-		
+
 	info.image_cnt += 1
 
 def extract_images(pdf_file, outdir, chart_ext = '.png'):
-	
+
 	pdf_file = os.path.expanduser(pdf_file)
 	if not os.path.exists(pdf_file):
 		print "`%s' does not exists" % pdf_file
 		return
-		
+
 	url = _create_url(pdf_file)
 	outdir = _expand_and_create(outdir)
-		
+
 	document = CGPDFDocumentCreateWithURL (url)
 	count = CGPDFDocumentGetNumberOfPages (document)
-	
+
 	print "%s has %s pages" % (pdf_file, count)
-	
+
 	info = _ImageApplierInfo(outdir, chart_ext)
-	
+
 	for page_idx in xrange(1, count+1):
-		
+
 		page = CGPDFDocumentGetPage (document, page_idx)
 		page_dict = CGPDFPageGetDictionary( page );
 
@@ -152,46 +151,46 @@ def extract_images(pdf_file, outdir, chart_ext = '.png'):
 		rsp, xobj_dict = CGPDFDictionaryGetDictionary( resources, "XObject", None )
 		if not rsp:
 			continue
-		
+
 		info.page_idx = page_idx
 		info.xobj_dict = xobj_dict
-		
+
 		CGPDFDictionaryApplyFunction(xobj_dict, _img_extracter_applier, info)
 
 # ----------------------
 
 def extract_pages(pdf_file, outdir):
-	
+
 	pdf_file = os.path.expanduser(pdf_file)
 	if not os.path.exists(pdf_file):
 		print "`%s' does not exists" % pdf_file
 		return
-		
+
 	url = _create_url(pdf_file)
 	outdir = _expand_and_create(outdir)
 	document = PDFDocument.alloc().initWithURL_( url )
 	count = document._.pageCount
-	
+
 	print "%s has %s pages" % (pdf_file, count)
-	
+
 	for page_idx in xrange(count):
 		page = document.pageAtIndex_( page_idx )
 		atstring = page.attributedString()
-		
+
 		if not atstring:
 			print "%s is an empty page" % page_idx
 			continue
-		
+
 		atdata = atstring.RTFFromRange_documentAttributes_(
 										 NSMakeRange( 0, atstring.length() ),
 										{ NSDocumentTypeDocumentAttribute:  NSHTMLTextDocumentType,
 										  NSCharacterEncodingDocumentAttribute: NSUTF8StringEncoding} )
-		
+
 		key = "page-%s.rtf" % (page_idx + 1)
 		path = os.path.join(outdir, key)
-		
+
 		atdata.writeToFile_atomically_(path, False)
-		
+
 if __name__ == "__main__":
 	#extract_images("~csanchez/Downloads/msw.pdf", "~csanchez/Downloads/images")
 	extract_pages("~csanchez/Downloads/msw.pdf", "~csanchez/Downloads/rtfs")
