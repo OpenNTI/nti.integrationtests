@@ -147,10 +147,11 @@ class OneRoomUser(BasicUser):
 
 class Host(OneRoomUser):
 
-	def __init__(self, username, occupants, *args, **kwargs):
+	def __init__(self, username, occupants, membership=None, *args, **kwargs):
 		super(Host, self).__init__(username=username, **kwargs)
-		self.occupants = occupants
 		self.online = set()
+		self.occupants = occupants
+		self.membership = (membership,) if membership else occupants
 
 	@property
 	def users_online(self):
@@ -185,7 +186,7 @@ class Host(OneRoomUser):
 
 			self.wait_for_guests_to_connect(max_heart_beats)
 
-			self.enterRoom(	occupants=self.occupants, containerId=containerId,
+			self.enterRoom(	occupants=self.membership, containerId=containerId,
 							inReplyTo=inReplyTo, references=references)
 			self.wait_4_room()
 			connect_event.set()
