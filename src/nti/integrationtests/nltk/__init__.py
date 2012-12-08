@@ -9,7 +9,7 @@ from nltk.probability import LidstoneProbDist
 
 BUFFER = 6
 
-class NLTKMessageGenerator:
+class NLTKMessageGenerator(object):
 
 	def __init__(self, fileobj, n=3):
 		raw = fileobj.read()
