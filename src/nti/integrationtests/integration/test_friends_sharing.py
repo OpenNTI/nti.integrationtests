@@ -9,7 +9,7 @@ from nti.integrationtests.integration import contained_in
 from nti.integrationtests.integration import containing_friends
 from nti.integrationtests.integration import container_of_length
 
-from hamcrest import assert_that, is_
+from hamcrest import ( assert_that, is_, has_entry, greater_than_or_equal_to)
 
 class TestFriendsSharing(DataServerTestCase):
 
@@ -148,6 +148,25 @@ class TestFriendsSharing(DataServerTestCase):
 		self.ds.delete_object(friendsList)
 
 		self._delete_friends_fake_notes(objects)
+		
+	def test_share_with_friends_and_search(self):
+
+		self.ds.set_credentials(self.owner)
+		
+		list_name = self.list_name
+		friendNames = [r[0] for r in self.friends]
+		friendsList = self.create_friends_list_with_name_and_friends(list_name, friendNames)
+		
+		note = self.ds.create_note(u'Shibari Benihime', container=str(uuid.uuid4()), sharedWith=[list_name])
+			
+		for c in self.friends:
+			self.ds.set_credentials(c)
+			content = self.ds.search_user_content("Benihime")
+			assert_that(content, has_entry('Hit Count', greater_than_or_equal_to(1)))
+			
+		self.ds.set_credentials(self.owner)
+		self.ds.delete_object(friendsList)
+		self.ds.delete_object(note)
 
 if __name__ == '__main__':
 	unittest.main()
