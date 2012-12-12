@@ -27,24 +27,6 @@ class TestFriendsSharing(DataServerTestCase):
 		fl = FriendsList(name=name, friends=friends)
 		return self.ds.create_friends_list(fl)
 
-	def _create_friends_fake_notes(self):
-		objects =[]
-		for f in self.friends:
-			username = f[0]
-			container = str(uuid.uuid1())
-			self.ds.clear_credentials()
-			self.ds.set_credentials(f)
-			note = self.ds.create_note('Fake note owned by %s' % username, container=container)
-			objects.append(note)
-		return objects
-
-	def _delete_friends_fake_notes(self, objects):
-		it = iter(objects)
-		for f in self.friends:
-			self.ds.clear_credentials()
-			self.ds.set_credentials(f)
-			self.ds.delete_object(it.next())
-
 	def _check_object_in_friends(self, created_obj, container, friends):
 		for f in friends:
 			self.ds.clear_credentials()
@@ -53,9 +35,6 @@ class TestFriendsSharing(DataServerTestCase):
 			assert_that(created_obj, contained_in(user_data))
 
 	def test_share_with_friends(self):
-
-		objects = self._create_friends_fake_notes()
-
 		# restore credentials
 		self.ds.set_credentials(self.owner)
 
@@ -83,10 +62,7 @@ class TestFriendsSharing(DataServerTestCase):
 		self.ds.delete_object(friendsList)
 		self.ds.delete_object(created_obj)
 
-		self._delete_friends_fake_notes(objects)
-
 	def test_share_with_friends_and_remove_friend(self):
-		objects = self._create_friends_fake_notes()
 		self.ds.set_credentials(self.owner)
 
 		# create friends list
@@ -94,7 +70,7 @@ class TestFriendsSharing(DataServerTestCase):
 		friendsList = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
 		# create and share
-		created_obj = self.ds.create_note(self.note, container=self.container, sharedWith=friends)
+		created_obj = self.ds.create_note(self.note, container=self.container, sharedWith=[self.list_name])
 		assert_that(created_obj, shared_with(friends))
 
 		# check that the friends can now see it
@@ -115,11 +91,7 @@ class TestFriendsSharing(DataServerTestCase):
 		self.ds.delete_object(friendsList)
 		self.ds.delete_object(created_obj)
 
-		self._delete_friends_fake_notes(objects)
-
 	def test_share_with_friends_and_delete_obj(self):
-
-		objects = self._create_friends_fake_notes()
 		self.ds.set_credentials(self.owner)
 
 		# create friends list
@@ -127,7 +99,7 @@ class TestFriendsSharing(DataServerTestCase):
 		friendsList = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
 		# create and share
-		created_obj = self.ds.create_note(self.note, container=self.container, sharedWith=friends)
+		created_obj = self.ds.create_note(self.note, container=self.container, sharedWith=[self.list_name])
 		assert_that(created_obj, shared_with(friends))
 
 		# check that the friends can now see it
@@ -146,8 +118,6 @@ class TestFriendsSharing(DataServerTestCase):
 		# clean up
 		self.ds.set_credentials(self.owner)
 		self.ds.delete_object(friendsList)
-
-		self._delete_friends_fake_notes(objects)
 		
 	def test_share_with_friends_and_search(self):
 
