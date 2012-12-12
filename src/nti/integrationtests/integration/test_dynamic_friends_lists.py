@@ -49,7 +49,7 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 		self._check_object_in_friends(created_obj, self.container, friends)
 
 		# check removed friend cannot see shared object
-		time.sleep(3) # wait till cache refresh in the server
+		time.sleep(0.5) # wait till cache refresh in the server
 		self.ds.set_credentials(user=removedFriend, password=DataServerTestCase.default_user_password)
 		user_data = self.ds.get_user_generated_data(self.container)
 		assert_that(created_obj, is_not(contained_in(user_data)))
