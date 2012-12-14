@@ -16,6 +16,8 @@ from hamcrest import ( assert_that, is_not)
 class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 							  test_friends_sharing.TestFriendsSharing):
 	
+	outsider = ('test.user.8@nextthought.com', DataServerTestCase.default_user_password)
+	
 	def setUp(self):
 		super(TestDynamicFriendsLists, self).setUp()		
 		self.realname ='%s@nt.com' % str(uuid.uuid4()).split('-')[-1]
@@ -87,6 +89,45 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 		self.ds.set_credentials(self.owner)
 		self.ds.delete_object(friendsList)
 		self.ds.delete_object(created_obj)
+		
+	def test_dfl_alpha_issue(self):
+		# create friends list
+		self.ds.set_credentials(self.owner)
+		friend_names = [r[0] for r in self.friends]
+		friendsList= self.create_friends_list_with_name_and_friends(self.list_name, friend_names)
+
+		# create and share
+		created_obj = self.ds.create_note(self.note, container=self.container, 
+										  sharedWith=[self.list_name, self.outsider[0]])
+
+		self.ds.set_credentials(self.outsider)
+		created_reply = self.ds.create_note("A reply to note", self.container, inReplyTo=created_obj.id)
+		
+		try:
+			#DFL ower should see the reply
+			self.ds.set_credentials(self.owner)
+			replies = self.ds.replies(created_obj)
+			assert_that(replies, container_of_length(1))
+			
+			#outsider should see the reply
+			self.ds.set_credentials(self.outsider)
+			replies = self.ds.replies(created_obj)
+			assert_that(replies, container_of_length(1))
+			
+			# members of the DFL should see the reply
+			for f in self.friends:
+				self.ds.set_credentials(f)
+				replies = self.ds.replies(created_obj)
+				assert_that(replies, container_of_length(1))
+		finally:	
+			self.ds.set_credentials(self.outsider)
+			self.ds.delete_object(created_reply)
+			
+			# clean up
+			self.ds.set_credentials(self.owner)
+			self.ds.delete_object(friendsList)
+			self.ds.delete_object(created_obj)
+
 		
 if __name__ == '__main__':
 	unittest.main()
