@@ -185,20 +185,21 @@ class DataserverClient(object):
 
 	# ------------------------
 	
-	def get_rss_feed(self, container, workspace=None, credentials=None):
-		return self._get_feed('feed.rss', container, workspace, credentials)
+	def get_rss_feed(self, container, workspace=None, credentials=None, gzip=False):
+		return self._get_feed('feed.rss', container, workspace, credentials, gzip)
 		
-	def get_atom_feed(self, container, workspace=None, credentials=None):
-		return self._get_feed('feed.atom', container, workspace, credentials)
+	def get_atom_feed(self, container, workspace=None, credentials=None, gzip=False):
+		return self._get_feed('feed.atom', container, workspace, credentials, gzip)
 		
-	def _get_feed(self, feed, container, workspace=None, credentials=None, **kwargs):
+	def _get_feed(self, feed, container, workspace=None, credentials=None, gzip=False):
 		credentials = self._credentials_to_use(credentials)
 		url = self._get_container_item_data_url(container=container, link_rel='RecursiveStream', workspace=workspace,
 												credentials=credentials, validate=True)
 		
 		url = urljoin(_check_url(url), feed)
 		
-		rp = self.httplib.do_get(url, credentials, **kwargs)
+		headers = None if not gzip else {'Accept-Encoding': 'gzip'}
+		rp = self.httplib.do_get(url, credentials, headers=headers)
 		assert_that(rp.status_int, is_(200), "invalid status code getting feed at '%s'" % url)
 		
 		data = self.httplib.body(rp)

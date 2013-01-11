@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import gzip
 import time
 import unittest
+from cStringIO import StringIO
 
 from lxml import etree
 
@@ -88,17 +90,20 @@ class TestFeeds(DataServerTestCase):
 	
 		self.ds.delete_object(created_obj)
 		
-	def test_multiple_notes(self):
+	def test_multiple_notes_gzip(self):
 		size = 50
 		for i in xrange(0, size):
 			self.ds.create_note('Note number %s' % i, self.container, sharedWith=[self.target[0]])
-		feed = self.ds.get_rss_feed(self.container, credentials=self.target)
-		root = etree.XML(feed)
+			
+		feed = self.ds.get_rss_feed(self.container, credentials=self.target, gzip=True)
+		feed = gzip.GzipFile('', 'r', 0, StringIO(feed))
+		root = etree.parse(feed)
 		count_elements = etree.XPath("count(//item)")
 		assert_that(count_elements(root), greater_than_or_equal_to(size))
 						
-		feed = self.ds.get_atom_feed(self.container, credentials=self.target)
-		root = etree.XML(feed)
+		feed = self.ds.get_atom_feed(self.container, credentials=self.target, gzip=True)
+		feed = gzip.GzipFile('', 'r', 0, StringIO(feed))
+		root = etree.parse(feed)
 		count_elements = etree.XPath("count(//t:entry)", namespaces={'t':'http://www.w3.org/2005/Atom'})
 		assert_that(count_elements(root), greater_than_or_equal_to(size))
 		
@@ -112,6 +117,6 @@ class TestFeeds(DataServerTestCase):
 		find = etree.XPath("//item[guid=$nid]")
 		items = find(root, nid = note['id'])
 		assert_that(items, has_length(0))
-		
+	
 if __name__ == '__main__':
 	unittest.main()
