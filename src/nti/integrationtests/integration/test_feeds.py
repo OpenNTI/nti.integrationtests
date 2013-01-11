@@ -10,7 +10,7 @@ from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
 
-from hamcrest import (assert_that, not_none, has_length, is_)
+from hamcrest import (assert_that, not_none, has_length, is_, greater_than_or_equal_to)
 
 class TestFeeds(DataServerTestCase):
 
@@ -88,5 +88,19 @@ class TestFeeds(DataServerTestCase):
 	
 		self.ds.delete_object(created_obj)
 		
+	def test_multiple_notes(self):
+		size = 50
+		for i in xrange(0, size):
+			self.ds.create_note('Note number %s' % i, self.container, sharedWith=[self.target[0]])
+		feed = self.ds.get_rss_feed(self.container, credentials=self.target)
+		root = etree.XML(feed)
+		count_elements = etree.XPath("count(//item)")
+		assert_that(count_elements(root), greater_than_or_equal_to(size))
+						
+		feed = self.ds.get_atom_feed(self.container, credentials=self.target)
+		root = etree.XML(feed)
+		count_elements = etree.XPath("count(//t:entry)", namespaces={'t':'http://www.w3.org/2005/Atom'})
+		assert_that(count_elements(root), greater_than_or_equal_to(size))
+				
 if __name__ == '__main__':
 	unittest.main()
