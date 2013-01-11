@@ -59,8 +59,6 @@ class URLHttpLib(object):
 	def __init__(self, debug=False):
 		self.debug = debug
 
-
-
 	@classmethod
 	def _get_encoding(cls, obj):
 		data = None
@@ -121,6 +119,9 @@ class URLHttpLib(object):
 			d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
 			pprint.pprint(d)
 
+	def body(self, rp):
+		return rp.body
+	
 	def deserialize(self, rp):
 		return anyjson.loads(rp.body)
 

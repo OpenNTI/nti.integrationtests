@@ -184,8 +184,29 @@ class DataserverClient(object):
 	getRecursiveStreamData = get_recursive_stream_data
 
 	# ------------------------
+	
+	def get_rss_feed(self, container, workspace=None, credentials=None):
+		return self._get_feed('feed.rss', container, workspace, credentials)
+		
+	def get_atom_feed(self, container, workspace=None, credentials=None):
+		return self._get_feed('feed.atom', container, workspace, credentials)
+		
+	def _get_feed(self, feed, container, workspace=None, credentials=None, **kwargs):
+		credentials = self._credentials_to_use(credentials)
+		url = self._get_container_item_data_url(container=container, link_rel='RecursiveStream', workspace=workspace,
+												credentials=credentials, validate=True)
+		
+		url = urljoin(_check_url(url), feed)
+		
+		rp = self.httplib.do_get(url, credentials, **kwargs)
+		assert_that(rp.status_int, is_(200), "invalid status code getting feed at '%s'" % url)
+		
+		data = self.httplib.body(rp)
+		return data
+		
+	# ------------------------
 
-	def get_object(self, obj=None, link=None, credentials=None, adapt=True, **kwargs):
+	def get_object(self, obj=None, link=None, credentials=None, adapt=False, **kwargs):
 		
 		if link is None:
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
@@ -507,6 +528,24 @@ class DataserverClient(object):
 		item = collection.get_item(container)
 		return item
 
+	def  _get_container_item_data_url(self, container, link_rel, name='Pages', workspace=None, credentials=None, validate=True):
+		
+		credentials = self._credentials_to_use(credentials)
+		item = self._get_container(	container=container, name=name, workspace=workspace,
+									credentials=credentials, validate=validate)
+
+		if not item:
+			return None
+
+		link = item.get_link(link_rel)
+		if validate:
+			assert_that(link, is_not(none()), "could not find '%s' link" % link_rel)
+		elif not link:
+			return None
+
+		result = urljoin(self.endpoint, link.href)
+		return result
+	
 	def _get_container_item_data(self, container, link_rel, name='Pages', workspace=None, credentials=None,
 								 validate=True, **kwargs):
 		"""
@@ -521,20 +560,12 @@ class DataserverClient(object):
 		validate: validate flag
 		"""
 		credentials = self._credentials_to_use(credentials)
-		item = self._get_container(	container=container, name=name, workspace=workspace,
-									credentials=credentials, validate=validate)
+		url = self._get_container_item_data_url(container=container, link_rel=link_rel, name=name, 
+												workspace=workspace, credentials=credentials, validate=validate)
 
-		if not item:
+		if url is None:
 			return EMPTY_CONTAINER_DICT
-
-		link = item.get_link(link_rel)
-		if validate:
-			assert_that(link, is_not(none()), "could not find '%s' link" % link_rel)
-
-		elif not link:
-			return EMPTY_CONTAINER_DICT
-
-		url = urljoin(self.endpoint, link.href)
+		
 		rp = self.httplib.do_get(url, credentials, **kwargs)
 
 		# check for empty reply from the server
@@ -637,7 +668,8 @@ class DataserverClient(object):
 
 # -------------------------------
 
-if __name__ == '__main__':
+	
+if __name__ == '__main__':	
 	end_point = 'http://localhost:8081/dataserver2'
 	cl = DataserverClient(end_point)
 	cl.set_credentials(user='test.user.1@nextthought.com', password='temp001')
