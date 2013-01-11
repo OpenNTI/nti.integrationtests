@@ -101,6 +101,17 @@ class TestFeeds(DataServerTestCase):
 		root = etree.XML(feed)
 		count_elements = etree.XPath("count(//t:entry)", namespaces={'t':'http://www.w3.org/2005/Atom'})
 		assert_that(count_elements(root), greater_than_or_equal_to(size))
-				
+		
+	def test_not_in_feed_after_del(self):
+		note = self.ds.create_note('my note', self.container, sharedWith=[self.target[0]])
+		note['body']=['my modified note']
+		self.ds.update_object(note)
+		self.ds.delete_object(note)
+		feed = self.ds.get_rss_feed(self.container, credentials=self.target)
+		root = etree.XML(feed)
+		find = etree.XPath("//item[guid=$nid]")
+		items = find(root, nid = note['id'])
+		assert_that(items, has_length(0))
+		
 if __name__ == '__main__':
 	unittest.main()
