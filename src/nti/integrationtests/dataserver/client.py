@@ -72,8 +72,9 @@ def _check_url(url):
 
 class DataserverClient(object):
 
-	def __init__(self, endpoint, credentials=None, httplib=None):
+	def __init__(self, endpoint, credentials=None, httplib=None, headers=None):
 		self.users_ws = {}
+		self.headers = headers or {}
 		self.credentials = credentials
 		self.endpoint = _check_url(endpoint)
 		self.httplib = httplib or URLHttpLib()
@@ -91,6 +92,38 @@ class DataserverClient(object):
 	def clear_credentials(self):
 		self.credentials = None
 
+	# ------------------------
+	
+	def prepare_headers(self, headers=None):
+		if headers:
+			result = dict(self.headers)
+			result.update(headers)
+		else:
+			result = dict(self.headers) if self.headers else None
+		return result
+	
+	def http_get(self, url, credentials, headers=None, **kwargs):
+		headers = self.prepare_headers(headers)
+		rp = self.httplib.do_get(url, credentials, headers=headers, **kwargs)
+		return rp
+	
+	def http_put(self, url, credentials, data, headers=None, **kwargs):
+		headers = self.prepare_headers(headers)
+		rp = self.httplib.do_put(url, credentials, data=data, headers=headers, **kwargs)
+		return rp
+	
+	def http_delete(self, url, credentials, headers=None, **kwargs):
+		headers = self.prepare_headers(headers)
+		rp = self.httplib.do_delete(url, credentials, headers=headers, **kwargs)
+		return rp
+	
+	def http_post(self, url, credentials=None, data=None, headers=None, **kwargs):
+		headers = self.prepare_headers(headers)
+		rp = self.httplib.do_post(url, credentials, data=data, headers=headers, **kwargs)
+		return rp
+	
+	# ------------------------
+	
 	def create_note(self, data, container, inReplyTo=None, sharedWith=None, references=None, applicableRange=None,
 					adapt=True, credentials=None, **kwargs):
 		body = self.create_text_and_body(data)
@@ -148,7 +181,7 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, collection.href)
 
-		rp = self.httplib.do_get(url, credentials, **kwargs)
+		rp = self.http_get(url, credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), 'invalid status code getting friends lists')
 
 		data = self.httplib.deserialize(rp)
@@ -199,7 +232,7 @@ class DataserverClient(object):
 		url = urljoin(_check_url(url), feed)
 		
 		headers = None if not gzip else {'Accept-Encoding': 'gzip'}
-		rp = self.httplib.do_get(url, credentials, headers=headers)
+		rp = self.http_get(url, credentials, headers=headers)
 		assert_that(rp.status_int, is_(200), "invalid status code getting feed at '%s'" % url)
 		
 		data = self.httplib.body(rp)
@@ -216,7 +249,7 @@ class DataserverClient(object):
 		href = link or obj.get_edit_link()
 		url = urljoin(self.endpoint, href)
 		__traceback_info__ = url, credentials, obj
-		rp = self.httplib.do_get(url, credentials, **kwargs)
+		rp = self.http_get(url, credentials, **kwargs)
 		
 		assert_that(rp.status_int, is_(200), "invalid status code getting object at '%s'" % href)
 
@@ -240,7 +273,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 		__traceback_info__ = url, credentials, obj
 
-		rp = self.httplib.do_put(url, credentials=credentials, data=self.object_to_persist(obj), **kwargs)
+		rp = self.http_put(url, credentials=credentials, data=self.object_to_persist(obj), **kwargs)
 		assert_that(rp.status_int, is_(200), 'invalid status code while updating an object')
 
 		data = self.httplib.deserialize(rp)
@@ -257,7 +290,7 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
 
-		rp = self.httplib.do_delete(url, credentials=credentials, **kwargs)
+		rp = self.http_delete(url, credentials=credentials, **kwargs)
 		assert_that(rp.status_int, is_(204), 'invalid status code while deleting an object')
 
 		return None
@@ -316,7 +349,7 @@ class DataserverClient(object):
 		assert_that(href, is_not(none()), "no '%s' href was provided for replies" )
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
-		rp = self.httplib.do_get(url, credentials=credentials, **kwargs)
+		rp = self.http_get(url, credentials=credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), "invalid status code object in replied operation")
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
@@ -328,7 +361,7 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
 
-		rp = self.httplib.do_post(url, credentials=credentials, **kwargs)
+		rp = self.http_post(url, credentials=credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), "invalid status code object in '%s' operation" % operation)
 
 		data = self.httplib.deserialize(rp)
@@ -356,7 +389,7 @@ class DataserverClient(object):
 			assert_that(href, is_not(none()), 'could not find a transcript link for %s' % room_id)
 
 			url = urljoin(self.endpoint, href)
-			rp = self.httplib.do_get(url, credentials, **kwargs)
+			rp = self.http_get(url, credentials, **kwargs)
 			assert_that(rp.status_int, is_(200), 'invalid status code while getting transcript data')
 
 			data = self.httplib.deserialize(rp)
@@ -379,7 +412,7 @@ class DataserverClient(object):
 			url = _check_url(url + urllib.quote(ntiid))
 		url = url + urllib.quote(query)
 
-		rp = self.httplib.do_get(url, credentials, **kwargs)
+		rp = self.http_get(url, credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), 'invalid status code while searching content')
 
 		data = self.httplib.deserialize(rp)
@@ -411,7 +444,7 @@ class DataserverClient(object):
 		link, _ = self._get_user_search_link(credentials=credentials)
 		url = _check_url(urljoin(self.endpoint, link.href)) + search
 
-		rp = self.httplib.do_get(url, credentials, **kwargs)
+		rp = self.http_get(url, credentials, **kwargs)
 		if rp.status_int == 404:
 			return EMPTY_CONTAINER_ARRAY
 
@@ -567,7 +600,7 @@ class DataserverClient(object):
 		if url is None:
 			return EMPTY_CONTAINER_DICT
 		
-		rp = self.httplib.do_get(url, credentials, **kwargs)
+		rp = self.http_get(url, credentials, **kwargs)
 
 		# check for empty reply from the server
 		if rp.status_int == 404:
@@ -579,7 +612,7 @@ class DataserverClient(object):
 	def _post_to_collection(self, obj, collection, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, collection.href)
-		rp = self.httplib.do_post(url, credentials=credentials, data=self.object_to_persist(obj), **kwargs)
+		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(obj), **kwargs)
 		assert_that(rp.status_int, is_(201), 'invalid status code while posting an object')
 
 		data = self.httplib.deserialize(rp)
@@ -609,7 +642,7 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
 
-		rp = self.httplib.do_get(url, credentials, **kwargs)
+		rp = self.http_get(url, credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), 'invalid status code while getting collection data')
 
 		data = self.httplib.deserialize(rp)
@@ -637,7 +670,7 @@ class DataserverClient(object):
 		
 		href = "users/@@account.create"
 		url = urljoin(self.endpoint, href)
-		rp = self.httplib.do_post(url, data=payload)
+		rp = self.http_post(url, data=payload)
 		assert_that(rp.status_int, is_(201), 'invalid status code while trying to create a user')
 		
 		data = self.httplib.deserialize(rp)
@@ -648,7 +681,7 @@ class DataserverClient(object):
 		
 		href = "ResolveUser/%s" % username
 		url = urljoin(self.endpoint, href)
-		rp = self.httplib.do_get(url, credentials, **kwargs)
+		rp = self.http_get(url, credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), 'invalid status while resolving user')
 			
 		data = self.httplib.deserialize(rp)
