@@ -686,6 +686,15 @@ class DataserverClient(object):
 			
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
+	
+	def preflight_create_user(self, data):
+		href = "users/@@account.preflight.create"
+		url = urljoin(self.endpoint, href)
+		rp = self.http_post(url, data=anyjson.dumps(data))
+		
+		assert_that(rp.status_int, is_(200), 'invalid status while user account creation preflight')
+		data = self.httplib.deserialize(rp)
+		return data
 		
 	# ------------------------
 
