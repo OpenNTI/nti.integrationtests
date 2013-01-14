@@ -74,10 +74,10 @@ class DataserverClient(object):
 
 	def __init__(self, endpoint, credentials=None, httplib=None, headers=None):
 		self.users_ws = {}
-		self.headers = headers or {}
 		self.credentials = credentials
 		self.endpoint = _check_url(endpoint)
 		self.httplib = httplib or URLHttpLib()
+		self.headers = dict(headers) if headers else None
 
 	def get_credentials(self):
 		return self.credentials
@@ -96,7 +96,7 @@ class DataserverClient(object):
 	
 	def prepare_headers(self, headers=None):
 		if headers:
-			result = dict(self.headers)
+			result = dict(self.headers) if self.headers else {}
 			result.update(headers)
 		else:
 			result = dict(self.headers) if self.headers else None

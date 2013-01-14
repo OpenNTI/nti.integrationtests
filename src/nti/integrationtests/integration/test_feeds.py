@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import gzip
 import time
 import unittest
-from cStringIO import StringIO
 
 from lxml import etree
 
@@ -96,13 +94,11 @@ class TestFeeds(DataServerTestCase):
 			self.ds.create_note('Note number %s' % i, self.container, sharedWith=[self.target[0]])
 			
 		feed = self.ds.get_rss_feed(self.container, credentials=self.target, gzip=True)
-		feed = gzip.GzipFile('', 'r', 0, StringIO(feed))
 		root = etree.parse(feed)
 		count_elements = etree.XPath("count(//item)")
 		assert_that(count_elements(root), greater_than_or_equal_to(size))
 						
 		feed = self.ds.get_atom_feed(self.container, credentials=self.target, gzip=True)
-		feed = gzip.GzipFile('', 'r', 0, StringIO(feed))
 		root = etree.parse(feed)
 		count_elements = etree.XPath("count(//t:entry)", namespaces={'t':'http://www.w3.org/2005/Atom'})
 		assert_that(count_elements(root), greater_than_or_equal_to(size))

@@ -59,6 +59,7 @@ class DataServerTestCase(unittest.TestCase):
 	user_names = []
 	root_item = ROOT_ITEM
 
+	headers = None
 	default_user_password = DEFAULT_USER_PASSWORD
 
 	# We need to start a dataserver (and stop it)
@@ -68,31 +69,37 @@ class DataServerTestCase(unittest.TestCase):
 		cls.static_initialization()
 
 	def setUp(self):
-		endpoint = self.get_endpoint()
-		self.ds = DataserverClient(endpoint)
+		self.ds = self.create_client()
 
 	@property
 	def client(self):
 		return self.ds
 
+	def create_client(self, headers=None):
+		endpoint = self.get_endpoint()
+		headers = headers or self.headers
+		result = self.new_client(endpoint=endpoint, headers=headers)
+		return result
+	
 	def get_endpoint(self):
 		if hasattr(self, 'endpoint'):
 			return self.endpoint
 		return self.resolve_endpoint(port = self.port)
-
-	# ======================
 
 	@classmethod
 	def resolve_endpoint(cls, host=None, port=None):
 		return DataserverProcess.resolve_endpoint(host, port)
 
 	@classmethod
-	def new_client(cls, credentials=None, endpoint=None):
-		clt = DataserverClient(endpoint or DataserverProcess.ENDPOINT2)
+	def new_client(cls, credentials=None, endpoint=None, headers=None):
+		endpoint = endpoint or DataserverProcess.ENDPOINT2
+		clt = DataserverClient(endpoint=endpoint, headers=headers)
 		if credentials:
 			clt.set_credentials(credentials)
 		return clt
 
+	# ======================
+		
 	process = None
 
 	@classmethod

@@ -1,13 +1,15 @@
 import os
+import six
 import sys
+import gzip
 import base64
 import pprint
 import urllib
-import anyjson
 import httplib
 import urllib2
 import mimetools
 import mimetypes
+import simplejson
 from cStringIO import StringIO
 
 from webob import Response
@@ -119,11 +121,24 @@ class URLHttpLib(object):
 			d = {'data':dt, 'url':url, 'auth':credentials, 'raw': raw_content}
 			pprint.pprint(d)
 
+	def get_headers(self, rp):
+		result = {k.lower():v for k,v in rp.headers.items()}
+		return result
+	
 	def body(self, rp):
-		return rp.body
+		result = rp.body
+		headers = self.get_headers(rp)
+		if headers.get('accept-encoding', None) == 'gzip' or headers.get('content-encoding',None) == 'gzip':
+			result = gzip.GzipFile('', 'r', 0, StringIO(result))
+		return result
 	
 	def deserialize(self, rp):
-		return anyjson.loads(rp.body)
+		data = self.body(rp)
+		if not isinstance(data, six.string_types):
+			result = simplejson.load(data)
+		else:
+			result = simplejson.loads(data)
+		return result
 
 	def _prune(self, d):
 		result = {}
