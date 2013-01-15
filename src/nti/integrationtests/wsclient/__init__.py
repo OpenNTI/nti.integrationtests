@@ -1,1 +1,1 @@
-from nti.integrationtests.wsclient.websocket import *
+from nti.integrationtests.socketio.websocket import *

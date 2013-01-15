@@ -28,6 +28,11 @@ import socket
 import struct
 from urlparse import urlparse
 
+from nti.integrationtests.socketio import SocketIOSocket
+from nti.integrationtests.socketio import SocketIOException
+from nti.integrationtests.socketio import get_default_timeout
+from nti.integrationtests.socketio import ConnectionClosedException
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -40,7 +45,6 @@ __all__ = [	'enable_trace','set_default_timeout', 'get_default_timeout',\
 
 #########################
 
-default_timeout = None
 traceEnabled = False
 
 # ---------------------------------
@@ -56,19 +60,6 @@ def enable_trace(trackable=True):
 		if not logger.handlers:
 			logger.addHandler(logging.StreamHandler())
 		logger.setLevel(logging.DEBUG)
-
-def set_default_timeout(timeout):
-	"""
-	Set the global timeout setting to connect.
-	"""
-	global default_timeout
-	default_timeout = timeout
-
-def get_default_timeout():
-	"""
-	Return the global timeout setting to connect.
-	"""
-	return default_timeout
 
 # ---------------------------------
 
@@ -140,10 +131,7 @@ HEADERS_TO_EXIST_FOR_HYBI00 = ["sec-websocket-origin", "sec-websocket-location",
 
 HEADERS_TO_EXIST_FOR_HIXIE75 = ["websocket-origin", "websocket-location",]
 
-class WebSocketException(Exception):
-	pass
-
-class ConnectionClosedException(WebSocketException):
+class WebSocketException(SocketIOException):
 	pass
 
 class _SSLSocketWrapper(object):
@@ -163,7 +151,7 @@ class _SSLSocketWrapper(object):
 	def connect(self, *args, **kwargs):
 		self.sock.connect(*args, **kwargs)
 
-class WebSocket(object):
+class WebSocket(SocketIOSocket):
 	"""
 	Low level WebSocket interface.
 	This class is based on
@@ -450,7 +438,7 @@ class WebSocket(object):
 					return s
 		return None
 
-def create_connection(url, timeout=default_timeout, on_handshake=None, **options):
+def create_connection(url, timeout=None, on_handshake=None, **options):
 	"""
 	connect to url and return websocket object.
 
@@ -459,20 +447,20 @@ def create_connection(url, timeout=default_timeout, on_handshake=None, **options
 	If no timeout is supplied, the global default timeout setting returned by getdefauttimeout() is used.
 	"""
 	websock = WebSocket()
-	websock.settimeout(timeout)
+	websock.settimeout(timeout or get_default_timeout())
 	websock.connect(url, on_handshake=on_handshake, **options)
 	return websock
 
 _msg_pat = re.compile('.+\\:15\\:10\\:.*websocket.*')
 
-def create_ds_connection(host, port, username, password, resource=None, is_secure=False, timeout=default_timeout, **options):
+def create_ds_connection(host, port, username, password, is_secure=False, timeout=None, resource=None, **options):
 
 	resource = resource or '/socket.io/1/'
 	if resource[-1] != '/':
 		resource += '/'
 
 	ws = WebSocket(is_secure)
-	ws.settimeout(timeout)
+	ws.settimeout(timeout or get_default_timeout())
 	io_sock = ws.io_sock
 	io_sock.connect((host, port))
 

@@ -9,9 +9,9 @@ from collections import OrderedDict, Mapping
 
 from nti.integrationtests.contenttypes import toExternalObject
 
-from nti.integrationtests.wsclient import WebSocketException
-from nti.integrationtests.wsclient import create_ds_connection
-from nti.integrationtests.wsclient import ConnectionClosedException
+from nti.integrationtests.socketio.websocket import WebSocketException
+from nti.integrationtests.socketio.websocket import create_ds_connection
+from nti.integrationtests.socketio.websocket import ConnectionClosedException
 
 WS_ACK			= b'6::'
 WS_CONNECT		= b'1::'
