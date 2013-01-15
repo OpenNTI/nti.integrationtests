@@ -53,6 +53,6 @@ class SocketIOSocket(object):
 		raise NotImplementedError()
 	
 	@classmethod
-	def connect_to_ds(cls, host, port, username, password, is_secure=False, timeout=default_timeout, resource=None, **kwargs):
-		pass
+	def connect_to_ds(cls, host, port, username, password, is_secure=False, timeout=default_timeout, **kwargs):
+		raise NotImplementedError()
 

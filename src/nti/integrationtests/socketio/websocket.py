@@ -170,6 +170,8 @@ class WebSocket(SocketIOSocket):
 	>>> ws.close()
 	"""
 
+	_msg_pat = re.compile('.+\\:15\\:10\\:.*websocket.*')
+	
 	def __init__(self, secure=False):
 		"""
 		Initalize WebSocket object.
@@ -438,6 +440,56 @@ class WebSocket(SocketIOSocket):
 					return s
 		return None
 
+	@classmethod
+	def connect_to_ds(cls, host, port, username, password, is_secure=False, timeout=None, resource=None, **kwargs):
+		resource = resource or '/socket.io/1/'
+		resource = resource + '/' if resource[-1] != '/' else resource
+	
+		ws = WebSocket(is_secure)
+		ws.settimeout(timeout or get_default_timeout())
+		io_sock = ws.io_sock
+		io_sock.connect((host, port))
+	
+		base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+		auth_header = 'Authorization: Basic %s' % base64string
+	
+		# socket.io handshake
+		io_sock.send('POST %s HTTP/1.1\r\n' % resource)
+		io_sock.send(auth_header)
+		io_sock.send('\r\nContent-Length: 0\r\n')
+		io_sock.send('\r\n')
+	
+		status, resp_headers = ws._read_headers()
+		if status == 200:
+			cl = resp_headers['content-length'] if 'content-length' in resp_headers else None
+			if cl:
+				content_length = int(resp_headers['content-length'])
+	
+				# get the session id. the server returns the session id e.g.
+				# 57e45c8578d9426fb0f12336c5ef21ed:15:10:websocket,xhr-polling
+				# 5ac894738a704995bd846dcad606e1aa:15:10:flashsocket,websocket,xhr-polling
+				msg = ws._recv_strict(content_length)
+				if cls._msg_pat.match(msg):
+					sessiond_id = msg.split(":")[0]
+					resource = '%s%s/%s' % (resource, 'websocket', sessiond_id)
+	
+					header = kwargs.get('headers', [])
+					header.append(auth_header)
+					kwargs['headers'] = header
+	
+					ws._handshake(host, port, resource, is_secure, **kwargs)
+					return ws
+				else:
+					ws.close()
+					raise WebSocketException("Could not find session id in server reply '%s'" % msg)
+			else:
+				ws.close()
+				raise WebSocketException("Invalid server response")
+		else:
+			ws.close()
+			raise WebSocketException("Invalid status %s writing to %s (%s)" % (status, resource, resp_headers))
+		
+	
 def create_connection(url, timeout=None, on_handshake=None, **options):
 	"""
 	connect to url and return websocket object.
@@ -451,57 +503,16 @@ def create_connection(url, timeout=None, on_handshake=None, **options):
 	websock.connect(url, on_handshake=on_handshake, **options)
 	return websock
 
-_msg_pat = re.compile('.+\\:15\\:10\\:.*websocket.*')
-
 def create_ds_connection(host, port, username, password, is_secure=False, timeout=None, resource=None, **options):
-
-	resource = resource or '/socket.io/1/'
-	if resource[-1] != '/':
-		resource += '/'
-
-	ws = WebSocket(is_secure)
-	ws.settimeout(timeout or get_default_timeout())
-	io_sock = ws.io_sock
-	io_sock.connect((host, port))
-
-	base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-	auth_header = 'Authorization: Basic %s' % base64string
-
-	# socket.io handshake
-	io_sock.send('POST %s HTTP/1.1\r\n' % resource)
-	io_sock.send(auth_header)
-	io_sock.send('\r\nContent-Length: 0\r\n')
-	io_sock.send('\r\n')
-
-	status, resp_headers = ws._read_headers()
-	if status == 200:
-		cl = resp_headers['content-length'] if 'content-length' in resp_headers else None
-		if cl:
-			content_length = int(resp_headers['content-length'])
-
-			# get the session id. the server returns the session id e.g.
-			# 57e45c8578d9426fb0f12336c5ef21ed:15:10:websocket,xhr-polling
-			# 5ac894738a704995bd846dcad606e1aa:15:10:flashsocket,websocket,xhr-polling
-			msg = ws._recv_strict(content_length)
-			if _msg_pat.match(msg):
-				sessiond_id = msg.split(":")[0]
-				resource = '%s%s/%s' % (resource, 'websocket', sessiond_id)
-
-				header = options.get('headers', [])
-				header.append(auth_header)
-				options['headers'] = header
-
-				ws._handshake(host, port, resource, is_secure, **options)
-				return ws
-			else:
-				ws.close()
-				raise WebSocketException("Could not find session id in server reply '%s'" % msg)
-		else:
-			ws.close()
-			raise WebSocketException("Invalid server response")
-	else:
-		ws.close()
-		raise WebSocketException("Invalid status %s writing to %s (%s)" % (status, resource, resp_headers))
+	result = WebSocket.connect_to_ds(host=host,
+									 port=port,
+									 username=username,
+									 password=password, 
+									 is_secure=is_secure, 
+									 timeout=timeout,
+									 resource=resource,
+									 **options)
+	return result
 
 if __name__ == "__main__":
 	ws = create_ds_connection('alpha.nextthought.com', 443, 'test.user.1@nextthought.com', 'temp001', is_secure=True)
