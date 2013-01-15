@@ -28,7 +28,7 @@ EVT_ENTER_ROOM		= 'chat_enterRoom'
 EVT_EXITED_ROOM		= 'chat_exitedRoom'
 EVT_ENTERED_ROOM	= 'chat_enteredRoom'
 EVT_SHADOW_USERS	= 'chat_shadowUsers'
-EVT_POST_MESSOGE	= 'chat_postMessage'
+EVT_POST_MESSAGE	= 'chat_postMessage'
 EVT_RECV_MESSAGE	= 'chat_recvMessage'
 EVT_MAKE_MODERATED	= 'chat_makeModerated'
 EVT_APPROVE_MSGS	= 'chat_approveMessages'
@@ -709,7 +709,7 @@ def _postMessage(ws, **kwargs):
 	if inReplyTo:
 		args['inReplyTo'] = inReplyTo
 
-	d = {"name":EVT_POST_MESSOGE, "args":[args]}
+	d = {"name":EVT_POST_MESSAGE, "args":[args]}
 	msg = encode(d, data_format)
 	if msg:
 		msg = WS_BROADCAST + msg
