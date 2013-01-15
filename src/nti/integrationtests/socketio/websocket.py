@@ -176,7 +176,7 @@ class WebSocket(SocketIOSocket):
 		"""
 		Initalize WebSocket object.
 		"""
-		self.connected = False
+		super(SocketIOSocket, self).__init__()
 		self.io_sock = self.sock = socket.socket()
 		if secure:
 			self.io_sock = _SSLSocketWrapper(self.sock)
