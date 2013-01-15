@@ -20,11 +20,12 @@ def run_test_suite(suite, dsprocess, config=None, module=None, use_coverage=Fals
 		else:
 			dsprocess.start_server()
 
-		print "Waiting for server to come up...."
+		print("Waiting for server to come up....")
 		time.sleep(5)
-		print "Starting tests"  
+		print("Starting tests")
 
 		set_server_data(suite, dsprocess)
+		
 		_runner = None 
 		_argv = [sys.argv[0], '--verbose'] if verbose else [sys.argv[0]]
 		nose.core.run( config=config, testRunner=_runner, suite=suite, module=module, argv=_argv )
