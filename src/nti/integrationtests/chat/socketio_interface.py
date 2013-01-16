@@ -9,9 +9,11 @@ from collections import OrderedDict, Mapping
 
 from nti.integrationtests.contenttypes import toExternalObject
 
-from nti.integrationtests.socketio.websocket import WebSocketException
-from nti.integrationtests.socketio.websocket import create_ds_connection
-from nti.integrationtests.socketio.websocket import ConnectionClosedException
+from nti.integrationtests.socketio import SocketIOException
+from nti.integrationtests.socketio import ConnectionClosedException
+
+from nti.integrationtests.socketio.websocket import WebSocket
+from nti.integrationtests.socketio.xhrpolling import XHRPollingSocket
 
 WS_ACK			= b'6::'
 WS_CONNECT		= b'1::'
@@ -237,8 +239,8 @@ class DSUser(object):
 		self.ws_recv = None
 		self.killed = False
 		self.heart_beats = 0
-		self.is_secure = kwargs.get('is_secure', False)
-
+		self.is_secure = kwargs.get('is_secure', False) 
+		self.transport = kwargs.get('transport', 'websocket')
 		self.message_context = kwargs.get('message_context', MessageContext())
 
 		self.ws = kwargs.get('ws', None)
@@ -456,6 +458,7 @@ class DSUser(object):
 		self.ws = _ws_connect(self.host, self.port, username=self.username,
 							  password=self.password, timeout=self.timeout,
 							  is_secure=self.is_secure,
+							  transport=self.transport,
 							  message_context=self.message_context)
 
 		self.connected = getattr(self.ws, "connected", False)
@@ -497,30 +500,30 @@ Graph = DSUser
 def _self_of_emtpy(s):
 	return ' ' + s if s else ''
 
-class Serverkill(WebSocketException):
+class Serverkill(SocketIOException):
 	def __init__(self, args=None):
 		super(Serverkill, self).__init__(str(args) if args else '')
 
-class InvalidAuthorization(WebSocketException):
+class InvalidAuthorization(SocketIOException):
 	def __init__(self, username, password=''):
 		super(InvalidAuthorization, self).__init__('Invalid credentials for %s' % username)
 		self.username = username
 		self.password = password
 
-class InvalidDataFormat(WebSocketException):
+class InvalidDataFormat(SocketIOException):
 	def __init__(self, data_format=''):
 		super(InvalidDataFormat, self).__init__('Invalid data format %s' % data_format)
 		self.data_format = data_format
 
-class CouldNotEnterRoom(WebSocketException):
+class CouldNotEnterRoom(SocketIOException):
 	def __init__(self, room_id=None):
 		super(CouldNotEnterRoom, self).__init__('Could not enter room' + _self_of_emtpy( room_id))
 
-class NotEnoughOccupants(WebSocketException):
+class NotEnoughOccupants(SocketIOException):
 	def __init__(self, room_id=''):
 		super(NotEnoughOccupants, self).__init__('room %s does not have enough occupants' % room_id)
 
-class InActiveRoom(WebSocketException):
+class InActiveRoom(SocketIOException):
 	def __init__(self, room_id=''):
 		super(InActiveRoom, self).__init__('Room is inactive %s' % room_id)
 
@@ -754,13 +757,14 @@ def _ws_disconnect(ws, data_format='json', message_context=default_message_conte
 def _send_heartbeat(ws):
 	ws.send(WS_HEART_BEAT)
 
-def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, timeout=DEAULT_TIMEOUT, is_secure=False,
-				message_context=default_message_context):
+def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, is_secure=False,
+				transport='websocket', timeout=DEAULT_TIMEOUT, message_context=default_message_context):
 
-	# create the connectiona and do a handshake.
-	ws = create_ds_connection(host, port, username=username, password=password,
-							  timeout=timeout, is_secure=is_secure)
-	return ws
+	if transport == 'xhr-polling':
+		result = XHRPollingSocket.connect_to_ds(host, port, username, password, is_secure)
+	else:
+		result = WebSocket.connect_to_ds(host, port, username, password, is_secure, timeout)
+	return result
 
 if __name__ == "__main__":
 	ws = _ws_connect('localhost', 8081, 'test.user.1@nextthought.com', 'temp001')

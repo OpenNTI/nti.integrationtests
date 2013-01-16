@@ -4,7 +4,7 @@ import unittest
 
 from nti.integrationtests.chat import objects
 from nti.integrationtests.integration import test_chat_multi_user
-from nti.integrationtests.chat.websocket_interface import WHISPER_CHANNEL
+from nti.integrationtests.chat.socketio_interface import WHISPER_CHANNEL
 
 from hamcrest import ( has_key, has_item, assert_that )
 

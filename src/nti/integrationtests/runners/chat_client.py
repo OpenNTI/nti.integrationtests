@@ -11,10 +11,10 @@ import argparse
 import threading
 from datetime import datetime
 
-from nti.integrationtests.chat.websocket_interface import DSUser
-from nti.integrationtests.chat.websocket_interface import CHANNELS
-from nti.integrationtests.chat.websocket_interface import DEFAULT_CHANNEL
-from nti.integrationtests.chat.websocket_interface import MessageContext
+from nti.integrationtests.chat.socketio_interface import DSUser
+from nti.integrationtests.chat.socketio_interface import CHANNELS
+from nti.integrationtests.chat.socketio_interface import DEFAULT_CHANNEL
+from nti.integrationtests.chat.socketio_interface import MessageContext
 
 #########################
 
