@@ -1,4 +1,6 @@
-import requests
+#import requests
+
+from collections import deque
 
 from nti.integrationtests.socketio import SocketIOSocket
 from nti.integrationtests.socketio import SocketIOException
@@ -13,4 +15,5 @@ class XHRPollingSocket(SocketIOSocket):
 	
 	def __init__(self):
 		super(SocketIOSocket, self).__init__()
+		self.queue = deque([])
 
