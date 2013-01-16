@@ -28,6 +28,8 @@ import socket
 import struct
 from urlparse import urlparse
 
+from ZODB import loglevels
+
 from nti.integrationtests.socketio import SocketIOSocket
 from nti.integrationtests.socketio import SocketIOException
 from nti.integrationtests.socketio import get_default_timeout
@@ -36,32 +38,7 @@ from nti.integrationtests.socketio import ConnectionClosedException
 import logging
 logger = logging.getLogger(__name__)
 
-#########################
-
-__all__ = [	'enable_trace','set_default_timeout', 'get_default_timeout',\
-			'WebSocketException', 'ConnectionClosedException',\
-			'WebSocket',\
-			'create_connection','create_ds_connection']
-
-#########################
-
-traceEnabled = False
-
-# ---------------------------------
-
-def enable_trace(trackable=True):
-	"""
-	turn on/off the tracability.
-	"""
-	global traceEnabled
-	traceEnabled = trackable
-
-	if trackable:
-		if not logger.handlers:
-			logger.addHandler(logging.StreamHandler())
-		logger.setLevel(logging.DEBUG)
-
-# ---------------------------------
+__all__ = [	'WebSocketException', 'WebSocket', 'create_ds_connection']
 
 def _parse_url(url):
 	"""
@@ -95,8 +72,6 @@ def _parse_url(url):
 
 	return (hostname, port, resource, is_secure)
 
-# ---------------------------------
-
 _MAX_INTEGER = (1 << 32) -1
 _AVAILABLE_KEY_CHARS = range(0x21, 0x2f + 1) + range(0x3a, 0x7e + 1)
 _MAX_CHAR_BYTE = (1<<8) -1
@@ -122,8 +97,6 @@ def _create_sec_websocket_key():
 
 def _create_key3():
 	return "".join([chr(random.randint(0, _MAX_CHAR_BYTE)) for _ in range(8)])
-
-# ---------------------------------
 
 HEADERS_TO_CHECK = {"upgrade": "websocket", "connection": "upgrade",}
 
@@ -170,6 +143,7 @@ class WebSocket(SocketIOSocket):
 	>>> ws.close()
 	"""
 
+	logging_level = loglevels.TRACE
 	_msg_pat = re.compile('.+\\:15\\:10\\:.*websocket.*')
 	
 	def __init__(self, secure=False):
@@ -199,7 +173,7 @@ class WebSocket(SocketIOSocket):
 		"""
 		host, port, resource, is_secure = _parse_url(url)
 		self.sock.connect((host, port))
-		self._handshake(	host, port, resource, is_secure,  **options)
+		self._handshake(host, port, resource, is_secure,  **options)
 		return self
 
 	def _handshake(self, host, port, resource, is_secure, **options):
@@ -235,10 +209,10 @@ class WebSocket(SocketIOSocket):
 
 		header_str = "\r\n".join(ws_info)
 		sock.send(header_str)
-		if traceEnabled:
-			logger.debug( "--- request header ---")
-			logger.debug( header_str)
-			logger.debug("-----------------------")
+		
+		logger.log(self.logging_level, "--- request header ---")
+		logger.log(self.logging_level, header_str)
+		logger.log(self.logging_level, "-----------------------")
 
 		status, resp_headers = self._read_headers()
 		if status != 101:
@@ -267,10 +241,9 @@ class WebSocket(SocketIOSocket):
 
 	def _get_resp(self):
 		result = self._recv(16)
-		if traceEnabled:
-			logger.debug("--- challenge response result ---")
-			logger.debug(repr(result))
-			logger.debug("---------------------------------")
+		logger.log(self.logging_level, "--- challenge response result ---")
+		logger.log(self.logging_level, repr(result))
+		logger.log(self.logging_level, "---------------------------------")
 
 		return result
 
@@ -302,16 +275,14 @@ class WebSocket(SocketIOSocket):
 	def _read_headers(self):
 		status = None
 		headers = {}
-		if traceEnabled:
-			logger.debug("--- response header ---")
+		logger.log(self.logging_level, "--- response header ---")
 
 		while True:
 			line = self._recv_line()
 			if line == "\r\n":
 				break
 			line = line.strip()
-			if traceEnabled:
-				logger.debug(line)
+			logger.log(self.logging_level, line)
 			if not status:
 				status_info = line.split(" ", 2)
 				status = int(status_info[1])
@@ -323,8 +294,7 @@ class WebSocket(SocketIOSocket):
 				else:
 					raise WebSocketException("Invalid header")
 
-		if traceEnabled:
-			logger.debug("-----------------------")
+		logger.log(self.logging_level, "-----------------------")
 
 		return status, headers
 
@@ -336,16 +306,15 @@ class WebSocket(SocketIOSocket):
 			payload = payload.encode("utf-8")
 		data = "".join(["\x00", payload, "\xff"])
 		self.io_sock.send(data)
-		if traceEnabled:
-			logger.debug("send: " + repr(data))
+
+		logger.log(self.logging_level, "send: " + repr(data))
 
 	def recv(self):
 		"""
 		Reeive utf-8 string data from the server.
 		"""
 		b = self._recv(1)
-		if enable_trace:
-			logger.debug("recv frame: " + repr(b))
+		logger.log(self.logging_level, "recv frame: " + repr(b))
 		frame_type = ord(b)
 		if frame_type == 0x00:
 			_data = []
@@ -390,8 +359,8 @@ class WebSocket(SocketIOSocket):
 				self.sock.settimeout(1)
 				try:
 					result = self._recv(2)
-					if result != "\xff\x00" and traceEnabled:
-						logger.debug("bad closing Handshake %s" % result)
+					if result != "\xff\x00":
+						logger.log(self.logging_level, "bad closing Handshake %s" % result)
 				except:
 					pass
 				self.sock.settimeout(timeout)
@@ -489,20 +458,6 @@ class WebSocket(SocketIOSocket):
 			ws.close()
 			raise WebSocketException("Invalid status %s writing to %s (%s)" % (status, resource, resp_headers))
 		
-	
-def create_connection(url, timeout=None, on_handshake=None, **options):
-	"""
-	connect to url and return websocket object.
-
-	Connect to url and return the WebSocket object.
-	Passing optional timeout parameter will set the timeout on the socket.
-	If no timeout is supplied, the global default timeout setting returned by getdefauttimeout() is used.
-	"""
-	websock = WebSocket()
-	websock.settimeout(timeout or get_default_timeout())
-	websock.connect(url, on_handshake=on_handshake, **options)
-	return websock
-
 def create_ds_connection(host, port, username, password, is_secure=False, timeout=None, resource=None, **options):
 	result = WebSocket.connect_to_ds(host=host,
 									 port=port,
