@@ -26,7 +26,7 @@ class TestBasicReplying(DataServerTestCase):
 		created_reply = self.ds.create_note("A reply to note", self.container, inReplyTo=created_obj['id'], adapt=True)
 		assert_that(created_reply['body'][0]), is_("A reply to note")
 		assert_that(created_reply['inReplyTo'], is_(created_obj['id']))
-		assert_that(created_reply['references'], is_(None))
+		assert_that(created_reply['references'], is_([]))
 
 		# cleanup
 		self.ds.delete_object(created_obj)
@@ -219,7 +219,7 @@ class TestBasicReplying(DataServerTestCase):
 		# cleanup
 		self.ds.delete_object(created_obj)
 		self.ds.delete_object(created_reply)
-		
+
 	def test_multiple_replies(self):
 		notes = []
 		for x, txt in enumerate(phrases):
@@ -233,6 +233,6 @@ class TestBasicReplying(DataServerTestCase):
 		replies = self.ds.replies(notes[0])
 		items = replies['Items']
 		assert_that(items, has_length(len(phrases)-1))
-		
+
 if __name__ == '__main__':
 	unittest.main()
