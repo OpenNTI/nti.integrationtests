@@ -38,6 +38,8 @@ class XHRPollingSocket(SocketIOSocket):
 			result = self.queue.popleft() 
 		else:
 			r = requests.get(self.url, auth=self.auth)
+			if r.status_code != 200:
+				raise XHRPollingSocketException("Could not get messages from '%s'" % self.url)
 			for msg in self.decode_multi(r.text):
 				self.queue.append(msg)
 			result = self.queue.popleft() if self.queue else None
