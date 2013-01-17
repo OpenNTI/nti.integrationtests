@@ -20,6 +20,7 @@ class TestUserPreflightCreate(DataServerTestCase):
 		
 		data = {"opt_in_email_communication":True, 'Username':username}
 		d = self.ds.preflight_create_user(data)
+
 		assert_that(d, has_key('AvatarURLChoices'))
 		assert_that(d['AvatarURLChoices'], has_length(greater_than(0)))
 		
@@ -53,5 +54,21 @@ class TestUserPreflightCreate(DataServerTestCase):
 		assert_that(d['invitation_codes'], has_entry('type', 'list'))
 		assert_that(d['opt_in_email_communication'], has_entry('type', 'bool'))
 
+	def _catch_test(self, data, msg):
+		try:
+			self.ds.preflight_create_user(data)
+			self.fail(msg)
+		except:
+			pass
+		
+	def test_preflight_validate(self):
+		self._catch_test({'Username':''}, 'Username cannot be empty')
+		self._catch_test({'Username':'xx'}, 'Username too short')
+		self._catch_test({'password':'xx'}, 'Password too short')
+		self._catch_test({'password':'12345'}, 'Invalid password')
+		self._catch_test({'email':'xx'}, 'Invalid email')
+		self._catch_test({'role':'xx'}, 'Invalid role')
+		self._catch_test({'birthdate':'xx'}, 'Invalid birthdate')
+		
 if __name__ == '__main__':
 	unittest.main()
