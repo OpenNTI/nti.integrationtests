@@ -11,7 +11,7 @@ class TestModeratedChat(HostUserChatTest):
 		super(TestModeratedChat, self).setUp()
 		self.chat_users = self.user_names[:3]
 
-	def test_chat(self):
+	def test_moderated_chat(self):
 
 		entries = random.randint(10, 15)
 		users = self._run_chat(self.container, entries, *self.chat_users)
@@ -30,9 +30,8 @@ class TestModeratedChat(HostUserChatTest):
 		for m in all_recv:
 			self.assert_(m not in moderator.moderated_messages, "Moderated message %s was received by a user" % m)
 
-	def _create_host(self, username, occupants):
-		return Moderator(username=username, occupants=occupants, port=self.port)
-
+	def _create_host(self, username, occupants, **kwargs):
+		return Moderator(username=username, occupants=occupants, port=self.port, **kwargs)
 
 class Moderator(Host):
 

@@ -25,6 +25,8 @@ class ConnectionClosedException(SocketIOException):
 
 class SocketIOSocket(object):
 	
+	WS_CONNECT = b'1::'
+	
 	def __init__(self):
 		self.connected = False
 
@@ -51,6 +53,20 @@ class SocketIOSocket(object):
 		Close Socket object
 		"""
 		raise NotImplementedError()
+	
+	def heartbeat(self):
+		"""
+		send a heartbeat
+		"""
+		raise NotImplementedError()
+	
+	def isHeartBeat(self, msg):
+		"""
+		check if the specified message is a heartbeat or noop
+		"""
+		raise NotImplementedError()
+	
+	isheartbeat = isHeartBeat
 	
 	@classmethod
 	def connect_to_ds(cls, host, port, username, password, is_secure=False, timeout=default_timeout, **kwargs):

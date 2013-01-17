@@ -11,8 +11,9 @@ from hamcrest import ( has_key, has_item, assert_that )
 class TestWhisperChat(test_chat_multi_user.TestMultiUserChat):
 	
 	chatting_users = 5
-
-	def test_chat(self):
+	
+	# override test
+	def test_multiuser_chat(self):
 		entries = random.randint(2, 5)
 		users = self._run_chat(self.container, entries, *self.chat_users)
 		for u in users:
@@ -30,11 +31,9 @@ class TestWhisperChat(test_chat_multi_user.TestMultiUserChat):
 			assert_that(mapping, has_key(r), "Whispered message was not recieved by %s" % r)
 			assert_that(mapping[r], has_item(m.text))
 			
-	def _create_host(self, username, occupants):
-		return Host(username, occupants, port=self.port)
+	def _create_host(self, username, occupants, **kwargs):
+		return Host(username, occupants, port=self.port, **kwargs)
 		
-# ----------------------------
-
 class Host(objects.Host):
 		
 	def post_messages(self, room_id, tick=5, *args, **kwargs):

@@ -13,7 +13,7 @@ class TestChatTranscript(HostUserChatTest):
 		self.user_one = self.user_names[0]
 		self.user_two = self.user_names[1]
 
-	def test_transcript(self):
+	def test_chat_transcript(self):
 		entries = 50
 		one, two = self._run_chat(self.container, entries, self.user_one, self.user_two)
 		for u in (one, two):

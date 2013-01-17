@@ -1,6 +1,7 @@
 import random
 import unittest
 
+from nti.integrationtests.utils import DEFAULT_USER_PASSWORD
 from nti.integrationtests.dataserver.client import DataserverClient
 from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
@@ -16,17 +17,26 @@ class TestSimpleChat(HostUserChatTest):
 		cls.user_one = cls.user_names[0]
 		cls.user_two = cls.user_names[1]
 		cls.user_three = cls.user_names[2]
-
-		cls.register_friends(cls.user_one, [cls.user_two], ds_client=ds_client)
-		cls.register_friends(cls.user_two, [cls.user_one], ds_client=ds_client)
-		cls.register_friends(cls.user_three, [cls.user_one, cls.user_two], ds_client=ds_client)
+		
+		fls = []
+		fls.append((cls.user_one, cls.register_friends(cls.user_one, [cls.user_two], ds_client=ds_client)))
+		fls.append((cls.user_two, cls.register_friends(cls.user_two, [cls.user_one], ds_client=ds_client)))
+		fls.append((cls.user_three, cls.register_friends(cls.user_three, [cls.user_one, cls.user_two], ds_client=ds_client)))
 
 		cls.user_four = cls.user_names[3]
-		cls.register_friends(cls.user_four, [cls.user_one, cls.user_two], ds_client=ds_client)
+		fls.append((cls.user_four, cls.register_friends(cls.user_four, [cls.user_one, cls.user_two], ds_client=ds_client)))
 
 		cls.user_five = cls.generate_user_name()
-
-	def test_chat(self):
+		cls.friend_lists = fls
+	
+	@classmethod
+	def static_finalization(cls):
+		ds_client = DataserverClient(endpoint = cls.resolve_endpoint(port=cls.port))
+		for username, fl in cls.friend_lists:
+			ds_client.set_credentials(user=username, password=DEFAULT_USER_PASSWORD)
+			ds_client.delete_object(fl)
+		
+	def test_simple_chat(self):
 		entries = random.randint(5, 10)
 		users = self._run_chat(self.container, entries, self.user_one, self.user_two)
 
@@ -34,8 +44,8 @@ class TestSimpleChat(HostUserChatTest):
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
 		for i in range(len(users) -1):
-			self._compare(users[i], users[i+1])
-			self._compare(users[i+1], users[i])
+			self._compare_sc_msgs(users[i], users[i+1])
+			self._compare_sc_msgs(users[i+1], users[i])
 
 	def test_chat_user_not_friend(self):
 		entries = random.randint(5, 10)
@@ -45,8 +55,8 @@ class TestSimpleChat(HostUserChatTest):
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
 		for i in range(len(users) -1):
-			self._compare(users[i], users[i+1])
-			self._compare(users[i+1], users[i])
+			self._compare_sc_msgs(users[i], users[i+1])
+			self._compare_sc_msgs(users[i+1], users[i])
 
 	def test_chat_unregistered_user(self):
 		entries = random.randint(5, 10)
@@ -54,7 +64,7 @@ class TestSimpleChat(HostUserChatTest):
 		self.assert_(len(one.users_online) == 0, "No user was supposed to be online")
 		self.assert_(two.exception, "Invalid Auth was expected for %s" % two.username)
 
-	def _compare(self, sender, receiver):
+	def _compare_sc_msgs(self, sender, receiver):
 		_sent = list(sender.sent)
 		assert_that( _sent, has_length( greater_than( 0 ) ), "%s did not send any messages" % sender)
 

@@ -142,7 +142,9 @@ class WebSocket(SocketIOSocket):
 	'Hello, Server'
 	>>> ws.close()
 	"""
-
+	
+	WS_HEART_BEAT = b'2::'
+	
 	logging_level = loglevels.TRACE
 	_msg_pat = re.compile('.+\\:15\\:10\\:.*websocket.*')
 	
@@ -409,6 +411,12 @@ class WebSocket(SocketIOSocket):
 					return s
 		return None
 
+	def heartbeat(self):
+		return self.send(self.WS_HEART_BEAT)
+	
+	def isHeartBeat(self, msg):
+		return str(msg).startswith(self.WS_HEART_BEAT)
+	
 	@classmethod
 	def connect_to_ds(cls, host, port, username, password, is_secure=False, timeout=None, resource=None, **kwargs):
 		resource = resource or '/socket.io/1/'

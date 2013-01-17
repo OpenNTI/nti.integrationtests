@@ -12,7 +12,7 @@ class TestShadowedChat(HostUserChatTest):
 		self.chat_users = self.user_names[:3]
 		self.users_to_shadow = [self.chat_users[1]]
 
-	def test_chat(self):
+	def test_shadowed_chat(self):
 		entries = 17
 		users = self._run_chat(self.container, entries, *self.chat_users)
 		for u in users:
@@ -30,9 +30,8 @@ class TestShadowedChat(HostUserChatTest):
 		# received messages match the shadowed messages, but we don't have
 		# correct ID information at this point
 
-	def _create_host(self, username, occupants):
-		return Ghost(self.users_to_shadow, username=username, occupants=occupants, port=self.port)
-
+	def _create_host(self, username, occupants, **kwargs):
+		return Ghost(self.users_to_shadow, username=username, occupants=occupants, port=self.port, **kwargs)
 
 class Ghost(objects.Host):
 

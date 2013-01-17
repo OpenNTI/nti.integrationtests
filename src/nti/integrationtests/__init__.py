@@ -68,6 +68,10 @@ class DataServerTestCase(unittest.TestCase):
 	def setUpClass(cls):
 		cls.static_initialization()
 
+	@classmethod
+	def tearDownClass(cls):
+		cls.static_finalization()
+		
 	def setUp(self):
 		self.ds = self.create_client()
 
@@ -113,6 +117,10 @@ class DataServerTestCase(unittest.TestCase):
 	def static_initialization(cls):
 		pass
 
+	@classmethod
+	def static_finalization(cls):
+		pass
+	
 	@classmethod
 	def generate_ntiid(cls, date=None, provider='nti', nttype=None, specific=None):
 		return generate_ntiid(date=date, provider=provider, nttype=nttype, specific=specific)

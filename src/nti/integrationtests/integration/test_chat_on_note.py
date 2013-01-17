@@ -21,7 +21,7 @@ class TestChatOnNote(HostUserChatTest):
 
 		self.ds.set_credentials((self.user_one, self.default_user_password))
 	
-	def test_chat(self):
+	def test_chat_on_a_note(self):
 
 		# creates a note
 		created_note = self.ds.create_note('A note to share', self.container, adapt=True)
@@ -73,11 +73,11 @@ class TestChatOnNote(HostUserChatTest):
 		
 		self.ds.delete_object(created_note)
 		
-	def _create_host(self, username, occupants):
-		return Host(self.host_messages, username=username, occupants=occupants, port=self.port)
+	def _create_host(self, username, occupants, **kwargs):
+		return Host(self.host_messages, username=username, occupants=occupants, port=self.port, **kwargs)
 	
-	def _create_user(self, username):
-		return User(self.user_messages, username=username, port=self.port)
+	def _create_user(self, username, **kwargs):
+		return User(self.user_messages, username=username, port=self.port, **kwargs)
 	
 # ---------------------------
 

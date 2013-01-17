@@ -13,7 +13,7 @@ class XHRPollingSocketException(SocketIOException):
 
 class XHRPollingSocket(SocketIOSocket):
 		
-	_WS_CONNECT					  = b'1::'
+	_WS_NOOP					  = b'8::'
 	_LIGHTWEIGHT_FRAME_DELIM      = b'\xff\xfd'     # u'\ufffd', the opening byte of a lightweight framing
 	_LIGHTWEIGHT_FRAME_UTF8_DELIM = b'\xef\xbf\xbd' # utf-8 encoding of u'\ufffd'
 
@@ -47,6 +47,12 @@ class XHRPollingSocket(SocketIOSocket):
 
 	def close(self):
 		self.connected = False
+	
+	def heartbeat(self):
+		pass
+	
+	def isHeartBeat(self, msg):
+		return str(msg).startswith(self._WS_NOOP)
 	
 	def decode_multi(self, data ):
 		"""
@@ -110,11 +116,12 @@ class XHRPollingSocket(SocketIOSocket):
 			headers = {'Origin': hostport, 'Host':hostport}
 			r = requests.post(urlf, auth=auth, headers=headers)
 			
-			if r.status_code != 200 or r.text != cls._WS_CONNECT:
+			if r.status_code != 200 or r.text != cls.WS_CONNECT:
 				raise XHRPollingSocketException("Could not set connection to %s" % urlf)
 			
 			result = XHRPollingSocket()
 			result.connect(urlf, auth)
+			return result
 		else:
 			raise XHRPollingSocketException("Invalid status code while posting to %s" % urlf)
 	

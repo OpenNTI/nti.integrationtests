@@ -27,10 +27,14 @@ class BasicChatTest(DataServerTestCase):
 			cls.user_names.append(name)
 
 		if create_friends_lists:
+			result = []
 			for u in cls.user_names:
 				friends = list(cls.user_names)
 				friends.remove(u)
-				cls.register_friends(username=u, friends=friends, ds_client=ds_client)
+				result.append(cls.register_friends(username=u, friends=friends, ds_client=ds_client))
+		else:
+			result = ()
+		return result
 
 	@classmethod
 	def generate_user_name(self):
@@ -49,29 +53,30 @@ class BasicChatTest(DataServerTestCase):
 		credentials = ds.get_credentials()
 		try:
 			ds.set_credentials(user=username, password=password)
-			ds.createFriendsListWithNameAndFriends(list_name, friends)
+			result = ds.createFriendsListWithNameAndFriends(list_name, friends)
+			return result
 		finally:
 			ds.set_credentials(credentials)
 
-		return list_name
-
-
 class HostUserChatTest(BasicChatTest):
 
-	def _create_host(self, username, occupants):
-		return Host(username, occupants, port=self.port)
+	host_transport = 'websocket'
+	user_transport = 'websocket'
+	
+	def _create_host(self, username, occupants, **kwargs):
+		return Host(username, occupants, port=self.port, **kwargs)
 
-	def _create_user(self, username):
-		return User(username=username, port=self.port)
+	def _create_user(self, username, **kwargs):
+		return User(username=username, port=self.port, **kwargs)
 
-	def _run_chat(self, containerId, entries, *denizens, **kwargs):
+	def _run_chat(self, containerId, entries, *members, **kwargs):
 
 		runnables = []
 		connect_event = threading.Event()
 
-		occupants = denizens[1:]
-		host = self._create_host(denizens[0], occupants)
-		users = [self._create_user(name) for name in occupants]
+		occupants = members[1:]
+		host = self._create_host(members[0], occupants, transport=self.host_transport)
+		users = [self._create_user(name, transport=self.user_transport) for name in occupants]
 
 		required_args = {'entries':entries, 'containerId':containerId, 'connect_event':connect_event}
 

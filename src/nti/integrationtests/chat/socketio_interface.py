@@ -18,7 +18,6 @@ from nti.integrationtests.socketio.xhrpolling import XHRPollingSocket
 WS_ACK			= b'6::'
 WS_CONNECT		= b'1::'
 WS_DISCONNECT	= b'0::'
-WS_HEART_BEAT	= b'2::'
 WS_MESSAGE		= b'3::'
 WS_BROADCAST	= b'5:::'
 
@@ -228,7 +227,6 @@ class _PostMessage(_Message):
 class DSUser(object):
 
 	def __init__(self, *args, **kwargs):
-
 		self.rooms = {}
 		self.sent_messages = []
 		self.recv_messages = OrderedDict()
@@ -496,7 +494,6 @@ class DSUser(object):
 
 Graph = DSUser
 
-
 def _self_of_emtpy(s):
 	return ' ' + s if s else ''
 
@@ -542,9 +539,6 @@ def isConnect(msg):
 
 def isBroadCast(msg):
 	return str(msg).startswith(WS_BROADCAST)
-
-def isHeartBeat(msg):
-	return str(msg).startswith(WS_HEART_BEAT)
 
 def encode(data, data_format='json'):
 	result = None
@@ -605,7 +599,7 @@ def _next_event(ws, graph=None, message_context=default_message_context):
 	if graph and isinstance(graph, DSUser):
 		if isConnect(msg):
 			graph.connect()
-		elif isHeartBeat(msg):
+		elif ws.isHeartBeat(msg):
 			graph.heartBeat()
 		elif isBroadCast(msg):
 			d = decode(msg)
@@ -657,7 +651,6 @@ def _exitRoom(ws, containerId, data_format='json', message_context=default_messa
 		raise InvalidDataFormat(data_format)
 
 def _enterRoom(ws, **kwargs):
-
 	message_context = kwargs.get('message_context', default_message_context)
 
 	occupants = kwargs.get('occupants', kwargs.get('Occupants',None))
@@ -690,7 +683,6 @@ def _enterRoom(ws, **kwargs):
 	return (None, None)
 
 def _postMessage(ws, **kwargs):
-
 	message = kwargs['message']
 	inReplyTo = kwargs.get("inReplyTo", None)
 	recipients = kwargs.get("recipients", None)
@@ -721,7 +713,6 @@ def _postMessage(ws, **kwargs):
 		raise InvalidDataFormat(data_format)
 
 def _makeModerated(ws, containerId, flag=True, data_format='json', message_context=default_message_context):
-
 	d = {"name":EVT_MAKE_MODERATED, "args":[containerId, flag]}
 	msg = encode(d, data_format)
 	if msg:
@@ -751,11 +742,10 @@ def _shadowUsers(ws, containerId, users, data_format='json', message_context=def
 		raise InvalidDataFormat(data_format)
 
 def _ws_disconnect(ws, data_format='json', message_context=default_message_context):
-	msg = b"0::"
-	message_context.send(ws, msg)
+	message_context.send(ws, WS_DISCONNECT)
 
 def _send_heartbeat(ws):
-	ws.send(WS_HEART_BEAT)
+	ws.heartbeat()
 
 def _ws_connect(host, port, username, password=DEFAULT_USER_PASSWORD, is_secure=False,
 				transport='websocket', timeout=DEAULT_TIMEOUT, message_context=default_message_context):

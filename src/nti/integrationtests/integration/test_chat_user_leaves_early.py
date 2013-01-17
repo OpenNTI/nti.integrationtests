@@ -12,7 +12,7 @@ class TestChatUserleavesEarly(HostUserChatTest):
 		self.chat_users = self.user_names[:3]
 		self.leave_early_user = self.chat_users[2]
 
-	def test_chat(self):
+	def test_chat_ule(self):
 		entries = 2
 		users = self._run_chat(self.container, entries, *self.chat_users)
 		for u in users:
@@ -25,13 +25,12 @@ class TestChatUserleavesEarly(HostUserChatTest):
 		assert_that( total_sent, is_( 10 ), "Incorrect number of messages sent")
 		assert_that( list(users[2].received), has_length( greater_than_or_equal_to( 6 ) ) )
 
-	def _create_user(self, username):
+	def _create_user(self, username, **kwargs):
 		early = username == self.leave_early_user
-		return User(leaves_early=early, username=username, port=self.port)
+		return User(leaves_early=early, username=username, port=self.port, **kwargs)
 
-	def _create_host(self, username, occupants):
-		return Host(username=username, occupants=occupants, port=self.port)
-
+	def _create_host(self, username, occupants, **kwargs):
+		return Host(username=username, occupants=occupants, port=self.port, **kwargs)
 
 class Host(objects.Host):
 	def post_messages(self, room_id, entries, *args, **kwargs):
@@ -41,7 +40,6 @@ class Host(objects.Host):
 
 	def __call__(self, *args, **kwargs):
 		super(Host, self).__call__(*args, **kwargs)
-		#print 'done host'
 
 class User(objects.User):
 
@@ -61,7 +59,6 @@ class User(objects.User):
 
 	def __call__(self, *args, **kwargs):
 		super(User, self).__call__(*args, **kwargs)
-		#print 'done', self.username
 
 if __name__ == '__main__':
 	unittest.main()

@@ -27,7 +27,7 @@ class TestChatSendingObject(HostUserChatTest):
 		
 		self.host_messages = [u'A note to user', created_obj]
 	
-	def test_chat(self):
+	def test_chat_sending_obj(self):
 		users = self._run_chat(self.container, 1, self.user_one, self.user_two)
 		for u in users:
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
@@ -42,8 +42,8 @@ class TestChatSendingObject(HostUserChatTest):
 			if isinstance(content, dict):
 				self.assertEqual(content['MimeType'], u'application/vnd.nextthought.canvas')
 	
-	def _create_host(self, username, occupants):
-		return Host(self.host_messages, username=username, occupants=occupants, port=self.port)
+	def _create_host(self, username, occupants, **kwargs):
+		return Host(self.host_messages, username=username, occupants=occupants, port=self.port, **kwargs)
 	
 # ----------------------------
 	

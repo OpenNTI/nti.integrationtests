@@ -11,7 +11,7 @@ class TestMultiUserChat(HostUserChatTest):
 		super(TestMultiUserChat, self).setUp()
 		self.chat_users = self.user_names[:self.chatting_users]
 	
-	def test_chat(self):
+	def test_multiuser_chat(self):
 		entries = random.randint(5, 10)
 		users = self._run_chat(self.container, entries, *self.chat_users)
 		
@@ -19,10 +19,10 @@ class TestMultiUserChat(HostUserChatTest):
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
 		for i in range(len(users) -1):
-			self._compare(users[i], users[i+1])
-			self._compare(users[i+1], users[i])
+			self._compare_mu_msgs(users[i], users[i+1])
+			self._compare_mu_msgs(users[i+1], users[i])
 		
-	def _compare(self, sender, receiver):
+	def _compare_mu_msgs(self, sender, receiver):
 		
 		_sent = list(sender.sent)
 		self.assertTrue(len(_sent) > 0, "%s did not send any messages" % sender)
