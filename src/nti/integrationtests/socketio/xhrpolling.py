@@ -54,6 +54,8 @@ class XHRPollingSocket(SocketIOSocket):
 	def isHeartBeat(self, msg):
 		return str(msg).startswith(self._WS_NOOP)
 	
+	isNOOP = isHeartBeat
+	
 	def decode_multi(self, data ):
 		"""
 		:return: A sequence of Message objects
