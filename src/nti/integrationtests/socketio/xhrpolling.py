@@ -85,7 +85,8 @@ class XHRPollingSocket(SocketIOSocket):
 			start_search = start + dl
 			end = data.find( d, start_search )
 			len_str = int( data[start_search:end] )
-			if len_str <= 0: raise ValueError( 'Bad length' )
+			if len_str <= 0: 
+				raise XHRPollingSocketException( 'Bad length' )
 			end_data = end + dl + len_str
 			sub_data = data[end+dl:end_data]
 			if not sub_data:
