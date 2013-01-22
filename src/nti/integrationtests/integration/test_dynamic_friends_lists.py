@@ -149,6 +149,7 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 			created_obj = self.ds.update_object(created_obj)
 			assert_that(created_obj, shared_with([friendsList.ntiid]))
 		
+			# make sure the event is in the stream
 			self.ds.set_credentials(self.friends[0])
 			stream = self.ds.get_recursive_stream_data(self.container)
 			assert_that(stream, is_(container()))
@@ -159,10 +160,10 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 					assert_that(c.item, shared_with([friendsList.ntiid]))
 					break							
 		
+			# do search
 			content = self.ds.search_user_content("Gokui")
 			assert_that(content, has_entry('Hit Count', greater_than_or_equal_to(1)))
 		finally:	
-			# clean up
 			self.ds.set_credentials(self.owner)
 			self.ds.delete_object(created_obj)
 			self.ds.delete_object(friendsList)
