@@ -11,7 +11,7 @@ from nti.integrationtests.integration import container_of_length
 from nti.integrationtests.integration import test_friends_lists
 from nti.integrationtests.integration import test_friends_sharing
 
-from hamcrest import ( assert_that, is_not)
+from hamcrest import (assert_that, is_not, has_entry, greater_than_or_equal_to)
 
 class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 							  test_friends_sharing.TestFriendsSharing):
@@ -127,7 +127,33 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 			self.ds.set_credentials(self.owner)
 			self.ds.delete_object(friendsList)
 			self.ds.delete_object(created_obj)
+			
+	def test_dfl_search_t846(self):
+		self.ds.set_credentials(self.owner)
+		friend_names = [r[0] for r in self.friends]
+		friendsList= self.create_friends_list_with_name_and_friends(self.list_name, friend_names)
 
+		created_obj = self.ds.create_note(u'Zanjutsu Gokui', container=self.container, sharedWith=[friend_names[0]])
+
+		try:
+			self.ds.set_credentials(self.friends[0])
+			content = self.ds.search_user_content("Zanjutsu")
+			assert_that(content, has_entry('Hit Count', greater_than_or_equal_to(1)))
+			
+			# change shared w/ group
+			self.ds.set_credentials(self.owner)
+			created_obj.shareWith([self.list_name], reset=True)
+			created_obj = self.ds.update_object(created_obj)
+			assert_that(created_obj, shared_with([friendsList.ntiid]))
 		
+			self.ds.set_credentials(self.friends[0])
+			content = self.ds.search_user_content("Gokui")
+			assert_that(content, has_entry('Hit Count', greater_than_or_equal_to(1)))
+		finally:	
+			# clean up
+			self.ds.set_credentials(self.owner)
+			self.ds.delete_object(created_obj)
+			self.ds.delete_object(friendsList)
+
 if __name__ == '__main__':
 	unittest.main()
