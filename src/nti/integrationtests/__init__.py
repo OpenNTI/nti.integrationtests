@@ -60,6 +60,7 @@ class DataServerTestCase(unittest.TestCase):
 	root_item = ROOT_ITEM
 
 	headers = None
+	op_delay = None
 	default_user_password = DEFAULT_USER_PASSWORD
 
 	# We need to start a dataserver (and stop it)
@@ -79,10 +80,11 @@ class DataServerTestCase(unittest.TestCase):
 	def client(self):
 		return self.ds
 
-	def create_client(self, headers=None):
+	def create_client(self, headers=None, op_delay=None):
 		endpoint = self.get_endpoint()
 		headers = headers or self.headers
-		result = self.new_client(endpoint=endpoint, headers=headers)
+		op_delay = op_delay or self.op_delay
+		result = self.new_client(endpoint=endpoint, headers=headers, op_delay=op_delay)
 		return result
 	
 	def get_endpoint(self):
@@ -95,9 +97,9 @@ class DataServerTestCase(unittest.TestCase):
 		return DataserverProcess.resolve_endpoint(host, port)
 
 	@classmethod
-	def new_client(cls, credentials=None, endpoint=None, headers=None):
+	def new_client(cls, credentials=None, endpoint=None, headers=None, op_delay=None):
 		endpoint = endpoint or DataserverProcess.ENDPOINT2
-		clt = DataserverClient(endpoint=endpoint, headers=headers)
+		clt = DataserverClient(endpoint=endpoint, headers=headers, op_delay=op_delay)
 		if credentials:
 			clt.set_credentials(credentials)
 		return clt
