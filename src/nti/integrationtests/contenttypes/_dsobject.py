@@ -90,11 +90,15 @@ class SharableMixin(object):
 		else:
 			super(SharableMixin, self).__setitem__(key, val)
 
-	def shareWith(self, targetOrTargets):
+	def shareWith(self, targetOrTargets, reset=False):
 		targets = targetOrTargets
 		if not isinstance(targets, list):
 			targets = [targets]
-		self.sharedWith.extend(targets)
+		
+		if not reset:
+			self.sharedWith.extend(targets)
+		else:
+			self.sharedWith = targets
 
 	def revokeSharing(self, targetOrTargets):
 		targets = targetOrTargets
