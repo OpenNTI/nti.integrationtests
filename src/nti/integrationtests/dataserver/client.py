@@ -1,5 +1,6 @@
 import os
 import six
+import time
 import urllib
 import anyjson
 import warnings
@@ -72,8 +73,9 @@ def _check_url(url):
 
 class DataserverClient(object):
 
-	def __init__(self, endpoint, credentials=None, httplib=None, headers=None):
+	def __init__(self, endpoint, credentials=None, httplib=None, headers=None, op_delay=None):
 		self.users_ws = {}
+		self.op_delay = op_delay
 		self.credentials = credentials
 		self.endpoint = _check_url(endpoint)
 		self.httplib = httplib or URLHttpLib()
@@ -102,24 +104,32 @@ class DataserverClient(object):
 			result = dict(self.headers) if self.headers else None
 		return result
 	
+	def _wait(self):
+		if self.op_delay:
+			time.sleep(self.op_delay)
+			
 	def http_get(self, url, credentials, headers=None, **kwargs):
 		headers = self.prepare_headers(headers)
 		rp = self.httplib.do_get(url, credentials, headers=headers, **kwargs)
+		self._wait()
 		return rp
 	
 	def http_put(self, url, credentials, data, headers=None, **kwargs):
 		headers = self.prepare_headers(headers)
 		rp = self.httplib.do_put(url, credentials, data=data, headers=headers, **kwargs)
+		self._wait()
 		return rp
 	
 	def http_delete(self, url, credentials, headers=None, **kwargs):
 		headers = self.prepare_headers(headers)
 		rp = self.httplib.do_delete(url, credentials, headers=headers, **kwargs)
+		self._wait()
 		return rp
 	
 	def http_post(self, url, credentials=None, data=None, headers=None, **kwargs):
 		headers = self.prepare_headers(headers)
 		rp = self.httplib.do_post(url, credentials, data=data, headers=headers, **kwargs)
+		self._wait()
 		return rp
 	
 	# ------------------------
