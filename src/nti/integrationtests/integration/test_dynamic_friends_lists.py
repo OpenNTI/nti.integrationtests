@@ -3,15 +3,18 @@ import uuid
 import unittest
 
 from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.integration import container
+from nti.integrationtests.integration import sortchanges
 from nti.integrationtests.integration import shared_with
 from nti.integrationtests.integration import contained_in
 from nti.integrationtests.integration import containing_friends
 from nti.integrationtests.integration import container_of_length
+from nti.integrationtests.integration import objects_from_container
 
 from nti.integrationtests.integration import test_friends_lists
 from nti.integrationtests.integration import test_friends_sharing
 
-from hamcrest import (assert_that, is_not, has_entry, greater_than_or_equal_to)
+from hamcrest import (assert_that, is_, is_not, has_entry, greater_than_or_equal_to)
 
 class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 							  test_friends_sharing.TestFriendsSharing):
@@ -147,6 +150,15 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 			assert_that(created_obj, shared_with([friendsList.ntiid]))
 		
 			self.ds.set_credentials(self.friends[0])
+			stream = self.ds.get_recursive_stream_data(self.container)
+			assert_that(stream, is_(container()))
+			sortedchanges = sortchanges(objects_from_container(stream))
+							
+			for c in sortedchanges:
+				if c.changeType == 'Shared':
+					assert_that(c.item, shared_with([friendsList.ntiid]))
+					break							
+		
 			content = self.ds.search_user_content("Gokui")
 			assert_that(content, has_entry('Hit Count', greater_than_or_equal_to(1)))
 		finally:	
