@@ -129,7 +129,7 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 			self.ds.delete_object(friendsList)
 			self.ds.delete_object(created_obj)
 			
-	def test_dfl_search_t846(self):
+	def test_trello_846(self):
 		self.ds.set_credentials(self.owner)
 		friend_names = [r[0] for r in self.friends]
 		friendsList= self.create_friends_list_with_name_and_friends(self.list_name, friend_names)
@@ -153,7 +153,7 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 			self.ds.delete_object(created_obj)
 			self.ds.delete_object(friendsList)
 			
-	def test_dfl_search_t847(self):
+	def test_trello_847(self):
 		self.ds.set_credentials(self.owner)
 		friend_name = self.friends[0][0]
 		friendsList= self.create_friends_list_with_name_and_friends(self.list_name, [friend_name])
