@@ -3,6 +3,7 @@ import uuid
 import unittest
 
 from nti.integrationtests import DataServerTestCase
+from nti.integrationtests.integration import contains
 from nti.integrationtests.integration import shared_with
 from nti.integrationtests.integration import contained_in
 from nti.integrationtests.integration import containing_friends
@@ -150,6 +151,35 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 		finally:	
 			self.ds.set_credentials(self.owner)
 			self.ds.delete_object(created_obj)
+			self.ds.delete_object(friendsList)
+			
+	def test_dfl_search_t847(self):
+		self.ds.set_credentials(self.owner)
+		friend_name = self.friends[0][0]
+		friendsList= self.create_friends_list_with_name_and_friends(self.list_name, [friend_name])
+
+		#share w/ dfl
+		note = self.ds.create_note(u'Two Kenpachis', container=self.container, sharedWith=[self.list_name])
+		try:
+			assert_that(note, shared_with([friendsList.ntiid]))
+			
+			# check note is in the stream 
+			self.ds.set_credentials(self.friends[0])
+			ugd = self.ds.get_user_generated_data(self.container)			
+			assert_that(ugd, contains(note))
+
+			# update note # direct share
+			self.ds.set_credentials(self.owner)
+			note.shareWith([friend_name], reset=True)
+			note = self.ds.update_object(note)
+			
+			# check note is in the stream 
+			self.ds.set_credentials(self.friends[0])
+			ugd = self.ds.get_user_generated_data(self.container)			
+			assert_that(ugd, contains(note))
+		finally:	
+			self.ds.set_credentials(self.owner)
+			self.ds.delete_object(note)
 			self.ds.delete_object(friendsList)
 
 if __name__ == '__main__':
