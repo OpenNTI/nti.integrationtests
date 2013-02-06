@@ -45,10 +45,11 @@ WHISPER_CHANNEL	= 'WHISPER'
 META_CHANNEL	= 'META'
 CONTENT_CHANNEL = 'CONTENT'
 POLL_CHANNEL	= 'POLL'
+STATE_CHANNEL	= 'STATE'
 DEFAULT_USER_PASSWORD = 'temp001'
 DEAULT_TIMEOUT = 180
 
-CHANNELS = (DEFAULT_CHANNEL, WHISPER_CHANNEL, META_CHANNEL, CONTENT_CHANNEL, POLL_CHANNEL)
+CHANNELS = (DEFAULT_CHANNEL, WHISPER_CHANNEL, META_CHANNEL, CONTENT_CHANNEL, POLL_CHANNEL, STATE_CHANNEL)
 
 class BasicMessageContext(object):
 
@@ -182,13 +183,10 @@ class _Message(object):
 
 	@property
 	def text(self):
+		result = None
 		if self.message:
-			if isinstance(self.message, list):
-				return str(self.message[0])
-			else:
-				return str(self.message)
-		else:
-			return None
+			result = str(self.message[0]) if isinstance(self.message, list) else str(self.message)
+		return result
 
 	def __str__(self):
 		return self.message
@@ -603,6 +601,7 @@ def _next_event(ws, graph=None, message_context=default_message_context):
 			graph.heartBeat()
 		elif isBroadCast(msg):
 			d = decode(msg)
+			
 			if isServerKill(d):
 				graph.serverKill(args=d.get('args', None))
 			elif isEnteredRoom(d) or isExitedRoom(d):
