@@ -26,9 +26,24 @@ def do_register_dsobjecs(classes):
 # Externalization
 
 def toExternalObject(obj):
-	if isinstance(obj, DSObject):
-		return obj.toDataServerObject()
-	return obj if isinstance(obj, collections.Mapping) else None
+	
+	def recall( obj ):
+		if hasattr(obj, 'toDataServerObject'):
+			result = obj.toDataServerObject()
+		elif isinstance(obj, six.string_types):
+			result = unicode(obj)
+		elif isinstance(obj, collections.Mapping):
+			result = {}
+			for key, value in obj.iteritems():
+				result[key] = recall( value )					
+			result = None if not result else result
+		elif isinstance(obj, (collections.Set, collections.Sequence)):
+			result = [recall(v) for v in obj]
+		else:
+			result = obj
+		return result
+		
+	return recall(obj)
 
 to_external_object = toExternalObject
 
@@ -190,28 +205,12 @@ class DSObject(Persistent, UserDict.DictMixin):
 	
 	def toDataServerObject(self):
 		external = {}
-		
-		def recall( obj ):
-			if isinstance(obj, list):
-				result = [recall(v) for v in val]
-			elif hasattr(obj , 'toDataServerObject'):
-				result = obj.toDataServerObject()
-			elif isinstance(obj, dict):
-				result = {}
-				for key, value in obj.iteritems():
-					result[key] = recall( value )					
-				result = None if not result else result
-			else:
-				result = obj
-			return result
-			
 		for key, val in self._data.iteritems():
 			if val is None or key is None:
 				continue
-			new_val = recall(val)
+			new_val = toExternalObject(val)
 			if new_val is not None:
 				external[key] = new_val
-			
 		return external
 
 	to_data_server_object = toDataServerObject

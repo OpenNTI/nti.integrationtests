@@ -8,6 +8,8 @@ from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
 
+from hamcrest import ( has_entry, assert_that, has_length )
+
 class TestChatSendingObject(HostUserChatTest):
 	
 	def setUp(self):
@@ -33,14 +35,14 @@ class TestChatSendingObject(HostUserChatTest):
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
 		messages = list(users[1].received_on_channel())
-		self.assertEqual(len(messages), 2, "%s did not get the expected messages" % users[1])
+		assert_that(messages, has_length(2))
 		
 		for m in messages:
 			content = m.content
 			if isinstance(content, list):
 				content = content[0]
 			if isinstance(content, dict):
-				self.assertEqual(content['MimeType'], u'application/vnd.nextthought.canvas')
+				assert_that(content, has_entry('MimeType', u'application/vnd.nextthought.canvas'))
 	
 	def _create_host(self, username, occupants, **kwargs):
 		return Host(self.host_messages, username=username, occupants=occupants, port=self.port, **kwargs)

@@ -121,19 +121,18 @@ class ThreadLocalMessageContext(threading.local, MessageContext):
 
 default_message_context = ThreadLocalMessageContext()
 
-
 def _nonefy(s):
 	return None if s and str(s) == 'null' else s
 
 def _create_message_body(info):
-	if isinstance(info, six.string_types):
-		body = [info]
-	elif isinstance(info, list):
-		body = [toExternalObject(m) for m in info]
-	elif isinstance(info, dict):
-		body = {unicode(k): toExternalObject(v) or v for k, v in info.items()}
+	if hasattr(info, 'toDataServerObject'):
+		body = [info.toDataServerObject()]
+	elif isinstance(info, six.string_types):
+		body = [unicode(info)]
+	elif isinstance(info, (collections.Mapping, collections.Sequence)):
+		body = toExternalObject(info)
 	else:
-		body = [toExternalObject(info) or info]
+		body = [toExternalObject(info)]
 	return body
 
 class _Room():
@@ -168,7 +167,6 @@ class _Room():
 
 		return False
 
-
 class _Message(object):
 	def __init__(self, **kwargs):
 		self.ID = kwargs.get('ID', None)
@@ -191,7 +189,7 @@ class _Message(object):
 		return result
 
 	def __str__(self):
-		return self.message
+		return str(self.message)
 
 	def __repr__(self):
 		return "<%r,%r>" % (self.__class__.__name__, self.message)
