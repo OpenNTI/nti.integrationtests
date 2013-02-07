@@ -130,6 +130,8 @@ def _create_message_body(info):
 		body = [info]
 	elif isinstance(info, list):
 		body = [toExternalObject(m) for m in info]
+	elif isinstance(info, dict):
+		body = {unicode(k): toExternalObject(v) or v for k, v in info.items()}
 	else:
 		body = [toExternalObject(info) or info]
 	return body

@@ -26,15 +26,17 @@ class TestWhisperChat(test_chat_multi_user.TestMultiUserChat):
 			
 		host = users[0]
 		sentOnChannel = list(host.sent_on_channel(self.channel))
-		
-		for m in sentOnChannel:
-			r = m.recipients[0]
-			assert_that(mapping, has_key(r), "%s message was not recieved by %s" % (self.channel,r))
-			assert_that(mapping[r], has_item(m.text))
+		self._check_channel_messages(mapping, sentOnChannel)
 			
 	def _create_host(self, username, occupants, **kwargs):
 		return ChannelHost(username, occupants, port=self.port, **kwargs)
 		
+	def _check_channel_messages(self, mapping, messages):
+		for m in messages:
+			r = m.recipients[0]
+			assert_that(mapping, has_key(r), "%s message was not recieved by %s" % (self.channel,r))
+			assert_that(mapping[r], has_item(m.text))
+			
 class ChannelHost(objects.Host):
 	
 	pcnt = 0.4
