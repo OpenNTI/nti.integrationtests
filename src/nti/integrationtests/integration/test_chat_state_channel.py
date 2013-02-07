@@ -6,6 +6,8 @@ from nti.integrationtests.chat.socketio_interface import STATE_CHANNEL
 from hamcrest import ( has_entry, is_not, assert_that, has_length )
 
 max_channel_messsages = 10
+max_state_channel_messsages = 10
+pcnt_state_channel_messages = 1.0
 
 class TestChatWithState(test_chat_whisper.TestWhisperChat):
 	
@@ -16,7 +18,7 @@ class TestChatWithState(test_chat_whisper.TestWhisperChat):
 		return StateChannelHost(username, occupants, port=self.port, **kwargs)
 		
 	def _check_channel_messages(self, mapping, messages):
-		assert_that(messages, has_length(max_channel_messsages))
+		assert_that(messages, has_length(max_state_channel_messsages))
 		for m in messages:
 			content = m.content
 			assert_that(content, is_not(None))
@@ -24,8 +26,8 @@ class TestChatWithState(test_chat_whisper.TestWhisperChat):
 			
 class StateChannelHost(test_chat_whisper.ChannelHost):
 	
-	pcnt = 1 # send a state message b4 any other message 
 	channel = STATE_CHANNEL
+	pcnt = pcnt_state_channel_messages
 	min_entries = max_channel_messsages
 	max_entries = max_channel_messsages
 
