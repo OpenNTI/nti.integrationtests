@@ -12,7 +12,7 @@ from nti.integrationtests.integration import container_of_length
 from nti.integrationtests.integration import test_friends_lists
 from nti.integrationtests.integration import test_friends_sharing
 
-from hamcrest import (assert_that, is_not, has_entry, greater_than_or_equal_to)
+from hamcrest import (assert_that, is_, is_not, has_entry, greater_than_or_equal_to, has_length)
 
 class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 							  test_friends_sharing.TestFriendsSharing):
@@ -23,8 +23,9 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 		super(TestDynamicFriendsLists, self).setUp()		
 		self.realname ='%s@nt.com' % str(uuid.uuid4()).split('-')[-1]
 		
-	def create_friends_list_with_name_and_friends(self, name, friends):
-		dfl = self.ds.create_DFL_with_name_and_friends(name, friends, realname=self.realname)
+	def create_friends_list_with_name_and_friends(self, name, friends, realname=None):
+		realname = realname or self.realname
+		dfl = self.ds.create_DFL_with_name_and_friends(name, friends, realname=realname)
 		return dfl
 	
 	def test_share_with_friends_and_delete_obj(self):
@@ -182,5 +183,20 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 			self.ds.delete_object(note)
 			self.ds.delete_object(friendsList)
 
+	def test_dfl_user_search(self):
+		self.ds.set_credentials(self.owner)
+		friend_names = [r[0] for r in self.friends]
+		suffix = str(uuid.uuid4()).split('-')[-1]
+		flname = "bankai-%s" % suffix
+		friendsList= self.create_friends_list_with_name_and_friends(flname, friend_names, flname)
+		try:
+			result = self.ds.execute_user_search('bankai')
+			assert_that(result, has_entry('Items', has_length(1)))
+			fl = result['Items'][0]
+			assert_that(fl.isDynamic, is_(True))
+		finally:	
+			self.ds.set_credentials(self.owner)
+			self.ds.delete_object(friendsList)
+			
 if __name__ == '__main__':
 	unittest.main()
