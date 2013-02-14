@@ -31,7 +31,6 @@ class BasicUser(DSUser):
 	def __repr__(self):
 		return "<%s,%s>" % (self.__class__.__name__,self.__str__())
 
-
 	def __call__(self, *args, **kwargs):
 		pass
 
@@ -79,7 +78,6 @@ class OneRoomUser(BasicUser):
 
 	def __init__(self, *args, **kwargs):
 		super(OneRoomUser, self).__init__(*args, **kwargs)
-		self._room = None
 		self.last_post_time = None
 		self.last_recv_time = None
 		self.creation_time = time.time()
@@ -133,9 +131,7 @@ class OneRoomUser(BasicUser):
 
 	@property
 	def room(self):
-		if not self._room and len(self.rooms) > 0:
-			self._room = self.first_room
-		return self._room
+		return self.first_room
 
 	@property
 	def elapsed_recv(self):

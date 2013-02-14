@@ -356,13 +356,8 @@ class DSUser(object):
 
 	def chat_exitedRoom(self, **kwargs):
 		ID = kwargs.get('ID', kwargs.get('id', None))
-		occupants = kwargs.get('Occupants', kwargs.get('occupants', []))
-		if not self.username in occupants:
-			return self.rooms.pop(ID, None) if ID else None
-		else:
-			room = _Room(**kwargs)
-			self.rooms[ID] = room
-			return room
+		result = self.rooms.pop(ID, None) if ID else None
+		return result
 
 	def chat_enteredRoom(self, **kwargs):
 		room = _Room(**kwargs)
