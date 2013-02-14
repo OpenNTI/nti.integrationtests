@@ -1,4 +1,11 @@
-from __future__ import print_function, unicode_literals
+# -*- coding: utf-8 -*-
+"""
+Defines DataServer chat users.
+
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
 
 import six
 import json
@@ -34,6 +41,8 @@ EVT_RECV_MESSAGE	= 'chat_recvMessage'
 EVT_MAKE_MODERATED	= 'chat_makeModerated'
 EVT_APPROVE_MSGS	= 'chat_approveMessages'
 EVT_RECV_MSG_SHADOW = 'chat_recvMessageForShadow'
+EVT_FAILED_TO_ENTER_ROOM = 'chat_failedToEnterRoom'
+EVT_ADD_OCCUPANT_TO_ROOM = 'chat_addOccupantToRoom'
 EVT_RECV_MSG_MOD	= 'chat_recvMessageForModeration'
 EVT_ROOM_MEMBERSHIP_CHANGED = "chat_roomMembershipChanged"
 EVT_PRESENCE_OF_USER_CHANGE_TO = 'chat_presenceOfUserChangedTo'
@@ -354,6 +363,12 @@ class DSUser(object):
 	def chat_presenceOfUserChangedTo(self, username, status):
 		pass
 
+	def chat_addOccupantToRoom(self, **kwargs):
+		pass
+	
+	def chat_failedToEnterRoom(self, **kwargs):
+		pass
+	
 	def chat_exitedRoom(self, **kwargs):
 		ID = kwargs.get('ID', kwargs.get('id', None))
 		result = self.rooms.pop(ID, None) if ID else None
@@ -569,6 +584,12 @@ def isExitedRoom(data, data_format='json'):
 def isEnteredRoom(data, data_format='json'):
 	return isEvent(data, EVT_ENTERED_ROOM, data_format)
 
+def isAddOccupantToRoom(data, data_format='json'):
+	return isEvent(data, EVT_ADD_OCCUPANT_TO_ROOM, data_format)
+
+def isFailedToEnterRoom(data, data_format='json'):
+	return isEvent(data, EVT_FAILED_TO_ENTER_ROOM, data_format)
+	
 def isPresenceOfUserChangedTo(data, data_format='json'):
 	return isEvent(data, EVT_PRESENCE_OF_USER_CHANGE_TO, data_format)
 
@@ -599,20 +620,21 @@ def _next_event(ws, graph=None, message_context=default_message_context):
 			
 			if isServerKill(d):
 				graph.serverKill(args=d.get('args', None))
-			elif isEnteredRoom(d) or isExitedRoom(d):
-
-				entered = isEnteredRoom(d)
+			elif isEnteredRoom(d):
 				params = d['args'][0]
-
-				if entered:
-					graph.chat_enteredRoom(**params)
-				else:
-					graph.chat_exitedRoom(**params)
-
+				graph.chat_enteredRoom(**params)
+			elif isExitedRoom(d):
+				params = d['args'][0]
+				graph.chat_exitedRoom(**params)
+			elif isAddOccupantToRoom(d):
+				params = d['args'][0]
+				graph.chat_addOccupantToRoom(**params)
+			elif isFailedToEnterRoom(d):
+				params = d['args'][0]
+				graph.chat_failedToEnterRoom(**params)
 			elif isRecvMessage(d) or isRecv4Moderation(d) or isRecvMessageForShadow(d):
 				moderated = isRecv4Moderation(d)
 				shadow = isRecvMessageForShadow(d)
-
 				params = d['args'][0]
 
 				if moderated:
