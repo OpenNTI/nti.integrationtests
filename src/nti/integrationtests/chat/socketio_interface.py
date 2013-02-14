@@ -655,13 +655,20 @@ def _enterRoom(ws, **kwargs):
 	occupants = kwargs.get('occupants', kwargs.get('Occupants',None))
 	inReplyTo = kwargs.get("inReplyTo", None)
 	references = kwargs.get("references", None)
+	room_id = kwargs.get("roomId", kwargs.get('RoomId',None))
 	containerId = kwargs.get("containerId", kwargs.get("ContainerId", None))
 
 	data_format = kwargs.get("data_format", 'json')
 
-	assert containerId, 'must specify either valid container id'
+	assert containerId or room_id, 'must specify either valid container id or room id'
 
-	args = {"Occupants": occupants}
+	args = {}
+	if room_id:
+		args["RoomId"] = room_id
+		
+	if occupants:
+		args["Occupants"] = occupants
+		
 	if containerId:
 		args["ContainerId"] = containerId
 
