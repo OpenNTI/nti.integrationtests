@@ -39,31 +39,32 @@ class TestChatReEnterRoom(HostUserChatTest):
 	def _create_host(self, username, occupants, **kwargs):
 		return Host(username=username, occupants=occupants, port=self.port, **kwargs)
 
-class Host(objects.Host):
-	
+class _BaseUser(object):
+	delay = 1.2
 	to_send = 5
 	total_sent = 0
-		
+
+class Host(_BaseUser, objects.Host):
+	
 	def post_messages(self, room_id, *args, **kwargs):
 		self.total_sent = 0
 		for _ in range(2):
-			self.post_random_messages(room_id, self.to_send, delay=1.5, tick=1)
+			self.post_random_messages(room_id, self.to_send, delay=self.delay, tick=1)
 			self.total_sent += self.to_send
 
-class User(objects.User):
+class User(_BaseUser, objects.User):
 	
 	to_send = 3
 	
 	def __init__(self, exit_enter=False, *args, **kwargs):
 		super(User, self).__init__(*args, **kwargs)
-		self.total_sent = 0
 		self._exit_event = None
 		self._renter_event = None
 		self.exit_enter = exit_enter
 
 	def post_messages(self, room_id, *args, **kwargs):
 		for _ in range(2):
-			self.post_random_messages(room_id, self.to_send, delay=1.5, tick=1)
+			self.post_random_messages(room_id, self.to_send, delay=self.delay, tick=1)
 			self.total_sent += self.to_send
 		
 	def chat_enteredRoom(self, **kwargs):
