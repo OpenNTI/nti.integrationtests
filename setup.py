@@ -24,7 +24,7 @@ setup(
 
 	install_requires = [ 'coverage',
 						 'httpie',
-						 'mmstats',
+						 #'mmstats', # neat idea, not currently used and pulls in many deps, so commented out until used
 						],
 	extras_require = {
 		'PDF': ['pyobjc', 'pyobjc-core'] # Quartz is used for pdfs
