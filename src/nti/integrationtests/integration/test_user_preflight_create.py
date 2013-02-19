@@ -41,7 +41,7 @@ class TestUserPreflightCreate(DataServerTestCase):
 		for key in ('email', 'alias'):
 			assert_that(d, has_key(key))
 			assert_that(d[key], has_entry('name', key))
-			assert_that(d[key], has_entry('type', 'string'))
+			assert_that(d[key], has_entry('base_type', 'string'))
 	
 		assert_that(d['email'], has_entry('required', True))
 					
