@@ -22,11 +22,12 @@ class PersonalBlogEntry(DSObject, SharableMixin):
 	MIME_TYPE = 'application/vnd.nextthought.forums.personalblogentry'
 
 	_ds_field_mapping = {'ID':'ID', "postCount":'PostCount', 'description':'description', 'likeCount':'LikeCount',
-						 'tags':'tags', 'story':'story' }
+						 'tags':'tags', 'story':'story', 'href':'href' }
 	_ds_field_mapping.update(DSObject._ds_field_mapping)
 	_ds_field_mapping.update(SharableMixin._ds_field_mapping)
 
-	_fields = {'ID':True, 'tags' : (True, list), 'postCount':True, 'description':False, 'title':False, 'likeCount':True, 'story':True}
+	_fields = {	'ID':True, 'tags' : (True, list), 'postCount':True, 'description':False, 'title':False, 'likeCount':True, 
+				'story':True, 'href':True}
 	_fields.update(DSObject._fields)
 	_fields.update(SharableMixin._fields)
 
