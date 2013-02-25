@@ -182,5 +182,6 @@ def get_notification_count(userObj):
 
 def setup_package():
 	pass
+
 def teardown_package():
 	pass

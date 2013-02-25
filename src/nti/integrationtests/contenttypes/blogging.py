@@ -35,10 +35,12 @@ class Post(DSObject, SharableMixin):
 	DATASERVER_CLASS = 'Post'
 	MIME_TYPE = 'application/vnd.nextthought.forums.post'
 	
-	_ds_field_mapping = {'title':'title', 'body':'body', 'moderated':'Moderated', 'occupants':'Occupants'}
+	_ds_field_mapping = {'title':'title', 'body':'body', 'tags':'tags' }
+	_ds_field_mapping.update(DSObject._ds_field_mapping)
 	_ds_field_mapping.update(SharableMixin._ds_field_mapping)
 
-	_fields = {'title': False, 'body' : (False, list)}
+	_fields = {'title': False, 'body' : (False, list), 'tags' : (True, list)}
+	_fields.update(DSObject._fields)
 	_fields.update(SharableMixin._fields)
 	
 	def __setitem__(self, key, val):
