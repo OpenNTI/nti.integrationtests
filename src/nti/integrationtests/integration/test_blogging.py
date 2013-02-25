@@ -25,8 +25,7 @@ class TestBasicStream(DataServerTestCase):
 		contents = self.ds.get_blog_contents()
 		assert_that(contents, contains(post))
 
-	@unittest.expectedFailure
-	def test_share_post(self):
+	def test_user_cannot_change_sharing_on_blog_entry(self):
 		post = self.ds.create_blog_post('Bankai Ability', 'A mere upgrade?')
 		assert_that(post, not_none())
 		
@@ -36,10 +35,11 @@ class TestBasicStream(DataServerTestCase):
 		ps = self.ds.update_object(ps)
 		
 		assert_that(ps.body, is_(['A 10 time upgrade']))
-		assert_that(ps.sharedWith, is_([self.target[0]]))
+		assert_that(ps.sharedWith, is_([]))
 		
-		contents = self.ds.get_blog_contents(credentials=self.target)
-		assert_that(contents, contains(post))
-		
+		post = self.ds.create_blog_post('Ichigo', 'A fake Shinigami?', sharedWith=[self.target[0]])
+		assert_that(post, not_none())
+		assert_that(post.sharedWith, is_([]))
+	
 if __name__ == '__main__':
 	unittest.main()
