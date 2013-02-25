@@ -473,9 +473,14 @@ class DataserverClient(object):
 		
 		rp = self.http_get(url, credentials=credentials)
 		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog')
-
+		
+		headers = rp.headers
 		data = self.httplib.deserialize(rp)
 		result = adapt_ds_object(data) if adapt else data
+		
+		if adapt and 'location' in headers:
+			setattr(result, 'location', headers.get('location', None))
+			
 		return result
 	
 	def get_blog_contents(self, credentials=None, adapt=True, **kwargs):
@@ -502,9 +507,14 @@ class DataserverClient(object):
 
 		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(post), **kwargs)
 		assert_that(rp.status_int, is_(201), 'invalid status code while posting a blog post')
-
+		
+		headers = rp.headers
 		data = self.httplib.deserialize(rp)
 		result = adapt_ds_object(data) if adapt else data
+		
+		if adapt and 'location' in headers:
+			setattr(result, 'location', headers.get('location', None))
+			
 		return result
 
 	# ------------------------
