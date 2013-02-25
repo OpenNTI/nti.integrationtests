@@ -17,6 +17,7 @@ from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_DICT
 from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_ARRAY
 
 from nti.integrationtests.contenttypes import Note
+from nti.integrationtests.contenttypes import Post
 from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import DSObject
 from nti.integrationtests.contenttypes import Sharable
@@ -223,9 +224,6 @@ class DataserverClient(object):
 											 credentials=credentials, validate=True)
 		return adapt_ds_object(data) if adapt else data
 
-	getUserGeneratedData = get_user_generated_data
-	getRecursiveStreamData = get_recursive_stream_data
-
 	# ------------------------
 	
 	def get_rss_feed(self, container, workspace=None, credentials=None, gzip=False):
@@ -377,11 +375,6 @@ class DataserverClient(object):
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 
-	likeObject = like_object
-	shareObject = share_object
-	unlikeObject = unlike_object
-	createObject = create_object
-
 	# ------------------------
 
 	def get_transcript(self, container, room_id, name='Pages', workspace=None, credentials=None, adapt=True, **kwargs):
@@ -407,8 +400,6 @@ class DataserverClient(object):
 
 		return None
 
-	getTranscript = get_transcript
-
 	# ------------------------
 
 	def _do_search(self, link, query, ntiid=None, credentials=None, adapt=True, **kwargs):
@@ -432,21 +423,15 @@ class DataserverClient(object):
 		result = self._do_search('UGDSearch', query, None, credentials, adapt, **kwargs)
 		return result
 
-	searchUserContent = search_user_content
-
 	def unified_search(self, query, ntiid=None, credentials=None, adapt=True, **kwargs):
 		result = self._do_search('UnifiedSearch', query, ntiid, credentials, adapt, **kwargs)
 		return result
-
-	unifiedSearch = unified_search
 
 	def get_user_object(self, user=None, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		user = user or credentials[0]
 		data = self.execute_user_search(user, credentials, adapt, **kwargs)
 		return data['Items'][0] if 'Items' in data and data['Items'] else data
-
-	getUserObject = get_user_object
 
 	def execute_user_search(self, search, credentials=None, adapt=True, **kwargs):
 
@@ -463,8 +448,6 @@ class DataserverClient(object):
 		data = self.httplib.deserialize(rp)
 		return adapt_ds_object(data) if adapt else data
 
-	executeUserSearch = execute_user_search
-
 	def _get_user_search_link(self, credentials=None):
 
 		credentials = self._credentials_to_use(credentials)
@@ -478,6 +461,51 @@ class DataserverClient(object):
 		assert_that(link, is_not(none()), "could not find a UserSearch link in Global workspace for '%s'" % credentials[0])
 
 		return (link, ws)
+
+	# ------------------------
+	
+	def get_blog(self, credentials=None, adapt=True, **kwargs):
+		credentials = self._credentials_to_use(credentials)
+		
+		#TODO: link does not show up yet in the service doc	
+		href = "users/%s/Blog" % credentials[0]
+		url = urljoin(self.endpoint, href)
+		
+		rp = self.http_get(url, credentials=credentials)
+		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog')
+
+		data = self.httplib.deserialize(rp)
+		result = adapt_ds_object(data) if adapt else data
+		return result
+	
+	def get_blog_contents(self, credentials=None, adapt=True, **kwargs):
+		credentials = self._credentials_to_use(credentials)
+		blog = self.get_blog(credentials=credentials, adapt=True)
+		href = blog.get_link('contents')
+		url = urljoin(self.endpoint, href)
+		
+		rp = self.http_get(url, credentials=credentials)
+		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog content')
+
+		data = self.httplib.deserialize(rp)
+		result = adapt_ds_object(data) if adapt else data
+		return result
+	
+	def create_blog_post(self, title, data, sharedWith=None, adapt=True, credentials=None, **kwargs):
+		body = self.create_text_and_body(data)
+		credentials = self._credentials_to_use(credentials)
+		post = Post(title=title, body=body, sharedWith=sharedWith)
+		
+		#TODO: link does not show up yet in the service doc	
+		href = "users/%s/Blog" % credentials[0]
+		url = urljoin(self.endpoint, href)
+
+		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(post), **kwargs)
+		assert_that(rp.status_int, is_(201), 'invalid status code while posting a blog post')
+
+		data = self.httplib.deserialize(rp)
+		result = adapt_ds_object(data) if adapt else data
+		return result
 
 	# ------------------------
 
@@ -512,7 +540,7 @@ class DataserverClient(object):
 
 		location, slug = self._post_raw_content(href, source_file, content_type, slug=slug, **kwargs)
 		return (location, slug)
-
+		
 	# ------------------------
 
 	def get_user_workspace(self, credentials=None):
@@ -705,24 +733,13 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(200), 'invalid status while user account creation preflight')
 		data = self.httplib.deserialize(rp)
 		return data
-		
-	# ------------------------
-
-	createCanvas = create_canvas
-	updateObject = update_object
-	unshareObject = unshare_object
-	setCredentials = set_credentials
-	createHighlight = create_highlight
-	getFriendsLists = get_friends_lists
-	objectToPersist = object_to_persist
-	clearCredentials = clear_credentials
-	createFriendsList = create_friends_list
-	createTextAndBody = create_text_and_body
 
 # -------------------------------
 
-	
 if __name__ == '__main__':	
 	end_point = 'http://localhost:8081/dataserver2'
 	cl = DataserverClient(end_point)
 	cl.set_credentials(user='test.user.1@nextthought.com', password='temp001')
+	cl.create_blog_post('foo', 'foo')
+	cl.get_blog_contents()
+

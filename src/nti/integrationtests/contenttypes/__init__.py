@@ -9,5 +9,6 @@ from nti.integrationtests.contenttypes.chat import *
 from nti.integrationtests.contenttypes.users import *
 from nti.integrationtests.contenttypes.ugdata import *
 from nti.integrationtests.contenttypes.classes import *
+from nti.integrationtests.contenttypes.blogging import *
 from nti.integrationtests.contenttypes.assessment import *
 from nti.integrationtests.contenttypes.contentlibrary_views import *
