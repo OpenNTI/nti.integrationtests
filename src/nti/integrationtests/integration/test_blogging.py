@@ -4,15 +4,15 @@ from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import contains
 
 from nose.tools import assert_raises
-from hamcrest import (assert_that, is_, not_none, greater_than_or_equal_to, less_than)
+from hamcrest import (assert_that, is_, not_none, greater_than_or_equal_to)
 
-class TestBasicStream(DataServerTestCase):
+class TestBlogging(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
 	target = ('test.user.2@nextthought.com', DataServerTestCase.default_user_password)
 
 	def setUp(self):
-		super(TestBasicStream, self).setUp()
+		super(TestBlogging, self).setUp()
 		self.ds.set_credentials(self.owner)
 
 	def test_create_post(self):
