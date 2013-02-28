@@ -514,6 +514,14 @@ class DataserverClient(object):
 			
 		return result
 
+	def publish_post(self, obj, credentials=None, adapt=True, **kwargs):
+		href = obj.get_publish_link()
+		return self._like_fav_op(href, 'publish', credentials=credentials, adapt=adapt, **kwargs)
+
+	def unpublish_post(self, obj, credentials=None, adapt=True, **kwargs):
+		href = obj.get_unpublish_link()
+		return self._like_fav_op(href, 'unpublish', credentials=credentials, adapt=adapt, **kwargs)
+
 	# ------------------------
 
 	def create_provider(self, name, credentials=None):

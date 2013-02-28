@@ -4,7 +4,7 @@ from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import contains
 
 from nose.tools import assert_raises
-from hamcrest import (assert_that, is_, not_none, greater_than_or_equal_to)
+from hamcrest import (assert_that, is_, not_none, greater_than_or_equal_to, none)
 
 class TestBlogging(DataServerTestCase):
 
@@ -52,6 +52,21 @@ class TestBlogging(DataServerTestCase):
 		
 		with assert_raises(Exception):
 			self.ds.delete_object(ps)
+
+	def test_publish_unpublish(self):
+		post = self.ds.create_blog_post("Kurosaki Ichigo", 'What is he human? Shinigami? Quincy?')
+		assert_that(post, not_none())
+		
+		published_post = self.ds.publish_post(post)
+		assert_that(published_post, is_(not_none()))
+		
+		unpublish = published_post.get_unpublish_link()
+		assert_that(unpublish, is_(not_none()))
+		assert_that(published_post.get_publish_link(), is_(none()) )
+		
+		unpublish_object = self.ds.unpublish_post(published_post)
+		assert_that(unpublish_object, is_(not_none()))
+		assert_that(unpublish_object.get_unpublish_link(), is_(none()) )
 
 if __name__ == '__main__':
 	unittest.main()
