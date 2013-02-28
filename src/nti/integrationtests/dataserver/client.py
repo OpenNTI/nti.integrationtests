@@ -466,10 +466,8 @@ class DataserverClient(object):
 	
 	def get_blog(self, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
-		
-		#TODO: link does not show up yet in the service doc	
-		href = "users/%s/Blog" % credentials[0]
-		url = urljoin(self.endpoint, href)
+		collection, _ = self._get_collection(name='Blog', credentials=credentials)
+		url = urljoin(self.endpoint, collection.href)
 		
 		rp = self.http_get(url, credentials=credentials)
 		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog')
@@ -501,9 +499,8 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		post = Post(title=title, body=body, sharedWith=sharedWith)
 		
-		#TODO: link does not show up yet in the service doc	
-		href = "users/%s/Blog" % credentials[0]
-		url = urljoin(self.endpoint, href)
+		collection, _ = self._get_collection(name='Blog', credentials=credentials)
+		url = urljoin(self.endpoint, collection.href)
 
 		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(post), **kwargs)
 		assert_that(rp.status_int, is_(201), 'invalid status code while posting a blog post')
