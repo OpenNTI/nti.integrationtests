@@ -4,7 +4,7 @@ from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import contains
 
 from nose.tools import assert_raises
-from hamcrest import (assert_that, is_, not_none, greater_than_or_equal_to, none)
+from hamcrest import (assert_that, is_, not_none, has_entry, greater_than_or_equal_to, none)
 
 class TestBlogging(DataServerTestCase):
 
@@ -81,5 +81,12 @@ class TestBlogging(DataServerTestCase):
 		assert_that(unpublish_object, is_(not_none()))
 		assert_that(unpublish_object.get_unpublish_link(), is_(none()) )
 
+	def test_blog_search(self):
+		post = self.ds.create_blog_post("Unohana", 'Begging her not to die Kenpachi screams out in rage as his opponent fades away')
+		assert_that(post, not_none())
+		
+		data = self.ds.search_user_content("kenpachi")
+		assert_that(data, has_entry('Hit Count', greater_than_or_equal_to(1)))
+		
 if __name__ == '__main__':
 	unittest.main()
