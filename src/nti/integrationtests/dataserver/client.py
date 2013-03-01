@@ -401,7 +401,7 @@ class DataserverClient(object):
 
 	# ------------------------
 
-	def _do_search(self, link, query, ntiid=None, credentials=None, adapt=True, **kwargs):
+	def _do_search(self, link, query, ntiid=None, credentials=None,  **kwargs):
 
 		credentials = self._credentials_to_use(credentials)
 		collection, _ = self._get_collection(credentials=credentials)
@@ -416,14 +416,14 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(200), 'invalid status code while searching content')
 
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data) if adapt else data
+		return data
 
-	def search_user_content(self, query, credentials=None, adapt=True, **kwargs):
-		result = self._do_search('UGDSearch', query, None, credentials, adapt, **kwargs)
+	def search_user_content(self, query, credentials=None, **kwargs):
+		result = self._do_search('UGDSearch', query, None, credentials, **kwargs)
 		return result
 
-	def unified_search(self, query, ntiid=None, credentials=None, adapt=True, **kwargs):
-		result = self._do_search('UnifiedSearch', query, ntiid, credentials, adapt, **kwargs)
+	def unified_search(self, query, ntiid=None, credentials=None, **kwargs):
+		result = self._do_search('UnifiedSearch', query, ntiid, credentials, **kwargs)
 		return result
 
 	def get_user_object(self, user=None, credentials=None, adapt=True, **kwargs):
@@ -433,7 +433,6 @@ class DataserverClient(object):
 		return data['Items'][0] if 'Items' in data and data['Items'] else data
 
 	def execute_user_search(self, search, credentials=None, adapt=True, **kwargs):
-
 		credentials = self._credentials_to_use(credentials)
 		link, _ = self._get_user_search_link(credentials=credentials)
 		url = _check_url(urljoin(self.endpoint, link.href)) + search
