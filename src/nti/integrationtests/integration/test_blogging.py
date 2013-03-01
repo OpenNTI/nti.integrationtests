@@ -26,6 +26,17 @@ class TestBlogging(DataServerTestCase):
 		contents = self.ds.get_blog_contents()
 		assert_that(contents, contains(post))
 
+	def test_comment_post(self):
+		post = self.ds.create_blog_post('Zaraki Kenpachi', 'What is the name of the his Zanpakuto')
+		assert_that(post, not_none())
+
+		comment = self.ds.create_comment_post('Zanpakuto', 'Minazuki?', post)
+		assert_that(comment, not_none())
+		
+		comment.body=['Minazuki Cannot be transfered']
+		comment = self.ds.update_object(comment)
+		assert_that(comment, not_none())
+		
 	def test_user_cannot_change_sharing_on_blog_entry(self):
 		post = self.ds.create_blog_post('Bankai Ability', 'A mere upgrade?')
 		assert_that(post, not_none())

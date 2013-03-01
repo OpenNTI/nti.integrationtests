@@ -197,32 +197,32 @@ class DataserverClient(object):
 
 		data = self.httplib.deserialize(rp)
 		data = data.get('Items', {})
-		result = adapt_ds_object(data) if adapt else data
+		result = self.adapt_ds_object(data) if adapt else data
 		return result
 
 	createFriendsListWithNameAndFriends = create_friends_list_with_name_and_friends
 
 	# ------------------------
 
-	def get_user_generated_data(self, container, workspace=None, credentials=None, adapt=True, **kwargs):
+	def get_user_generated_data(self, container, name='Pages', workspace=None, credentials=None, adapt=True, **kwargs):
 		data = self._get_container_item_data(container=container, link_rel='UserGeneratedData', workspace=workspace,
 											 credentials=credentials, validate=True)
-		return adapt_ds_object(data) if adapt else data
+		return self.adapt_ds_object(data) if adapt else data
 
-	def get_recursive_stream_data(self, container, workspace=None, credentials=None, adapt=True):
-		data = self._get_container_item_data(container=container, link_rel='RecursiveStream', workspace=workspace,
+	def get_recursive_stream_data(self, container, name='Pages', workspace=None, credentials=None, adapt=True):
+		data = self._get_container_item_data(container=container, link_rel='RecursiveStream', name=name, workspace=workspace,
 											 credentials=credentials, validate=True)
-		return adapt_ds_object(data) if adapt else data
+		return self.adapt_ds_object(data) if adapt else data
 
-	def get_ugd_and_recursive_stream_ata(self, container, workspace=None, credentials=None, adapt=True):
+	def get_ugd_and_recursive_stream_ata(self, container, name='Pages', workspace=None, credentials=None, adapt=True):
 		data = self._get_container_item_data(container=container, link_rel='UserGeneratedDataAndRecursiveStream', workspace=workspace,
-											 credentials=credentials, validate=True)
-		return adapt_ds_object(data) if adapt else data
+											 name=name, credentials=credentials, validate=True)
+		return self.adapt_ds_object(data) if adapt else data
 
-	def get_recursive_user_generated_data(self, container, workspace=None, credentials=None, adapt=True):
+	def get_recursive_user_generated_data(self, container, name='Pages', workspace=None, credentials=None, adapt=True):
 		data = self._get_container_item_data(container=container, link_rel='RecursiveUserGeneratedData', workspace=workspace,
-											 credentials=credentials, validate=True)
-		return adapt_ds_object(data) if adapt else data
+											 name=name, credentials=credentials, validate=True)
+		return self.adapt_ds_object(data) if adapt else data
 
 	# ------------------------
 	
@@ -262,7 +262,7 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(200), "invalid status code getting object at '%s'" % href)
 
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data) if adapt else data
+		return self.adapt_ds_object(data, rp) if adapt else data
 
 	def create_object(self, obj, credentials=None, name='Pages', workspace=None, adapt=True, **kwargs):
 		assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
@@ -285,7 +285,7 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(200), 'invalid status code while updating an object')
 
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data) if adapt else data
+		return self.adapt_ds_object(data, rp) if adapt else data
 
 	def delete_object(self, obj=None, link=None, credentials=None, **kwargs):
 
@@ -360,9 +360,7 @@ class DataserverClient(object):
 		rp = self.http_get(url, credentials=credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), "invalid status code object in replied operation")
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data) if adapt else data
-	
-		return self._like_fav_op(href, 'replies', credentials=credentials, status=204, **kwargs)
+		return self.adapt_ds_object(data) if adapt else data
 
 	def _like_fav_op(self, href, operation, credentials=None, adapt=True, **kwargs):
 		assert_that(href, is_not(none()), "no '%s' href was provided" % operation)
@@ -373,14 +371,15 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(200), "invalid status code object in '%s' operation" % operation)
 
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data) if adapt else data
+		return self.adapt_ds_object(data, rp) if adapt else data
 
 	# ------------------------
 
 	def get_transcript(self, container, room_id, name='Pages', workspace=None, credentials=None, adapt=True, **kwargs):
 
 		credentials = self._credentials_to_use(credentials)
-		data = self.get_user_generated_data(container=container, workspace=workspace, credentials=credentials, adapt=True)
+		data = self.get_user_generated_data(container=container, name=name, workspace=workspace,
+											credentials=credentials, adapt=True)
 		for item in data.get('Items',[]):
 			if not isinstance(item, TranscriptSummary):
 				continue
@@ -396,7 +395,7 @@ class DataserverClient(object):
 			assert_that(rp.status_int, is_(200), 'invalid status code while getting transcript data')
 
 			data = self.httplib.deserialize(rp)
-			return adapt_ds_object(data) if adapt else data
+			return self.adapt_ds_object(data, rp) if adapt else data
 
 		return None
 
@@ -446,7 +445,7 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(200), 'invalid status code while getting user object(s)')
 
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data) if adapt else data
+		return self.adapt_ds_object(data, rp) if adapt else data
 
 	def _get_user_search_link(self, credentials=None):
 
@@ -472,13 +471,8 @@ class DataserverClient(object):
 		rp = self.http_get(url, credentials=credentials)
 		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog')
 		
-		headers = rp.headers
 		data = self.httplib.deserialize(rp)
-		result = adapt_ds_object(data) if adapt else data
-		
-		if adapt and 'location' in headers:
-			setattr(result, 'location', headers.get('location', None))
-			
+		result = self.adapt_ds_object(data, rp) if adapt else data			
 		return result
 	
 	def get_blog_contents(self, credentials=None, adapt=True, **kwargs):
@@ -491,7 +485,7 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog content')
 
 		data = self.httplib.deserialize(rp)
-		result = adapt_ds_object(data) if adapt else data
+		result = self.adapt_ds_object(data, rp) if adapt else data
 		return result
 	
 	def create_blog_post(self, title, data, sharedWith=None, adapt=True, credentials=None, **kwargs):
@@ -505,13 +499,29 @@ class DataserverClient(object):
 		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(post), **kwargs)
 		assert_that(rp.status_int, is_(201), 'invalid status code while posting a blog post')
 		
-		headers = rp.headers
 		data = self.httplib.deserialize(rp)
-		result = adapt_ds_object(data) if adapt else data
+		result = self.adapt_ds_object(data, rp) if adapt else data	
+		return result
+
+	def create_comment_post(self, title, data, post=None, adapt=True, credentials=None, **kwargs):
+		credentials = self._credentials_to_use(credentials)
+		objs, _ = self._get_collection(name='Objects', workspace='Global', credentials=credentials)
+		objs_url = urljoin(self.endpoint, objs.href)
 		
-		if adapt and 'location' in headers:
-			setattr(result, 'location', headers.get('location', None))
-			
+		body = self.create_text_and_body(data)
+		comment = Post(title=title, body=body)
+		oid = post.id
+		if oid:
+			url = urljoin(_check_url(objs_url), urllib.quote(oid))
+		else:
+			href = getattr(post, 'location', None)
+			url = urljoin(self.endpoint, href)
+
+		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(comment), **kwargs)
+		assert_that(rp.status_int, is_(201), 'invalid status code while posting a comment')
+		
+		data = self.httplib.deserialize(rp)
+		result = self.adapt_ds_object(data, rp) if adapt else data
 		return result
 
 	def publish_post(self, obj, credentials=None, adapt=True, **kwargs):
@@ -727,7 +737,7 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(201), 'invalid status code while trying to create a user')
 		
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data) if adapt else data
+		return self.adapt_ds_object(data, rp) if adapt else data
 		
 	def resolve_user(self, username, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
@@ -738,7 +748,7 @@ class DataserverClient(object):
 		assert_that(rp.status_int, is_(200), 'invalid status while resolving user')
 			
 		data = self.httplib.deserialize(rp)
-		return adapt_ds_object(data) if adapt else data
+		return self.adapt_ds_object(data, rp) if adapt else data
 	
 	def preflight_create_user(self, data):
 		href = "users/@@account.preflight.create"
@@ -749,6 +759,13 @@ class DataserverClient(object):
 		data = self.httplib.deserialize(rp)
 		return data
 
+	def adapt_ds_object(self, data, rp=None):
+		result = adapt_ds_object(data) 
+		headers = rp.headers if rp else None
+		if headers and 'location' in headers and not isinstance(result, dict):
+			setattr(result, 'location', headers.get('location', None))
+		return result
+		
 # -------------------------------
 
 if __name__ == '__main__':	

@@ -36,11 +36,11 @@ class Post(DSObject, SharableMixin):
 	DATASERVER_CLASS = 'Post'
 	MIME_TYPE = 'application/vnd.nextthought.forums.post'
 	
-	_ds_field_mapping = {'title':'title', 'body':'body', 'tags':'tags' }
+	_ds_field_mapping = {'title':'title', 'body':'body', 'tags':'tags', 'href':'href' }
 	_ds_field_mapping.update(DSObject._ds_field_mapping)
 	_ds_field_mapping.update(SharableMixin._ds_field_mapping)
 
-	_fields = {'title': False, 'body' : (False, list), 'tags' : (True, list)}
+	_fields = {'title': False, 'body' : (False, list), 'tags' : (True, list), 'href':True}
 	_fields.update(DSObject._fields)
 	_fields.update(SharableMixin._fields)
 	
@@ -53,5 +53,9 @@ class Post(DSObject, SharableMixin):
 class PersonalBlogEntryPost(Post):
 	DATASERVER_CLASS = 'PersonalBlogEntryPost'
 	MIME_TYPE = 'application/vnd.nextthought.forums.personalblogentrypost'
-	
+
+class PersonalBlogComment(Post):
+	DATASERVER_CLASS = 'PersonalBlogComment'
+	MIME_TYPE = 'application/vnd.nextthought.forums.personalblogcomment'
+
 do_register_dsobjecs(dict(locals()).itervalues())

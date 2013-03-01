@@ -83,6 +83,5 @@ class TestBasicNotes(DataServerTestCase):
 		created_note = self.ds.create_note(self.string, self.container, sharedWith=[self.target[0]])
 		assert_that(created_note['sharedWith'], is_([self.target[0]]))
 
-
 if __name__ == '__main__':
 	unittest.main()
