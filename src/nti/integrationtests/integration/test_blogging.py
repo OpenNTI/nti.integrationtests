@@ -37,6 +37,8 @@ class TestBlogging(DataServerTestCase):
 		comment = self.ds.update_object(comment)
 		assert_that(comment, not_none())
 		
+		self.ds.delete_object(comment)
+		
 	def test_user_cannot_change_sharing_on_blog_entry(self):
 		post = self.ds.create_blog_post('Bankai Ability', 'A mere upgrade?')
 		assert_that(post, not_none())
