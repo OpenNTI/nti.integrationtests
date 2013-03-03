@@ -38,7 +38,11 @@ def _http_ise_error_logging(f):
 
 	return to_call
 
+from abc import ABCMeta, abstractmethod
+
 class BasicSeverOperation(object):
+
+	__metaclass__ = ABCMeta
 
 	requests = None
 	objTest = None
@@ -57,10 +61,15 @@ class BasicSeverOperation(object):
 	lastModified = None
 	lastModifiedCollection = None
 	preRequestTime = None
+	format = None
 
 	# Methods called by the generator should copy this data
 	# into their local frame's __traceback_info__ variable
 	_traceback_info_ = None
+
+	@abstractmethod
+	def makeRequest(self, kwargs ):
+		raise NotImplementedError()
 
 	@_http_ise_error_logging
 	def setValues(self, kwargs):
@@ -153,7 +162,7 @@ class BasicSeverOperation(object):
 			parsed_body = json.loads(request.read())
 			self.lastModifiedCollection = parsed_body['Last Modified']
 			return self.lastModifiedCollection
-		except urllib2.HTTPError or KeyError:
+		except (urllib2.HTTPError, KeyError):
 			self.lastModifiedCollection = None
 	setCollectionModificationTime = set_collection_modification_time
 
