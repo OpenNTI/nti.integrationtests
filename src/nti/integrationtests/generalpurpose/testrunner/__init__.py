@@ -119,6 +119,11 @@ class BasicSeverOperation(object):
 			if parsed_body['href'].find('/Objects/') != -1:
 				url = urljoin(self.endpoint, parsed_body['href'])
 				self.testArgs = {'url_id':url, 'id' : parsed_body['href']}
+			# TODO: The above is an invalid assumption. /objects/ is not always in an href
+			# what breaks with the following code?
+			elif parsed_body['href']:
+				url = urljoin(self.endpoint, parsed_body['href'])
+				self.testArgs = {'url_id':url, 'id' : parsed_body['href']}
 			else:
 				self.testArgs = None
 		return self.testArgs
@@ -132,7 +137,6 @@ class BasicSeverOperation(object):
 			# Normally this will be swallowed. But if we fail later, and logcapture is on
 			# this might be handy
 			logger.exception( "Failed to delete during cleanup" )
-			pass
 
 	@classmethod
 	def http_ise_error_logging(cls, f):
