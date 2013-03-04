@@ -487,10 +487,10 @@ class DataserverClient(object):
 		result = self.adapt_ds_object(data, rp) if adapt else data
 		return result
 	
-	def create_blog_post(self, title, data, sharedWith=None, adapt=True, credentials=None, **kwargs):
+	def create_blog_post(self, title, data, tags=None, sharedWith=None, adapt=True, credentials=None, **kwargs):
 		body = self.create_text_and_body(data)
 		credentials = self._credentials_to_use(credentials)
-		post = Post(title=title, body=body, sharedWith=sharedWith)
+		post = Post(title=title, body=body, sharedWith=sharedWith, tags=tags)
 		
 		collection, _ = self._get_collection(name='Blog', credentials=credentials)
 		url = urljoin(self.endpoint, collection.href)
