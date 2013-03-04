@@ -27,7 +27,7 @@ setup(
 						 #'mmstats', # neat idea, not currently used and pulls in many deps, so commented out until used
 						],
 	extras_require = {
-		'PDF': ['pyobjc', 'pyobjc-core'] # Quartz is used for pdfs
+		'PDF': ['pyobjc >= 2.5.1', 'pyobjc-core >= 2.5.1'] # Quartz is used for pdfs
 		},
 	packages = find_packages('src'),
 	package_dir = {'': 'src'},
