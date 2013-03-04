@@ -16,7 +16,9 @@ class TestBlogging(DataServerTestCase):
 		self.ds.set_credentials(self.owner)
 
 	def test_create_post(self):
-		post = self.ds.create_blog_post('Shikai vs Bankai', 'No Zanpakuto in existence has a Shikai and a Bankai that use unrelated abilities')
+		post = self.ds.create_blog_post('Shikai vs Bankai', 
+										'No Zanpakuto in existence has a Shikai and a Bankai that use unrelated abilities',
+										tags=('shikai', 'bankai'))
 		assert_that(post, not_none())
 		assert_that(post.description, is_('Shikai vs Bankai'))
 		
