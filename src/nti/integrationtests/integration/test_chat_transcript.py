@@ -15,7 +15,7 @@ class TestChatTranscript(HostUserChatTest):
 
 	def test_chat_transcript(self):
 		entries = 50
-		one, two = self._run_chat(self.container, entries, self.user_one, self.user_two)
+		one, two = self._run_chat(self.container, entries, self.user_one, self.user_two, delay=0.5)
 		for u in (one, two):
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 
