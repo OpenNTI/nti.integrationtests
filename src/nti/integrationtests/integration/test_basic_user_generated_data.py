@@ -85,6 +85,10 @@ class TestBasicUserGeneratedData(DataServerTestCase):
 		ugd = self.ds.get_user_generated_data(self.container)
 		items = ugd['Items']
 		assert_that(items, has_length(greater_than_or_equal_to(75)))
+		
+		ac = self.ds.get_user_activity()
+		items = ac['Items']
+		assert_that(items, has_length(greater_than_or_equal_to(75)))
 
 if __name__ == '__main__':
 	unittest.main()

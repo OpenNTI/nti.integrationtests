@@ -758,6 +758,16 @@ class DataserverClient(object):
 		data = self.httplib.deserialize(rp)
 		return data
 
+	def get_user_activity(self, credentials=None, adapt=True, **kwargs):
+		credentials = self._credentials_to_use(credentials)
+		href = "users/%s/Activity" % urllib.quote(credentials[0])
+		url = urljoin(self.endpoint, href)
+		
+		rp = self.http_get(url, credentials, **kwargs)
+		assert_that(rp.status_int, is_(200), 'invalid status while user activity')
+		data = self.httplib.deserialize(rp)
+		return self.adapt_ds_object(data, rp) if adapt else data
+	
 	def adapt_ds_object(self, data, rp=None):
 		result = adapt_ds_object(data) 
 		headers = rp.headers if rp else None
