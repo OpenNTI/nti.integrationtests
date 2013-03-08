@@ -1,3 +1,5 @@
+import os
+import random
 import unittest
 
 from nti.integrationtests import DataServerTestCase
@@ -55,7 +57,7 @@ class TestBlogging(DataServerTestCase):
 		
 		post = self.ds.create_blog_post('Ichigo', 'A fake Shinigami?', sharedWith=[self.target[0]])
 		assert_that(post, not_none())
-		assert_that(post.sharedWith, is_([]))
+		assert_that(post.sharedWith, is_([])) 
 		
 	def test_delete_post_with_edit_link(self):
 		post = self.ds.create_blog_post('Spain', 'A no ending nightmare')
@@ -84,11 +86,30 @@ class TestBlogging(DataServerTestCase):
 		assert_that(unpublish_object.get_unpublish_link(), is_(none()) )
 
 	def test_blog_search(self):
-		post = self.ds.create_blog_post("Unohana", 'Begging her not to die Kenpachi screams out in rage as his opponent fades away')
+		post = self.ds.create_blog_post("Unohana", 
+										'Begging her not to die Kenpachi screams out in rage as his opponent fades away',
+										tags=('yachiru', 'haori'))
 		assert_that(post, not_none())
 		
 		data = self.ds.search_user_content("kenpachi")
 		assert_that(data, has_entry('Hit Count', greater_than_or_equal_to(1)))
 		
+		data = self.ds.search_user_content("yachiru")
+		assert_that(data, has_entry('Hit Count', greater_than_or_equal_to(1)))
+		
+	def test_posting_several_blogs(self):
+
+		source_file = os.path.join(os.path.dirname(__file__), "_blog.txt")
+		with open(source_file, "rb") as fd:
+			lines = fd.readlines()
+		
+		title = unicode(lines[0].strip())
+		tags = tuple([unicode(x.strip()) for x in lines[1].split(',')])
+		body = unicode(''.join(lines[2:]))
+		entries = random.randint(5, 15)
+		for _ in xrange(entries+1):
+			post = self.ds.create_blog_post(title, body, tags=tags)
+			assert_that(post, not_none())
+
 if __name__ == '__main__':
 	unittest.main()
