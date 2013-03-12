@@ -15,6 +15,9 @@ from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
 from hamcrest import (assert_that, is_, has_length)
 
+from nose.plugins.attrib import attr
+
+@attr(priority=5, type='chat')
 class TestChatReEnterRoom(HostUserChatTest):
 
 	def setUp(self):

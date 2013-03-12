@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
+
 import time
 
 from nti.integrationtests import DataServerTestCase
@@ -7,6 +16,9 @@ from nti.integrationtests.integration import only_shared_with
 
 from hamcrest import (is_, assert_that)
 
+from nose.plugins.attrib import attr
+
+@attr(priority=3)
 class TestThreadedNotes(DataServerTestCase):
 
 	user_one = ('test.user.1@nextthought.com', 'temp001')

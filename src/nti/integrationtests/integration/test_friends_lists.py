@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
+
 import time
 import uuid
 import unittest
@@ -12,6 +21,9 @@ from nti.integrationtests.integration import friends_list_from_friends_lists
 
 from hamcrest import (is_not, has_key, assert_that)
 
+from nose.plugins.attrib import attr
+
+@attr(priority=3)
 class TestBasicFriendsLists(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

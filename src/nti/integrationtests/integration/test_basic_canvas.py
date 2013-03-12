@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
+
 import os
 import time
 import unittest
@@ -11,6 +20,9 @@ from nti.integrationtests.contenttypes import CanvasAffineTransform
 
 from hamcrest import (is_, is_not, assert_that)
 
+from nose.plugins.attrib import attr
+
+@attr(priority=3)
 class TestBasicCanvas(DataServerTestCase):
 	
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

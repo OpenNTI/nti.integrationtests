@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
+
 import time
 import uuid
 import unittest
@@ -14,6 +23,9 @@ from nti.integrationtests.integration import test_friends_sharing
 
 from hamcrest import (assert_that, is_, is_not, has_entry, greater_than_or_equal_to, has_length)
 
+from nose.plugins.attrib import attr
+
+@attr(priority=3, type="dfl")
 class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 							  test_friends_sharing.TestFriendsSharing):
 	

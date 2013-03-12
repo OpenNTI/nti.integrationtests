@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-
-
-$Id$
-"""
 
 from __future__ import print_function, unicode_literals, absolute_import
 __docformat__ = "restructuredtext en"
@@ -23,10 +18,12 @@ import gevent
 from nti.integrationtests.contenttypes import Note
 from nti.integrationtests.contenttypes import TranscriptSummary
 
-
 from nti.integrationtests.chat import objects
 from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
+from nose.plugins.attrib import attr
+
+@attr(priority=5, type='chat')
 class TestChatOnNote(HostUserChatTest):
 
 	def setUp(self):

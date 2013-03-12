@@ -1,11 +1,24 @@
-import uuid
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
+
+import uuid
+import unittest
+	
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import container
 from nti.integrationtests.integration import container_of_length
 
 from hamcrest import assert_that
 
+from nose.plugins.attrib import attr
+
+@attr(priority=3)
 class TestUserSearch(DataServerTestCase):
 
 	def setUp(self):
@@ -33,5 +46,4 @@ class TestUserSearch(DataServerTestCase):
 		assert_that(result, container_of_length(0))
 
 if __name__ == '__main__':
-	import unittest
 	unittest.main()

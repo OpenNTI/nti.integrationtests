@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
+
 import random
 import unittest
 
@@ -5,6 +14,9 @@ from nti.integrationtests.chat.objects import Host
 
 from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
+from nose.plugins.attrib import attr
+
+@attr(priority=5, type='chat')
 class TestModeratedChat(HostUserChatTest):
 
 	def setUp(self):

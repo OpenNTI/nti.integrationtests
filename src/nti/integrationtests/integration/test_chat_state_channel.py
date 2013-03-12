@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
+
 import unittest
 
 from nti.integrationtests.integration import test_chat_whisper
@@ -9,6 +18,9 @@ max_channel_messsages = 10
 max_state_channel_messsages = 10
 pcnt_state_channel_messages = 1.0
 
+from nose.plugins.attrib import attr
+
+@attr(priority=5, type='chat')
 class TestChatWithState(test_chat_whisper.TestWhisperChat):
 	
 	chatting_users = 4

@@ -1,4 +1,11 @@
-from __future__ import unicode_literals
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
 
 import unittest
 
@@ -6,6 +13,9 @@ from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
 from hamcrest import (is_in, assert_that, is_, has_entry, not_none, has_property, has_key)
 
+from nose.plugins.attrib import attr
+
+@attr(priority=5, type='chat')
 class TestChatTranscript(HostUserChatTest):
 
 	def setUp(self):

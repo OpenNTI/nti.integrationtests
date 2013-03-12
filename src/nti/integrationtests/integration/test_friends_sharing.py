@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
+
 import uuid
 import unittest
 	
@@ -11,6 +20,9 @@ from nti.integrationtests.integration import container_of_length
 
 from hamcrest import ( assert_that, is_, has_entry, greater_than_or_equal_to)
 
+from nose.plugins.attrib import attr
+
+@attr(priority=3)
 class TestFriendsSharing(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

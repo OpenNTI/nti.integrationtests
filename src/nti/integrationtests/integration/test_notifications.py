@@ -1,4 +1,11 @@
-from __future__ import unicode_literals
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
 
 import time
 import uuid
@@ -9,6 +16,8 @@ from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.chat.objects import BasicUser
 
 from hamcrest import assert_that, is_
+
+from nose.plugins.attrib import attr
 
 class _User(BasicUser):
 	def __init__(self, change_type='Circled', *args, **kwargs):
@@ -29,7 +38,8 @@ class _User(BasicUser):
 			pass
 		finally:
 			self.ws_close()
-		
+
+@attr(priority=5)
 class TestNotifications(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
