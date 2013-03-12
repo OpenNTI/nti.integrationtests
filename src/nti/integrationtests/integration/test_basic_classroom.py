@@ -31,7 +31,7 @@ from hamcrest import greater_than_or_equal_to
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestBasicClassRoom(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

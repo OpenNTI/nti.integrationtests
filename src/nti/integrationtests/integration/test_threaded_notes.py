@@ -18,7 +18,7 @@ from hamcrest import (is_, assert_that)
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestThreadedNotes(DataServerTestCase):
 
 	user_one = ('test.user.1@nextthought.com', 'temp001')

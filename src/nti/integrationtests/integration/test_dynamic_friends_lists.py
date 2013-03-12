@@ -25,7 +25,7 @@ from hamcrest import (assert_that, is_, is_not, has_entry, greater_than_or_equal
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3, type="dfl")
+@attr(level=3, type="dfl")
 class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 							  test_friends_sharing.TestFriendsSharing):
 	

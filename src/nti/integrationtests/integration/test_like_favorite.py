@@ -20,7 +20,7 @@ from hamcrest import greater_than
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestLikeFavorite(DataServerTestCase):
 	
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

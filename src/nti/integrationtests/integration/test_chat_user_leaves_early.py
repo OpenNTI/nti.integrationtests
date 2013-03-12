@@ -16,7 +16,7 @@ from hamcrest import (is_, assert_that, has_length, greater_than_or_equal_to )
 
 from nose.plugins.attrib import attr
 
-@attr(priority=5, type='chat')
+@attr(level=5, type='chat')
 class TestChatUserleavesEarly(HostUserChatTest):
 
 	def setUp(self):

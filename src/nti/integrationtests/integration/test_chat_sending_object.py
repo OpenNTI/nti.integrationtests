@@ -21,7 +21,7 @@ from hamcrest import ( has_entry, assert_that, has_length )
 
 from nose.plugins.attrib import attr
 
-@attr(priority=5, type='chat')
+@attr(level=5, type='chat')
 class TestChatSendingObject(HostUserChatTest):
 	
 	def setUp(self):

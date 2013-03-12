@@ -21,7 +21,7 @@ from hamcrest import (is_, is_not, has_entry, has_length, assert_that, greater_t
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestBasicUserGeneratedData(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

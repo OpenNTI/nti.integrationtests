@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
+
+#disable: accessing protected members, too many methods
+#pylint: disable=W0212,R0904
 
 import os
 import sys
@@ -11,8 +18,8 @@ import tempfile
 from nose.util import resolve_name
 
 from nti.integrationtests.utils import get_open_port
-from nti.integrationtests.dataserver.server import DataserverProcess
 from nti.integrationtests.contenttypes.servicedoc import Workspace
+from nti.integrationtests.dataserver.server import DataserverProcess
 
 from nti.integrationtests.generalpurpose import PATH_TO_TESTS
 from nti.integrationtests.generalpurpose.utils.response_assert import MIME_TYPE_REGISTRY
@@ -95,6 +102,9 @@ def get_workspaces(url, username, password):
 	workspace = Workspace.new_from_dict(parsed_body['Items'][0])
 	return workspace
 
+from nose.plugins.attrib import attr
+
+@attr(level=5, type='gpt')
 def test_generator():
 
 	workspace = get_workspaces(endpoint, username, password)

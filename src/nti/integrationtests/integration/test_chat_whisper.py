@@ -19,7 +19,7 @@ from hamcrest import ( has_key, has_item, assert_that )
 
 from nose.plugins.attrib import attr
 
-@attr(priority=5, type='chat')
+@attr(level=5, type='chat')
 class TestWhisperChat(test_chat_multi_user.TestMultiUserChat):
 	
 	chatting_users = 5

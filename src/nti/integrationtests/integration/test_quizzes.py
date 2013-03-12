@@ -20,7 +20,7 @@ from nti.integrationtests.contenttypes import QNumericMathSolution
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestQuizzes(DataServerTestCase):
 	
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

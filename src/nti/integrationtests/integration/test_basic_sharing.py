@@ -22,7 +22,7 @@ from hamcrest import (is_, assert_that, is_not)
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestBasicSharing(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

@@ -30,7 +30,7 @@ does_not = is_not
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestBasicStream(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

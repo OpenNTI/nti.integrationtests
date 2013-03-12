@@ -22,7 +22,7 @@ from hamcrest import (is_, is_not, assert_that)
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestBasicCanvas(DataServerTestCase):
 	
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

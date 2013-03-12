@@ -21,7 +21,7 @@ from hamcrest import (assert_that, not_none, has_length, is_, greater_than_or_eq
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3, type="feeds")
+@attr(level=3, type="feeds")
 class TestFeeds(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

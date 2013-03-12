@@ -18,7 +18,7 @@ from hamcrest import (assert_that, has_property, has_entry, is_, is_not)
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestUserObject(DataServerTestCase):
 
 	user_one = ('test.user.6@nextthought.com', DataServerTestCase.default_user_password)

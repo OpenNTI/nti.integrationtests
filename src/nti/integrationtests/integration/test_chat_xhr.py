@@ -18,7 +18,7 @@ from hamcrest import (assert_that, has_length, greater_than, greater_than_or_equ
 
 from nose.plugins.attrib import attr
 
-@attr(priority=5, type='chat')
+@attr(level=5, type='chat')
 class TestSimpleChatXHR(HostUserChatTest):
 
 	host_transport = 'xhr-polling'

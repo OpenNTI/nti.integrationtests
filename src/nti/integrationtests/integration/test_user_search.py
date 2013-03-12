@@ -18,7 +18,7 @@ from hamcrest import assert_that
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestUserSearch(DataServerTestCase):
 
 	def setUp(self):

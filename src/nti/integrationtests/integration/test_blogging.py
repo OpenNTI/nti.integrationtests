@@ -19,7 +19,7 @@ from hamcrest import (assert_that, is_, not_none, has_entry, greater_than_or_equ
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestBlogging(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

@@ -15,7 +15,7 @@ from hamcrest import (is_in, assert_that, is_, has_entry, not_none, has_property
 
 from nose.plugins.attrib import attr
 
-@attr(priority=5, type='chat')
+@attr(level=5, type='chat')
 class TestChatTranscript(HostUserChatTest):
 
 	def setUp(self):

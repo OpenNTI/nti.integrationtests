@@ -20,7 +20,7 @@ pcnt_state_channel_messages = 1.0
 
 from nose.plugins.attrib import attr
 
-@attr(priority=5, type='chat')
+@attr(level=5, type='chat')
 class TestChatWithState(test_chat_whisper.TestWhisperChat):
 	
 	chatting_users = 4

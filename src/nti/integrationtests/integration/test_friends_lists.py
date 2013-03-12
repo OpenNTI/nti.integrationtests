@@ -23,7 +23,7 @@ from hamcrest import (is_not, has_key, assert_that)
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestBasicFriendsLists(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

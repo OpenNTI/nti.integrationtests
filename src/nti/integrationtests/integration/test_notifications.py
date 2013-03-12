@@ -39,7 +39,7 @@ class _User(BasicUser):
 		finally:
 			self.ws_close()
 
-@attr(priority=5)
+@attr(level=5)
 class TestNotifications(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

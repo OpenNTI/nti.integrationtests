@@ -16,7 +16,7 @@ from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
 from nose.plugins.attrib import attr
 
-@attr(priority=5, type='chat')
+@attr(level=5, type='chat')
 class TestModeratedChat(HostUserChatTest):
 
 	def setUp(self):

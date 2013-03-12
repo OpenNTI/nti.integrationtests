@@ -18,7 +18,7 @@ from hamcrest import (is_, is_not, assert_that, has_length)
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestBasicReplying(DataServerTestCase):
 
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)

@@ -17,7 +17,7 @@ from hamcrest import (assert_that, has_entry, has_key, has_length, greater_than)
 
 from nose.plugins.attrib import attr
 
-@attr(priority=3)
+@attr(level=3)
 class TestUserPreflightCreate(DataServerTestCase):
 
 	headers = {'Origin':'https://mathcounts.nextthought.com'}
