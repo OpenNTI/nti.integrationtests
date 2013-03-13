@@ -74,19 +74,19 @@ class DataserverProcess(object):
 
 	# -----------------------------------
 
-	def start_server(self, block_interval_seconds=1, max_wait_secs=30, *arg, **kwargs):
+	def start_server(self, block_interval_seconds=0.5, max_wait_secs=60, *arg, **kwargs):
 		self._start_process(block_interval_seconds, max_wait_secs, use_coverage=False, \
 							root_dir=self.root_dir, port=self.port, **kwargs)
 
 	startServer = start_server
 
-	def start_server_with_coverage(self, block_interval_seconds=1, max_wait_secs=30, *arg, **kwargs):
+	def start_server_with_coverage(self, block_interval_seconds=0.5, max_wait_secs=60, *arg, **kwargs):
 		self._start_process(block_interval_seconds, max_wait_secs, use_coverage=True, \
 							root_dir=self.root_dir, port=self.port, *arg, **kwargs)
 
 	startServerWithCoverage = start_server_with_coverage
 
-	def _start_process(self, block_interval_seconds=1, max_wait_secs=30, *arg, **kwargs):
+	def _start_process(self, block_interval_seconds=0.5, max_wait_secs=60, *arg, **kwargs):
 
 		if self.process or self.is_running():
 			logger.debug( "Dataserver already running.  Won't start a new one" )
