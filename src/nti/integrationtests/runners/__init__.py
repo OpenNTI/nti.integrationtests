@@ -27,8 +27,7 @@ def set_server_data(target, dsprocess):
 	nti.integrationtests.DataServerTestCase.process = dsprocess
 	dsprocess.register_server_data(nti.integrationtests.DataServerTestCase)
 
-def run_test_suite(suite, dsprocess, config=None, module=None, use_coverage=False, coverage_report=False,
-				   levels=None, verbose=False):
+def run_test_suite(suite, dsprocess, config=None, module=None, use_coverage=False, coverage_report=False, verbose=False):
 
 	try:
 		if use_coverage:
@@ -45,9 +44,6 @@ def run_test_suite(suite, dsprocess, config=None, module=None, use_coverage=Fals
 
 		_runner = None
 		_argv = [sys.argv[0]]
-		for l in levels or ():
-			_argv.append('-a level=%s' % l)
-
 		if verbose:
 			_argv.append('--verbose')
 
@@ -97,4 +93,4 @@ def test_runner(path=None, module=None, pattern="test*.py", use_coverage=False, 
 
 	dsprocess = DataserverProcess(port=port, root_dir=root_dir)
 	run_test_suite(suite, dsprocess, config=config, use_coverage=use_coverage,
- 				   coverage_report=coverage_report, levels=levels, verbose=verbose)
+ 				   coverage_report=coverage_report, verbose=verbose)
