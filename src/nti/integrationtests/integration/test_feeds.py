@@ -19,7 +19,7 @@ from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
 
-from hamcrest import (assert_that, not_none, has_length, is_, greater_than_or_equal_to, none)
+from hamcrest import (assert_that, not_none, has_length, is_, greater_than_or_equal_to)
 
 from nose.plugins.attrib import attr
 
@@ -132,7 +132,11 @@ class TestFeeds(DataServerTestCase):
 		# delete and check feed
 		self.ds.delete_object(note)
 		feed = self.ds.get_rss_feed(self.container, credentials=self.target)
-		assert_that(feed, is_(none()))
+		if feed:
+			root = etree.XML(feed)
+			find = etree.XPath("//item[guid=$nid]")
+			items = find(root, nid=note['id'])
+			assert_that(items, has_length(0))
 
 if __name__ == '__main__':
 	unittest.main()
