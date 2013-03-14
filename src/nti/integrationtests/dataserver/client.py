@@ -96,7 +96,7 @@ class DataserverClient(object):
 		self.credentials = None
 
 	# ------------------------
-	
+
 	def prepare_headers(self, headers=None):
 		if headers:
 			result = dict(self.headers) if self.headers else {}
@@ -104,37 +104,37 @@ class DataserverClient(object):
 		else:
 			result = dict(self.headers) if self.headers else None
 		return result
-	
+
 	def _wait(self):
 		if self.op_delay:
 			time.sleep(self.op_delay)
-			
+
 	def http_get(self, url, credentials, headers=None, **kwargs):
 		headers = self.prepare_headers(headers)
 		rp = self.httplib.do_get(url, credentials, headers=headers, **kwargs)
 		self._wait()
 		return rp
-	
+
 	def http_put(self, url, credentials, data, headers=None, **kwargs):
 		headers = self.prepare_headers(headers)
 		rp = self.httplib.do_put(url, credentials, data=data, headers=headers, **kwargs)
 		self._wait()
 		return rp
-	
+
 	def http_delete(self, url, credentials, headers=None, **kwargs):
 		headers = self.prepare_headers(headers)
 		rp = self.httplib.do_delete(url, credentials, headers=headers, **kwargs)
 		self._wait()
 		return rp
-	
+
 	def http_post(self, url, credentials=None, data=None, headers=None, **kwargs):
 		headers = self.prepare_headers(headers)
 		rp = self.httplib.do_post(url, credentials, data=data, headers=headers, **kwargs)
 		self._wait()
 		return rp
-	
+
 	# ------------------------
-	
+
 	def create_note(self, data, container, inReplyTo=None, sharedWith=None, references=None, applicableRange=None,
 					adapt=True, credentials=None, **kwargs):
 		body = self.create_text_and_body(data)
@@ -225,40 +225,43 @@ class DataserverClient(object):
 		return self.adapt_ds_object(data) if adapt else data
 
 	# ------------------------
-	
+
 	def get_rss_feed(self, container, workspace=None, credentials=None, gzip=False):
 		return self._get_feed('feed.rss', container, workspace, credentials, gzip)
-		
+
 	def get_atom_feed(self, container, workspace=None, credentials=None, gzip=False):
 		return self._get_feed('feed.atom', container, workspace, credentials, gzip)
-		
+
 	def _get_feed(self, feed, container, workspace=None, credentials=None, gzip=False):
 		credentials = self._credentials_to_use(credentials)
 		url = self._get_container_item_data_url(container=container, link_rel='RecursiveStream', workspace=workspace,
 												credentials=credentials, validate=True)
-		
+
 		url = urljoin(_check_url(url), feed)
-		
+
 		headers = None if not gzip else {'Accept-Encoding': 'gzip'}
 		rp = self.http_get(url, credentials, headers=headers)
+		if rp.status_int == 404:
+			return None
+
 		assert_that(rp.status_int, is_(200), "invalid status code getting feed at '%s'" % url)
-		
+
 		data = self.httplib.body(rp)
 		return data
-		
+
 	# ------------------------
 
 	def get_object(self, obj=None, link=None, credentials=None, adapt=False, **kwargs):
-		
+
 		if link is None:
 			assert_that(obj, instance_of(DSObject), 'must provide a valid DataServer object')
-			
+
 		credentials = self._credentials_to_use(credentials)
 		href = link or obj.get_edit_link()
 		url = urljoin(self.endpoint, href)
 		__traceback_info__ = url, credentials, obj
 		rp = self.http_get(url, credentials, **kwargs)
-		
+
 		assert_that(rp.status_int, is_(200), "invalid status code getting object at '%s'" % href)
 
 		data = self.httplib.deserialize(rp)
@@ -306,8 +309,8 @@ class DataserverClient(object):
 	def share_object(self, obj, targets, credentials=None, adapt=True, **kwargs):
 		# Some clients use this API wrong, passing in credentials
 		# instead of targets. Detect that.
-		if isinstance( targets, tuple ) and len(targets) == 2 and credentials is None and '@' not in targets[1]:
-			warnings.warn( "Incorrect API usage: passed credentials for targets" )
+		if isinstance(targets, tuple) and len(targets) == 2 and credentials is None and '@' not in targets[1]:
+			warnings.warn("Incorrect API usage: passed credentials for targets")
 			targets = [targets[0]]
 
 		if isinstance(obj, Sharable):
@@ -347,14 +350,14 @@ class DataserverClient(object):
 	def unfav_object(self, obj, credentials=None, adapt=True, **kwargs):
 		href = obj.get_unfavorite_link()
 		return self._like_fav_op(href, 'unfavorite', credentials=credentials, adapt=adapt, **kwargs)
-	
+
 	def flag_object(self, obj, credentials=None, adapt=True, **kwargs):
 		href = obj.get_flag_link()
 		return self._like_fav_op(href, 'flag', credentials=credentials, adapt=adapt, **kwargs)
-	
+
 	def replies(self, obj, credentials=None, adapt=True, **kwargs):
 		href = obj.get_replies_link()
-		assert_that(href, is_not(none()), "no '%s' href was provided for replies" )
+		assert_that(href, is_not(none()), "no '%s' href was provided for replies")
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
 		rp = self.http_get(url, credentials=credentials, **kwargs)
@@ -380,7 +383,7 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		data = self.get_user_generated_data(container=container, name=name, workspace=workspace,
 											credentials=credentials, adapt=True)
-		for item in data.get('Items',[]):
+		for item in data.get('Items', []):
 			if not isinstance(item, TranscriptSummary):
 				continue
 
@@ -401,7 +404,7 @@ class DataserverClient(object):
 
 	# ------------------------
 
-	def _do_search(self, link, query, ntiid=None, credentials=None,  **kwargs):
+	def _do_search(self, link, query, ntiid=None, credentials=None, **kwargs):
 
 		credentials = self._credentials_to_use(credentials)
 		collection, _ = self._get_collection(credentials=credentials)
@@ -461,52 +464,52 @@ class DataserverClient(object):
 		return (link, ws)
 
 	# ------------------------
-	
+
 	def get_blog(self, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		collection, _ = self._get_collection(name='Blog', credentials=credentials)
 		url = urljoin(self.endpoint, collection.href)
-		
+
 		rp = self.http_get(url, credentials=credentials)
 		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog')
-		
+
 		data = self.httplib.deserialize(rp)
-		result = self.adapt_ds_object(data, rp) if adapt else data			
+		result = self.adapt_ds_object(data, rp) if adapt else data
 		return result
-	
+
 	def get_blog_contents(self, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		blog = self.get_blog(credentials=credentials, adapt=True)
 		href = blog.get_link('contents')
 		url = urljoin(self.endpoint, href)
-		
+
 		rp = self.http_get(url, credentials=credentials)
 		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog content')
 
 		data = self.httplib.deserialize(rp)
 		result = self.adapt_ds_object(data, rp) if adapt else data
 		return result
-	
+
 	def create_blog_post(self, title, data, tags=None, sharedWith=None, adapt=True, credentials=None, **kwargs):
 		body = self.create_text_and_body(data)
 		credentials = self._credentials_to_use(credentials)
 		post = Post(title=title, body=body, sharedWith=sharedWith, tags=tags)
-		
+
 		collection, _ = self._get_collection(name='Blog', credentials=credentials)
 		url = urljoin(self.endpoint, collection.href)
 
 		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(post), **kwargs)
 		assert_that(rp.status_int, is_(201), 'invalid status code while posting a blog post')
-		
+
 		data = self.httplib.deserialize(rp)
-		result = self.adapt_ds_object(data, rp) if adapt else data	
+		result = self.adapt_ds_object(data, rp) if adapt else data
 		return result
 
 	def create_comment_post(self, title, data, post=None, adapt=True, credentials=None, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		objs, _ = self._get_collection(name='Objects', workspace='Global', credentials=credentials)
 		objs_url = urljoin(self.endpoint, objs.href)
-		
+
 		body = self.create_text_and_body(data)
 		comment = Post(title=title, body=body)
 		oid = post.id
@@ -518,7 +521,7 @@ class DataserverClient(object):
 
 		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(comment), **kwargs)
 		assert_that(rp.status_int, is_(201), 'invalid status code while posting a comment')
-		
+
 		data = self.httplib.deserialize(rp)
 		result = self.adapt_ds_object(data, rp) if adapt else data
 		return result
@@ -550,7 +553,7 @@ class DataserverClient(object):
 										 credentials=credentials, always_new=True, **kwargs)
 		return adapt_ds_object(class_info) if isinstance(class_info, dict) and adapt else class_info
 
-	def add_class_resource(	self, source_file, provider, class_name, section_name=None,
+	def add_class_resource(self, source_file, provider, class_name, section_name=None,
 							content_type=None, credentials=None, slug=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		class_info = self.get_class(provider, class_name, credentials=credentials, adapt=True)
@@ -564,7 +567,7 @@ class DataserverClient(object):
 
 		location, slug = self._post_raw_content(href, source_file, content_type, slug=slug, **kwargs)
 		return (location, slug)
-		
+
 	# ------------------------
 
 	def get_user_workspace(self, credentials=None):
@@ -604,7 +607,7 @@ class DataserverClient(object):
 
 		return (collection, ws)
 
-	def _get_container(	self, container, name='Pages', workspace=None, credentials=None, validate=True,
+	def _get_container(self, container, name='Pages', workspace=None, credentials=None, validate=True,
 					 	always_new=False, **kwargs):
 		"""
 		return Item object associated withe specified workspace/collection
@@ -625,9 +628,9 @@ class DataserverClient(object):
 		return item
 
 	def  _get_container_item_data_url(self, container, link_rel, name='Pages', workspace=None, credentials=None, validate=True):
-		
+
 		credentials = self._credentials_to_use(credentials)
-		item = self._get_container(	container=container, name=name, workspace=workspace,
+		item = self._get_container(container=container, name=name, workspace=workspace,
 									credentials=credentials, validate=validate)
 
 		if not item:
@@ -641,7 +644,7 @@ class DataserverClient(object):
 
 		result = urljoin(self.endpoint, link.href)
 		return result
-	
+
 	def _get_container_item_data(self, container, link_rel, name='Pages', workspace=None, credentials=None,
 								 validate=True, **kwargs):
 		"""
@@ -656,12 +659,12 @@ class DataserverClient(object):
 		validate: validate flag
 		"""
 		credentials = self._credentials_to_use(credentials)
-		url = self._get_container_item_data_url(container=container, link_rel=link_rel, name=name, 
+		url = self._get_container_item_data_url(container=container, link_rel=link_rel, name=name,
 												workspace=workspace, credentials=credentials, validate=validate)
 
 		if url is None:
 			return EMPTY_CONTAINER_DICT
-		
+
 		rp = self.http_get(url, credentials, **kwargs)
 
 		# check for empty reply from the server
@@ -687,7 +690,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 
 		rp = self.httplib.do_upload_resource(url, credentials=credentials, source_file=source,
-											 content_type=content_type, headers= {'slug' : slug }, **kwargs)
+											 content_type=content_type, headers={'slug' : slug }, **kwargs)
 		assert_that(rp.status_int, is_(201), 'invalid status code while posting raw content')
 
 		headers = rp.headers
@@ -722,38 +725,38 @@ class DataserverClient(object):
 		params['password'] = password
 		params['realname'] = realname or username
 		params['opt_in_email_communication'] = opt_in_email_communication
-		
+
 		# remove any None argument
-		for k,v in list(params.items()):
+		for k, v in list(params.items()):
 			if v is None:
 				params.pop(k)
-				
+
 		payload = anyjson.dumps(params)
-		
+
 		href = "users/@@account.create"
 		url = urljoin(self.endpoint, href)
 		rp = self.http_post(url, data=payload)
 		assert_that(rp.status_int, is_(201), 'invalid status code while trying to create a user')
-		
+
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
-		
+
 	def resolve_user(self, username, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
-		
+
 		href = "ResolveUser/%s" % username
 		url = urljoin(self.endpoint, href)
 		rp = self.http_get(url, credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), 'invalid status while resolving user')
-			
+
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
-	
+
 	def preflight_create_user(self, data):
 		href = "users/@@account.preflight.create"
 		url = urljoin(self.endpoint, href)
 		rp = self.http_post(url, data=anyjson.dumps(data))
-		
+
 		assert_that(rp.status_int, is_(200), 'invalid status while user account creation preflight')
 		data = self.httplib.deserialize(rp)
 		return data
@@ -762,22 +765,22 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		href = "users/%s/Activity" % urllib.quote(credentials[0])
 		url = urljoin(self.endpoint, href)
-		
+
 		rp = self.http_get(url, credentials, **kwargs)
 		assert_that(rp.status_int, is_(200), 'invalid status while user activity')
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
-	
+
 	def adapt_ds_object(self, data, rp=None):
-		result = adapt_ds_object(data) 
+		result = adapt_ds_object(data)
 		headers = rp.headers if rp else None
 		if headers and 'location' in headers and not isinstance(result, dict):
 			setattr(result, 'location', headers.get('location', None))
 		return result
-		
+
 # -------------------------------
 
-if __name__ == '__main__':	
+if __name__ == '__main__':
 	end_point = 'http://localhost:8081/dataserver2'
 	cl = DataserverClient(end_point)
 	cl.set_credentials(user='test.user.1@nextthought.com', password='temp001')
