@@ -19,7 +19,7 @@ from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
 
-from hamcrest import (assert_that, not_none, has_length, is_, greater_than_or_equal_to)
+from hamcrest import (assert_that, not_none, has_length, greater_than_or_equal_to, contains_string)
 
 from nose.plugins.attrib import attr
 
@@ -76,11 +76,11 @@ class TestFeeds(DataServerTestCase):
 
 		feed = self.ds.get_rss_feed(self.container, credentials=self.target)
 		item = self._find_item_in_rss(created_obj, feed)
-		assert_that(item.find('description').text, is_('my note with canvas'))
+		assert_that(item.find('description').text, contains_string('my note with canvas'))
 
 		feed = self.ds.get_atom_feed(self.container, credentials=self.target)
 		entry = self._find_item_in_atom(created_obj, feed)
-		assert_that(entry.find('t:summary', namespaces={'t':'http://www.w3.org/2005/Atom'}).text, is_('my note with canvas'))
+		assert_that(entry.find('t:summary', namespaces={'t':'http://www.w3.org/2005/Atom'}).text, contains_string('my note with canvas'))
 
 		self.ds.delete_object(created_obj)
 
@@ -92,11 +92,11 @@ class TestFeeds(DataServerTestCase):
 
 		feed = self.ds.get_rss_feed(self.container, credentials=self.target)
 		item = self._find_item_in_rss(created_obj, feed)
-		assert_that(item.find('description').text, is_(unicode_string))
+		assert_that(item.find('description').text, contains_string(unicode_string))
 
 		feed = self.ds.get_atom_feed(self.container, credentials=self.target)
 		entry = self._find_item_in_atom(created_obj, feed)
-		assert_that(entry.find('t:summary', namespaces={'t':'http://www.w3.org/2005/Atom'}).text, is_(unicode_string))
+		assert_that(entry.find('t:summary', namespaces={'t':'http://www.w3.org/2005/Atom'}).text, contains_string(unicode_string))
 
 		self.ds.delete_object(created_obj)
 
