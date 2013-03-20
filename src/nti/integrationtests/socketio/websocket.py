@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 websocket - WebSocket client library for Python
 
@@ -18,7 +19,11 @@ Copyright (C) 2010 Hiroki Ohtani(liris)
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 	https://github.com/liris/websocket-client/blob/master/websocket.py
+
+$Id$
 """
+from __future__ import print_function, unicode_literals, absolute_import
+__docformat__ = "restructuredtext en"
 
 import re
 import md5
@@ -61,7 +66,7 @@ def _parse_url(url):
 	elif parsed.scheme == "wss":
 		is_secure = True
 		if not port:
-			port  = 443
+			port = 443
 	else:
 		raise ValueError("scheme %s is invalid" % parsed.scheme)
 
@@ -72,9 +77,9 @@ def _parse_url(url):
 
 	return (hostname, port, resource, is_secure)
 
-_MAX_INTEGER = (1 << 32) -1
-_AVAILABLE_KEY_CHARS = range(0x21, 0x2f + 1) + range(0x3a, 0x7e + 1)
-_MAX_CHAR_BYTE = (1<<8) -1
+_MAX_INTEGER = (1 << 32) - 1
+_AVAILABLE_KEY_CHARS = range(0x21, 0x2f + 1) + range(0x3a, 0x7e+1)
+_MAX_CHAR_BYTE = (1 << 8) - 1
 
 # ref. Websocket gets an update, and it breaks stuff.
 # http://axod.blogspot.com/2010/06/websocket-gets-update-and-it-breaks.html
@@ -90,7 +95,7 @@ def _create_sec_websocket_key():
 		pos = random.randint(0, len(key_n))
 		key_n = key_n[0:pos] + chr(c) + key_n[pos:]
 	for _ in range(spaces_n):
-		pos = random.randint(1, len(key_n)-1)
+		pos = random.randint(1, len(key_n) - 1)
 		key_n = key_n[0:pos] + " " + key_n[pos:]
 
 	return number_n, key_n
@@ -98,11 +103,11 @@ def _create_sec_websocket_key():
 def _create_key3():
 	return "".join([chr(random.randint(0, _MAX_CHAR_BYTE)) for _ in range(8)])
 
-HEADERS_TO_CHECK = {"upgrade": "websocket", "connection": "upgrade",}
+HEADERS_TO_CHECK = {"upgrade": "websocket", "connection": "upgrade", }
 
-HEADERS_TO_EXIST_FOR_HYBI00 = ["sec-websocket-origin", "sec-websocket-location",]
+HEADERS_TO_EXIST_FOR_HYBI00 = ["sec-websocket-origin", "sec-websocket-location", ]
 
-HEADERS_TO_EXIST_FOR_HIXIE75 = ["websocket-origin", "websocket-location",]
+HEADERS_TO_EXIST_FOR_HIXIE75 = ["websocket-origin", "websocket-location", ]
 
 class WebSocketException(SocketIOException):
 	pass
@@ -117,10 +122,10 @@ class _SSLSocketWrapper(object):
 
 	def send(self, payload):
 		return self.ssl.write(payload)
-	
+
 	def settimeout(self, timeout):
 		self.sock.settimeout(timeout)
-		
+
 	def connect(self, *args, **kwargs):
 		self.sock.connect(*args, **kwargs)
 
@@ -142,17 +147,18 @@ class WebSocket(SocketIOSocket):
 	'Hello, Server'
 	>>> ws.close()
 	"""
-	
+
 	WS_HEART_BEAT = b'2::'
-	
+
 	logging_level = loglevels.TRACE
 	_msg_pat = re.compile('.+\\:15\\:10\\:.*websocket.*')
-	
+
 	def __init__(self, secure=False):
 		"""
 		Initalize WebSocket object.
 		"""
 		super(SocketIOSocket, self).__init__()
+		self.connected = False
 		self.io_sock = self.sock = socket.socket()
 		if secure:
 			self.io_sock = _SSLSocketWrapper(self.sock)
@@ -175,7 +181,7 @@ class WebSocket(SocketIOSocket):
 		"""
 		host, port, resource, is_secure = _parse_url(url)
 		self.sock.connect((host, port))
-		self._handshake(host, port, resource, is_secure,  **options)
+		self._handshake(host, port, resource, is_secure, **options)
 		return self
 
 	def _handshake(self, host, port, resource, is_secure, **options):
@@ -211,7 +217,7 @@ class WebSocket(SocketIOSocket):
 
 		header_str = "\r\n".join(ws_info)
 		sock.send(header_str)
-		
+
 		logger.log(self.logging_level, "--- request header ---")
 		logger.log(self.logging_level, header_str)
 		logger.log(self.logging_level, "-----------------------")
@@ -250,7 +256,7 @@ class WebSocket(SocketIOSocket):
 		return result
 
 	def _validate_header(self, headers):
-		#TODO: check other headers
+		# TODO: check other headers
 		for key, value in HEADERS_TO_CHECK.iteritems():
 			v = headers.get(key, None)
 			if value != v:
@@ -413,35 +419,35 @@ class WebSocket(SocketIOSocket):
 
 	def heartbeat(self):
 		return self.send(self.WS_HEART_BEAT)
-	
+
 	def isHeartBeat(self, msg):
 		return str(msg).startswith(self.WS_HEART_BEAT)
-	
+
 	@classmethod
 	def connect_to_ds(cls, host, port, username, password, is_secure=False, timeout=None, resource=None, **kwargs):
 		resource = resource or '/socket.io/1/'
 		resource = resource + '/' if resource[-1] != '/' else resource
-	
+
 		ws = WebSocket(is_secure)
 		ws.settimeout(timeout or get_default_timeout())
 		io_sock = ws.io_sock
 		io_sock.connect((host, port))
-	
+
 		base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
 		auth_header = 'Authorization: Basic %s' % base64string
-	
+
 		# socket.io handshake
 		io_sock.send('POST %s HTTP/1.1\r\n' % resource)
 		io_sock.send(auth_header)
 		io_sock.send('\r\nContent-Length: 0\r\n')
 		io_sock.send('\r\n')
-	
+
 		status, resp_headers = ws._read_headers()
 		if status == 200:
 			cl = resp_headers['content-length'] if 'content-length' in resp_headers else None
 			if cl:
 				content_length = int(resp_headers['content-length'])
-	
+
 				# get the session id. the server returns the session id e.g.
 				# 57e45c8578d9426fb0f12336c5ef21ed:15:10:websocket,xhr-polling
 				# 5ac894738a704995bd846dcad606e1aa:15:10:flashsocket,websocket,xhr-polling
@@ -449,11 +455,11 @@ class WebSocket(SocketIOSocket):
 				if cls._msg_pat.match(msg):
 					sessiond_id = msg.split(":")[0]
 					resource = '%s%s/%s' % (resource, 'websocket', sessiond_id)
-	
+
 					header = kwargs.get('headers', [])
 					header.append(auth_header)
 					kwargs['headers'] = header
-	
+
 					ws._handshake(host, port, resource, is_secure, **kwargs)
 					return ws
 				else:
@@ -465,19 +471,19 @@ class WebSocket(SocketIOSocket):
 		else:
 			ws.close()
 			raise WebSocketException("Invalid status %s writing to %s (%s)" % (status, resource, resp_headers))
-		
+
 def create_ds_connection(host, port, username, password, is_secure=False, timeout=None, resource=None, **options):
 	result = WebSocket.connect_to_ds(host=host,
 									 port=port,
 									 username=username,
-									 password=password, 
-									 is_secure=is_secure, 
+									 password=password,
+									 is_secure=is_secure,
 									 timeout=timeout,
 									 resource=resource,
 									 **options)
 	return result
 
-if __name__ == "__main__":
-	ws = create_ds_connection('alpha.nextthought.com', 443, 'test.user.1@nextthought.com', 'temp001', is_secure=True)
-	#ws = create_ds_connection('localhost', 8081, 'test.user.1@nextthought.com', 'temp001')
-	ws.close()
+# if __name__ == "__main__":
+# 	ws = create_ds_connection('alpha.nextthought.com', 443, 'test.user.1@nextthought.com', 'temp001', is_secure=True)
+# 	# ws = create_ds_connection('localhost', 8081, 'test.user.1@nextthought.com', 'temp001')
+# 	ws.close()
