@@ -22,8 +22,10 @@ Copyright (C) 2010 Hiroki Ohtani(liris)
 
 $Id$
 """
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, absolute_import
 __docformat__ = "restructuredtext en"
+
+logger = __import__('logging').getLogger(__name__)
 
 import re
 import md5
@@ -39,9 +41,6 @@ from nti.integrationtests.socketio import SocketIOSocket
 from nti.integrationtests.socketio import SocketIOException
 from nti.integrationtests.socketio import get_default_timeout
 from nti.integrationtests.socketio import ConnectionClosedException
-
-import logging
-logger = logging.getLogger(__name__)
 
 __all__ = [	'WebSocketException', 'WebSocket', 'create_ds_connection']
 
