@@ -22,7 +22,7 @@ Copyright (C) 2010 Hiroki Ohtani(liris)
 
 $Id$
 """
-from __future__ import print_function, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -59,10 +59,10 @@ def _parse_url(url):
 		port = parsed.port
 
 	is_secure = False
-	if parsed.scheme == "ws":
+	if parsed.scheme == b"ws":
 		if not port:
 			port = 80
-	elif parsed.scheme == "wss":
+	elif parsed.scheme == b"wss":
 		is_secure = True
 		if not port:
 			port = 443
@@ -72,7 +72,7 @@ def _parse_url(url):
 	if parsed.path:
 		resource = parsed.path
 	else:
-		resource = "/"
+		resource = b"/"
 
 	return (hostname, port, resource, is_secure)
 
@@ -95,18 +95,18 @@ def _create_sec_websocket_key():
 		key_n = key_n[0:pos] + chr(c) + key_n[pos:]
 	for _ in range(spaces_n):
 		pos = random.randint(1, len(key_n) - 1)
-		key_n = key_n[0:pos] + " " + key_n[pos:]
+		key_n = key_n[0:pos] + b" " + key_n[pos:]
 
 	return number_n, key_n
 
 def _create_key3():
-	return "".join([chr(random.randint(0, _MAX_CHAR_BYTE)) for _ in range(8)])
+	return b"".join([chr(random.randint(0, _MAX_CHAR_BYTE)) for _ in range(8)])
 
-HEADERS_TO_CHECK = {"upgrade": "websocket", "connection": "upgrade", }
+HEADERS_TO_CHECK = {b"upgrade": b"websocket", b"connection": b"upgrade", }
 
-HEADERS_TO_EXIST_FOR_HYBI00 = ["sec-websocket-origin", "sec-websocket-location", ]
+HEADERS_TO_EXIST_FOR_HYBI00 = [b"sec-websocket-origin", b"sec-websocket-location", ]
 
-HEADERS_TO_EXIST_FOR_HIXIE75 = ["websocket-origin", "websocket-location", ]
+HEADERS_TO_EXIST_FOR_HIXIE75 = [b"websocket-origin", b"websocket-location", ]
 
 class WebSocketException(SocketIOException):
 	pass
@@ -150,7 +150,7 @@ class WebSocket(SocketIOSocket):
 	WS_HEART_BEAT = b'2::'
 
 	logging_level = loglevels.TRACE
-	_msg_pat = re.compile('.+\\:15\\:10\\:.*websocket.*')
+	_msg_pat = re.compile(u'.+\\:15\\:10\\:.*websocket.*')
 
 	def __init__(self, secure=False):
 		"""
@@ -191,30 +191,30 @@ class WebSocket(SocketIOSocket):
 		sock = self.io_sock
 		ws_info = list()
 
-		ws_info.append("GET %s HTTP/1.1" % resource)
-		ws_info.append("Upgrade: WebSocket")
-		ws_info.append("Connection: Upgrade")
+		ws_info.append(b"GET %s HTTP/1.1" % bytes(resource))
+		ws_info.append(b"Upgrade: WebSocket")
+		ws_info.append(b"Connection: Upgrade")
 		if port == 80:
 			hostport = host
 		else:
-			hostport = "%s:%d" % (host, port)
+			hostport = b"%s:%d" % (host, port)
 
-		ws_info.append("Host: %s" % hostport)
-		ws_info.append("Origin: %s" % hostport)
+		ws_info.append(b"Host: %s" % hostport)
+		ws_info.append(b"Origin: %s" % hostport)
 
 		number_1, key_1 = _create_sec_websocket_key()
-		ws_info.append("Sec-WebSocket-Key1: %s" % key_1)
+		ws_info.append(b"Sec-WebSocket-Key1: %s" % key_1)
 		number_2, key_2 = _create_sec_websocket_key()
-		ws_info.append("Sec-WebSocket-Key2: %s" % key_2)
+		ws_info.append(b"Sec-WebSocket-Key2: %s" % key_2)
 
 		if "headers" in options:
 			ws_info.extend(options["headers"])
 
-		ws_info.append("")
+		ws_info.append(b"")
 		key_3 = _create_key3()
 		ws_info.append(key_3)
 
-		header_str = "\r\n".join(ws_info)
+		header_str = b"\r\n".join(ws_info)
 		sock.send(header_str)
 
 		logger.log(self.logging_level, "--- request header ---")
@@ -240,8 +240,8 @@ class WebSocket(SocketIOSocket):
 		self.connected = True
 
 	def _validate_resp(self, number_1, number_2, key3, resp):
-		challenge = struct.pack("!I", number_1)
-		challenge += struct.pack("!I", number_2)
+		challenge = struct.pack(b"!I", number_1)
+		challenge += struct.pack(b"!I", number_2)
 		challenge += key3
 		digest = md5.md5(challenge).digest()
 		return resp == digest
@@ -286,7 +286,7 @@ class WebSocket(SocketIOSocket):
 
 		while True:
 			line = self._recv_line()
-			if line == "\r\n":
+			if line == b"\r\n":
 				break
 			line = line.strip()
 			logger.log(self.logging_level, line)
@@ -311,7 +311,7 @@ class WebSocket(SocketIOSocket):
 		"""
 		if isinstance(payload, unicode):
 			payload = payload.encode("utf-8")
-		data = "".join(["\x00", payload, "\xff"])
+		data = b"".join([b"\x00", payload, b"\xff"])
 		self.io_sock.send(data)
 
 		logger.log(self.logging_level, "send: " + repr(data))
@@ -327,7 +327,7 @@ class WebSocket(SocketIOSocket):
 			_data = []
 			while True:
 				b = self._recv(1)
-				if b == "\xff":
+				if b == b"\xff":
 					break
 				else:
 					_data.append(b)
@@ -361,12 +361,12 @@ class WebSocket(SocketIOSocket):
 		"""
 		if self.connected:
 			try:
-				self.io_sock.send("\xff\x00")
+				self.io_sock.send(b"\xff\x00")
 				timeout = self.sock.gettimeout()
 				self.sock.settimeout(1)
 				try:
 					result = self._recv(2)
-					if result != "\xff\x00":
+					if result != b"\xff\x00":
 						logger.log(self.logging_level, "bad closing Handshake %s" % result)
 				except:
 					pass
@@ -401,7 +401,7 @@ class WebSocket(SocketIOSocket):
 		while True:
 			c = self._recv(1)
 			line.append(c)
-			if c == "\n":
+			if c == b"\n":
 				break
 		return "".join(line)
 
@@ -411,7 +411,7 @@ class WebSocket(SocketIOSocket):
 			c = self._recv(1)
 			line.append(c)
 			if len(line) >= len(word):
-				s = "".join(line)
+				s = b"".join(line)
 				if word in s:
 					return s
 		return None
@@ -424,22 +424,22 @@ class WebSocket(SocketIOSocket):
 
 	@classmethod
 	def connect_to_ds(cls, host, port, username, password, is_secure=False, timeout=None, resource=None, **kwargs):
-		resource = resource or '/socket.io/1/'
-		resource = resource + '/' if resource[-1] != '/' else resource
+		resource = resource or b'/socket.io/1/'
+		resource = resource + b'/' if resource[-1] != b'/' else resource
 
 		ws = WebSocket(is_secure)
 		ws.settimeout(timeout or get_default_timeout())
 		io_sock = ws.io_sock
 		io_sock.connect((host, port))
 
-		base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-		auth_header = 'Authorization: Basic %s' % base64string
+		base64string = base64.encodestring(b'%s:%s' % (username, password))[:-1]
+		auth_header = b'Authorization: Basic %s' % base64string
 
 		# socket.io handshake
-		io_sock.send('POST %s HTTP/1.1\r\n' % resource)
+		io_sock.send(b'POST %s HTTP/1.1\r\n' % resource)
 		io_sock.send(auth_header)
-		io_sock.send('\r\nContent-Length: 0\r\n')
-		io_sock.send('\r\n')
+		io_sock.send(b'\r\nContent-Length: 0\r\n')
+		io_sock.send(b'\r\n')
 
 		status, resp_headers = ws._read_headers()
 		if status == 200:
@@ -453,7 +453,7 @@ class WebSocket(SocketIOSocket):
 				msg = ws._recv_strict(content_length)
 				if cls._msg_pat.match(msg):
 					sessiond_id = msg.split(":")[0]
-					resource = '%s%s/%s' % (resource, 'websocket', sessiond_id)
+					resource = b'%s%s/%s' % (resource, 'websocket', sessiond_id)
 
 					header = kwargs.get('headers', [])
 					header.append(auth_header)
