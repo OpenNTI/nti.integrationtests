@@ -110,6 +110,7 @@ class DataserverProcess(object):
 			else:
 				self._write_supervisor_config(root_dir, pserve_ini_file)
 
+			os.environ['DATASERVER_TESTING_PLAIN_TEXT_PWDS'] = 'True'
 			# start server
 			command = os.path.join(os.path.dirname(sys.executable), 'supervisord')
 			args = [command, '-c', os.path.join(root_dir, 'etc', 'supervisord_dev.conf')]
