@@ -22,8 +22,8 @@ from nti.integrationtests.utils import get_bool_option
 # assume they own it and can delete the entire thing, clearly not right,
 # but cater to it by using a throw-away directory if one is not provided.
 DATASERVER_DIR = os.getenv('DATASERVER_DIR') or os.path.join( tempfile.gettempdir(), 'DEFAULT_INT_TEST_DIR' )
-SERVER_CONFIG = os.getenv('SERVER_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/development.ini"))
-COVERAGE_CONFIG = os.getenv('COVERAGE_CONFIG', os.path.join(os.path.dirname(__file__), "../../../../config/coverage_run.cfg"))
+SERVER_CONFIG = os.getenv('SERVER_CONFIG', os.path.abspath( os.path.join(os.path.dirname(__file__), "../../../../config/development.ini") ))
+COVERAGE_CONFIG = os.getenv('COVERAGE_CONFIG', os.path.abspath( os.path.join(os.path.dirname(__file__), "../../../../config/coverage_run.cfg")))
 
 class DataserverProcess(object):
 
@@ -45,7 +45,7 @@ class DataserverProcess(object):
 		self.process = None
 		self.port = int(port) if port else PORT
 		self.endpoint = self.resolve_endpoint(SERVER_HOST, self.port)
-		self.root_dir = os.path.expanduser(root_dir if root_dir else DATASERVER_DIR)
+		self.root_dir = os.path.abspath( os.path.expanduser(root_dir if root_dir else DATASERVER_DIR) )
 
 	def register_server_data(self, target):
 		target.port = self.port
@@ -96,12 +96,12 @@ class DataserverProcess(object):
 			sync_changes = kwargs.get('sync_changes', None)
 			use_coverage = kwargs.get('use_coverage', False)
 			coverage_rcfile = kwargs.get('rcfile', COVERAGE_CONFIG)
-			root_dir = os.path.expanduser(kwargs.get('root_dir', DATASERVER_DIR))
+			root_dir = os.path.abspath( os.path.expanduser(kwargs.get('root_dir', DATASERVER_DIR)))
 			pserve_ini_file = kwargs.get('pserve_ini_file', None) or SERVER_CONFIG
 
 			logger.info( 'Starting dataserver (%s,%s)', port, root_dir)
 
-			pserve_ini_file = self._rewrite_pserve_config(	config=pserve_ini_file,
+			pserve_ini_file = self._rewrite_pserve_config(	pserve_ini_file,
 															root_dir=root_dir,
 															port=port,
 															sync_changes=sync_changes)
@@ -132,17 +132,18 @@ class DataserverProcess(object):
 
 
 	def _rewrite_pserve_config(	self,
-								config,
+								config_path,
 								root_dir=DATASERVER_DIR,
 								port=PORT,
 								sync_changes=None,
 								out_dir="/tmp"):
 
-		if not os.path.exists(config):
-			raise OSError('No pserve file %s' % config)
+		if not os.path.exists(config_path):
+			raise OSError('No pserve file %s' % config_path)
 
+		result = config_path
 		ini = ConfigParser.SafeConfigParser()
-		ini.read(config)
+		ini.read(config_path)
 
 		config_port = get_int_option(ini, name='http_port', default=PORT)
 		config_sync_changes = get_bool_option(ini, name='sync_changes', default=True)
@@ -159,14 +160,17 @@ class DataserverProcess(object):
 			if not os.path.exists(out_dir):
 				os.makedirs(out_dir)
 
-			config = tempfile.mktemp(prefix="pserve.", suffix=".ini", dir=out_dir)
-			with open(config, "wb") as fp:
+			new_config = tempfile.mktemp(prefix="pserve.", suffix=".ini", dir=out_dir)
+			with open(new_config, "wb") as fp:
 				ini.write(fp)
+
+
+			result = new_config
 
 		if sync_changes:
 			os.environ['DATASERVER_SYNC_CHANGES'] = 'True'
 
-		return config
+		return result
 
 	def _rewrite_supervisor_config(self, config, command_prefix):
 
@@ -199,8 +203,14 @@ class DataserverProcess(object):
 			raise OSError('Error while creating configurations', args)
 
 		command_prefix = os.path.dirname(sys.executable) + '/'
-		visord = os.path.join(os.path.expanduser(root_dir), 'etc', 'supervisord_dev.conf')
+		etc_dir = os.path.join( os.path.abspath( os.path.expanduser(root_dir) ), 'etc' )
+		visord = os.path.join(etc_dir, 'supervisord_dev.conf')
 		self._rewrite_supervisor_config(visord, command_prefix)
+
+		if os.path.exists( os.path.join( os.path.dirname( SERVER_CONFIG ), 'library.zcml' ) ):
+			shutil.copyfile( os.path.join( os.path.dirname( SERVER_CONFIG ), 'library.zcml' ),
+							 os.path.join( etc_dir, 'library.zcml' ) )
+
 
 	def _write_supervisor_config_coverage(self, root_dir=DATASERVER_DIR, pserve_ini_file=SERVER_CONFIG,
 										   rcfile=COVERAGE_CONFIG):

@@ -38,7 +38,7 @@ def main(args=None):
 	levels = opts.levels
 	use_coverage = True if opts.use_coverage else False
 	coverage_report = True if opts.coverage_report else False
-	root_dir = opts.root_dir if opts.root_dir else tempfile.mkdtemp(prefix="ds.data.int.", dir="/tmp")
+	root_dir = os.path.abspath( os.path.expanduser(opts.root_dir if opts.root_dir else tempfile.mkdtemp(prefix="ds.data.int.", dir="/tmp") ) )
 	port = opts.port if opts.port else get_open_port()
 
 	import nti.integrationtests.integration

@@ -29,7 +29,7 @@ def main(args = None):
 
 	# set env that are used in the test run
 	os.environ['port'] = str(port)
-	os.environ['root_dir'] = os.path.expanduser(root_dir)
+	os.environ['root_dir'] = os.path.abspath(os.path.expanduser(root_dir))
 	os.environ['use_coverage'] = 'True' if opts.use_coverage else 'False'
 	if sync_changes:
 		os.environ['DATASERVER_SYNC_CHANGES'] = 'True'

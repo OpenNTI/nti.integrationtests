@@ -72,7 +72,7 @@ class DataServerTestCase(unittest.TestCase):
 	@classmethod
 	def tearDownClass(cls):
 		cls.static_finalization()
-		
+
 	def setUp(self):
 		self.ds = self.create_client()
 
@@ -86,7 +86,7 @@ class DataServerTestCase(unittest.TestCase):
 		op_delay = op_delay or self.op_delay
 		result = self.new_client(endpoint=endpoint, headers=headers, op_delay=op_delay)
 		return result
-	
+
 	def get_endpoint(self):
 		if hasattr(self, 'endpoint'):
 			return self.endpoint
@@ -105,7 +105,7 @@ class DataServerTestCase(unittest.TestCase):
 		return clt
 
 	# ======================
-		
+
 	process = None
 
 	@classmethod
@@ -122,7 +122,7 @@ class DataServerTestCase(unittest.TestCase):
 	@classmethod
 	def static_finalization(cls):
 		pass
-	
+
 	@classmethod
 	def generate_ntiid(cls, date=None, provider='nti', nttype=None, specific=None):
 		return generate_ntiid(date=date, provider=provider, nttype=nttype, specific=specific)
