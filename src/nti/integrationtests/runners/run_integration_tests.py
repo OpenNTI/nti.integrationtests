@@ -11,6 +11,7 @@ from nti.monkey import gevent_patch_on_import
 gevent_patch_on_import.patch()
 
 import sys
+import os.path
 import argparse
 import tempfile
 
