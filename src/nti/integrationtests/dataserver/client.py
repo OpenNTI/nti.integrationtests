@@ -536,6 +536,49 @@ class DataserverClient(object):
 
 	# ------------------------
 
+	def create_stripe_token(self, data, credentials=None, **kwargs):
+		# prepare post data
+		data = anyjson.dumps(data)
+
+		# do post
+		href = 'store/create_stripe_token'
+		url = urljoin(self.endpoint, href)
+		credentials = self._credentials_to_use(credentials)
+		rp = self.http_post(url, credentials, data, **kwargs)
+		assert_that(rp.status_int, is_(200), 'invalid status while creating a stripe token')
+
+		result = self.httplib.deserialize(rp)
+		return result['Token']
+
+	def post_stripe_payment(self, data, credentials=None, **kwargs):
+		# prepare post data
+		data = anyjson.dumps(data)
+
+		# do post
+		credentials = self._credentials_to_use(credentials)
+		href = 'store/post_stripe_payment'
+		url = urljoin(self.endpoint, href)
+		rp = self.http_post(url, credentials, data, **kwargs)
+		assert_that(rp.status_int, is_(200), 'invalid status while posting a stripe purchase')
+
+		result = self.httplib.deserialize(rp)
+		return result['Items'][0]
+
+	def get_purchase_attempt(self, purchase_id, credentials=None, **kwargs):
+		credentials = self._credentials_to_use(credentials)
+		href = 'store/get_purchase_attempt'
+		url = urljoin(self.endpoint, href)
+
+		rp = self.http_get(url, credentials, purchaseID=purchase_id, **kwargs)
+		if rp.status_int == 404:
+			return None
+
+		assert_that(rp.status_int, is_(200), 'invalid status while getting a purchase attempt')
+		result = self.httplib.deserialize(rp)
+		return result['Items'][0]
+
+	# ------------------------
+
 	def create_provider(self, name, credentials=None):
 		credentials = self._credentials_to_use(credentials)
 		provider = Provider(name=name)
