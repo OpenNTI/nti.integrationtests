@@ -7,6 +7,7 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
+import time
 import unittest
 
 from nti.integrationtests import DataServerTestCase
@@ -41,7 +42,7 @@ class TestStore(DataServerTestCase):
 	def test_purchase(self):
 		token = self._create_stripe_token()
 		purchase = {
-			'items':'tag:nextthought.com,2011-10:CMU-HTML-04630_main.04_630:_computer_science_for_practicing_engineers',
+			'items':'tag:nextthought.com,2011-10:NextThought-HTML-NextThoughtHelpCenter.nextthought_help_center',
 			'amount': 300,
 			'token': token,
 			'provider': "NTI-TEST"}
@@ -52,8 +53,12 @@ class TestStore(DataServerTestCase):
 		purchase_id = purchase.get('ID')
 		assert_that(purchase_id, is_not(none()))
 
-		purchase = self.ds.get_purchase_attempt(purchase_id)
-		assert_that(purchase, is_not(none()))
+		for _ in xrange(10):
+			time.sleep(1)
+			purchase = self.ds.get_purchase_attempt(purchase_id)
+			assert_that(purchase, is_not(none()))
+			if purchase['State'] == 'Success':
+				break
 
 if __name__ == '__main__':
 	unittest.main()
