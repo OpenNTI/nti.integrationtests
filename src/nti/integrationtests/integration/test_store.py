@@ -11,7 +11,7 @@ import unittest
 
 from nti.integrationtests import DataServerTestCase
 
-from hamcrest import (assert_that, is_not, has_entry, has_length, none)
+from hamcrest import (assert_that, is_not, none)
 
 from nose.plugins.attrib import attr
 
