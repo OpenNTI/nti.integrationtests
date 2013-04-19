@@ -56,8 +56,6 @@ class TestStore(DataServerTestCase):
 			time.sleep(1)
 			purchase = self.ds.get_purchase_attempt(purchase_id)
 			assert_that(purchase, is_not(none()))
-			import pprint
-			pprint.pprint(purchase)
 			if purchase['State'] == 'Success':
 				break
 
