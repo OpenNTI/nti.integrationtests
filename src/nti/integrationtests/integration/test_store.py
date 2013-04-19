@@ -42,10 +42,9 @@ class TestStore(DataServerTestCase):
 	def test_purchase(self):
 		token = self._create_stripe_token()
 		purchase = {
-			'items':'tag:nextthought.com,2011-10:NextThought-HTML-NextThoughtHelpCenter.nextthought_help_center',
+			'purchasableID':'tag:nextthought.com,2011-10:NextThought-HTML-NextThoughtHelpCenter.nextthought_help_center',
 			'amount': 300,
-			'token': token,
-			'provider': "NTI-TEST"}
+			'token': token}
 
 		purchase = self.ds.post_stripe_payment(purchase)
 		assert_that(purchase, is_not(none()))
@@ -57,6 +56,8 @@ class TestStore(DataServerTestCase):
 			time.sleep(1)
 			purchase = self.ds.get_purchase_attempt(purchase_id)
 			assert_that(purchase, is_not(none()))
+			import pprint
+			pprint.pprint(purchase)
 			if purchase['State'] == 'Success':
 				break
 
