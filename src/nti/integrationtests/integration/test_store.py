@@ -43,7 +43,7 @@ class TestStore(DataServerTestCase):
 		token = self._create_stripe_token()
 		purchase = {
 			'purchasableID':'tag:nextthought.com,2011-10:NextThought-HTML-NextThoughtHelpCenter.nextthought_help_center',
-			'amount': 300,
+			'amount': 100,
 			'token': token}
 
 		purchase = self.ds.post_stripe_payment(purchase)
