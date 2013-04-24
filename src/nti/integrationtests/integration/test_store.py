@@ -71,7 +71,7 @@ class TestStore(DataServerTestCase):
 	def test_purchase(self):
 		token = self._create_stripe_token()
 		purchase = {
-			'purchasableID':'tag:nextthought.com,2011-10:NextThought-HTML-NextThoughtHelpCenter.nextthought_help_center',
+			'purchasableID':'tag:nextthought.com,2011-10:NextThought-purchasable-HelpCenter',
 			'amount': 100,
 			'token': token}
 
@@ -86,7 +86,7 @@ class TestStore(DataServerTestCase):
 		coupon = self._create_coupon(percent_off=50)
 		token = self._create_stripe_token()
 		purchase = {
-			'purchasableID':'tag:nextthought.com,2011-10:NextThought-HTML-NextThoughtHelpCenter.nextthought_help_center',
+			'purchasableID':'tag:nextthought.com,2011-10:NextThought-purchasable-HelpCenter',
 			'amount': 50,
 			'token': token,
 			'coupon':coupon.id}
