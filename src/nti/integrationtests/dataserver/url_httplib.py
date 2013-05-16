@@ -84,7 +84,7 @@ class URLHttpLib(object):
 		charset = cls._get_encoding(headers)
 		return Response(body=body, status=status, headerlist=headerlist, charset=charset)
 
-	def _create_request(self, url, credentials=None, data=None, headers=None, *args, **kwargs):
+	def _create_request(self, url, credentials=None, data=None, headers=None, **kwargs):
 		headers = {} if not headers else headers
 		if kwargs:
 			params =  urllib.urlencode(kwargs)
@@ -146,43 +146,43 @@ class URLHttpLib(object):
 		result.pop('self')
 		return result
 
-	def do_get(self, url, credentials=None, *args, **kwargs):
+	def do_get(self, url, credentials=None, **kwargs):
 		call_args = self._prune(locals())
-		request = self._create_request(url, credentials, *args, **kwargs)
+		request = self._create_request(url, credentials, **kwargs)
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
 
-	def do_post(self, url, credentials=None, data=None, *args, **kwargs):
+	def do_post(self, url, credentials=None, data=None, **kwargs):
 		call_args = self._prune(locals())
-		request = self._create_request(url, credentials, data, *args, **kwargs)
+		request = self._create_request(url, credentials, data, **kwargs)
 		request.get_method = lambda: 'POST'
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
 
-	def do_put(self, url, credentials, data=None, *args, **kwargs):
+	def do_put(self, url, credentials, data=None, **kwargs):
 		call_args = self._prune(locals())
-		request = self._create_request(url, credentials, data, *args, **kwargs)
+		request = self._create_request(url, credentials, data, **kwargs)
 		request.get_method = lambda: 'PUT'
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
 
-	def do_delete(self, url, credentials, *args, **kwargs):
+	def do_delete(self, url, credentials, **kwargs):
 		call_args = self._prune(locals())
-		request = self._create_request(url, credentials, *args, **kwargs)
+		request = self._create_request(url, credentials, **kwargs)
 		request.get_method = lambda: 'DELETE'
 		rp = self._do_request(request, **call_args)
 		self._do_debug(url, rp, credentials)
 		return rp
 
 	def do_upload_resource(	self, url, credentials, source_file, 
-							content_type=None, headers={}, is_put=False, *args, **kwargs):
+							content_type=None, headers={}, is_put=False, **kwargs):
 		call_args = self._prune(locals())
 
 		content_type = content_type if content_type else self._get_mime_type(source_file)
-		request = self._create_request(url, credentials, headers={'Content-Type': content_type}, *args, **kwargs)
+		request = self._create_request(url, credentials, headers={'Content-Type': content_type}, **kwargs)
 		if is_put: request.get_method =  lambda: 'PUT'
 		request.add_unredirected_header('Content-Type', content_type)
 		for k, v in headers.items():
@@ -205,12 +205,12 @@ class URLHttpLib(object):
 
 	# -----------------------------------
 
-	def do_upload_resources(self, url, credentials, files, default_content_type=None, headers={}, *args, **kwargs ):
+	def do_upload_resources(self, url, credentials, files, default_content_type=None, headers={}, **kwargs):
 		"""
 		Implements multipart resource upload.
 		This is not currently supported by the dataserver
 		"""
-		request = self._create_request(url, credentials, *args, **kwargs)
+		request = self._create_request(url, credentials, **kwargs)
 		boundary, data = self.multipart_encode(files, default_content_type)
 		content_type = 'multipart/form-data; boundary=%s' % boundary
 		request.add_unredirected_header('Content-Type', content_type)

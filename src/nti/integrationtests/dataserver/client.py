@@ -206,22 +206,22 @@ class DataserverClient(object):
 
 	def get_user_generated_data(self, container, name='Pages', workspace=None, credentials=None, adapt=True, **kwargs):
 		data = self._get_container_item_data(container=container, link_rel='UserGeneratedData', workspace=workspace,
-											 credentials=credentials, validate=True)
+											 credentials=credentials, validate=True, **kwargs)
 		return self.adapt_ds_object(data) if adapt else data
 
-	def get_recursive_stream_data(self, container, name='Pages', workspace=None, credentials=None, adapt=True):
+	def get_recursive_stream_data(self, container, name='Pages', workspace=None, credentials=None, adapt=True, **kwargs):
 		data = self._get_container_item_data(container=container, link_rel='RecursiveStream', name=name, workspace=workspace,
-											 credentials=credentials, validate=True)
+											 credentials=credentials, validate=True, **kwargs)
 		return self.adapt_ds_object(data) if adapt else data
 
-	def get_ugd_and_recursive_stream_ata(self, container, name='Pages', workspace=None, credentials=None, adapt=True):
+	def get_ugd_and_recursive_stream_ata(self, container, name='Pages', workspace=None, credentials=None, adapt=True, **kwargs):
 		data = self._get_container_item_data(container=container, link_rel='UserGeneratedDataAndRecursiveStream', workspace=workspace,
-											 name=name, credentials=credentials, validate=True)
+											 name=name, credentials=credentials, validate=True, **kwargs)
 		return self.adapt_ds_object(data) if adapt else data
 
-	def get_recursive_user_generated_data(self, container, name='Pages', workspace=None, credentials=None, adapt=True):
+	def get_recursive_user_generated_data(self, container, name='Pages', workspace=None, credentials=None, adapt=True, **kwargs):
 		data = self._get_container_item_data(container=container, link_rel='RecursiveUserGeneratedData', workspace=workspace,
-											 name=name, credentials=credentials, validate=True)
+											 name=name, credentials=credentials, validate=True, **kwargs)
 		return self.adapt_ds_object(data) if adapt else data
 
 	# ------------------------
@@ -702,6 +702,7 @@ class DataserverClient(object):
 		validate: validate flag
 		"""
 		credentials = self._credentials_to_use(credentials)
+
 		url = self._get_container_item_data_url(container=container, link_rel=link_rel, name=name,
 												workspace=workspace, credentials=credentials, validate=validate)
 
