@@ -41,7 +41,7 @@ EVT_RECV_MESSAGE	 = 'chat_recvMessage'
 EVT_SET_PRESENCE	 = 'chat_setPresence'
 EVT_MAKE_MODERATED	 = 'chat_makeModerated'
 EVT_APPROVE_MSGS	 = 'chat_approveMessages'
-EVT_RECV_MSG_SHADOW = 'chat_recvMessageForShadow'
+EVT_RECV_MSG_SHADOW	 = 'chat_recvMessageForShadow'
 EVT_FAILED_TO_ENTER_ROOM = 'chat_failedToEnterRoom'
 EVT_ADD_OCCUPANT_TO_ROOM = 'chat_addOccupantToRoom'
 EVT_RECV_MSG_MOD	 = 'chat_recvMessageForModeration'
@@ -51,14 +51,14 @@ EVT_PRESENCE_OF_USER_CHANGE_TO = 'chat_presenceOfUserChangedTo'
 
 EVT_NOTICE_INCOMING_CHANGE = 'data_noticeIncomingChange'
 
-DEFAULT_CHANNEL = 'DEFAULT'
+DEFAULT_CHANNEL	 = 'DEFAULT'
 WHISPER_CHANNEL	 = 'WHISPER'
 META_CHANNEL	 = 'META'
-CONTENT_CHANNEL = 'CONTENT'
+CONTENT_CHANNEL	 = 'CONTENT'
 POLL_CHANNEL	 = 'POLL'
 STATE_CHANNEL	 = 'STATE'
 DEFAULT_USER_PASSWORD = 'temp001'
-DEAULT_TIMEOUT = 180
+DEAULT_TIMEOUT	 = 180
 
 CHANNELS = (DEFAULT_CHANNEL, WHISPER_CHANNEL, META_CHANNEL, CONTENT_CHANNEL, POLL_CHANNEL, STATE_CHANNEL)
 
@@ -99,6 +99,7 @@ class BasicMessageContext(object):
 		return self._last_sent
 
 class MessageContext(BasicMessageContext):
+
 	def __init__(self):
 		super(MessageContext, self).__init__()
 		self._sent = []
@@ -147,8 +148,8 @@ def _create_message_body(info):
 	return body
 
 class _Room():
-	def __init__(self, **kwargs):
 
+	def __init__(self, **kwargs):
 		ID = kwargs.get('ID', kwargs.get('id', None))
 		active = kwargs.get('Active', kwargs.get('active', True))
 		occupants = kwargs.get('Occupants', kwargs.get('occupants', None))
