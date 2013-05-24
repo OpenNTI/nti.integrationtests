@@ -135,11 +135,11 @@ class DataserverClient(object):
 
 	# ------------------------
 
-	def create_note(self, data, container, inReplyTo=None, sharedWith=None, references=None, applicableRange=None,
-					adapt=True, credentials=None, **kwargs):
+	def create_note(self, data, container, title=None, inReplyTo=None, sharedWith=None, references=None,
+					applicableRange=None, adapt=True, credentials=None, **kwargs):
 		body = self.create_text_and_body(data)
 		applicableRange = applicableRange or create_artificial_applicable_range()
-		note = Note(body=body, container=container, inReplyTo=inReplyTo, sharedWith=sharedWith,
+		note = Note(body=body, title=title, container=container, inReplyTo=inReplyTo, sharedWith=sharedWith,
 					applicableRange=applicableRange, references=references)
 		return self.create_object(note, adapt=adapt, credentials=credentials, **kwargs)
 

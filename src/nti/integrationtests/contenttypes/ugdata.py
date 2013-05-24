@@ -101,7 +101,7 @@ class Note(Sharable, Threadable):
 	_ds_field_mapping.update(Sharable._ds_field_mapping)
 	_ds_field_mapping.update(Threadable._ds_field_mapping)
 
-	_fields = {'text': False, 'body': False, 'href':True, 'applicableRange': False}
+	_fields = {'text': False, 'title':False, 'body': False, 'href':True, 'applicableRange': False}
 	_fields.update(Sharable._fields)
 	_fields.update(Threadable._fields)
 

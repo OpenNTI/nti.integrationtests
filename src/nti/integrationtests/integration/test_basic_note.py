@@ -25,6 +25,7 @@ class TestBasicNotes(DataServerTestCase):
 	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
 	target = ('test.user.2@nextthought.com', DataServerTestCase.default_user_password)
 	string = u'a note to post'
+	title = u'a note title'
 
 	def setUp(self):
 		super(TestBasicNotes, self).setUp()
@@ -33,17 +34,18 @@ class TestBasicNotes(DataServerTestCase):
 		self.ds.set_credentials(self.owner)
 
 	def test_create_note_with_string(self):
-		created_obj =  self.ds.create_note(self.string, self.container)
+		created_obj = self.ds.create_note(self.string, self.container, title=self.title)
 		assert_that(created_obj['body'][0], is_(self.string))
 		assert_that(created_obj['id'], is_not(None))
+		assert_that(created_obj['title'], is_(self.title))
 	
 	def test_create_note_with_string_in_array(self):
-		created_obj =  self.ds.create_note([self.string], self.container)
+		created_obj = self.ds.create_note([self.string], self.container)
 		assert_that(created_obj['body'][0], is_(self.string))
 		
 	def test_create_note_with_string_and_object_in_array(self):
 		created_canvas = self.create_canvas()
-		created_obj =  self.ds.create_note([self.string, created_canvas], self.container)
+		created_obj = self.ds.create_note([self.string, created_canvas], self.container)
 		assert_that(created_obj['body'][0], is_(self.string))
 		assert_that(created_obj['body'][1], is_(Canvas))
 		
