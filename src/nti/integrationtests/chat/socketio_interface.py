@@ -22,39 +22,41 @@ from nti.integrationtests.socketio import ConnectionClosedException
 from nti.integrationtests.socketio.websocket import WebSocket
 from nti.integrationtests.socketio.xhrpolling import XHRPollingSocket
 
-WS_ACK			= b'6::'
-WS_CONNECT		= b'1::'
-WS_DISCONNECT	= b'0::'
-WS_MESSAGE		= b'3::'
-WS_BROADCAST	= b'5:::'
+WS_ACK			 = b'6::'
+WS_CONNECT		 = b'1::'
+WS_DISCONNECT	 = b'0::'
+WS_MESSAGE		 = b'3::'
+WS_BROADCAST	 = b'5:::'
 
-SERVER_KILL		= 'serverkill'
+SERVER_KILL		 = 'serverkill'
 
-EVT_MESSAGE			= 'message'
-EVT_EXIT_ROOM		= 'chat_exitRoom'
-EVT_ENTER_ROOM		= 'chat_enterRoom'
-EVT_EXITED_ROOM		= 'chat_exitedRoom'
-EVT_ENTERED_ROOM	= 'chat_enteredRoom'
-EVT_SHADOW_USERS	= 'chat_shadowUsers'
-EVT_POST_MESSAGE	= 'chat_postMessage'
-EVT_RECV_MESSAGE	= 'chat_recvMessage'
-EVT_MAKE_MODERATED	= 'chat_makeModerated'
-EVT_APPROVE_MSGS	= 'chat_approveMessages'
+EVT_MESSAGE			 = 'message'
+EVT_EXIT_ROOM		 = 'chat_exitRoom'
+EVT_ENTER_ROOM		 = 'chat_enterRoom'
+EVT_EXITED_ROOM		 = 'chat_exitedRoom'
+EVT_ENTERED_ROOM	 = 'chat_enteredRoom'
+EVT_SHADOW_USERS	 = 'chat_shadowUsers'
+EVT_POST_MESSAGE	 = 'chat_postMessage'
+EVT_RECV_MESSAGE	 = 'chat_recvMessage'
+EVT_SET_PRESENCE	 = 'chat_setPresence'
+EVT_MAKE_MODERATED	 = 'chat_makeModerated'
+EVT_APPROVE_MSGS	 = 'chat_approveMessages'
 EVT_RECV_MSG_SHADOW = 'chat_recvMessageForShadow'
 EVT_FAILED_TO_ENTER_ROOM = 'chat_failedToEnterRoom'
 EVT_ADD_OCCUPANT_TO_ROOM = 'chat_addOccupantToRoom'
-EVT_RECV_MSG_MOD	= 'chat_recvMessageForModeration'
-EVT_ROOM_MEMBERSHIP_CHANGED = "chat_roomMembershipChanged"
+EVT_RECV_MSG_MOD	 = 'chat_recvMessageForModeration'
+EVT_ROOM_MEMBERSHIP_CHANGED = 'chat_roomMembershipChanged'
+EVT_SET_PRESENCE_OF_USERS_TO = 'chat_setPresenceOfUsersTo'
 EVT_PRESENCE_OF_USER_CHANGE_TO = 'chat_presenceOfUserChangedTo'
 
 EVT_NOTICE_INCOMING_CHANGE = 'data_noticeIncomingChange'
 
 DEFAULT_CHANNEL = 'DEFAULT'
-WHISPER_CHANNEL	= 'WHISPER'
-META_CHANNEL	= 'META'
+WHISPER_CHANNEL	 = 'WHISPER'
+META_CHANNEL	 = 'META'
 CONTENT_CHANNEL = 'CONTENT'
-POLL_CHANNEL	= 'POLL'
-STATE_CHANNEL	= 'STATE'
+POLL_CHANNEL	 = 'POLL'
+STATE_CHANNEL	 = 'STATE'
 DEFAULT_USER_PASSWORD = 'temp001'
 DEAULT_TIMEOUT = 180
 
@@ -99,8 +101,8 @@ class BasicMessageContext(object):
 class MessageContext(BasicMessageContext):
 	def __init__(self):
 		super(MessageContext, self).__init__()
-		self._sent=[]
-		self._recv=[]
+		self._sent = []
+		self._recv = []
 
 	def recv(self, ws):
 		msg = super(MessageContext, self).recv(ws)
@@ -113,8 +115,8 @@ class MessageContext(BasicMessageContext):
 		return msg
 
 	def reset(self):
-		self._sent=[]
-		self._recv=[]
+		self._sent = []
+		self._recv = []
 
 	@property
 	def sent(self):
@@ -150,8 +152,8 @@ class _Room():
 		ID = kwargs.get('ID', kwargs.get('id', None))
 		active = kwargs.get('Active', kwargs.get('active', True))
 		occupants = kwargs.get('Occupants', kwargs.get('occupants', None))
-		moderated = kwargs.get('Moderated',  kwargs.get('moderated', False))
-		containerId = kwargs.get('ContainerId',  kwargs.get('containerId', None))
+		moderated = kwargs.get('Moderated', kwargs.get('moderated', False))
+		containerId = kwargs.get('ContainerId', kwargs.get('containerId', None))
 
 		assert ID, ("must specify a valid room ID", kwargs)
 		assert occupants != None, ("must specify valid room occupants", kwargs)
@@ -168,7 +170,7 @@ class _Room():
 	def __repr__(self):
 		return "<%s,%s,%s,%s,%s>" % (self.ID, self.occupants, self.active, self.moderated, self.containerId)
 
-	def __eq__( self, other ):
+	def __eq__(self, other):
 		if isinstance(other, six.string_types):
 			return self.ID == other
 		if isinstance(other, _Room):
@@ -183,8 +185,8 @@ class _Message(object):
 		self.inReplyTo = kwargs.get('inReplyTo', None)
 		self.recipients = kwargs.get('recipients', None)
 		self.channel = kwargs.get('channel', DEFAULT_CHANNEL)
-		self.creator = kwargs.get('Creator', kwargs.get('creator',None))
-		self.containerId = kwargs.get('ContainerId', kwargs.get('containerId',None))
+		self.creator = kwargs.get('Creator', kwargs.get('creator', None))
+		self.containerId = kwargs.get('ContainerId', kwargs.get('containerId', None))
 
 	@property
 	def content(self):
@@ -208,7 +210,7 @@ class _RecvMessage(_Message):
 		super(_RecvMessage, self).__init__(**kwargs)
 		self.lastModified = kwargs.get('lastModified', 0)
 
-	def __eq__( self, other ):
+	def __eq__(self, other):
 		if isinstance(other, six.string_types):
 			return self.ID == other
 		elif isinstance(other, _RecvMessage):
@@ -223,7 +225,7 @@ class _PostMessage(_Message):
 	def __init__(self, **kwargs):
 		super(_PostMessage, self).__init__(**kwargs)
 
-	def __eq__( self, other ):
+	def __eq__(self, other):
 		if isinstance(other, six.string_types):
 			return str(self.message) == other
 		elif isinstance(other, _PostMessage):
@@ -244,7 +246,7 @@ class DSUser(object):
 		self.ws_recv = None
 		self.killed = False
 		self.heart_beats = 0
-		self.is_secure = kwargs.get('is_secure', False) 
+		self.is_secure = kwargs.get('is_secure', False)
 		self.transport = kwargs.get('transport', 'websocket')
 		self.message_context = kwargs.get('message_context', MessageContext())
 
@@ -333,7 +335,7 @@ class DSUser(object):
 		d['message_context'] = self.message_context
 		return _enterRoom(self.ws, **d)
 
-	def exitRoom( self, room_id ):
+	def exitRoom(self, room_id):
 		if room_id in self.rooms:
 			_exitRoom(self.ws, room_id, self.data_format, message_context=self.message_context)
 			return self.rooms.pop(room_id, None)
@@ -360,15 +362,18 @@ class DSUser(object):
 	def chat_roomMembershipChanged(self, room_info):
 		pass
 
+	def chat_setPresenceOfUsersTo(self, username, presenceInfo):
+		pass
+
 	def chat_presenceOfUserChangedTo(self, username, status):
 		pass
 
 	def chat_addOccupantToRoom(self, **kwargs):
 		pass
-	
+
 	def chat_failedToEnterRoom(self, **kwargs):
 		pass
-	
+
 	def chat_exitedRoom(self, **kwargs):
 		ID = kwargs.get('ID', kwargs.get('id', None))
 		result = self.rooms.pop(ID, None) if ID else None
@@ -393,14 +398,27 @@ class DSUser(object):
 
 	postMessage = chat_postMessage
 
+	def chat_setPresence(self, **kwargs):
+		d = dict(kwargs)
+		d['message_context'] = self.message_context
+		if 'type' not in d:
+			d['type'] = 'available'
+		if 'show' not in d:
+			d['show'] = 'chat'
+		if 'username' not in d:
+			d['username'] = self.username
+		_setPresence(ws=self.ws, data_format=self.data_format, **d)
+
+	setPresence = chat_setPresence
+
 	def send_heartbeat(self):
 		_send_heartbeat(self.ws)
-		
+
 	# ---- ----- ----
-	
+
 	def data_noticeIncomingChange(self, change):
 		pass
-		
+
 	# ---- ----- ----
 
 	def _msg_params(self, **kwargs):
@@ -522,7 +540,7 @@ class InvalidDataFormat(SocketIOException):
 
 class CouldNotEnterRoom(SocketIOException):
 	def __init__(self, room_id=None):
-		super(CouldNotEnterRoom, self).__init__('Could not enter room' + _self_of_emtpy( room_id))
+		super(CouldNotEnterRoom, self).__init__('Could not enter room' + _self_of_emtpy(room_id))
 
 class NotEnoughOccupants(SocketIOException):
 	def __init__(self, room_id=''):
@@ -569,7 +587,7 @@ def isEvent(data, event, data_format='json'):
 	if isinstance(data, six.string_types):
 		data = decode(data, data_format)
 	if isinstance(data, Mapping):
-		return data.get('name',None) == event
+		return data.get('name', None) == event
 	return False
 
 def isServerKill(data, data_format='json'):
@@ -589,9 +607,12 @@ def isAddOccupantToRoom(data, data_format='json'):
 
 def isFailedToEnterRoom(data, data_format='json'):
 	return isEvent(data, EVT_FAILED_TO_ENTER_ROOM, data_format)
-	
+
 def isPresenceOfUserChangedTo(data, data_format='json'):
 	return isEvent(data, EVT_PRESENCE_OF_USER_CHANGE_TO, data_format)
+
+def isSetPresenceOfUsersTo(data, data_format='json'):
+	return isEvent(data, EVT_SET_PRESENCE_OF_USERS_TO, data_format)
 
 def isRoomMembershipChanged(data, data_format='json'):
 	return isEvent(data, EVT_ROOM_MEMBERSHIP_CHANGED, data_format)
@@ -607,7 +628,7 @@ def isApproveMessages(data, data_format='json'):
 
 def isDataIncomingChange(data, data_format='json'):
 	return isEvent(data, EVT_NOTICE_INCOMING_CHANGE, data_format)
-	
+
 def _next_event(ws, graph=None, message_context=default_message_context):
 	msg = message_context.recv(ws)
 	if graph and isinstance(graph, DSUser):
@@ -617,7 +638,7 @@ def _next_event(ws, graph=None, message_context=default_message_context):
 			graph.heartBeat()
 		elif isBroadCast(msg):
 			d = decode(msg)
-			
+
 			if isServerKill(d):
 				graph.serverKill(args=d.get('args', None))
 			elif isEnteredRoom(d):
@@ -648,6 +669,12 @@ def _next_event(ws, graph=None, message_context=default_message_context):
 				d = d['args']
 				graph.chat_presenceOfUserChangedTo(username=d[0], status=d[1])
 
+			elif isSetPresenceOfUsersTo(d):
+				args = d['args']
+				for d in args:
+					for k, v in d.items():
+						graph.chat_setPresenceOfUsersTo(k, v)
+
 			elif isRoomMembershipChanged(d):
 				room_info = d['args'][0]
 				graph.chat_roomMembershipChanged(room_info)
@@ -669,10 +696,10 @@ def _exitRoom(ws, containerId, data_format='json', message_context=default_messa
 def _enterRoom(ws, **kwargs):
 	message_context = kwargs.get('message_context', default_message_context)
 
-	occupants = kwargs.get('occupants', kwargs.get('Occupants',None))
+	occupants = kwargs.get('occupants', kwargs.get('Occupants', None))
 	inReplyTo = kwargs.get("inReplyTo", None)
 	references = kwargs.get("references", None)
-	room_id = kwargs.get("roomId", kwargs.get('RoomId',None))
+	room_id = kwargs.get("roomId", kwargs.get('RoomId', None))
 	containerId = kwargs.get("containerId", kwargs.get("ContainerId", None))
 
 	data_format = kwargs.get("data_format", 'json')
@@ -682,10 +709,10 @@ def _enterRoom(ws, **kwargs):
 	args = {}
 	if room_id:
 		args["RoomId"] = room_id
-		
+
 	if occupants:
 		args["Occupants"] = occupants
-		
+
 	if containerId:
 		args["ContainerId"] = containerId
 
@@ -705,6 +732,34 @@ def _enterRoom(ws, **kwargs):
 
 	return (None, None)
 
+def _setPresence(ws, **kwargs):
+	message_context = kwargs.get('message_context', default_message_context)
+
+	username = kwargs.get("username", kwargs.get("Username", None))
+	assert username, 'must specify a valid username'
+
+	containerId = kwargs.get("containerId", kwargs.get("ContainerId", u''))
+	status = kwargs.get("status", kwargs.get("Status", None))
+	show = kwargs.get("show", kwargs.get("show", 'chat'))
+	type_ = kwargs.get("type", kwargs.get("type_", kwargs.get("Type", u'available')))
+
+	data_format = kwargs.get("data_format", 'json')
+
+	args = {u"ContainerId": containerId,
+			u"show": show,
+			u"type": type_,
+			u"username": username,
+			u"status" : status,
+			u"MimeType":u"application/vnd.nextthought.presenceinfo"}
+
+	d = {"name":EVT_SET_PRESENCE, "args":[args]}
+	msg = encode(d, data_format)
+	if msg:
+		msg = WS_BROADCAST + msg
+		message_context.send(ws, msg)
+	else:
+		raise InvalidDataFormat(data_format)
+
 def _postMessage(ws, **kwargs):
 	message = kwargs['message']
 	inReplyTo = kwargs.get("inReplyTo", None)
@@ -712,7 +767,7 @@ def _postMessage(ws, **kwargs):
 	channel = kwargs.get("channel", DEFAULT_CHANNEL)
 	containerId = kwargs.get("containerId", kwargs.get("ContainerId", None))
 
-	assert containerId,'must specify a valid container'
+	assert containerId, 'must specify a valid container'
 
 	data_format = kwargs.get("data_format", 'json')
 	message_context = kwargs.get('message_context', default_message_context)

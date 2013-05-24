@@ -29,7 +29,7 @@ class BasicUser(DSUser):
 		return self.username if self.username else self.socketio_url
 
 	def __repr__(self):
-		return "<%s,%s>" % (self.__class__.__name__,self.__str__())
+		return "<%s,%s>" % (self.__class__.__name__, self.__str__())
 
 	def __call__(self, *args, **kwargs):
 		pass
@@ -42,7 +42,7 @@ class BasicUser(DSUser):
 		counter = 0
 		self.heart_beats = 0
 		while self.heart_beats < max_beats:
-			counter +=1 
+			counter += 1
 			self.nextEvent()
 			if counter % tick == 0:
 				self.send_heartbeat()
@@ -53,7 +53,7 @@ class BasicUser(DSUser):
 
 	def generate_message(self, k=4, phrases=phrases):
 		return generate_message(k=4, phrases=phrases)
-			
+
 	def post_random_messages(self, room_id, entries=None, a_min=3, a_max=10, delay=None, tick=5):
 		counter = 0
 		entries = entries or random.randint(a_min, a_max)
@@ -101,8 +101,8 @@ class OneRoomUser(BasicUser):
 
 	def chat_recvMessage(self, **kwargs):
 		message = super(OneRoomUser, self).chat_recvMessage(**kwargs)
-		creator = kwargs.get('Creator',  kwargs.get('creator', None))
-		cid = kwargs.get('ContainerId',  kwargs.get('containerId', None))
+		creator = kwargs.get('Creator', kwargs.get('creator', None))
+		cid = kwargs.get('ContainerId', kwargs.get('containerId', None))
 		if cid == self.room and creator != self.username:
 			self.heart_beats = 0
 		else:
@@ -123,6 +123,10 @@ class OneRoomUser(BasicUser):
 			raise CouldNotEnterRoom()
 
 	# ======================
+
+	def set_presence(self, available=True, show='chat', **kwargs):
+		type_ = 'available' if available else 'unavailable'
+		self.chat_setPresence(type=type_, show=show, **kwargs)
 
 	def post_messages(self, room_id, entries, delay=0.25, min_phrases=5):
 		self.post_random_messages(room_id, entries, min_phrases, delay=delay)
@@ -153,20 +157,29 @@ class Host(OneRoomUser):
 	def users_online(self):
 		return list(sorted(self.online))
 
+	def chat_setPresenceOfUsersTo(self, username, presenceInfo):
+		type_ = presenceInfo.get('type')
+		if username in self.occupants:
+			if type_ == 'available':
+				self.online.add(username)
+			elif type == 'unavailable':
+				self.online.discard(username)
+			self.heart_beats = 0
+
 	def chat_presenceOfUserChangedTo(self, username, status):
 		if status == 'Online' and username in self.occupants:
 			self.online.add(username)
 			self.heart_beats = 0
 
 	def wait_for_guests_to_connect(self, max_heart_beats=3, tick=3):
-		counter = 0 
+		counter = 0
 		self.heart_beats = 0
 		while self.heart_beats < max_heart_beats and len(self.online) < len(self.occupants):
 			self.nextEvent()
 			counter = counter + 1
 			if counter % tick == 0:
 				self.send_heartbeat()
-			
+
 	def __call__(self, *arg, **kwargs):
 
 		delay = kwargs.get('delay', 0.05)
@@ -179,11 +192,12 @@ class Host(OneRoomUser):
 
 		try:
 			self.ws_connect()
-
+			self.set_presence(available=True)
 			self.wait_for_guests_to_connect(max_heart_beats)
 
-			self.enterRoom(	occupants=self.membership, containerId=containerId,
-							inReplyTo=inReplyTo, references=references)
+			self.enterRoom(occupants=self.membership, containerId=containerId,
+						   inReplyTo=inReplyTo, references=references)
+
 			self.wait_4_room()
 			connect_event.set()
 
@@ -195,7 +209,7 @@ class Host(OneRoomUser):
 
 			# process messages
 			self.wait_heart_beats(max_heart_beats)
-
+			self.set_presence(available=False, show=None)
 		except Exception, e:
 			self.save_traceback(e)
 		finally:
@@ -211,6 +225,7 @@ class Guest(OneRoomUser):
 
 			# connect
 			self.ws_connect()
+			self.set_presence(available=True)
 
 			# check for an connect event
 			event = kwargs.get('connect_event', None)
@@ -227,7 +242,7 @@ class Guest(OneRoomUser):
 
 			# get any message
 			self.wait_heart_beats(max_heart_beats)
-
+			self.set_presence(available=False, show=None)
 		except Exception, e:
 			self.save_traceback(e)
 		finally:
