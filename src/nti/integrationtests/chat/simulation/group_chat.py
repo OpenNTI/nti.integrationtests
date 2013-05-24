@@ -48,6 +48,7 @@ class Host(_Host):
 		max_words = kwargs.get('max_words', 40)
 		try:
 			self.ws_connect()
+			self.set_presence(available=True)
 
 			self.wait_for_guests_to_connect(max_heart_beats)
 			
@@ -66,7 +67,7 @@ class Host(_Host):
 
 			# process messages
 			self.wait_heart_beats(max_heart_beats)
-			
+			self.set_presence(available=False)
 		except Exception, e:
 			self.save_traceback(e)
 		finally:
@@ -86,6 +87,7 @@ class Guest(_Guest):
 			time.sleep(random.uniform(1, 2))
 			
 			self.ws_connect()
+			self.set_presence(available=True)
 			event = kwargs.get('connect_event', None)
 			event.wait(60)
 
@@ -100,7 +102,7 @@ class Guest(_Guest):
 
 			# get any message
 			self.wait_heart_beats(max_heart_beats)
-			
+			self.set_presence(available=False)
 		except Exception, e:
 			self.save_traceback(e)
 		finally:

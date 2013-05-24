@@ -53,7 +53,7 @@ class Moderator(Host):
 		connect_event = kwargs.pop('connect_event')
 		try:
 			self.ws_connect()
-
+			self.set_presence(available=True)
 			self.wait_for_guests_to_connect(max_heart_beats)
 			
 			self.enterRoom( occupants=self.occupants, containerId=containerId,
@@ -73,7 +73,7 @@ class Moderator(Host):
 
 			# process any remaning message
 			self.wait_heart_beats(max_heart_beats)
-			
+			self.set_presence(available=False)
 		except Exception, e:
 			self.save_traceback(e)
 		finally:
@@ -141,6 +141,7 @@ class Student(Guest):
 		max_heart_beats = kwargs.get('max_heart_beats', 3)
 		try:
 			self.ws_connect()
+			self.set_presence(available=True)
 			connect_event.wait(60)
 			
 			self.wait_4_room()
@@ -154,7 +155,7 @@ class Student(Guest):
 
 			# process any remaning message
 			self.wait_heart_beats(max_heart_beats)
-			
+			self.set_presence(available=False)
 		except Exception, e:
 			self.save_traceback(e)
 			print self.traceback
