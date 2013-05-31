@@ -57,6 +57,6 @@ def read_config_and_results(path, on_record=None):
 	config_file = os.path.join(path, 'results.cfg')
 	
 	results = load_results(results_file, on_record)
-	context, groups = read_config(config_file, False)
+	context, groups, _ = read_config(config_file, False)
 	
 	return context, groups, results

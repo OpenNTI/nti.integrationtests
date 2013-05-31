@@ -14,6 +14,9 @@ from nti.integrationtests.performance.config import read_config
 from nti.integrationtests.performance.datastore import ResultDbWriter
 from nti.integrationtests.performance.datastore import ResultBatchDbLoader
 
+from pymongo import MongoClient
+from nti.integrationtests.performance.eval.test_results import TestResults
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -98,12 +101,14 @@ def _close_queue(queue):
 	queue.put_nowait(None)
 	queue.join()
 	
-def run(config_file):
+def run(config_file):	
+	context, groups, config_entries = read_config(config_file)
 	
-	context, groups = read_config (config_file)
+	TR = TestResults()
+	TR.addConfiguration(config_entries)
 	
-	run_localtime = time.localtime()
-	timestamp = time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime)
+	start_time = time.time()
+	timestamp = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(start_time))
 	context.timestamp = timestamp
 	
 	subscribers = []
@@ -151,7 +156,6 @@ def run(config_file):
 	context.script_setup(context=context)
 	try:
 		_setup_subscribers(subscribers)
-		now = time.time()
 		
 		for group in groups:
 			group.queue = queue
@@ -166,13 +170,23 @@ def run(config_file):
 		if not context.serialize:
 			for group in groups:
 				group.join()
-		
-		result = time.time() - now
 			
 		copy_cfg_file = os.path.join(result_output_dir, 'results.cfg')
 		shutil.copy(config_file, copy_cfg_file)
 		
-		return result
+		end_time = time.time()
+		elapsed = end_time - start_time		
+		TR.addRunTime(start_time, end_time)
+		
+		# Save results to MongoDB database
+		client = MongoClient()
+		db = client['TestResultsDatabase']
+	
+		test_name = config_entries['test_name']
+		collection = db[test_name]
+		collection.insert(TR)
+		
+		return elapsed
 	finally:
 		_close_queue(queue)
 		_close_subscribers(subscribers)

@@ -33,6 +33,7 @@ def read_config(config_file, process_args=True):
 	config.read(config_file)
 	config_dir = os.path.dirname(config_file)
 	config_name, _ = os.path.splitext(os.path.basename(config_file))
+	config_entries = {}
 	
 	# --------------
 	
@@ -46,7 +47,7 @@ def read_config(config_file, process_args=True):
 				v = eval(v) if process_args else v
 				k = k[:-5]
 			setattr(context, k, v)
-	
+			config_entries[k] = v
 	# --------------
 	
 	context = Context()
@@ -126,4 +127,4 @@ def read_config(config_file, process_args=True):
 	if not process_args:
 		context['config'] = config
 		
-	return (context, group_runners)
+	return (context, group_runners, config_entries)
