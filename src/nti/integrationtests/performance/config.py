@@ -1,130 +1,160 @@
-from __future__ import print_function, unicode_literals
-
-import os
 import ConfigParser
-import multiprocessing
+import itertools
+import inspect
+import os.path
 
-from zope.dottedname.resolve import resolve
+""" Config files are typically partitioned into sections. This object represents the values stored in a single section by
+    creating dictionaries of attribute-value pairs for each unique combination of comma-separated parameters in config-file. 
+    This allows suites of tests to be created, which use different parameter values, using a single config file. """
+class _SectionConfigs:
+    # List of dictionaries, where each dictionary is a unique combination of the comma-separated values specified in config-file
+    sectionConfigs = []
 
-from nti.integrationtests.utils import get_option
-from nti.integrationtests.utils import get_int_option
-from nti.integrationtests.utils import get_bool_option
-from nti.integrationtests.utils import get_float_option
+    # If necessary values are not provided in config file, provide default values when appropriate
+    default_values = { 'serialize': True,
+                    'database_file': None,
+                    'db_batch': False,
+                    'run_time': None,
+                    'max_iterations': None,
+                    'runners': 8,
+                    'target_args': None,
+                    'use_threads': False,
+                    'call_wait_time': 0,
+                    'target_args': None,
+                    'test_setup': None,
+                    'test_teardown': None,
+                    'section_setup': None,
+                    'section_teardown': None }
 
-from nti.integrationtests.performance import noop
-from nti.integrationtests.performance import Context
-from nti.integrationtests.performance import RunnerGroup
-from nti.integrationtests.performance import DelegateContext
+    """ If a critical value was not provided in config file, and a reasonable default value can be assumed, insert it into list """
+    def _insert_default_values(self, labels, values):
+        missing = set(self.default_values) - set(labels)
 
-import logging
-logger = logging.getLogger(__name__)
-		
-def is_default_value(config, section, name):
-	def_val = config.defaults()[name] if name in config.defaults() else None
-	sec_val = get_option(config, section, name)
-	return def_val == sec_val
-		
-def read_config(config_file, process_args=True):
-	
-	logger.info("processing '%s'", config_file)
-	
-	group_runners = []
-	config = ConfigParser.ConfigParser()
-	config.read(config_file)
-	config_dir = os.path.dirname(config_file)
-	config_name, _ = os.path.splitext(os.path.basename(config_file))
-	config_entries = {}
-	
-	# --------------
-	
-	def parse_items(context, config, process_args, section=ConfigParser.DEFAULTSECT):
-		for k, v in config.items(section):
-			if k.endswith('_env'):
-				k = k[:-4]
-				v = os.environ.get(v) if process_args else v
-				
-			if k.endswith('_args'):
-				v = eval(v) if process_args else v
-				k = k[:-5]
-			setattr(context, k, v)
-			config_entries[k] = v
-	# --------------
-	
-	context = Context()
-	parse_items(context, config, process_args)
-	
-	context.serialize = get_bool_option(config, name="serialize")
-	context.test_name = get_option(config, name="test_name", default=config_name)
-	
-	context.base_path = os.path.expanduser(get_option(config, name="base_path", default=config_dir))
-	context.output_dir = get_option(config, name="output_dir", default=None)
-	if context.output_dir:
-		context.output_dir = os.path.join(context.base_path, context.output_dir)
+        for label in missing:
+            labels = labels + (label,)
+            values.append( [self.default_values[label]] )
 
-	context.database_file = get_option(config, name="database_file", default=None)
-	context.db_batch = get_bool_option(config, name="db_batch", default=False)
-	
-	if process_args:
-		context.script_setup = resolve(context.script_setup) if hasattr(context, "script_setup") else noop 
-		context.script_teardown = resolve(context.script_teardown) if hasattr(context, "script_teardown") else noop 
-		context.script_subscriber = resolve(context.script_subscriber) if hasattr(context, "script_subscriber") else None 
-		
-	# read running groups
-	
-	context.run_time = get_int_option(config, name="run_time")
-	context.rampup = get_int_option(config, name="rampup", default=0)
-	context.use_threads = get_bool_option(config, name="use_threads")
-	context.call_wait_time = get_float_option(config, name="call_wait_time", default=0)
-	context.max_iterations = get_int_option(config, name="max_iterations")
-	
-	for num, section in enumerate(config.sections()):
-		delegate = DelegateContext(context)
-		parse_items(delegate, config, process_args, section)
-		
-		delegate.group_number = num
-		delegate.group_name = get_option(config, section, 'group_name', section)
-		delegate.rampup = get_int_option(config, section, 'rampup', context.rampup)
-			
-		delegate.run_time = get_int_option(config, section, 'run_time') \
-							if not is_default_value(config, section, 'run_time') else None
+        return labels, values
 
-		delegate.max_iterations = 	get_int_option(config, section, 'max_iterations') \
-									if not is_default_value(config, section, 'max_iterations') else None
-		
-		if delegate.run_time:
-			delegate.max_iterations = None
-		elif delegate.max_iterations:
-			delegate.run_time = None
-			
-		if not delegate.run_time and not delegate.max_iterations:
-			delegate.run_time = context.run_time
-			delegate.max_iterations = context.max_iterations
-			
-		delegate.runners = config.getint(section, 'runners')
-		if delegate.runners > multiprocessing.cpu_count():
-			logger.warn("number of runners for group '%s' is %s. CPU count (%s) exceeded",
-						 delegate.group_name, delegate.runners, multiprocessing.cpu_count())
-			
-		delegate.target = config.get(section, 'target')
-		delegate.target_args = get_option(config, section, 'target_args', None)
-		
-		delegate.use_threads = get_bool_option(config, section, "use_threads", context.use_threads)
-		delegate.call_wait_time = get_float_option(config, section, "call_wait_time", context.call_wait_time)
-		
-		# get target and params
-		if process_args:
-			delegate.target = resolve(delegate.target)
-			delegate.target_args = eval(delegate.target_args) if delegate.target_args else delegate.target_args
-			
-		# resolve setup/teardown
-		if process_args:
-			delegate.setup = resolve(delegate.setup) if hasattr(delegate, "setup") else noop 
-			delegate.teardown = resolve(delegate.teardown) if hasattr(delegate, "teardown") else noop 
-	
-		runner = RunnerGroup(delegate, validate=process_args)
-		group_runners.append(runner)
-	
-	if not process_args:
-		context['config'] = config
-		
-	return (context, group_runners, config_entries)
+    """ Is this string a boolean? """
+    def _is_boolean(self, value):
+        value = value.lower()
+        return value in ['true', 'false', 'yes', 'no', 'on', 'off']
+
+    """ Determine if this string is True or False """
+    def _evaluate_boolean(self, value):
+        assert self._is_boolean(value), "value is not boolean and cannot be evaluated: %r" % value
+        return value.lower() in ['true', 'yes', 'on']
+
+    """ Is this string a float? """
+    def _is_float(self, value):
+        # String is not of form ##.##, so cannot be a float
+        if len(value.split('.')) != 2: return False
+
+        # If string is in form ##.## and both sides are numbers, then string is a float
+        num, dec = value.split('.')
+        return num.isdigit() and dec.isdigit()
+
+    """ Is this string a number? """
+    def _is_num(self, value):
+        return value.isdigit()
+
+    """ Convert each string in list to a bool, int, float, or string, depending on its type """
+    def _evaluate_strings(self, strngs):
+        for idx in range(len(strngs)):
+            strng = strngs[idx]
+
+            # If this item is boolean, convert it to boolean
+            if self._is_boolean(strng):
+                strngs[idx] = self._evaluate_boolean(strng)
+                continue
+
+            # If this item is a number, conver it to a number
+            if self._is_float(strng) or self._is_num(strng):
+                strngs[idx] = eval(strng)
+                continue
+
+        return strngs
+    
+    """ Determine if the config-file is valid """
+    def _validate_section_configs(self):
+        for config in self.sectionConfigs:
+            assert config['run_time'] or config['max_iterations'], "must specify a valid run time in secs or max number of iterations"
+
+            if config['run_time']: assert config['run_time'] > 0, "must specify a valid run time in secs"
+
+            if config['max_iterations']: assert config['max_iterations'] > 0, "must specify a valid number of max iterations"
+
+            assert config['runners'] > 0, "must specify a valid number of runners"
+            
+            # TO-DO: Create test and section inspections and move to appropriate classes
+            #assert inspect.isfunction(config['target']) or callable(config['target']), "must specify a valid target"
+
+            if config['target_args']: assert tuple(config['target_args']),  "must specify a valid target arguments"
+
+            assert config['test_name'],  "must specify a valid runner group name"
+
+    def __init__(self, parser, section_name):
+        # Create two tuples of all attributes and values specified in dictionary
+        items = parser.items(section_name)
+        labels, values = zip(*items)
+
+        # Split comma-separated values
+        values = [value.split(',') for value in values]
+
+        # Convert strings to ints, bools, or floats when appropriate
+        values = [self._evaluate_strings(value) for value in values]
+
+        # If critical value wasn't provided, use the default value
+        labels, values = self._insert_default_values(labels, values)
+
+        # Create a list of dictionaries using Cartesian product of all sets of possible values
+        self.sectionConfigs = [dict(zip(labels, value)) for value in itertools.product(*values)]
+
+        self._validate_section_configs()
+
+    """ Defining __iter__ allows us to iterate over _SectionConfigs object """
+    def __iter__(self):
+        return iter(self.sectionConfigs)
+
+    """ Return the number of unique combinations of comma-separated values in this section """
+    def __len__(self):
+        return len(self.sectionConfigs)
+          
+class Config(dict):
+    def __init__(self, config_dict):
+        super(Config, self).__init__(config_dict)
+        
+    def globalConfigProperties(self, key):
+        sectionConfig = self.values()[0]
+        return sectionConfig[key]
+    
+""" Generator object which yields each unique combination of comma-separated parameters in config-file. By
+    iterating over the Config object, a sequence of tests with different parameters can be run in sequence """
+class ConfigGenerator:
+    def __init__(self, filename):
+        assert os.path.exists(filename), "Configuration file could not be found: %r" % filename
+
+        # Dictionary which maps a section-name to its _SectionConfigs object
+        self.sectionConfigs = {}
+
+        # Create object for parsing config file
+        parser = ConfigParser.SafeConfigParser()
+        parser.read(filename)
+
+        # Loop through each section of config file and create sectionConfigs
+        for section_name in parser.sections():
+            self.sectionConfigs[section_name] = _SectionConfigs(parser, section_name)
+
+    def __iter__(self):
+        # Create two tuples for all attributes and values specified in dictionary
+        labels, configs = zip(*self.sectionConfigs.items())
+        
+        # Create a dictionary for each combination of comma-separated parameters in config file 
+        for config_dict in [dict(zip(labels, sc)) for sc in itertools.product(*configs)]:
+            yield Config(config_dict)
+
+    """ Return number of unique combinations of comma-separated values in entire config-file. """ 
+    def __len__(self):
+        # Product of the number of combinations in each section
+        return reduce(lambda x, y: x * len(y), self.sectionConfigs.values(), 1)        
