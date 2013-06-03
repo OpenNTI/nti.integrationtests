@@ -15,6 +15,8 @@ from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
 
+from nti.integrationtests.integration import container_of_length
+
 from hamcrest import (is_, is_not, assert_that, has_length)
 
 from nose.plugins.attrib import attr
@@ -94,6 +96,21 @@ class TestBasicNotes(DataServerTestCase):
 	def test_sharedWith(self):		
 		created_note = self.ds.create_note(self.string, self.container, sharedWith=[self.target[0]])
 		assert_that(created_note['sharedWith'], is_([self.target[0]]))
+		
+	def test_note_title_indexing(self):
+		note = self.ds.create_note(u'The Asauchi breaks away to reveal Hollow Ichigo', self.container, title='At the palace of Oetsu')
+		result = self.ds.search_user_content("Asauchi")
+		assert_that(result, container_of_length(1))
+
+		result = self.ds.search_user_content("Oetsu")
+		assert_that(result, container_of_length(1))
+
+		self.ds.delete_object(note)
+		result = self.ds.search_user_content("Asauchi")
+		assert_that(result, container_of_length(0))
+
+		result = self.ds.search_user_content("Oetsu")
+		assert_that(result, container_of_length(0))
 
 if __name__ == '__main__':
 	unittest.main()
