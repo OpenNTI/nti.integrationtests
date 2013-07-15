@@ -19,6 +19,7 @@ from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_ARRAY
 from nti.integrationtests.contenttypes import Note
 from nti.integrationtests.contenttypes import Post
 from nti.integrationtests.contenttypes import Canvas
+from nti.integrationtests.contenttypes import Device
 from nti.integrationtests.contenttypes import DSObject
 from nti.integrationtests.contenttypes import Sharable
 from nti.integrationtests.contenttypes import Provider
@@ -577,7 +578,32 @@ class DataserverClient(object):
 		result = self.httplib.deserialize(rp)
 		return result['Items'][0]
 
+	
 	# ------------------------
+
+	def register_device(self, id_, credentials=None):
+		credentials = self._credentials_to_use(credentials)
+		device = Device(id=id_)
+		collection, _ = self._get_collection(name='Devices', credentials=credentials)
+		result  = self._post_to_collection(device, collection, credentials=credentials)
+		return result
+
+	def get_devices(self, credentials=None, adapt=True, **kwargs):
+		credentials = self._credentials_to_use(credentials)
+		collection, _ = self._get_collection(name='Devices', credentials=credentials)
+		credentials = self._credentials_to_use(credentials)
+		url = urljoin(self.endpoint, collection.href)
+
+		rp = self.http_get(url, credentials, **kwargs)
+		assert_that(rp.status_int, is_(200), 'invalid status code getting devices')
+
+		data = self.httplib.deserialize(rp)
+		data = data.get('Items', {})
+		result = self.adapt_ds_object(data) if adapt else data
+		return result
+
+	# ------------------------
+
 
 	def create_provider(self, name, credentials=None):
 		credentials = self._credentials_to_use(credentials)
