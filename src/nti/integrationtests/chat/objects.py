@@ -209,6 +209,7 @@ class Host(OneRoomUser):
 
 			# process messages
 			self.wait_heart_beats(max_heart_beats)
+			self.exitRoom(room_id)
 			self.set_presence(available=False, show=None)
 		except Exception, e:
 			self.save_traceback(e)
@@ -242,6 +243,7 @@ class Guest(OneRoomUser):
 
 			# get any message
 			self.wait_heart_beats(max_heart_beats)
+			self.exitRoom(room_id)
 			self.set_presence(available=False, show=None)
 		except Exception, e:
 			self.save_traceback(e)
