@@ -64,8 +64,8 @@ def setter(name):
 
 class MetaDSObject(type):
 	
-	def __new__(mcs, clsname, clsbases, clsdict):
-		t = type.__new__(mcs, clsname, clsbases, clsdict)
+	def __new__(cls, clsname, clsbases, clsdict):
+		t = type.__new__(cls, clsname, clsbases, clsdict)
 		fields = getattr(t, '_fields', None)
 		if fields is not None:
 			# _fields is a mapping between field name and

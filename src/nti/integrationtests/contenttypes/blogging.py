@@ -4,19 +4,50 @@ from nti.integrationtests.contenttypes._dsobject import DSObject
 from nti.integrationtests.contenttypes._dsobject import SharableMixin
 from nti.integrationtests.contenttypes._dsobject import do_register_dsobjecs
 
-class PersonalBlog(DSObject, SharableMixin):
+class Forum(DSObject, SharableMixin):
+
+	DATASERVER_CLASS = 'Forum'
+	MIME_TYPE = 'application/vnd.nextthought.forums.forum'
+
+	_ds_field_mapping = {"topicCount":'TopicCount', "description": "description", 'title':'title',
+						 'newestDescendantCreatedTime':'NewestDescendantCreatedTime',
+						 'newestDescendant':'NewestDescendant' }
+	_ds_field_mapping.update(DSObject._ds_field_mapping)
+	_ds_field_mapping.update(SharableMixin._ds_field_mapping)
+
+	_fields = {'topicCount':True, 'description':False, 'title':False,
+			   'newestDescendant':True, 'newestDescendantCreatedTime':True}
+	_fields.update(DSObject._fields)
+	_fields.update(SharableMixin._fields)
+
+class CommunityForum(Forum):
+	MIME_TYPE = 'application/vnd.nextthought.forums.communityforum'
+
+class ForumACE(DSObject):
+
+	DATASERVER_CLASS = 'ACE'
+	MIME_TYPE = 'application/vnd.nextthought.forums.ace'
+
+	_ds_field_mapping = {"action":'Action', 'entities':'Entities', 'permission':'Permission'}
+
+	_fields = {'action':False, 'entities':(False, list), 'permission':False}
+
+class ACLCommunityForum(CommunityForum):
+
+	DATASERVER_CLASS = 'CommunityForum'
+	MIME_TYPE = 'application/vnd.nextthought.forums.aclcommunityforum'
+
+	_ds_field_mapping = {"acl":'ACL'}
+	_ds_field_mapping.update(CommunityForum._ds_field_mapping)
+
+	_fields = {'acl':(False, list)}
+	_fields.update(CommunityForum._fields)
+
+class PersonalBlog(Forum):
 	
 	DATASERVER_CLASS = 'PersonalBlog'
 	MIME_TYPE = 'application/vnd.nextthought.forums.personalblog'
 	
-	_ds_field_mapping = {"topicCount":'TopicCount', "description": "description", 'title':'title' }
-	_ds_field_mapping.update(DSObject._ds_field_mapping)
-	_ds_field_mapping.update(SharableMixin._ds_field_mapping)
-
-	_fields = {'topicCount':True, 'description':False, 'title':False}
-	_fields.update(DSObject._fields)
-	_fields.update(SharableMixin._fields)
-
 class PersonalBlogEntry(DSObject, SharableMixin):
 	DATASERVER_CLASS = 'PersonalBlogEntry'
 	MIME_TYPE = 'application/vnd.nextthought.forums.personalblogentry'
