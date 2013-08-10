@@ -25,8 +25,8 @@ class CommunityForum(Forum):
 
 class ForumACE(DSObject):
 
-	DATASERVER_CLASS = 'ACE'
-	MIME_TYPE = 'application/vnd.nextthought.forums.ace'
+	DATASERVER_CLASS = 'ForumACE'
+	MIME_TYPE = 'application/vnd.nextthought.forumace'
 
 	_ds_field_mapping = {"action":'Action', 'entities':'Entities', 'permission':'Permission'}
 
@@ -34,7 +34,7 @@ class ForumACE(DSObject):
 
 class ACLCommunityForum(CommunityForum):
 
-	DATASERVER_CLASS = 'CommunityForum'
+	DATASERVER_CLASS = 'ACLCommunityForum'
 	MIME_TYPE = 'application/vnd.nextthought.forums.aclcommunityforum'
 
 	_ds_field_mapping = {"acl":'ACL'}
