@@ -46,10 +46,10 @@ class FriendsList(Community):
 
 class DynamicFriendsList(FriendsList):
     
-    _ds_field_mapping = {'realname' : 'realname'}
+    _ds_field_mapping = {'realname' : 'realname', 'locked':'Locked'}
     _ds_field_mapping.update(FriendsList._ds_field_mapping)
 
-    _fields = {'realname' : False}
+    _fields = {'realname' : False, 'locked':False}
     _fields.update(FriendsList._fields)
     
     def __init__(self, *args, **kwargs):

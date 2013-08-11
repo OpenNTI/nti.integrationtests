@@ -174,11 +174,11 @@ class DataserverClient(object):
 		canvas = Canvas(shapeList=[shape], container=container, **kwargs)
 		return self.create_object(canvas, credentials=credentials, adapt=adapt, **kwargs) if store else canvas
 
-	def create_DFL_with_name_and_friends(self, name, friends, realname=None, credentials=None, adapt=True, **kwargs):
-		dfl = DynamicFriendsList(name=name, friends=friends, realname=realname or name)
+	def create_DFL_with_name_and_friends(self, name, friends, realname=None, locked=False, credentials=None, adapt=True, **kwargs):
+		dfl = DynamicFriendsList(name=name, friends=friends, locked=locked, realname=realname or name)
 		return self.create_friends_list(dfl, credentials=credentials, adapt=adapt, **kwargs)
 
-	def create_friends_list_with_name_and_friends(self, name, friends, credentials=None, adapt=True, **kwargs):
+	def create_friends_list_with_name_and_friends(self, name, friends, locked=False, credentials=None, adapt=True, **kwargs):
 		fl = FriendsList(name=name, friends=friends)
 		return self.create_friends_list(fl, credentials=credentials, adapt=adapt, **kwargs)
 
