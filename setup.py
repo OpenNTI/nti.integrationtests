@@ -23,8 +23,7 @@ setup(
 		],
 
 	install_requires = [ 'coverage',
-						 'httpie',
-						 'pymongo >= 2.6.2'
+						 'httpie'
 						 #'mmstats', # neat idea, not currently used and pulls in many deps, so commented out until used
 						],
 	extras_require = {
