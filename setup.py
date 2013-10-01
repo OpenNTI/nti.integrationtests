@@ -22,10 +22,12 @@ setup(
 			"Programming Language :: Python"
 		],
 
-	install_requires = [ 'coverage',
-						 'httpie'
-						 #'mmstats', # neat idea, not currently used and pulls in many deps, so commented out until used
-						],
+	install_requires = [
+		'setuptools',
+		'coverage',
+		'httpie'
+		#'mmstats', # neat idea, not currently used and pulls in many deps, so commented out until used
+	],
 	extras_require = {
 		'PDF': ['pyobjc >= 2.5.1', 'pyobjc-core >= 2.5.1'] # Quartz is used for pdfs
 		},
