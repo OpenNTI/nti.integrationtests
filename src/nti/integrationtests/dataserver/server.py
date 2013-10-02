@@ -100,22 +100,32 @@ class DataserverProcess(object):
 			pserve_ini_file = kwargs.get('pserve_ini_file', None) or SERVER_CONFIG
 
 			logger.info( 'Starting dataserver (%s,%s)', port, root_dir)
+			if not os.getenv('DATASERVER_DIR_IS_BUILDOUT'):
+				pserve_ini_file = self._rewrite_pserve_config(	pserve_ini_file,
+																root_dir=root_dir,
+																port=port,
+																sync_changes=sync_changes)
+				if use_coverage:
+					self._write_supervisor_config_coverage(root_dir, pserve_ini_file, coverage_rcfile)
+				else:
+					self._write_supervisor_config(root_dir, pserve_ini_file)
 
-			pserve_ini_file = self._rewrite_pserve_config(	pserve_ini_file,
-															root_dir=root_dir,
-															port=port,
-															sync_changes=sync_changes)
-			if use_coverage:
-				self._write_supervisor_config_coverage(root_dir, pserve_ini_file, coverage_rcfile)
+
+				# start server
+				command = os.path.join(os.path.dirname(sys.executable), 'supervisord')
+				args = [command, '-c', os.path.join(root_dir, 'etc', 'supervisord_dev.conf')]
 			else:
-				self._write_supervisor_config(root_dir, pserve_ini_file)
+				# buildout gives us a bin/supervisord that already
+				# has the right executable and the right conf file.
+				# We just don't want to spawn it in the background
+				command = os.path.join(os.getenv('DATASERVER_DIR'), 'bin', 'supervisord' )
+				args = [command, '-n']
 
 			os.environ['DATASERVER_TESTING_PLAIN_TEXT_PWDS'] = 'True'
-			# start server
-			command = os.path.join(os.path.dirname(sys.executable), 'supervisord')
-			args = [command, '-c', os.path.join(root_dir, 'etc', 'supervisord_dev.conf')]
 			devnull = open("/dev/null", 'w') if 'DATASERVER_NO_REDIRECT' not in os.environ else None
+
 			self.process = subprocess.Popen(args, stdin=devnull, stdout=devnull, stderr=devnull)
+
 			if devnull is not None:
 				devnull.close()
 

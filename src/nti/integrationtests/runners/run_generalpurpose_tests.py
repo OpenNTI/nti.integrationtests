@@ -24,8 +24,14 @@ def main(args = None):
 	sync_changes = opts.sync_changes
 	use_coverage = True if opts.use_coverage else False
 	coverage_report = True if opts.coverage_report else False
-	root_dir = opts.root_dir if opts.root_dir else tempfile.mkdtemp(prefix="ds.data.gpt.", dir="/tmp")
-	port = opts.port if opts.port else get_open_port()
+	if os.getenv('DATASERVER_DIR_IS_BUILDOUT'):
+		# We are running directly from an already setup
+		# environment. Yay!
+		root_dir = os.getenv('DATASERVER_DIR')
+		port = os.getenv('DATASERVER_BUILDOUT_PORT')
+	else:
+		root_dir = opts.root_dir if opts.root_dir else tempfile.mkdtemp(prefix="ds.data.gpt.", dir="/tmp")
+		port = opts.port if opts.port else get_open_port()
 
 	# set env that are used in the test run
 	os.environ['port'] = str(port)
