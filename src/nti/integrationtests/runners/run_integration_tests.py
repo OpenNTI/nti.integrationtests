@@ -39,8 +39,14 @@ def main(args=None):
 	levels = opts.levels
 	use_coverage = True if opts.use_coverage else False
 	coverage_report = True if opts.coverage_report else False
-	root_dir = os.path.abspath( os.path.expanduser(opts.root_dir if opts.root_dir else tempfile.mkdtemp(prefix="ds.data.int.", dir="/tmp") ) )
-	port = opts.port if opts.port else get_open_port()
+	if os.getenv('DATASERVER_DIR_IS_BUILDOUT'):
+		# We are running directly from an already setup
+		# environment. Yay!
+		root_dir = os.getenv('DATASERVER_DIR')
+		port = os.getenv('DATASERVER_BUILDOUT_PORT')
+	else:
+		root_dir = os.path.abspath( os.path.expanduser(opts.root_dir if opts.root_dir else tempfile.mkdtemp(prefix="ds.data.int.", dir="/tmp") ) )
+		port = opts.port if opts.port else get_open_port()
 
 	import nti.integrationtests.integration
 	test_runner(module=nti.integrationtests.integration, use_coverage=use_coverage, coverage_report=coverage_report,
