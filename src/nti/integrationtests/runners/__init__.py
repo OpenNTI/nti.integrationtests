@@ -7,6 +7,8 @@ $Id$
 from __future__ import print_function, unicode_literals, absolute_import
 __docformat__ = "restructuredtext en"
 
+logger = __import__('logging').getLogger(__name__)
+
 import sys
 import time
 import inspect
@@ -48,6 +50,9 @@ def run_test_suite(suite, dsprocess, config=None, module=None, use_coverage=Fals
 			_argv.append('--verbose')
 
 		nose.core.run(config=config, testRunner=_runner, suite=suite, module=module, argv=_argv)
+	except Exception:
+		logger.error("Failed to run tests")
+		raise
 	finally:
 		if use_coverage:
 			dsprocess.terminate_server_with_coverage(report=coverage_report)
