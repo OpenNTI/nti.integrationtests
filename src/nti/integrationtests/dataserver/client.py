@@ -22,7 +22,6 @@ from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import Device
 from nti.integrationtests.contenttypes import DSObject
 from nti.integrationtests.contenttypes import Sharable
-from nti.integrationtests.contenttypes import Provider
 from nti.integrationtests.contenttypes import Highlight
 from nti.integrationtests.contenttypes import Redaction
 from nti.integrationtests.contenttypes import FriendsList
@@ -601,41 +600,6 @@ class DataserverClient(object):
 		data = data.get('Items', {})
 		result = self.adapt_ds_object(data) if adapt else data
 		return result
-
-	# ------------------------
-
-
-	def create_provider(self, name, credentials=None):
-		credentials = self._credentials_to_use(credentials)
-		provider = Provider(name=name)
-		return provider
-
-	def create_class(self, classinfo, provider, credentials=None, adapt=True, **kwargs):
-		credentials = self._credentials_to_use(credentials)
-		collection, _ = self._get_collection(name=provider, workspace='providers', credentials=credentials)
-		result = self._post_to_collection(classinfo, collection, credentials, adapt=adapt, **kwargs)
-		return result
-
-	def get_class(self, provider, class_name, credentials=None, adapt=True, **kwargs):
-		credentials = self._credentials_to_use(credentials)
-		class_info = self._get_container(class_name, name=provider, workspace='providers',
-										 credentials=credentials, always_new=True, **kwargs)
-		return adapt_ds_object(class_info) if isinstance(class_info, dict) and adapt else class_info
-
-	def add_class_resource(self, source_file, provider, class_name, section_name=None,
-							content_type=None, credentials=None, slug=None, adapt=True, **kwargs):
-		credentials = self._credentials_to_use(credentials)
-		class_info = self.get_class(provider, class_name, credentials=credentials, adapt=True)
-		assert_that(class_info, is_not(none()), "could not find a class with name '%s'" % class_name)
-
-		href = class_info.href
-		if section_name:
-			section = class_info.get_section(section_name)
-			assert_that(section, is_not(none()), "could not find a section with name '%s'" % section_name)
-			href = section.href
-
-		location, slug = self._post_raw_content(href, source_file, content_type, slug=slug, **kwargs)
-		return (location, slug)
 
 	# ------------------------
 
