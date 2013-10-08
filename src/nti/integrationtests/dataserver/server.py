@@ -86,12 +86,10 @@ class DataserverProcess(object):
 
 	startServerWithCoverage = start_server_with_coverage
 
-	def _start_process(self, block_interval_seconds=0.5, max_wait_secs=60, *arg, **kwargs):
-
+	def _start_process(self, block_interval_seconds=1, max_wait_secs=30, *arg, **kwargs):
 		if self.process or self.is_running():
 			logger.debug( "Dataserver already running.  Won't start a new one" )
 		else:
-
 			port = int(kwargs.get('port', PORT))
 			sync_changes = kwargs.get('sync_changes', None)
 			use_coverage = kwargs.get('use_coverage', False)
