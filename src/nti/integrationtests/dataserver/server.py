@@ -115,6 +115,14 @@ class DataserverProcess(object):
 				command = os.path.join(os.path.dirname(sys.executable), 'supervisord')
 				args = [command, '-c', os.path.join(root_dir, 'etc', 'supervisord_dev.conf')]
 			else:
+				# shutdown supervisor in case is running. ignore output
+				devnull = open("/dev/null", 'w') if 'DATASERVER_NO_REDIRECT' not in os.environ else None
+				command = os.path.join(os.getenv('DATASERVER_DIR'), 'bin', 'supervisorctl')
+				args = [command, 'shutdown']
+				subprocess.Popen(args, stdin=devnull, stdout=devnull, stderr=devnull)
+				if devnull is not None:
+					devnull.close()
+
 				# buildout gives us a bin/supervisord that already
 				# has the right executable and the right conf file.
 				# We just don't want to spawn it in the background
@@ -123,9 +131,7 @@ class DataserverProcess(object):
 
 			os.environ['DATASERVER_TESTING_PLAIN_TEXT_PWDS'] = 'True'
 			devnull = open("/dev/null", 'w') if 'DATASERVER_NO_REDIRECT' not in os.environ else None
-
 			self.process = subprocess.Popen(args, stdin=devnull, stdout=devnull, stderr=devnull)
-
 			if devnull is not None:
 				devnull.close()
 
