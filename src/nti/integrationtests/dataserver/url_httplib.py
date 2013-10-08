@@ -14,9 +14,10 @@ from cStringIO import StringIO
 
 from webob import Response
 
-def urlopen( request, *args, **kwargs):
+def urlopen(request, *args, **kwargs):
+	timeout = kwargs.get('timeout', 30)
 	try:
-		return urllib2.urlopen(request)
+		return urllib2.urlopen(request, timeout=timeout)
 	except urllib2.HTTPError as http:
 
 		# If the server sent us anything,

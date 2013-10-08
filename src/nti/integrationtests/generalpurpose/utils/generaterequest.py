@@ -7,6 +7,8 @@ from nti.integrationtests.dataserver import url_httplib
 
 class ServerRequest(object):
 
+	timeout = 30
+
 	def get(self, url, username, password):
 		request = urllib2.Request(url=url)
 		auth = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -14,7 +16,7 @@ class ServerRequest(object):
 		authendicated = urllib2.HTTPBasicAuthHandler(auth)
 		opener = urllib2.build_opener(authendicated)
 		urllib2.install_opener(opener)
-		return url_httplib.urlopen(request)
+		return url_httplib.urlopen(request, timeout=self.timeout)
 
 	def delete(self, url, username, password):
 		request = urllib2.Request(url)
@@ -24,7 +26,7 @@ class ServerRequest(object):
 		opener = urllib2.build_opener(authendicated)
 		urllib2.install_opener(opener)
 		request.get_method = lambda: 'DELETE'
-		return url_httplib.urlopen(request)
+		return url_httplib.urlopen(request, timeout=self.timeout)
 
 	def put(self, url, data, username, password):
 		request = urllib2.Request(url, data)
@@ -34,7 +36,7 @@ class ServerRequest(object):
 		opener = urllib2.build_opener(authendicated)
 		urllib2.install_opener(opener)
 		request.get_method = lambda: 'PUT'
-		return url_httplib.urlopen(request)
+		return url_httplib.urlopen(request, timeout=self.timeout)
 
 	def post(self, url, username, password, data):
 		request = urllib2.Request(url, data)
@@ -43,7 +45,7 @@ class ServerRequest(object):
 		authendicated = urllib2.HTTPBasicAuthHandler(auth)
 		opener = urllib2.build_opener(authendicated)
 		urllib2.install_opener(opener)
-		return url_httplib.urlopen(request)
+		return url_httplib.urlopen(request, timeout=self.timeout)
 
 	def ifModifiedSinceYes(self, url, username, password):
 		request = urllib2.Request(url)
@@ -53,7 +55,7 @@ class ServerRequest(object):
 		GMTTime = handlers.format_date_time(stamp)
 		request.headers['If-Modified-Since'] = GMTTime
 		try:
-			result = url_httplib.urlopen(request)
+			result = url_httplib.urlopen(request, timeout=self.timeout)
 			result.close()
 			return result.code
 		except urllib2.HTTPError as error:
@@ -66,10 +68,10 @@ class ServerRequest(object):
 		authendicated = urllib2.HTTPBasicAuthHandler(auth)
 		opener = urllib2.build_opener(authendicated)
 		urllib2.install_opener(opener)
-		response = urllib2.urlopen(request)
+		response = urllib2.urlopen(request, timeout=self.timeout)
 		request.add_header('If-Modified-Since', response.headers.get('Last-Modified'))
 		try:
-			result = url_httplib.urlopen(request)
+			result = url_httplib.urlopen(request, timeout=self.timeout)
 			result.close()
 			return result.code
 		except urllib2.HTTPError as error:
