@@ -126,9 +126,8 @@ class TestBasicNotes(DataServerTestCase):
 			pass
 
 	def test_conditional_delete(self):
-		note = self.ds.create_note(u'The man who stole the bankai', self.container, title='At the seretei')
-		note['body'] = ['Kill the captains with their stolen bankai']
-		since = datetime.fromtimestamp(time.time() - 1000)
+		note = self.ds.create_note(u'Things that live together should die together', self.container, title='Stern ritter')
+		since = datetime.fromtimestamp(time.time() - 10000)
 		sdate = datetime_utils.serialize_date(since)
 		headers = {'If-Unmodified-Since': sdate}
 		try:
