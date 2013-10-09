@@ -9,6 +9,9 @@ __docformat__ = "restructuredtext en"
 
 import time
 import unittest
+from datetime import datetime
+
+from webob import datetime_utils
 
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.contenttypes import Canvas
@@ -111,6 +114,28 @@ class TestBasicNotes(DataServerTestCase):
 
 		result = self.ds.search_user_content("Oetsu")
 		assert_that(result, container_of_length(0))
+
+	def test_conditional_put(self):
+		note = self.ds.create_note(u'The man who stole the bankai', self.container, title='At the seretei')
+		note['body'] = ['Kill the captains with their stolen bankai']
+		headers = {'If-Unmodified-Since': 'Wed, 09 Oct 1973 15:07:09 GMT'}
+		try:
+			self.ds.update_object(note, headers=headers)
+			self.fail('conditional put failed')
+		except:
+			pass
+
+	def test_conditional_delete(self):
+		note = self.ds.create_note(u'The man who stole the bankai', self.container, title='At the seretei')
+		note['body'] = ['Kill the captains with their stolen bankai']
+		since = datetime.fromtimestamp(time.time() - 1000)
+		sdate = datetime_utils.serialize_date(since)
+		headers = {'If-Unmodified-Since': sdate}
+		try:
+			self.ds.delete_object(note, headers=headers)
+			self.fail('conditional delete failed')
+		except:
+			pass
 
 if __name__ == '__main__':
 	unittest.main()
