@@ -35,23 +35,24 @@ class TestUserObject(DataServerTestCase):
 		email = username + '@nextthought.com'
 		password = 'mypassword'
 		realname = 'real ' + code
+		cap_realname = 'Real ' + code # Case is normalized by the DS
 		opt_in_email_communication = True
 		user_object = self.ds.create_user(username, password, email, realname, opt_in_email_communication)
 		assert_that(user_object, is_not(None))
 		assert_that(user_object.email, is_(email))
 		assert_that(user_object.name, is_(username))
-		assert_that(user_object.realname, is_(realname))
+		assert_that(user_object.realname, is_(cap_realname))
 		assert_that(user_object.opt_in_email_communication, is_(opt_in_email_communication))
-	
+
 	def test_resolve_user(self):
 		self.ds.set_credentials(self.user_one)
 		user_object = self.ds.resolve_user(self.user_two[0])
 		assert_that(user_object, is_not(None))
-		
+
 		user_object = self.ds.resolve_user("idonotexists")
 		assert_that(user_object, is_not(None))
 		assert_that(user_object, has_entry('Items',is_([])))
-				
+
 	def test_notification_count_can_reset_by_changing_lastLoginTime(self):
 		user_object = self.ds.get_user_object()
 
