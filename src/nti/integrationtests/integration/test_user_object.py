@@ -35,7 +35,7 @@ class TestUserObject(DataServerTestCase):
 		email = username + '@nextthought.com'
 		password = 'mypassword'
 		realname = 'real ' + code
-		cap_realname = 'Real ' + code # Case is normalized by the DS
+		cap_realname = 'Real ' + code.capitalize() # Case is normalized by the DS
 		opt_in_email_communication = True
 		user_object = self.ds.create_user(username, password, email, realname, opt_in_email_communication)
 		assert_that(user_object, is_not(None))
