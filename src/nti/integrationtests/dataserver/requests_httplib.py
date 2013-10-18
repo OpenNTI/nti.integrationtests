@@ -47,6 +47,11 @@ def _http_error_logging(f):
 	return to_call
 
 class _ResponseProxy(PyProxyBase):
+
+	@property
+	def code(self):
+		return self.status_code
+
 	def read(self):
 		return self.content
 
