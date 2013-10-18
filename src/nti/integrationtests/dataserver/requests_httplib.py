@@ -8,7 +8,41 @@ $Id$
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
+import sys
 import requests
+import functools
+
+def _http_error_logging(f):
+
+	@functools.wraps(f)
+	def to_call(*args, **kwargs):
+		try:
+			return f(*args, **kwargs)
+		except requests.exceptions.HTTPError, http:
+			response = getattr(http, 'response', None)
+			_, _, tb = sys.exc_info()
+
+			message = http.message
+			message += ' URL: ' + getattr(response, 'url', u'')
+
+			body = getattr(response, 'content', u'')
+			message += ' Body: ' + str(body)[-1600:]
+			message += '\n Args: ' + str(args)
+			message += '\n KWArgs: ' + str(kwargs)
+
+			raise http.__class__(message), None, tb
+
+		except requests.exceptions.RequestException, http:
+
+			_, _, tb = sys.exc_info()
+
+			message = http.message
+			message += '\n Args: ' + str(args)
+			message += '\n KWArgs: ' + str(kwargs)
+
+			raise http.__class__(message), None, tb
+
+	return to_call
 
 class RequestHttpLib(object):
 
@@ -34,6 +68,7 @@ class RequestHttpLib(object):
 		result = rp.json()
 		return result
 
+	@_http_error_logging
 	def do_get(self, url, credentials=None, **kwargs):
 		headers = kwargs.pop('headers', {})
 		timeout = kwargs.pop('timeout', 30)
@@ -41,6 +76,7 @@ class RequestHttpLib(object):
 		rp = s.get(url, headers=headers, params=kwargs, timeout=timeout)
 		return rp
 
+	@_http_error_logging
 	def do_post(self, url, credentials=None, data=None, **kwargs):
 		headers = kwargs.pop('headers', {})
 		timeout = kwargs.pop('timeout', 30)
@@ -48,6 +84,7 @@ class RequestHttpLib(object):
 		rp = s.post(url, data=data, headers=headers, timeout=timeout)
 		return rp
 
+	@_http_error_logging
 	def do_put(self, url, credentials, data=None, **kwargs):
 		headers = kwargs.pop('headers', {})
 		timeout = kwargs.pop('timeout', 30)
@@ -55,6 +92,7 @@ class RequestHttpLib(object):
 		rp = s.put(url, data=data, headers=headers, timeout=timeout)
 		return rp
 
+	@_http_error_logging
 	def do_delete(self, url, credentials, **kwargs):
 		headers = kwargs.pop('headers', {})
 		timeout = kwargs.pop('timeout', 30)

@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Defines requests http wrapper
+
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
+
 logger = __import__('logging').getLogger(__name__)
 
 import sys
@@ -10,7 +20,7 @@ from urlparse import urljoin
 from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 
-from hamcrest import assert_that, greater_than_or_equal_to, less_than_or_equal_to, has_entry
+from hamcrest import (assert_that, greater_than_or_equal_to, less_than_or_equal_to, has_entry)
 
 def _http_ise_error_logging(f):
 	@functools.wraps(f)
