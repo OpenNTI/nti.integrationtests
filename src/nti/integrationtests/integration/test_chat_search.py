@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -34,7 +34,6 @@ class TestChatSearch(HostUserChatTest):
 		for u in users:
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 		
-		#TODO: Should wwait?
 		self.ds.set_credentials((self.user_one, self.default_user_password))
 		
 		user_1_host_snippet = self._get_snippet(self.ds.search_user_content("town"))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -19,9 +19,8 @@ from nti.integrationtests.integration import containing_no_friends
 from nti.integrationtests.integration import contains_friendslist
 from nti.integrationtests.integration import friends_list_from_friends_lists
 
-from hamcrest import (is_not, has_key, assert_that)
-
 from nose.plugins.attrib import attr
+from hamcrest import (is_not, has_key, assert_that)
 
 @attr(level=3)
 class TestBasicFriendsLists(DataServerTestCase):

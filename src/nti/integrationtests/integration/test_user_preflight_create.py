@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -13,9 +13,8 @@ import unittest
 
 from nti.integrationtests import DataServerTestCase
 
-from hamcrest import (assert_that, has_entry, has_key, has_length, greater_than)
-
 from nose.plugins.attrib import attr
+from hamcrest import (assert_that, has_entry, has_key, has_length, greater_than)
 
 @attr(level=3)
 class TestUserPreflightCreate(DataServerTestCase):

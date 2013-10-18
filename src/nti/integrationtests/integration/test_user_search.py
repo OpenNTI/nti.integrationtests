@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -15,7 +15,6 @@ from nti.integrationtests.integration import container
 from nti.integrationtests.integration import container_of_length
 
 from hamcrest import assert_that
-
 from nose.plugins.attrib import attr
 
 @attr(level=3)

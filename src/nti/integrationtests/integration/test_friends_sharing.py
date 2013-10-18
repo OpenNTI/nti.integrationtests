@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -18,9 +18,8 @@ from nti.integrationtests.integration import contained_in
 from nti.integrationtests.integration import containing_friends
 from nti.integrationtests.integration import container_of_length
 
-from hamcrest import ( assert_that, is_, has_entry, greater_than_or_equal_to)
-
 from nose.plugins.attrib import attr
+from hamcrest import ( assert_that, is_, has_entry, greater_than_or_equal_to)
 
 @attr(level=3)
 class TestFriendsSharing(DataServerTestCase):

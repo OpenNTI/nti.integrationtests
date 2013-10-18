@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -39,9 +39,8 @@ class TestBasicStream(DataServerTestCase):
 
 	def setUp(self):
 		super(TestBasicStream, self).setUp()
-
-		self.container = generate_ntiid(nttype='stream')
 		self.ds.set_credentials(self.owner)
+		self.container = generate_ntiid(nttype='stream')
 
 	def test_sharing_goes_to_stream(self):
 

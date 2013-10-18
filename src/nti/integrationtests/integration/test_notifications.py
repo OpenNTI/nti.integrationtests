@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -15,9 +15,8 @@ import threading
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.chat.objects import BasicUser
 
-from hamcrest import assert_that, is_
-
 from nose.plugins.attrib import attr
+from hamcrest import (assert_that, is_)
 
 class _User(BasicUser):
 	def __init__(self, change_type='Circled', *args, **kwargs):

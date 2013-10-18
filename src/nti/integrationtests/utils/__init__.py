@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Defines requests http wrapper
+
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
+
 import os
 import time
 import base64
@@ -7,8 +17,8 @@ import numbers
 import datetime
 import ConfigParser
 
-boolean_states = {	'1': True, 'yes': True, 'true': True, 'on': True,
-					'0': False, 'no': False, 'false': False, 'off': False}
+boolean_states = {	u'1': True, u'yes': True, u'true': True, u'on': True,
+					u'0': False, u'no': False, u'false': False, u'off': False}
 
 phrases = (	b'Yellow brown',
 			b'Blue red green render purple',
@@ -53,23 +63,29 @@ phrases = (	b'Yellow brown',
 			b'Thousand Cherry Blossoms',
 			b'Prison Uniform of the Remaining Sun')
 
-DEFAULT_USER_PASSWORD = 'temp001'
+DEFAULT_USER_PASSWORD = b'temp001'
 
-PORT = int(os.getenv('PORT', '8081'))
-SERVER_HOST = os.getenv('SERVER_HOST', 'localhost')
+PORT = int(os.getenv('PORT', b'8081'))
+SERVER_HOST = os.getenv('SERVER_HOST', b'localhost')
 
 def eval_bool(s):
-	s = str(s).lower()
+	s = unicode(s).lower()
 	return boolean_states.get(s, None)
 
 def generate_message(k=3, phrases=phrases):
-	return ' '.join(random.sample(phrases, k))
+	result = ' '.join(random.sample(phrases, k))
+	return unicode(result)
 
 def generate_random_text(a_max=5):
 	word = []
 	for _ in xrange(a_max+1):
 		word.append(chr(random.randint(ord('a'), ord('z'))))
-	return "".join(word)
+	result = "".join(word)
+	return unicode(result)
+
+def check_url(url):
+	result = url + '/' if url[-1] != '/' else url
+	return unicode(result)
 
 def get_open_port():
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -96,7 +112,7 @@ def generate_ntiid(date=None, provider='nti', nttype=None, specific=None):
 	specific = '-' + specific if specific else '-' + str(time.clock())
 
 	result = 'tag:nextthought.com,%s:%s%s%s' % (date_string, provider, nttype, specific )
-	return result
+	return unicode(result)
 
 def _get_option(method, section, name, default):
 	try:

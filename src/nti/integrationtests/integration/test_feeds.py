@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -19,9 +19,8 @@ from nti.integrationtests.contenttypes import Canvas
 from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
 
-from hamcrest import (assert_that, not_none, has_length, greater_than_or_equal_to, contains_string)
-
 from nose.plugins.attrib import attr
+from hamcrest import (assert_that, not_none, has_length, greater_than_or_equal_to, contains_string)
 
 @attr(level=3, type="feeds")
 class TestFeeds(DataServerTestCase):

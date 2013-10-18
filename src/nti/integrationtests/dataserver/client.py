@@ -1,4 +1,13 @@
-import os
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Defines requests http wrapper
+
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
+
 import six
 import time
 import urllib
@@ -6,15 +15,6 @@ import anyjson
 import warnings
 import collections
 from urlparse import urljoin
-from url_httplib import URLHttpLib
-
-from nti.integrationtests.contenttypes.servicedoc import Link
-from nti.integrationtests.contenttypes.servicedoc import Item
-from nti.integrationtests.contenttypes.servicedoc import ROOT_ITEM
-from nti.integrationtests.contenttypes.servicedoc import Workspace
-from nti.integrationtests.contenttypes.servicedoc import Collection
-from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_DICT
-from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_ARRAY
 
 from nti.integrationtests.contenttypes import Note
 from nti.integrationtests.contenttypes import Post
@@ -31,6 +31,17 @@ from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import DynamicFriendsList
 from nti.integrationtests.contenttypes import create_artificial_applicable_range
 
+from nti.integrationtests.contenttypes.servicedoc import Link
+from nti.integrationtests.contenttypes.servicedoc import Item
+from nti.integrationtests.contenttypes.servicedoc import ROOT_ITEM
+from nti.integrationtests.contenttypes.servicedoc import Workspace
+from nti.integrationtests.contenttypes.servicedoc import Collection
+from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_DICT
+from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_ARRAY
+
+from nti.integrationtests.dataserver import check_url
+from nti.integrationtests.dataserver.requests_httplib import RequestHttpLib
+
 from hamcrest import assert_that, is_, is_not, none, instance_of
 
 def get_root_item():
@@ -42,7 +53,7 @@ def get_link_from_dict(data):
 def get_item_from_dict(data):
 	return Item.new_from_dict(data)
 
-def get_workspaces(url, username, password='temp001'):
+def get_workspaces(url, username, password='temp001', httplib=None):
 	"""
 	Return the Workspace objects from the specified url
 	url: dataserver URL
@@ -50,7 +61,7 @@ def get_workspaces(url, username, password='temp001'):
 	password: User's password
 	"""
 
-	httplib = URLHttpLib()
+	httplib = httplib or RequestHttpLib()
 	rp = httplib.do_get(url, credentials=(username, password))
 	data = httplib.deserialize(rp)
 
@@ -61,16 +72,13 @@ def get_workspaces(url, username, password='temp001'):
 		result.append(ws)
 	return result
 
-def get_user_workspaces(url, username, password='temp001'):
+def get_user_workspaces(url, username, password='temp001', httplib=None):
 	result = {}
-	for ws in get_workspaces(url, username, password):
+	for ws in get_workspaces(url, username, password, httplib=httplib):
 		result[ws.title] = ws
 	return result
 
-def _check_url(url):
-	if url[-1] != '/':
-		url += '/'
-	return url
+_check_url = check_url  # BWC
 
 class DataserverClient(object):
 
@@ -79,7 +87,7 @@ class DataserverClient(object):
 		self.op_delay = op_delay
 		self.credentials = credentials
 		self.endpoint = _check_url(endpoint)
-		self.httplib = httplib or URLHttpLib()
+		self.httplib = httplib or RequestHttpLib()
 		self.headers = dict(headers) if headers else None
 
 	def get_credentials(self):
@@ -193,7 +201,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, collection.href)
 
 		rp = self.http_get(url, credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status code getting friends lists')
+		assert_that(rp.status_code, is_(200), 'invalid status code getting friends lists')
 
 		data = self.httplib.deserialize(rp)
 		data = data.get('Items', {})
@@ -241,10 +249,10 @@ class DataserverClient(object):
 
 		headers = None if not gzip else {'Accept-Encoding': 'gzip'}
 		rp = self.http_get(url, credentials, headers=headers)
-		if rp.status_int == 404:
+		if rp.status_code == 404:
 			return None
 
-		assert_that(rp.status_int, is_(200), "invalid status code getting feed at '%s'" % url)
+		assert_that(rp.status_code, is_(200), "invalid status code getting feed at '%s'" % url)
 
 		data = self.httplib.body(rp)
 		return data
@@ -262,7 +270,7 @@ class DataserverClient(object):
 		__traceback_info__ = url, credentials, obj
 		rp = self.http_get(url, credentials, **kwargs)
 
-		assert_that(rp.status_int, is_(200), "invalid status code getting object at '%s'" % href)
+		assert_that(rp.status_code, is_(200), "invalid status code getting object at '%s'" % href)
 
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
@@ -285,7 +293,7 @@ class DataserverClient(object):
 		__traceback_info__ = url, credentials, obj
 
 		rp = self.http_put(url, credentials=credentials, data=self.object_to_persist(obj), **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status code while updating an object')
+		assert_that(rp.status_code, is_(200), 'invalid status code while updating an object')
 
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
@@ -302,7 +310,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 
 		rp = self.http_delete(url, credentials=credentials, **kwargs)
-		assert_that(rp.status_int, is_(204), 'invalid status code while deleting an object')
+		assert_that(rp.status_code, is_(204), 'invalid status code while deleting an object')
 
 		return None
 
@@ -361,7 +369,7 @@ class DataserverClient(object):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, href)
 		rp = self.http_get(url, credentials=credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), "invalid status code object in replied operation")
+		assert_that(rp.status_code, is_(200), "invalid status code object in replied operation")
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data) if adapt else data
 
@@ -371,7 +379,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 
 		rp = self.http_post(url, credentials=credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), "invalid status code object in '%s' operation" % operation)
+		assert_that(rp.status_code, is_(200), "invalid status code object in '%s' operation" % operation)
 
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
@@ -395,7 +403,7 @@ class DataserverClient(object):
 
 			url = urljoin(self.endpoint, href)
 			rp = self.http_get(url, credentials, **kwargs)
-			assert_that(rp.status_int, is_(200), 'invalid status code while getting transcript data')
+			assert_that(rp.status_code, is_(200), 'invalid status code while getting transcript data')
 
 			data = self.httplib.deserialize(rp)
 			return self.adapt_ds_object(data, rp) if adapt else data
@@ -416,7 +424,7 @@ class DataserverClient(object):
 		url = url + urllib.quote(query)
 
 		rp = self.http_get(url, credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status code while searching content')
+		assert_that(rp.status_code, is_(200), 'invalid status code while searching content')
 
 		data = self.httplib.deserialize(rp)
 		return data
@@ -441,10 +449,10 @@ class DataserverClient(object):
 		url = _check_url(urljoin(self.endpoint, link.href)) + search
 
 		rp = self.http_get(url, credentials, **kwargs)
-		if rp.status_int == 404:
+		if rp.status_code == 404:
 			return EMPTY_CONTAINER_ARRAY
 
-		assert_that(rp.status_int, is_(200), 'invalid status code while getting user object(s)')
+		assert_that(rp.status_code, is_(200), 'invalid status code while getting user object(s)')
 
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
@@ -471,7 +479,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, collection.href)
 
 		rp = self.http_get(url, credentials=credentials)
-		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog')
+		assert_that(rp.status_code, is_(200), 'invalid status code while getting personal blog')
 
 		data = self.httplib.deserialize(rp)
 		result = self.adapt_ds_object(data, rp) if adapt else data
@@ -484,7 +492,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 
 		rp = self.http_get(url, credentials=credentials)
-		assert_that(rp.status_int, is_(200), 'invalid status code while getting personal blog content')
+		assert_that(rp.status_code, is_(200), 'invalid status code while getting personal blog content')
 
 		data = self.httplib.deserialize(rp)
 		result = self.adapt_ds_object(data, rp) if adapt else data
@@ -499,7 +507,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, collection.href)
 
 		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(post), **kwargs)
-		assert_that(rp.status_int, is_(201), 'invalid status code while posting a blog post')
+		assert_that(rp.status_code, is_(201), 'invalid status code while posting a blog post')
 
 		data = self.httplib.deserialize(rp)
 		result = self.adapt_ds_object(data, rp) if adapt else data
@@ -520,7 +528,7 @@ class DataserverClient(object):
 			url = urljoin(self.endpoint, href)
 
 		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(comment), **kwargs)
-		assert_that(rp.status_int, is_(201), 'invalid status code while posting a comment')
+		assert_that(rp.status_code, is_(201), 'invalid status code while posting a comment')
 
 		data = self.httplib.deserialize(rp)
 		result = self.adapt_ds_object(data, rp) if adapt else data
@@ -545,7 +553,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 		credentials = self._credentials_to_use(credentials)
 		rp = self.http_post(url, credentials, data, **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status while creating a stripe token')
+		assert_that(rp.status_code, is_(200), 'invalid status while creating a stripe token')
 
 		result = self.httplib.deserialize(rp)
 		return result['Token']
@@ -559,7 +567,7 @@ class DataserverClient(object):
 		href = 'store/post_stripe_payment'
 		url = urljoin(self.endpoint, href)
 		rp = self.http_post(url, credentials, data, **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status while posting a stripe purchase')
+		assert_that(rp.status_code, is_(200), 'invalid status while posting a stripe purchase')
 
 		result = self.httplib.deserialize(rp)
 		return result['Items'][0]
@@ -570,10 +578,10 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 
 		rp = self.http_get(url, credentials, purchaseID=purchase_id, **kwargs)
-		if rp.status_int == 404:
+		if rp.status_code == 404:
 			return None
 
-		assert_that(rp.status_int, is_(200), 'invalid status while getting a purchase attempt')
+		assert_that(rp.status_code, is_(200), 'invalid status while getting a purchase attempt')
 		result = self.httplib.deserialize(rp)
 		return result['Items'][0]
 
@@ -594,7 +602,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, collection.href)
 
 		rp = self.http_get(url, credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status code getting devices')
+		assert_that(rp.status_code, is_(200), 'invalid status code getting devices')
 
 		data = self.httplib.deserialize(rp)
 		data = data.get('Items', {})
@@ -702,38 +710,26 @@ class DataserverClient(object):
 		rp = self.http_get(url, credentials, **kwargs)
 
 		# check for empty reply from the server
-		if rp.status_int == 404:
+		if rp.status_code == 404:
 			return EMPTY_CONTAINER_DICT
 
-		assert_that(rp.status_int, is_(200), "invalid status code getting '%s'" % link_rel)
+		assert_that(rp.status_code, is_(200), "invalid status code getting '%s'" % link_rel)
 		return self.httplib.deserialize(rp)
 
 	def _post_to_collection(self, obj, collection, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		url = urljoin(self.endpoint, collection.href)
 		rp = self.http_post(url, credentials=credentials, data=self.object_to_persist(obj), **kwargs)
-		assert_that(rp.status_int, is_(201), 'invalid status code while posting an object')
+		assert_that(rp.status_code, is_(201), 'invalid status code while posting an object')
 
 		data = self.httplib.deserialize(rp)
 		result = adapt_ds_object(data) if adapt else data
 		return result
 
-	def _post_raw_content(self, href, source, content_type=None, slug=None, credentials=None, adapt=True, **kwargs):
-		credentials = self._credentials_to_use(credentials)
-		slug = slug or os.path.basename(source)
-		url = urljoin(self.endpoint, href)
-
-		rp = self.httplib.do_upload_resource(url, credentials=credentials, source_file=source,
-											 content_type=content_type, headers={'slug' : slug }, **kwargs)
-		assert_that(rp.status_int, is_(201), 'invalid status code while posting raw content')
-
-		headers = rp.headers
-		return (headers.get('location', None), slug)
-
 	def _get_or_parse_user_doc(self, credentials=None):
 		credentials = self._credentials_to_use(credentials)
 		if credentials[0] not in self.users_ws:
-			ds = get_user_workspaces(self.endpoint, credentials[0], credentials[1])
+			ds = get_user_workspaces(self.endpoint, credentials[0], credentials[1], self.httplib)
 			self.users_ws[credentials[0]] = ds
 		return self.users_ws[credentials[0]]
 
@@ -742,7 +738,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 
 		rp = self.http_get(url, credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status code while getting collection data')
+		assert_that(rp.status_code, is_(200), 'invalid status code while getting collection data')
 
 		data = self.httplib.deserialize(rp)
 		return Collection.new_from_dict(data) if data else None
@@ -770,7 +766,7 @@ class DataserverClient(object):
 		href = "users/@@account.create"
 		url = urljoin(self.endpoint, href)
 		rp = self.http_post(url, data=payload)
-		assert_that(rp.status_int, is_(201), 'invalid status code while trying to create a user')
+		assert_that(rp.status_code, is_(201), 'invalid status code while trying to create a user')
 
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
@@ -781,7 +777,7 @@ class DataserverClient(object):
 		href = "ResolveUser/%s" % username
 		url = urljoin(self.endpoint, href)
 		rp = self.http_get(url, credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status while resolving user')
+		assert_that(rp.status_code, is_(200), 'invalid status while resolving user')
 
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
@@ -790,8 +786,7 @@ class DataserverClient(object):
 		href = "users/@@account.preflight.create"
 		url = urljoin(self.endpoint, href)
 		rp = self.http_post(url, data=anyjson.dumps(data))
-
-		assert_that(rp.status_int, is_(200), 'invalid status while user account creation preflight')
+		assert_that(rp.status_code, is_(200), 'invalid status while user account creation preflight')
 		data = self.httplib.deserialize(rp)
 		return data
 
@@ -801,7 +796,7 @@ class DataserverClient(object):
 		url = urljoin(self.endpoint, href)
 
 		rp = self.http_get(url, credentials, **kwargs)
-		assert_that(rp.status_int, is_(200), 'invalid status while user activity')
+		assert_that(rp.status_code, is_(200), 'invalid status while user activity')
 		data = self.httplib.deserialize(rp)
 		return self.adapt_ds_object(data, rp) if adapt else data
 

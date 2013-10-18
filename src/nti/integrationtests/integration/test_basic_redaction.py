@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -14,9 +14,7 @@ from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.utils import generate_message
 from nti.integrationtests.integration import container_of_length
 
-from hamcrest import is_
-from hamcrest import assert_that
-from hamcrest import greater_than_or_equal_to
+from hamcrest import (assert_that, is_, greater_than_or_equal_to)
 
 from nose.plugins.attrib import attr
 
@@ -28,8 +26,8 @@ class TestBasicRedactions(DataServerTestCase):
 
 	def setUp(self):
 		super(TestBasicRedactions, self).setUp()
-		self.container = 'test.user.container.%s' % time.time()
 		self.ds.set_credentials(self.owner)
+		self.container = 'test.user.container.%s' % time.time()
 
 	def test_create_redaction(self):
 		st = generate_message()
@@ -42,8 +40,7 @@ class TestBasicRedactions(DataServerTestCase):
 		assert_that(created_obj['redactionExplanation'], is_('explanation'))
 		
 	def test_search_shared(self):
-		self.ds.set_credentials(self.owner)	
-		
+		self.ds.set_credentials(self.owner)
 		redaction =  self.ds.create_redaction(selectedText='Zangetsu', replacementContent='Katen Kyokotsu',
 											  redactionExplanation='Sogyo no Kotowari', container=self.container,
 											  adapt=True)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -14,9 +14,8 @@ from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import not_shared
 from nti.integrationtests.integration import only_shared_with
 
-from hamcrest import (is_, assert_that)
-
 from nose.plugins.attrib import attr
+from hamcrest import (assert_that, is_)
 
 @attr(level=3)
 class TestThreadedNotes(DataServerTestCase):

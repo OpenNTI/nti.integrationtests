@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Defines requests http wrapper
+
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
 
 import os
 import sys
@@ -10,8 +18,7 @@ import subprocess
 import ConfigParser
 from datetime import datetime
 
-import logging
-logger = logging.getLogger(__name__)
+logger = __import__('logging').getLogger(__name__)
 
 from nti.integrationtests.utils import PORT
 from nti.integrationtests.utils import SERVER_HOST
@@ -261,13 +268,13 @@ class DataserverProcess(object):
 	def _terminate_process(self, block_interval_seconds=1, max_wait_secs=30):
 		result = False
 		if self.process:
-			print 'Terminating dataserver'
+			print('Terminating dataserver')
 			try:
 				self.process.terminate()
 				result = self._wait_for_termination(block_interval_seconds, max_wait_secs)
 				self.process = None if result else self.process
 			except OSError as e:
-				print 'Failed to terminate dataserver', e
+				print('Failed to terminate dataserver', e)
 				self.process = None # No use trying again
 		return result
 
@@ -279,7 +286,7 @@ class DataserverProcess(object):
 			elapsed = elapsed + block_interval_seconds
 
 		if elapsed >= max_wait_secs:
-			print "Could not stop data server"
+			print("Could not stop data server")
 			return False
 
 		return True

@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
+
+# disable: accessing protected members, too many methods
+# pylint: disable=W0212,R0904
+
 import time
 import uuid
 import random
@@ -7,6 +16,7 @@ import datetime
 import collections
 
 from nti.integrationtests.utils import PORT
+from nti.integrationtests.utils import check_url
 from nti.integrationtests.utils import get_open_port
 from nti.integrationtests.utils import generate_ntiid
 from nti.integrationtests.dataserver.client import ROOT_ITEM
@@ -53,6 +63,8 @@ class DataServerTestCase(unittest.TestCase):
 
 	# class vars
 
+	ds = None
+
 	port = PORT
 	root_dir = DATASERVER_DIR
 
@@ -74,7 +86,9 @@ class DataServerTestCase(unittest.TestCase):
 		cls.static_finalization()
 
 	def setUp(self):
-		self.ds = self.create_client()
+		if self.ds is None or self.ds.endpoint != self.get_endpoint():
+			self.ds = self.create_client()
+		return self.ds
 
 	@property
 	def client(self):
@@ -89,8 +103,10 @@ class DataServerTestCase(unittest.TestCase):
 
 	def get_endpoint(self):
 		if hasattr(self, 'endpoint'):
-			return self.endpoint
-		return self.resolve_endpoint(port = self.port)
+			result = self.endpoint
+		else:
+			result = self.resolve_endpoint(port=self.port)
+		return check_url(result)
 
 	@classmethod
 	def resolve_endpoint(cls, host=None, port=None):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -34,9 +34,8 @@ class TestBasicSharing(DataServerTestCase):
 
 	def setUp(self):
 		super(TestBasicSharing, self).setUp()
-
-		self.container = 'test_basic_sharing-container-%s' % time.time()
 		self.ds.set_credentials(self.owner)
+		self.container = 'test_basic_sharing-container-%s' % time.time()
 
 	def test_basic_sharing(self):
 

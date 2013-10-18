@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -29,8 +29,8 @@ class TestBasicUserGeneratedData(DataServerTestCase):
 	def setUp(self):
 		super(TestBasicUserGeneratedData, self).setUp()
 		
-		self.container = 'test_basic_ugd-container-%s' % time.time()
 		self.ds.set_credentials(self.owner)
+		self.container = 'test_basic_ugd-container-%s' % time.time()
 
 		# we clean these up in different places for each test
 		self.created_note = self.ds.create_note("A note to test with", self.container)

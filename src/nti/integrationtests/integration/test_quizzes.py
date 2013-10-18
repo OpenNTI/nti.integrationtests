@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -16,9 +16,8 @@ from nti.integrationtests.contenttypes import QQuestionSet
 from nti.integrationtests.contenttypes import QNumericMathPart
 from nti.integrationtests.contenttypes import QNumericMathSolution
 
-#from hamcrest import (is_, is_not, assert_that)
-
 from nose.plugins.attrib import attr
+#from hamcrest import (is_, is_not, assert_that)
 
 @attr(level=3)
 class TestQuizzes(DataServerTestCase):

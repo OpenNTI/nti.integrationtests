@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
 #pylint: disable=W0212,R0904
-
-from hamcrest import assert_that
-from hamcrest import is_
-from hamcrest import has_length
-from hamcrest import has_property
-from hamcrest import only_contains
 
 import gevent
 
@@ -22,6 +16,7 @@ from nti.integrationtests.chat import objects
 from nti.integrationtests.integration.user_chat_objects import HostUserChatTest
 
 from nose.plugins.attrib import attr
+from hamcrest import (assert_that, is_, has_length, has_property, only_contains)
 
 @attr(level=5, type='chat')
 class TestChatOnNote(HostUserChatTest):

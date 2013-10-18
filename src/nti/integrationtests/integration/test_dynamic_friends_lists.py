@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -21,9 +21,8 @@ from nti.integrationtests.integration import container_of_length
 from nti.integrationtests.integration import test_friends_lists
 from nti.integrationtests.integration import test_friends_sharing
 
-from hamcrest import (assert_that, is_, is_not, has_entry, greater_than_or_equal_to, has_length, none, greater_than)
-
 from nose.plugins.attrib import attr
+from hamcrest import (assert_that, is_, is_not, has_entry, greater_than_or_equal_to, has_length, none, greater_than)
 
 @attr(level=3, type="dfl")
 class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,

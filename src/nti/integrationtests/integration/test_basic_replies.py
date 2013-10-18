@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -26,9 +26,8 @@ class TestBasicReplying(DataServerTestCase):
 
 	def setUp(self):
 		super(TestBasicReplying, self).setUp()
-
-		self.container = 'test.user.container.%s' % time.time()
 		self.ds.set_credentials(self.owner)
+		self.container = 'test.user.container.%s' % time.time()
 
 	def test_create_basic_reply(self):
 		# create the object to share

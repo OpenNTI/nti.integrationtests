@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 #disable: accessing protected members, too many methods
@@ -12,13 +12,12 @@ import unittest
 from nti.integrationtests.integration import test_chat_whisper
 from nti.integrationtests.chat.socketio_interface import STATE_CHANNEL
 
+from nose.plugins.attrib import attr
 from hamcrest import ( has_entry, is_not, assert_that, has_length )
 
 max_channel_messsages = 10
 max_state_channel_messsages = 10
 pcnt_state_channel_messages = 1.0
-
-from nose.plugins.attrib import attr
 
 @attr(level=5, type='chat')
 class TestChatWithState(test_chat_whisper.TestWhisperChat):
