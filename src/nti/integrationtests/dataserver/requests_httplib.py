@@ -30,7 +30,7 @@ def _http_error_logging(f):
 			message += '\n Args: ' + str(args)
 			message += '\n KWArgs: ' + str(kwargs)
 
-			raise http.__class__(message), None, tb
+			raise http.__class__(message, response=response), None, tb
 
 		except requests.exceptions.RequestException, http:
 

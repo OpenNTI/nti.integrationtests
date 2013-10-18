@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Defines requests http wrapper
-
 $Id$
 """
 from __future__ import print_function, unicode_literals, absolute_import, division
@@ -54,24 +52,24 @@ class BasicSeverOperation(object):
 
 	__metaclass__ = ABCMeta
 
-	requests = None
+	format = None
 	objTest = None
+	requests = None
+	testArgs = None
 	endpoint = None
 	username = None
 	password = None
 	href_url = None
+	testObjRef = None
 	putObjData = None
 	postObjData = None
-	responseCode = None
-	testPassword = None
-	testObjRef = None
 	objResponse = None
 	testHrefUrl = None
-	testArgs = None
+	responseCode = None
+	testPassword = None
 	lastModified = None
-	lastModifiedCollection = None
 	preRequestTime = None
-	format = None
+	lastModifiedCollection = None
 
 	# Methods called by the generator should copy this data
 	# into their local frame's __traceback_info__ variable

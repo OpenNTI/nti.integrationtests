@@ -1,7 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
 
 import inspect
 
-from hamcrest import assert_that, is_
+from hamcrest import (assert_that, is_)
 
 class BodyTester(object):
 	def testBody(self, parsedBody, mimeType, info):
@@ -80,10 +87,7 @@ class QuizResultTester(BodyTester):
 		assert_that( parsedBody['Items'][0]['Response'],             is_( info[0]['1']['Response'] ) )
 		assert_that( parsedBody['Items'][0]['Assessment'],           is_( info[0]['1']['Assessment'] ))
 
-
-
 MIME_TYPE_REGISTRY = {}
-
 for v in dict(locals()).itervalues():
 	if inspect.isclass(v) and issubclass(v, BodyTester):
 		if hasattr(v, 'MIME_TYPE'):
