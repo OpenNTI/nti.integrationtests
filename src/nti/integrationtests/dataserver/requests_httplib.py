@@ -12,6 +12,8 @@ import sys
 import requests
 import functools
 
+from zope.proxy import PyProxyBase
+
 def _http_error_logging(f):
 
 	@functools.wraps(f)
@@ -44,6 +46,10 @@ def _http_error_logging(f):
 
 	return to_call
 
+class _ResponseProxy(PyProxyBase):
+	def read(self):
+		return self.content
+
 class RequestHttpLib(object):
 
 	def __init__(self):
@@ -74,7 +80,7 @@ class RequestHttpLib(object):
 		timeout = kwargs.pop('timeout', 30)
 		s = self._get_session(credentials)
 		rp = s.get(url, headers=headers, params=kwargs, timeout=timeout)
-		return rp
+		return _ResponseProxy(rp)
 
 	@_http_error_logging
 	def do_post(self, url, credentials=None, data=None, **kwargs):
@@ -82,7 +88,7 @@ class RequestHttpLib(object):
 		timeout = kwargs.pop('timeout', 30)
 		s = self._get_session(credentials)
 		rp = s.post(url, data=data, headers=headers, timeout=timeout)
-		return rp
+		return _ResponseProxy(rp)
 
 	@_http_error_logging
 	def do_put(self, url, credentials, data=None, **kwargs):
@@ -90,7 +96,7 @@ class RequestHttpLib(object):
 		timeout = kwargs.pop('timeout', 30)
 		s = self._get_session(credentials)
 		rp = s.put(url, data=data, headers=headers, timeout=timeout)
-		return rp
+		return _ResponseProxy(rp)
 
 	@_http_error_logging
 	def do_delete(self, url, credentials, **kwargs):
@@ -98,7 +104,7 @@ class RequestHttpLib(object):
 		timeout = kwargs.pop('timeout', 30)
 		s = self._get_session(credentials)
 		rp = s.delete(url, headers=headers, timeout=timeout)
-		return rp
+		return _ResponseProxy(rp)
 
 	def do_close(self):
 		for s in self.sessions.values():
