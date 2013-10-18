@@ -78,15 +78,13 @@ def get_user_workspaces(url, username, password='temp001', httplib=None):
 		result[ws.title] = ws
 	return result
 
-_check_url = check_url  # BWC
-
 class DataserverClient(object):
 
 	def __init__(self, endpoint, credentials=None, httplib=None, headers=None, op_delay=None):
 		self.users_ws = {}
 		self.op_delay = op_delay
 		self.credentials = credentials
-		self.endpoint = _check_url(endpoint)
+		self.endpoint = check_url(endpoint)
 		self.httplib = httplib or RequestHttpLib()
 		self.headers = dict(headers) if headers else None
 
@@ -96,7 +94,11 @@ class DataserverClient(object):
 	def set_credentials(self, credentials=None, user=None, password=None):
 		self.credentials = credentials if credentials else (user, password)
 
+	def close(self):
+		self.httplib.do_close()
+
 	def clear(self):
+		self.close()
 		self.users_ws.clear()
 		self.clear_credentials()
 
@@ -245,7 +247,7 @@ class DataserverClient(object):
 		url = self._get_container_item_data_url(container=container, link_rel='RecursiveStream', workspace=workspace,
 												credentials=credentials, validate=True)
 
-		url = urljoin(_check_url(url), feed)
+		url = urljoin(check_url(url), feed)
 
 		headers = None if not gzip else {'Accept-Encoding': 'gzip'}
 		rp = self.http_get(url, credentials, headers=headers)
@@ -418,9 +420,9 @@ class DataserverClient(object):
 		collection, _ = self._get_collection(credentials=credentials)
 
 		link = collection.get_link(link)
-		url = _check_url(urljoin(self.endpoint, link.href))
+		url = check_url(urljoin(self.endpoint, link.href))
 		if ntiid:
-			url = _check_url(url + urllib.quote(ntiid))
+			url = check_url(url + urllib.quote(ntiid))
 		url = url + urllib.quote(query)
 
 		rp = self.http_get(url, credentials, **kwargs)
@@ -446,7 +448,7 @@ class DataserverClient(object):
 	def execute_user_search(self, search, credentials=None, adapt=True, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		link, _ = self._get_user_search_link(credentials=credentials)
-		url = _check_url(urljoin(self.endpoint, link.href)) + search
+		url = check_url(urljoin(self.endpoint, link.href)) + search
 
 		rp = self.http_get(url, credentials, **kwargs)
 		if rp.status_code == 404:
@@ -522,7 +524,7 @@ class DataserverClient(object):
 		comment = Post(title=title, body=body)
 		oid = post.id
 		if oid:
-			url = urljoin(_check_url(objs_url), urllib.quote(oid))
+			url = urljoin(check_url(objs_url), urllib.quote(oid))
 		else:
 			href = getattr(post, 'location', None)
 			url = urljoin(self.endpoint, href)

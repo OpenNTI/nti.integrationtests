@@ -61,3 +61,8 @@ class RequestHttpLib(object):
 		s = self._get_session(credentials)
 		rp = s.delete(url, headers=headers, timeout=timeout)
 		return rp
+
+	def do_close(self):
+		for s in self.sessions.values():
+			s.close()
+		self.sessions.clear()

@@ -44,6 +44,7 @@ class TestChatUserleavesEarly(HostUserChatTest):
 		return Host(username=username, occupants=occupants, port=self.port, **kwargs)
 
 class Host(objects.Host):
+
 	def post_messages(self, room_id, entries, *args, **kwargs):
 		self.post_random_messages(room_id, entries)
 		self.wait_heart_beats(2)

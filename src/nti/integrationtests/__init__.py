@@ -80,32 +80,36 @@ class DataServerTestCase(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.static_initialization()
+		cls.ds = cls.create_client()
 
 	@classmethod
 	def tearDownClass(cls):
-		cls.static_finalization()
+		try:
+			cls.static_finalization()
+		finally:
+			cls.ds.close()
 
 	def setUp(self):
-		if self.ds is None or self.ds.endpoint != self.get_endpoint():
-			self.ds = self.create_client()
-		return self.ds
+		pass
 
 	@property
 	def client(self):
 		return self.ds
 
-	def create_client(self, headers=None, op_delay=None):
-		endpoint = self.get_endpoint()
-		headers = headers or self.headers
-		op_delay = op_delay or self.op_delay
-		result = self.new_client(endpoint=endpoint, headers=headers, op_delay=op_delay)
+	@classmethod
+	def create_client(cls, headers=None, op_delay=None, endpoint=None):
+		headers = headers or cls.headers
+		op_delay = op_delay or cls.op_delay
+		endpoint = endpoint or cls.get_endpoint()
+		result = cls.new_client(endpoint=endpoint, headers=headers, op_delay=op_delay)
 		return result
 
-	def get_endpoint(self):
-		if hasattr(self, 'endpoint'):
-			result = self.endpoint
+	@classmethod
+	def get_endpoint(cls):
+		if hasattr(cls, 'endpoint'):
+			result = cls.endpoint
 		else:
-			result = self.resolve_endpoint(port=self.port)
+			result = cls.resolve_endpoint(port=cls.port)
 		return check_url(result)
 
 	@classmethod

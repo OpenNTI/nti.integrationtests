@@ -147,6 +147,9 @@ class URLHttpLib(object):
 		result.pop('self')
 		return result
 
+	def do_close(self):
+		pass
+
 	def do_get(self, url, credentials=None, **kwargs):
 		call_args = self._prune(locals())
 		request = self._create_request(url, credentials, **kwargs)
