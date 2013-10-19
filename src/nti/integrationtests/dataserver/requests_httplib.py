@@ -12,7 +12,7 @@ import sys
 import requests
 import functools
 
-from zope.proxy import PyProxyBase
+from zope.proxy import ProxyBase
 
 def _http_error_logging(f):
 
@@ -46,7 +46,7 @@ def _http_error_logging(f):
 
 	return to_call
 
-class _ResponseProxy(PyProxyBase):
+class _ResponseProxy(ProxyBase):
 
 	@property
 	def code(self):
