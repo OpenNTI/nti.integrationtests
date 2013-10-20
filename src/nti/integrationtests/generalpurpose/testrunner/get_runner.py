@@ -1,6 +1,12 @@
-from __future__ import print_function, unicode_literals
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
 
-import urllib2
+import requests
 
 from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
 
@@ -19,8 +25,8 @@ class GetObject(BasicSeverOperation):
 		self.preRequestTime = self.set_collection_modification_time()
 		url = self.format.formatURL(test_args['url_id'])
 		try:
-			request = self.requests.get(url=url, username=self.username, password=self.testPassword)
-			parsed_body = self.format.read(request)
+			response = self.requests.get(url=url, username=self.username, password=self.testPassword)
+			parsed_body = self.format.read(response)
 
 			ifModifiedSinceYes = self.requests.ifModifiedSinceYes(url=test_args['url_id'],
 																  username=self.username,
@@ -33,9 +39,9 @@ class GetObject(BasicSeverOperation):
 			self.obj_tearDown()
 
 			self.set_modification_time(parsed_body)
-			__traceback_info__ = self._traceback_info_, kwargs, test_args, request, ifModifiedSinceYes, ifModifiedSinceNo, parsed_body
-			assert_that( request.code, is_( self.responseCode['get'] ),
-					'this method was expecting a %d response, instead received %d' % (self.responseCode['get'], request.code) )
+			__traceback_info__ = self._traceback_info_, kwargs, test_args, response, ifModifiedSinceYes, ifModifiedSinceNo, parsed_body
+			assert_that(response.status_code, is_(self.responseCode['get']),
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['get'], response.status_code))
 
 			assert_that( ifModifiedSinceYes, is_( self.responseCode['if_modified_since_yes'] ),
 					'this method was expecting a %d response, instead received %d' % (self.responseCode['if_modified_since_yes'], ifModifiedSinceYes) )
@@ -49,11 +55,14 @@ class GetObject(BasicSeverOperation):
 													collectionTime=self.lastModifiedCollection,
 													requestTime=self.lastModified)
 
-		except urllib2.HTTPError as error:
+		except requests.exceptions.HTTPError, error:
+			response = getattr(error, 'response', None)
+			code = getattr(response, 'status_code', None)
+
 			self.obj_tearDown()
 			self.set_collection_modification_time()
 
 			assert_that( error.code, is_( self.responseCode['get'] ),
-					'this method was expecting a %d response, instead received %d' % (self.responseCode['get'], error.code) )
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['get'], code))
 
 			self.check_unchanged_last_modified_time(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)

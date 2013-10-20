@@ -10,14 +10,25 @@ import anyjson
 import plistlib
 import cStringIO
 
+def _content(response):
+	if hasattr(response, 'read'):
+		result = response.read()
+	elif hasattr(response, 'content'):
+		result = response.content
+	else:
+		result = u''
+	return result
+
 class FormatFunctionality(object):
 
 	def urlFormat(self, URL, fmt):
 		return URL + '?format=' + fmt
 
-	def read(self): pass
+	def read(self):
+		pass
 
-	def write(self): pass
+	def write(self):
+		pass
 	
 class NoFormat(FormatFunctionality):
 
@@ -27,8 +38,8 @@ class NoFormat(FormatFunctionality):
 	def write(self, data):
 		return anyjson.dumps(data)
 
-	def read(self, request):
-		return anyjson.loads(request.read())
+	def read(self, response):
+		return anyjson.loads(_content(response))
 
 class JsonFormat(FormatFunctionality):
 
@@ -38,8 +49,8 @@ class JsonFormat(FormatFunctionality):
 	def write(self, data):
 		return anyjson.dumps(data)
 
-	def read(self, request):
-		return anyjson.loads(request.read())
+	def read(self, response):
+		return anyjson.loads(_content(response))
 	
 class PlistFormat(FormatFunctionality):
 
@@ -53,8 +64,5 @@ class PlistFormat(FormatFunctionality):
 		output.close()
 		return data
 
-	def read(self, request):
-		return plistlib.readPlistFromString(request.read())
-	
-	
-	
+	def read(self, response):
+		return plistlib.readPlistFromString(_content(response))

@@ -6,7 +6,7 @@ $Id$
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
-import urllib2
+import requests
 
 from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
 
@@ -22,18 +22,20 @@ class DeleteObject(BasicSeverOperation):
 		self.set_time()
 		url = self.format.formatURL(test_args['url_id'])
 		try:			
-			request = self.requests.delete(url=url, username=self.username, password=self.testPassword)
+			response = self.requests.delete(url=url, username=self.username, password=self.testPassword)
 			self.set_collection_modification_time()
 			
-			assert 	request.code == self.responseCode['delete'], \
-					'this method was expecting a %d response, instead received %d' % (self.responseCode['delete'], request.code)
+			assert 	response.status_code == self.responseCode['delete'], \
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['delete'], response.status_code)
 					
 			self.check_changed_last_modified_time(	preRequestTime=self.preRequestTime, 
 													collectionTime=self.lastModifiedCollection)
 			
-		except urllib2.HTTPError, error:
-			
-			if error.code != 404:
+		except requests.exceptions.HTTPError, error:
+			response = getattr(error, 'response', None)
+			code = getattr(response, 'status_code', None)
+
+			if code != 404:
 				parsed_body = self.format.read(self.requests.get(url=url,
 																 username=self.username, 
 																 password=self.password))
@@ -52,5 +54,5 @@ class DeleteObject(BasicSeverOperation):
 				self.check_unchanged_last_modified_time(preRequestTime=self.preRequestTime,
 														collectionTime=self.lastModifiedCollection)
 			
-			assert	error.code == self.responseCode['delete'], \
-					'this method was expecting a %d response, instead received %d' % (self.responseCode['delete'], error.code)
+			assert	code == self.responseCode['delete'], \
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['delete'], code)

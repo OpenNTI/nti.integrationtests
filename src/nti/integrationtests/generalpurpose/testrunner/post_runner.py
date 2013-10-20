@@ -1,5 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
+
 import sys
-import urllib2
+import requests
 
 from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
 
@@ -28,26 +36,22 @@ class PostObject(BasicSeverOperation):
 
 			self.check_changed_last_modified_time(	preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection,
 													requestTime=self.lastModified)
-		except urllib2.HTTPError, error:
+		except requests.exceptions.HTTPError, error:
+			response = getattr(error, 'response', None)
+			code = getattr(response, 'status_code', None)
+
 			self.set_collection_modification_time()
 
-			if error.code != self.responseCode['post']:
+			if code != self.responseCode['post']:
 				# If the server sent us anything,
 				# try to use it
 				_, _, tb = sys.exc_info()
-				try:
-					error.msg += ' URL: ' + error.geturl()
-					body = error.read()
-					# The last 20 or so lines
-					error.msg += ' Body: ' + str( body )[-1600:]
-				except (AttributeError, IOError):
-					pass
+				message = error.message
+				message += '\n KWArgs: ' + str(kwargs)
+				message += '\n This method was expecting a %s response, instead received %s' % (self.responseCode['post'], code)
 
-				error.msg += '\n KWArgs: ' + str(kwargs)
-				error.msg += '\n This method was expecting a %s response, instead received %s' % (self.responseCode['post'], error.code)
 				# re-raise the original exception object
 				# with the original traceback
-				raise error, None, tb
-
+				raise error.__class__(message, response=response), None, tb
 
 			self.check_unchanged_last_modified_time(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)

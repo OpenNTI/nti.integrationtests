@@ -11,7 +11,7 @@ logger = __import__('logging').getLogger(__name__)
 import sys
 import json
 import time
-import urllib2
+import requests
 import functools
 from urlparse import urljoin
 
@@ -19,32 +19,6 @@ from nti.integrationtests.generalpurpose.utils.url_formatter import NoFormat
 from nti.integrationtests.generalpurpose.utils.generaterequest import ServerRequest
 
 from hamcrest import (assert_that, greater_than_or_equal_to, less_than_or_equal_to, has_entry)
-
-def _http_ise_error_logging(f):
-	@functools.wraps(f)
-	def to_call( *args, **kwargs ):
-		try:
-			return f( *args, **kwargs )
-		except urllib2.HTTPError as http:
-			# If the server sent us anything,
-			# try to use it
-			_, _, tb = sys.exc_info()
-			try:
-				http.msg += ' URL: ' + http.geturl()
-				body = http.read()
-				# The last 20 or so lines
-				http.msg += ' Body: ' + str( body )[-1600:]
-			except (AttributeError, IOError):
-				pass
-
-			http.msg += '\n Args: ' + str(args)
-			http.msg += '\n KWArgs: ' + str(kwargs)
-
-			# re-raise the original exception object
-			# with the original traceback
-			raise http, None, tb
-
-	return to_call
 
 from abc import ABCMeta, abstractmethod
 
@@ -79,7 +53,6 @@ class BasicSeverOperation(object):
 	def makeRequest(self, kwargs ):
 		raise NotImplementedError()
 
-	@_http_ise_error_logging
 	def setValues(self, kwargs):
 
 		self.requests = ServerRequest()
@@ -107,7 +80,6 @@ class BasicSeverOperation(object):
 		self.testArgs = None
 		self.preRequestTime = 0
 
-	@_http_ise_error_logging
 	def make_quiz_result_request(self, kwargs):
 		new_server_request = ServerRequest()
 		no_format = NoFormat()
@@ -122,7 +94,6 @@ class BasicSeverOperation(object):
 
 	makeQuizResultRequest  = make_quiz_result_request
 
-	@_http_ise_error_logging
 	def obj_setUp(self):
 		if self.testObjRef:
 			url = urljoin(self.endpoint, self.testObjRef)
@@ -150,14 +121,10 @@ class BasicSeverOperation(object):
 			url = urljoin(self.endpoint, objref) if objref else self.testArgs['url_id']
 			__traceback_info__ = url, objref, self
 			self.requests.delete(url=url, username=self.username, password=self.password)
-		except urllib2.HTTPError:
+		except requests.exceptions.HTTPError:
 			# Normally this will be swallowed. But if we fail later, and logcapture is on
 			# this might be handy
 			logger.exception( "Failed to delete during cleanup" )
-
-	@classmethod
-	def http_ise_error_logging(cls, f):
-		_http_ise_error_logging(f)
 
 	def set_modification_time(self, parsed_body):
 		self.lastModified = parsed_body.get( 'LastModified', parsed_body.get( 'Last Modified' ) )
@@ -170,7 +137,7 @@ class BasicSeverOperation(object):
 			parsed_body = json.loads(request.read())
 			self.lastModifiedCollection = parsed_body['Last Modified']
 			return self.lastModifiedCollection
-		except (urllib2.HTTPError, KeyError):
+		except (requests.exceptions.HTTPError, KeyError):
 			self.lastModifiedCollection = None
 	setCollectionModificationTime = set_collection_modification_time
 
@@ -187,7 +154,6 @@ class BasicSeverOperation(object):
 
 		if lastModifiedTime:
 			assert_that( kwargs, has_entry( 'requestTime', greater_than_or_equal_to( preRequestTime ) ) )
-
 
 	changedLastModifiedTime = check_changed_last_modified_time
 

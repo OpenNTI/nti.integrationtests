@@ -1,4 +1,12 @@
-import urllib2
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
+
+import requests
 
 from nti.integrationtests.generalpurpose.testrunner import BasicSeverOperation
 
@@ -16,25 +24,29 @@ class PutObject(BasicSeverOperation):
 
 		self.set_time()
 		try:
-			request = self.requests.put(url=url, data=data, username=self.username, password=self.testPassword)
-			parsed_body = self.format.read(request)
+			response = self.requests.put(url=url, data=data, username=self.username, password=self.testPassword)
+			parsed_body = self.format.read(response)
 
 			self.obj_tearDown()
 			self.set_collection_modification_time()
 			self.set_modification_time(parsed_body)
 
-			assert	request.code==self.responseCode['put'], \
-					'this method was expecting a %d response, instead received %d' % (self.responseCode['put'], request.code)
+			assert	response.status_code == self.responseCode['put'], \
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['put'], response.status_code)
 
 			self.objTest.testBody(parsed_body, self.putObjData['MimeType'], self.objResponse['putExpectedResponse'])
 
 			self.check_changed_last_modified_time(	preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection,
 													requestTime=self.lastModified)
-		except urllib2.HTTPError, error:
+
+		except requests.exceptions.HTTPError, error:
+			response = getattr(error, 'response', None)
+			code = getattr(response, 'status_code', None)
+
 			self.obj_tearDown()
 			self.set_collection_modification_time()
 
-			assert 	error.code==self.responseCode['put'], \
-					'this method was expecting a %d response, instead received %d' % (self.responseCode['put'], error.code)
+			assert 	code == self.responseCode['put'], \
+					'this method was expecting a %d response, instead received %d' % (self.responseCode['put'], code)
 
 			self.check_unchanged_last_modified_time(preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection)
