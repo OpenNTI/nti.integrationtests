@@ -40,7 +40,7 @@ from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_DICT
 from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_ARRAY
 
 from nti.integrationtests.dataserver import check_url
-from nti.integrationtests.dataserver.requests_httplib import RequestHttpLib
+from nti.integrationtests.dataserver.httplib import RequestHttpLib
 
 from hamcrest import assert_that, is_, is_not, none, instance_of
 

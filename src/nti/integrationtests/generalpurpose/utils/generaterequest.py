@@ -15,7 +15,7 @@ from time import mktime
 from wsgiref import handlers
 from datetime import datetime
 
-from nti.integrationtests.dataserver import requests_httplib as httplib
+from nti.integrationtests.dataserver import httplib
 
 class ServerRequest(object):
 
