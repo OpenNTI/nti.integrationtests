@@ -11,6 +11,7 @@ __docformat__ = "restructuredtext en"
 import sys
 import requests
 import functools
+from urlparse import urljoin
 
 from zope.proxy import ProxyBase
 
@@ -111,7 +112,61 @@ class RequestHttpLib(object):
 		rp = s.delete(url, headers=headers, timeout=timeout)
 		return _ResponseProxy(rp)
 
+	def do_session_close(self, s):
+		s.close()
+
 	def do_close(self):
 		for s in self.sessions.values():
-			s.close()
+			self.do_session_close(s)
 		self.sessions.clear()
+
+class DSRequestHttpLib(RequestHttpLib):
+
+	def __init__(self, endpoint):
+		super(DSRequestHttpLib, self).__init__()
+		self.endpoint = endpoint
+
+	@classmethod
+	def _get_link(cls, response, name):
+		try:
+			data = response.json()
+			links = data.get('Links', ())
+			for link in links:
+				if link.get('rel') == name:
+					return link.get(u'href')
+		except:
+			pass
+		return None
+		
+	def _get_session(self, credentials=None):
+		s = super(DSRequestHttpLib, self)._get_session(credentials=credentials)
+		if not getattr(s, 'login', None):
+			try:
+				url = urljoin(self.endpoint, 'logon.handshake')
+				r = s.post(url, data={'username':credentials[0]})
+
+				# save logout
+				logout = self._get_link(r, 'logon.logout')
+				if logout:
+					s.logout = urljoin(self.endpoint, logout)
+
+				# set cookie
+				nti_pwd = self._get_link(r, 'logon.nti.password')
+				if nti_pwd:
+					url = urljoin(self.endpoint, nti_pwd)
+					s.get(url)
+			except:
+				pass
+			finally:
+				setattr(s, 'login', True)
+		return s
+	
+	def do_session_close(self, s):
+		logout = getattr(s, 'logout', None)
+		if logout:
+			try:
+				s.get(logout)
+			except:
+				pass
+		s.close()
+	

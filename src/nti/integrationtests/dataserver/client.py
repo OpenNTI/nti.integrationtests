@@ -39,8 +39,8 @@ from nti.integrationtests.contenttypes.servicedoc import Collection
 from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_DICT
 from nti.integrationtests.contenttypes.servicedoc import EMPTY_CONTAINER_ARRAY
 
+from nti.integrationtests.dataserver import httplib
 from nti.integrationtests.dataserver import check_url
-from nti.integrationtests.dataserver.httplib import RequestHttpLib
 
 from hamcrest import assert_that, is_, is_not, none, instance_of
 
@@ -53,7 +53,7 @@ def get_link_from_dict(data):
 def get_item_from_dict(data):
 	return Item.new_from_dict(data)
 
-def get_workspaces(url, username, password='temp001', httplib=None):
+def get_workspaces(url, username, password='temp001', http_wrapper=None):
 	"""
 	Return the Workspace objects from the specified url
 	url: dataserver URL
@@ -61,9 +61,9 @@ def get_workspaces(url, username, password='temp001', httplib=None):
 	password: User's password
 	"""
 
-	httplib = httplib or RequestHttpLib()
-	rp = httplib.do_get(url, credentials=(username, password))
-	data = httplib.deserialize(rp)
+	http_wrapper = http_wrapper or httplib.RequestHttpLib()
+	rp = http_wrapper.do_get(url, credentials=(username, password))
+	data = http_wrapper.deserialize(rp)
 
 	result = []
 	for item in data.get('Items', []):
@@ -72,21 +72,21 @@ def get_workspaces(url, username, password='temp001', httplib=None):
 		result.append(ws)
 	return result
 
-def get_user_workspaces(url, username, password='temp001', httplib=None):
+def get_user_workspaces(url, username, password='temp001', http_wrapper=None):
 	result = {}
-	for ws in get_workspaces(url, username, password, httplib=httplib):
+	for ws in get_workspaces(url, username, password, http_wrapper=http_wrapper):
 		result[ws.title] = ws
 	return result
 
 class DataserverClient(object):
 
-	def __init__(self, endpoint, credentials=None, httplib=None, headers=None, op_delay=None):
+	def __init__(self, endpoint, credentials=None, http_wrapper=None, headers=None, op_delay=None):
 		self.users_ws = {}
 		self.op_delay = op_delay
 		self.credentials = credentials
 		self.endpoint = check_url(endpoint)
-		self.httplib = httplib or RequestHttpLib()
 		self.headers = dict(headers) if headers else None
+		self.httplib = http_wrapper or httplib.DSRequestHttpLib(self.endpoint)
 
 	def get_credentials(self):
 		return self.credentials
