@@ -25,7 +25,7 @@ def _http_error_logging(f):
 			response = getattr(http, 'response', None)
 			_, _, tb = sys.exc_info()
 
-			message = http.message
+			message = str(http.message)
 			message += ' URL: ' + getattr(response, 'url', u'')
 
 			body = getattr(response, 'content', u'')
@@ -39,7 +39,7 @@ def _http_error_logging(f):
 
 			_, _, tb = sys.exc_info()
 
-			message = http.message
+			message = str(http.message)
 			message += '\n Args: ' + str(args)
 			message += '\n KWArgs: ' + str(kwargs)
 
