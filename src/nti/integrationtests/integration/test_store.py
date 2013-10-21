@@ -48,7 +48,7 @@ class TestStore(DataServerTestCase):
 					  state="OK",
 					  country="USA",
 					  provider='NTI-TEST')
-		token = self.ds.create_stripe_token(params)
+		token = self.ds.create_stripe_token(params, timeout=45)
 		return token
 
 	def _create_coupon(self, percent_off=None, amount_off=None, duration="once"):
