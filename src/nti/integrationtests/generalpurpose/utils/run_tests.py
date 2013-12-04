@@ -99,8 +99,10 @@ def get_workspaces(url, username, password):
 	formatter = get_format('NoFormat')
 	document = ServerRequest().get(url=url, username=username, password=password)
 	parsed_body = formatter.read(document)
-	workspace = Workspace.new_from_dict(parsed_body['Items'][0])
-	return workspace
+	for item in parsed_body['Items']:
+		if item.get('Title') == username:
+			return Workspace.new_from_dict(item)
+	return None
 
 from nose.plugins.attrib import attr
 
@@ -108,6 +110,8 @@ from nose.plugins.attrib import attr
 def test_generator():
 
 	workspace = get_workspaces(endpoint, username, password)
+	if workspace is None:
+		raise Exception('Could not find user "%s" workspace' % username)
 
 	# the tests that will be ran
 	test_files_path = os.path.expanduser(os.environ.get('test_files', PATH_TO_TESTS))
