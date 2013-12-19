@@ -587,7 +587,7 @@ class DataserverClient(object):
 		result = self.httplib.deserialize(rp)
 		return result['Items'][0]
 
-	
+
 	# ------------------------
 
 	def register_device(self, id_, credentials=None):
@@ -764,8 +764,8 @@ class DataserverClient(object):
 				params.pop(k)
 
 		payload = anyjson.dumps(params)
-
-		href = "users/@@account.create"
+		# FIXME: Get this from a link sent by the DS
+		href = "account.create"
 		url = urljoin(self.endpoint, href)
 		rp = self.http_post(url, data=payload)
 		assert_that(rp.status_code, is_(201), 'invalid status code while trying to create a user')
@@ -785,7 +785,8 @@ class DataserverClient(object):
 		return self.adapt_ds_object(data, rp) if adapt else data
 
 	def preflight_create_user(self, data):
-		href = "users/@@account.preflight.create"
+		# FIXME: Get this from a link sent by the DS
+		href = "account.preflight.create"
 		url = urljoin(self.endpoint, href)
 		rp = self.http_post(url, data=anyjson.dumps(data))
 		assert_that(rp.status_code, is_(200), 'invalid status while user account creation preflight')
@@ -817,4 +818,3 @@ if __name__ == '__main__':
 	cl.set_credentials(user='test.user.1@nextthought.com', password='temp001')
 	cl.create_blog_post('foo', 'foo')
 	cl.get_blog_contents()
-
