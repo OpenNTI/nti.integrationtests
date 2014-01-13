@@ -220,13 +220,9 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 		suffix = str(uuid.uuid4()).split('-')[-1]
 		flname = "sebonsakura-%s" % suffix
 		friendsList = self.create_friends_list_with_name_and_friends(flname, friend_names, flname, locked=True)
-		try:
-			# make sure we don't have a link to get the code when the DFL is locked
-			link = friendsList.get_link('default-trivial-invitation-code')
-			assert_that(link, is_(none()))
-		finally:
-			self.ds.set_credentials(self.owner)
-			self.ds.delete_object(friendsList)
+		# make sure we don't have a link to get the code when the DFL is locked
+		link = friendsList.get_link('default-trivial-invitation-code')
+		assert_that(link, is_(none()))
 
 if __name__ == '__main__':
 	unittest.main()
