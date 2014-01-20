@@ -55,6 +55,7 @@ class TestNotifications(DataServerTestCase):
 		
 	def test_circled_event(self):
 		usr = self.ds.get_user_object(self.target[0], credentials=self.target)
+		__traceback_info__ = usr
 		usr.dynamicMemberships = usr.following = usr.communities = usr.accepting = []
 		usr = self.ds.update_object(usr, credentials=self.target)
 		
