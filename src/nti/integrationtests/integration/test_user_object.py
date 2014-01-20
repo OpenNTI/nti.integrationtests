@@ -40,7 +40,7 @@ class TestUserObject(DataServerTestCase):
 		assert_that(user_object, is_not(None))
 		assert_that(user_object.email, is_(email))
 		assert_that(user_object.name, is_(username))
-		assert_that(user_object.realname, is_(cap_realname))
+		assert_that(user_object.realname.lower(), is_(cap_realname.lower()))
 		assert_that(user_object.opt_in_email_communication, is_(opt_in_email_communication))
 
 	def test_resolve_user(self):
