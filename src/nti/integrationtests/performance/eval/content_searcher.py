@@ -1,14 +1,23 @@
-from __future__ import print_function, unicode_literals
+#!/usr/bin/env python
+# -*- coding: utf-8 -*
+"""
+$Id$
+"""
+from __future__ import print_function, unicode_literals, absolute_import, division
+__docformat__ = "restructuredtext en"
+
+logger = __import__('logging').getLogger(__name__)
 
 import random
+
 from whoosh.analysis import STOP_WORDS
 
 from nltk import word_tokenize
 
 from nti.integrationtests.performance import IGNORE_RESULT
 from nti.integrationtests.performance.eval import new_client
-from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 from nti.integrationtests.nltk import default_message_generator
+from nti.integrationtests.chat.simulation import MAX_TEST_USERS
 
 _max_users = MAX_TEST_USERS
 _generator = default_message_generator()
