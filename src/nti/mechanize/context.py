@@ -8,22 +8,24 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import numbers
+
 from . import boolean_states
 from . import toExternalObject
 
-class Context(object):
+class DataMixin(object):
 
 	def __contains__(self, key):
 		return key in self.__dict__
 
 	def __getitem__(self, key):
-		return self.__dict__[key]
+		return self.__getattr__.get(key)
 
 	def __setitem__(self, key, val):
-		self.__dict__[key] = val
+		self.__setattr__(key, val)
 
 	def __delitem__(self, key):
-		self.__dict__.pop(key)
+		del self.__dict__[key]
 
 	def items(self):
 		return self.__dict__.items()
@@ -34,6 +36,29 @@ class Context(object):
 	def __str__(self):
 		return "%s(%s)" % (self.__class__.__name__, self.__dict__)
 	__repr__ = __str__
+
+	def toExternalObject(self):
+		external = {}
+		for k, v in self.__dict__.items():
+			if not k.startswith("_"):
+				external[k] = toExternalObject(v)
+		return external
+
+class TimerResultMixin(DataMixin):
+
+	def __init__(self, data=None):
+		super(TimerResultMixin, self).__init__()
+		self.__dict__.update(data or {})
+
+	def __setattr__(self, name, value):
+		assert isinstance(value, numbers.Number)
+		super(TimerResultMixin, self).__setattr__(name, value)
+
+	@property
+	def timers(self):
+		return dict(self.__dict__)
+
+class Context(DataMixin):
 
 	def _as(self, trx, key, default=None):
 		result = getattr(self, key, default)
@@ -56,13 +81,6 @@ class Context(object):
 	def as_str(self, key, default=None):
 		return self._as(str, key, default)
 
-	def toExternalObject(self):
-		external = {}
-		for k, v in self.__dict__.items():
-			if not k.startswith("_"):
-				external[k] = toExternalObject(v)
-		return external
-
 class DelegateContext(Context):
 
 	def __init__(self, context):
@@ -72,15 +90,6 @@ class DelegateContext(Context):
 
 	def __contains__(self, key):
 		return key in self.__dict__ or key in self._delegated
-
-	def __getitem__(self, key):
-		return self.__getattr__.get(key)
-
-	def __setitem__(self, key, val):
-		self.__setattr__(key, val)
-
-	def __delitem__(self, key):
-		del self.__dict__[key]
 
 	def keys(self):
 		result = list(self.__dict__.keys()) + list(self._delegated.keys())
