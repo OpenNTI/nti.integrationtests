@@ -13,8 +13,8 @@ import inspect
 import numbers
 import collections
 
-boolean_states = { u'1': True, u'yes': True, u'true': True, u'on': True,
-				   u'0': False, u'no': False, u'false': False, u'off': False}
+boolean_states = { u'1': True, 'y':True, u'yes': True, u'true': True, u'on': True,
+				   u'0': False, 'n':False, u'no': False, u'false': False, u'off': False}
 
 def toExternalObject(obj):
 

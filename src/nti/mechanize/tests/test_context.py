@@ -41,3 +41,7 @@ class TestContext(unittest.TestCase):
 
 		assert_that(d, has_property('foo', is_(2)))
 		assert_that(d, has_entry('foo', is_(2)))
+
+		assert_that(c.as_str('foo'), is_('2'))
+		c['foo'] = 'y'
+		assert_that(c.as_bool('foo'), is_(True))
