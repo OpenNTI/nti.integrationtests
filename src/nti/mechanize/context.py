@@ -92,23 +92,26 @@ class DelegateContext(Context):
 		return key in self.__dict__ or key in self._delegated
 
 	def keys(self):
-		result = list(self.__dict__.keys()) + list(self._delegated.keys())
+		result = set(self.__dict__.keys())
+		result.update(self._delegated.keys())
 		return result
 
 	def items(self):
-		result = list(self.__dict__.items()) + list(self._delegated.items())
-		return result
+		result = {}
+		result.update(self._delegated.__dict__)
+		result.update(self.__dict__)
+		return result.items()
 
 	def __getattr__(self, name):
-		if name in self._delegated:
-			return self._delegated[name]
-		return self.__dict__[name]
+		if name in self.__dict__:
+			return self.__dict__[name]
+		return self._delegated.__dict__[name]
 
-	def __setattr__(self, name, value):
-		if name not in self._delegated:
-			self.__dict__[name] = value
+	def __delattr__(self, name):
+		if name in self.__dict__:
+			del self.__dict__[name]
 		else:
-			raise AttributeError('Cannot set a delegated attribute')
+			raise AttributeError("cannot delete a delegated attribute")
 
 	def toExternalObject(self):
 		external = self._delegated.toExternalObject()

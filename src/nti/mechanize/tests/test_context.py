@@ -27,11 +27,10 @@ class TestContext(unittest.TestCase):
 		assert_that(d, has_property('test', 'test'))
 		d.test1 = 'test1'
 		assert_that(d, has_property('test1', 'test1'))
-		try:
-			d.test = 'xxx'
-			self.fail()
-		except AttributeError:
-			pass
+
+		d.test = 'xxx'
+		assert_that(d, has_property('test', 'xxx'))
+		assert_that(c, has_property('test', 'test'))
 
 		c['foo'] = 1
 		assert_that(c, has_property('foo', is_(1)))
