@@ -10,8 +10,11 @@ logger = __import__('logging').getLogger(__name__)
 
 import numbers
 
+from zope import interface
+
 from . import boolean_states
 from . import toExternalObject
+from . import interfaces as mc_interfaces
 
 class DataMixin(object):
 
@@ -58,6 +61,7 @@ class TimerResultMixin(DataMixin):
 	def timers(self):
 		return dict(self.__dict__)
 
+@interface.implementer(mc_interfaces.IContext)
 class Context(DataMixin):
 
 	def _as(self, trx, key, default=None):
@@ -81,10 +85,11 @@ class Context(DataMixin):
 	def as_str(self, key, default=None):
 		return self._as(str, key, default)
 
-class DelegateContext(Context):
+@interface.implementer(mc_interfaces.IDelegatedContext)
+class DelegatedContext(Context):
 
 	def __init__(self, context):
-		super(DelegateContext, self).__init__()
+		super(DelegatedContext, self).__init__()
 		assert isinstance(context, Context)
 		self.__dict__['_delegated'] = context
 

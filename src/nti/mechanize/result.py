@@ -10,10 +10,14 @@ logger = __import__('logging').getLogger(__name__)
 
 import time
 
+from zope import interface
+
 from . import toExternalObject
+from . import interfaces as mc_interfaces
 
 IGNORE_RESULT = object()
 
+@interface.implementer(mc_interfaces.IRunnerResult)
 class RunnerResult(object):
 
     def __init__(self, group_name, runner_num, run_time, elapsed, iteration,

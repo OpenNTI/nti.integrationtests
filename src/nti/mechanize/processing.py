@@ -16,10 +16,15 @@ import traceback
 import multiprocessing
 from cStringIO import StringIO
 
+from zope import interface
+from zope import lifecycleevent
+
 from .context import Context
+from . import toExternalObject
 from .result import RunnerResult
 from .result import IGNORE_RESULT
 from .context import TimerResultMixin
+from . import interfaces as mc_interfaces
 
 def validate_context(context):
 	assert isinstance(context, Context), 'must specify a valid context'
@@ -44,6 +49,7 @@ def validate_context(context):
 	assert context.group_name, "must specify a valid runner group name"
 	return context
 
+@interface.implementer(mc_interfaces.ICallable)
 def noop(*args, **kwargs):
 	pass
 
@@ -256,7 +262,7 @@ class TargetRunner(object):
 				else:
 					custom_timers = None
 
-				result = repr(result) if result is not None else result
+				result = toExternalObject(result) if result is not None else result
 				runner_result = RunnerResult(group_name=self.group_name,
 											 runner_num=self.runner_num,
 											 run_time=run_time,
@@ -268,6 +274,8 @@ class TargetRunner(object):
 
 				if self.queue:
 					self.queue.put(runner_result)
+				else:
+					lifecycleevent.created(runner_result)
 
 				if self.hold_results:
 					self._results.append(runner_result)

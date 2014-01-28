@@ -15,7 +15,7 @@ from hamcrest import has_property
 import unittest
 
 from nti.mechanize.context import Context
-from nti.mechanize.context import DelegateContext
+from nti.mechanize.context import DelegatedContext
 
 class TestContext(unittest.TestCase):
 	
@@ -23,7 +23,7 @@ class TestContext(unittest.TestCase):
 		c = Context()
 		c.test = 'test'
 		assert_that(c, has_property('test', 'test'))
-		d = DelegateContext(c)
+		d = DelegatedContext(c)
 		assert_that(d, has_property('test', 'test'))
 		d.test1 = 'test1'
 		assert_that(d, has_property('test1', 'test1'))
