@@ -17,7 +17,7 @@ import multiprocessing
 from cStringIO import StringIO
 
 from zope import interface
-from zope import lifecycleevent
+from zope.event import notify
 
 from .context import Context
 from . import toExternalObject
@@ -275,7 +275,7 @@ class TargetRunner(object):
 				if self.queue:
 					self.queue.put(runner_result)
 				else:
-					lifecycleevent.created(runner_result)
+					notify(runner_result)
 
 				if self.hold_results:
 					self._results.append(runner_result)

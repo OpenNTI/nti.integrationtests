@@ -55,3 +55,13 @@ class IRunnerResult(IExternalizable):
 	group_name = schema.TextLine(title="runner group", required=True)
 	custom_timers = schema.Dict(title="runenr custom timers", required=False)
 
+class IResultListener(interface.Interface):
+
+	def open(context):
+		pass
+	
+	def __call__(result):
+		pass
+
+	def close(context):
+		pass
