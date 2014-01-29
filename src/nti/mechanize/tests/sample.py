@@ -30,13 +30,11 @@ def creation(*args, **kwargs):
 @interface.implementer(mc_interfaces.IResultListener)
 class _listener(object):
 
-    context = None
-
     def open(self, context):
-        self.context.opened = True
+        context.opened = True
 
     def __call__(self, result):
         result.listened = True
 
     def close(self, context):
-        self.context.closed = True
+        context.closed = True

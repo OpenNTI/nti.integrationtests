@@ -145,6 +145,9 @@ def read_config(config_file, process_args=True):
 				get_float_option(config, section, "call_wait_time",
 								 context.call_wait_time)
 		
+		delegated.hold_results = \
+				get_bool_option(config, section, "hold_results", False)
+			
 		# get target and params
 		if process_args:
 			delegated.target = resolve(delegated.target)

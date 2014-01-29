@@ -17,6 +17,8 @@ import argparse
 import zope.exceptions
 from zope import component
 
+__import__('zope.component.event')  # make the dispatching effective
+
 from .config import read_config
 from . import interfaces as mc_interfaces
 	
@@ -25,8 +27,9 @@ def get_result_listeners():
 		yield impl
 
 def open_result_listeners(context):
+	sm = component.getSiteManager()
 	for listener in get_result_listeners():
-		component.provideHandler(listener, [mc_interfaces.IRunnerResult])
+		sm.registerHandler(listener, [mc_interfaces.IRunnerResult])
 		listener.open(context)
 
 def close_result_listeners(context):
@@ -57,7 +60,7 @@ def run(config_file):
 
 	open_result_listeners(context)
 	results = {}
-	context['_results'] = results
+	context['__results__'] = results
 	context.script_setup(context)
 	try:
 		now = time.time()

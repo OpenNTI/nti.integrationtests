@@ -32,10 +32,10 @@ def validate_context(context):
 	assert 	hasattr(context, 'run_time') or  hasattr(context, 'max_iterations'), \
 			"must specify a valid max number of iterations or runtime in secs"
 
-	if hasattr(context, 'run_time'):
+	if context.run_time is not None:
 		assert context.run_time > 0, "must specify a valid run time in secs"
 
-	if hasattr(context, 'max_iterations'):
+	if context.max_iterations is not None:
 		assert context.max_iterations > 0, "must specify a valid max number of iterations"
 
 	assert context.runners > 0, "must specify a valid number of runners"
@@ -43,7 +43,7 @@ def validate_context(context):
 	assert 	inspect.isfunction(context.target) or callable(context.target), \
 			"must specify a valid target"
 
-	if hasattr(context, 'target_args'):
+	if context.target_args:
 		assert tuple(context.target_args), "must specify a valid target arguments"
 
 	assert context.group_name, "must specify a valid runner group name"
@@ -128,7 +128,7 @@ class RunnerGroup(multiprocessing.Process):
 		return self.context.teardown
 
 	def run(self):
-		targets = []
+		callables = []
 
 		self.setup(self.context)
 		logger.info("group '%s' started", self.group_name)
@@ -147,12 +147,12 @@ class RunnerGroup(multiprocessing.Process):
 				else:
 					runner = multiprocessing.Process(target=target, args=())
 
-				targets.append(runner)
+				callables.append((runner, target))
 				runner.start()
 
-			for runner in targets:
+			for runner, target in callables:
 				runner.join()
-				self._add_result(runner)
+				self._add_result(target)
 		finally:
 			self.teardown(self.context)
 			elapsed = time.time() - t

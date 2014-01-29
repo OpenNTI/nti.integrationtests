@@ -43,7 +43,7 @@ class TestConfig(unittest.TestCase):
 		assert_that(runners, has_length(1))
 		assert_that(runners[0], has_property('context'))
 		assert_that(runners[0], has_property('runners', is_(1)))
-		assert_that(runners[0], has_property('max_iterations', is_(50)))
+		assert_that(runners[0], has_property('max_iterations', is_(1)))
 		assert_that(runners[0], has_property('group_name', is_('creation')))
 		assert_that(runners[0], has_property('setup',
 											 is_('nti.mechanize.tests.sample.setup')))
