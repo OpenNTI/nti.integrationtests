@@ -145,3 +145,14 @@ class XHRPollingSocket(SocketIOSocket):
 						"Invalid status code while posting to %s" % urlf)
 	
 	connect_to_ds = connect_to_server  # BWC
+
+def create_server_connection(host, port, username, password, is_secure=False,
+							 resource=None, **options):
+	result = XHRPollingSocket.connect_to_server(host=host,
+											 	port=port,
+											 	username=username,
+											 	password=password,
+											 	is_secure=is_secure,
+												resource=resource,
+												**options)
+	return result

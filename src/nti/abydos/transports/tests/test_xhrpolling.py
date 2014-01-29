@@ -15,13 +15,13 @@ from hamcrest import has_property
 
 import unittest
 
-from .. import websocket
+from .. import xhrpolling
 
-class TestWebSocket(unittest.TestCase):
+class TestXHRPolling(unittest.TestCase):
 	
 	@unittest.skip("localhost")
 	def test_connect(self):
-		ws = websocket.create_server_connection('localhost',
+		ws = xhrpolling.create_server_connection('localhost',
 												 8081,  # 8443 secure
 												'test.user.1@nextthought.com',
 												'temp001', is_secure=False)
