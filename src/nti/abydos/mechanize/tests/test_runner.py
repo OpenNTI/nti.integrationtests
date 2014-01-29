@@ -16,7 +16,7 @@ from hamcrest import has_property
 import os
 import unittest
 
-from nti.mechanize.runner import run
+from ..runner import run
 
 class TestRunner(unittest.TestCase):
 	

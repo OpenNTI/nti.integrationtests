@@ -10,7 +10,7 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import interface
 
-from nti.mechanize import interfaces as mc_interfaces
+from nti.abydos.mechanize import interfaces as mc_interfaces
 
 def script_setup(context):
     context.script_setup = True

@@ -14,8 +14,8 @@ from hamcrest import has_property
 
 import unittest
 
-from nti.mechanize.context import Context
-from nti.mechanize.context import DelegatedContext
+from ..context import Context
+from ..context import DelegatedContext
 
 class TestContext(unittest.TestCase):
 	

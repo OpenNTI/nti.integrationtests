@@ -15,7 +15,7 @@ from hamcrest import has_property
 import os
 import unittest
 
-from nti.mechanize.config import read_config
+from ..config import read_config
 
 class TestConfig(unittest.TestCase):
 	

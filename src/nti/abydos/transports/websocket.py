@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*
 """
 websocket - WebSocket client library for Python
 
@@ -22,7 +23,7 @@ Copyright (C) 2010 Hiroki Ohtani(liris)
 
 $Id$
 """
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -37,10 +38,10 @@ from urlparse import urlparse
 
 from ZODB import loglevels
 
-from nti.integrationtests.socketio import SocketIOSocket
-from nti.integrationtests.socketio import SocketIOException
-from nti.integrationtests.socketio import get_default_timeout
-from nti.integrationtests.socketio import ConnectionClosedException
+from . import SocketIOSocket
+from . import SocketIOException
+from . import get_default_timeout
+from . import ConnectionClosedException
 
 __all__ = [	'WebSocketException', 'WebSocket', 'create_ds_connection']
 
@@ -77,8 +78,8 @@ def _parse_url(url):
 	return (hostname, port, resource, is_secure)
 
 _MAX_INTEGER = (1 << 32) - 1
-_AVAILABLE_KEY_CHARS = range(0x21, 0x2f + 1) + range(0x3a, 0x7e+1)
 _MAX_CHAR_BYTE = (1 << 8) - 1
+_AVAILABLE_KEY_CHARS = range(0x21, 0x2f + 1) + range(0x3a, 0x7e+1)
 
 # ref. Websocket gets an update, and it breaks stuff.
 # http://axod.blogspot.com/2010/06/websocket-gets-update-and-it-breaks.html
@@ -86,13 +87,16 @@ _MAX_CHAR_BYTE = (1 << 8) - 1
 def _create_sec_websocket_key():
 	spaces_n = random.randint(1, 12)
 	max_n = _MAX_INTEGER / spaces_n
-	number_n = random.randint(0, max_n)
+	number_n = random.randint(0, int(max_n))
+
 	product_n = number_n * spaces_n
 	key_n = str(product_n)
+
 	for _ in range(random.randint(1, 12)):
 		c = random.choice(_AVAILABLE_KEY_CHARS)
 		pos = random.randint(0, len(key_n))
 		key_n = key_n[0:pos] + chr(c) + key_n[pos:]
+
 	for _ in range(spaces_n):
 		pos = random.randint(1, len(key_n) - 1)
 		key_n = key_n[0:pos] + b" " + key_n[pos:]
@@ -367,7 +371,8 @@ class WebSocket(SocketIOSocket):
 				try:
 					result = self._recv(2)
 					if result != b"\xff\x00":
-						logger.log(self.logging_level, "bad closing Handshake %s" % result)
+						logger.log(self.logging_level,
+								  "bad closing Handshake %s" % result)
 				except:
 					pass
 				self.sock.settimeout(timeout)
@@ -423,7 +428,8 @@ class WebSocket(SocketIOSocket):
 		return str(msg).startswith(self.WS_HEART_BEAT)
 
 	@classmethod
-	def connect_to_ds(cls, host, port, username, password, is_secure=False, timeout=None, resource=None, **kwargs):
+	def connect_to_server(cls, host, port, username, password, is_secure=False,
+					  	  timeout=None, resource=None, **kwargs):
 		host = bytes(host)
 		resource = resource or b'/socket.io/1/'
 		resource = resource + b'/' if resource[-1] != b'/' else resource
@@ -444,13 +450,14 @@ class WebSocket(SocketIOSocket):
 
 		status, resp_headers = ws._read_headers()
 		if status == 200:
-			cl = resp_headers['content-length'] if 'content-length' in resp_headers else None
+			cl = resp_headers['content-length'] \
+				 if 'content-length' in resp_headers else None
 			if cl:
 				content_length = int(resp_headers['content-length'])
 
 				# get the session id. the server returns the session id e.g.
-				# 57e45c8578d9426fb0f12336c5ef21ed:15:10:websocket,xhr-polling
-				# 5ac894738a704995bd846dcad606e1aa:15:10:flashsocket,websocket,xhr-polling
+				# 57e45c8578d9426fb0f12336c5ef21:15:10:websocket,xhr-polling
+				# 5ac894738a704995bd846dcad606e1:15:10:flashsocket,websocket,xhr-polling
 				msg = ws._recv_strict(content_length)
 				if cls._msg_pat.match(msg):
 					sessiond_id = msg.split(":")[0]
@@ -464,26 +471,27 @@ class WebSocket(SocketIOSocket):
 					return ws
 				else:
 					ws.close()
-					raise WebSocketException("Could not find session id in server reply '%s'" % msg)
+					raise WebSocketException(
+							"Could not find session id in server reply '%s'" % msg)
 			else:
 				ws.close()
 				raise WebSocketException("Invalid server response")
 		else:
 			ws.close()
-			raise WebSocketException("Invalid status %s writing to %s (%s)" % (status, resource, resp_headers))
+			raise WebSocketException("Invalid status %s writing to %s (%s)" %
+									 (status, resource, resp_headers))
+	connect_to_ds = connect_to_server  # BWC
 
-def create_ds_connection(host, port, username, password, is_secure=False, timeout=None, resource=None, **options):
-	result = WebSocket.connect_to_ds(host=host,
-									 port=port,
-									 username=username,
-									 password=password,
-									 is_secure=is_secure,
-									 timeout=timeout,
-									 resource=resource,
-									 **options)
+def create_server_connection(host, port, username, password, is_secure=False,
+							 timeout=None, resource=None, **options):
+	result = WebSocket.connect_to_server(host=host,
+									 	 port=port,
+									 	 username=username,
+									 	 password=password,
+									 	 is_secure=is_secure,
+										 timeout=timeout,
+										 resource=resource,
+										 **options)
 	return result
 
-# if __name__ == "__main__":
-# 	ws = create_ds_connection('alpha.nextthought.com', 443, 'test.user.1@nextthought.com', 'temp001', is_secure=True)
-# 	# ws = create_ds_connection('localhost', 8081, 'test.user.1@nextthought.com', 'temp001')
-# 	ws.close()
+create_ds_connection = create_server_connection
