@@ -32,13 +32,13 @@ class TestConfig(unittest.TestCase):
 		assert_that(context, has_property('max_words', is_('40')))
 
 		assert_that(context, has_property('script_setup',
-										  is_('nti.mechanize.tests.sample.script_setup')))
+										  is_('nti.abydos.mechanize.tests.sample.script_setup')))
 
 		assert_that(context, has_property('script_teardown',
-										  is_('nti.mechanize.tests.sample.script_teardown')))
+										  is_('nti.abydos.mechanize.tests.sample.script_teardown')))
 
 		assert_that(context, has_property('script_subscriber',
-										  is_('nti.mechanize.tests.sample._listener')))
+										  is_('nti.abydos.mechanize.tests.sample._listener')))
 
 		assert_that(runners, has_length(1))
 		assert_that(runners[0], has_property('context'))
@@ -46,9 +46,9 @@ class TestConfig(unittest.TestCase):
 		assert_that(runners[0], has_property('max_iterations', is_(1)))
 		assert_that(runners[0], has_property('group_name', is_('creation')))
 		assert_that(runners[0], has_property('setup',
-											 is_('nti.mechanize.tests.sample.setup')))
+											 is_('nti.abydos.mechanize.tests.sample.setup')))
 		assert_that(runners[0], has_property('teardown',
-											 is_('nti.mechanize.tests.sample.teardown')))
+											 is_('nti.abydos.mechanize.tests.sample.teardown')))
 		assert_that(runners[0], has_property('target',
-											 is_('nti.mechanize.tests.sample.creation')))
+											 is_('nti.abydos.mechanize.tests.sample.creation')))
 		assert_that(runners[0], has_property('target_args', is_('("foo",1)')))
