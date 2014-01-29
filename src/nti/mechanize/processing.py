@@ -55,12 +55,14 @@ def noop(*args, **kwargs):
 
 class RunnerGroup(multiprocessing.Process):
 
+	queue = None
 	_results = ()
 
-	def __init__(self, context, queue=None, validate=True, *args, **kwargs):
+	def __init__(self, context, validate=True, queue=None, *args, **kwargs):
 		super(RunnerGroup, self).__init__(*args, **kwargs)
-		self.queue = queue
-		self.context = validate_context(context)
+		self.context = validate_context(context) if validate else context
+		if queue:
+			self.queue = queue
 		if self.hold_results:
 			self._results = []
 
@@ -69,7 +71,7 @@ class RunnerGroup(multiprocessing.Process):
 
 	def __repr__(self):
 		return "(%s, %s, %s, %s)" % (self.group_name, self.runners, self.run_time,
-									 self.rampup)
+									 self.max_iterations)
 
 	# ----------------
 
@@ -94,6 +96,10 @@ class RunnerGroup(multiprocessing.Process):
 		return getattr(self.context, 'run_time', None)
 
 	@property
+	def max_iterations(self):
+		return getattr(self.context, 'max_iterations', None)
+
+	@property
 	def rampup(self):
 		return getattr(self.context, 'rampup', 0)
 
@@ -104,6 +110,14 @@ class RunnerGroup(multiprocessing.Process):
 	@property
 	def hold_results(self):
 		return getattr(self.context, 'hold_results', False)
+
+	@property
+	def target(self):
+		return self.context.target
+
+	@property
+	def target_args(self):
+		return self.context.target_args
 
 	@property
 	def setup(self):

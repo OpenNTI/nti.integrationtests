@@ -98,6 +98,7 @@ def read_config(config_file, process_args=True):
 		
 	# read running groups
 	
+	context.runners = get_int_option(config, name='runners')
 	context.run_time = get_int_option(config, name="run_time")
 	context.rampup = get_int_option(config, name="rampup", default=0)
 	context.use_threads = get_bool_option(config, name="use_threads")

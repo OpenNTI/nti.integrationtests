@@ -110,7 +110,10 @@ class DelegatedContext(Context):
 	def __getattr__(self, name):
 		if name in self.__dict__:
 			return self.__dict__[name]
-		return self._delegated.__dict__[name]
+		try:
+			return self._delegated.__dict__[name]
+		except KeyError:
+			raise AttributeError(name)
 
 	def __delattr__(self, name):
 		if name in self.__dict__:
