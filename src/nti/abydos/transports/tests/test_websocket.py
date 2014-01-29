@@ -15,10 +15,11 @@ from hamcrest import has_property
 
 import unittest
 
-from nti.abydos.transports import websocket
+from .. import websocket
 
 class TestWebSocket(unittest.TestCase):
 	
+	@unittest.skip("localhost")
 	def test_connect(self):
 		ws = websocket.create_server_connection('localhost',
 												8081,
