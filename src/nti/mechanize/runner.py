@@ -40,7 +40,7 @@ def close_result_listeners(context):
 
 def run(config_file):
 	context, groups = read_config(config_file)
-	context['config_file'] = config_file
+	context['__config_file__'] = config_file
 	
 	elapsed = None
 	run_localtime = time.localtime()

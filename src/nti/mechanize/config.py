@@ -160,6 +160,6 @@ def read_config(config_file, process_args=True):
 		group_runners.append(runner)
 	
 	if not process_args:
-		context['config'] = config
+		context['__config__'] = config
 		
 	return (context, group_runners)
