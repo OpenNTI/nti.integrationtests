@@ -16,6 +16,8 @@ from . import boolean_states
 from . import toExternalObject
 from . import interfaces as mc_interfaces
 
+read_only_attributes = ('script_setup', 'script_teardown', 'script_subscriber')
+
 class DataMixin(object):
 
 	def __contains__(self, key):
@@ -114,6 +116,10 @@ class DelegatedContext(Context):
 			return self._delegated.__dict__[name]
 		except KeyError:
 			raise AttributeError(name)
+
+	def __setattr__(self, name, value):
+		if name not in read_only_attributes:
+			self.__dict__[name] = value
 
 	def __delattr__(self, name):
 		if name in self.__dict__:

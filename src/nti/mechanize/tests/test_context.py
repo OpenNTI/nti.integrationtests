@@ -44,3 +44,7 @@ class TestContext(unittest.TestCase):
 		assert_that(c.as_str('foo'), is_('2'))
 		c['foo'] = 'y'
 		assert_that(c.as_bool('foo'), is_(True))
+
+		c.script_setup = 'script_setup'
+		d.script_setup = 'new'
+		assert_that(d, has_property('script_setup', is_('script_setup')))

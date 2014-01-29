@@ -37,6 +37,9 @@ class TestConfig(unittest.TestCase):
 		assert_that(context, has_property('script_teardown',
 										  is_('nti.mechanize.tests.sample.script_teardown')))
 
+		assert_that(context, has_property('script_subscriber',
+										  is_('nti.mechanize.tests.sample._listener')))
+
 		assert_that(runners, has_length(1))
 		assert_that(runners[0], has_property('context'))
 		assert_that(runners[0], has_property('runners', is_(1)))

@@ -30,29 +30,35 @@ def open_result_listeners(context):
 		listener.open(context)
 
 def close_result_listeners(context):
-	gsm = component.getGlobalSiteManager()
+	sm = component.getSiteManager()
 	for listener in get_result_listeners():
-		listener.close(context)
-		gsm.unregisterHandler(listener, [mc_interfaces.IRunnerResult])
+		try:
+			listener.close(context)
+		except:
+			logger.exception("error closing listener %r", listener)
+		sm.unregisterHandler(listener, [mc_interfaces.IRunnerResult])
 
 def run(config_file):
-	context, groups = read_config (config_file)
+	context, groups = read_config(config_file)
 	context['config_file'] = config_file
 	
+	elapsed = None
 	run_localtime = time.localtime()
 	timestamp = time.strftime('%Y.%m.%d_%H.%M.%S', run_localtime)
 	context.timestamp = timestamp
 		
+	listener = None
 	clazz = context.script_subscriber
 	if 	clazz and inspect.isclass(clazz) and \
 		mc_interfaces.IResultListener.implementedBy(clazz):
 		# register result listerner
-		component.provideUtility(clazz(), mc_interfaces.IResultListener)
+		listener = clazz()
+		component.provideUtility(listener, mc_interfaces.IResultListener)
 
 	open_result_listeners(context)
 	results = {}
 	context['_results'] = results
-	context.script_setup(context=context)
+	context.script_setup(context)
 	try:
 		now = time.time()
 		for group in groups:
@@ -66,11 +72,15 @@ def run(config_file):
 			for group in groups:
 				group.join()
 		
-		result = time.time() - now
-		return result
+		elapsed = time.time() - now
 	finally:
-		context.script_teardown(context=context)
+		context.script_teardown(context)
 		close_result_listeners(context)
+		if listener is not None:
+			sm = component.getSiteManager()
+			sm.unregisterUtility(listener, mc_interfaces.IResultListener)
+
+	return context, groups, elapsed
 
 def set_logger(debug=False):
 	ei = '%(asctime)s %(levelname)-5.5s [%(name)s][%(thread)d][%(threadName)s] %(message)s'
@@ -92,7 +102,7 @@ def main():
 	if not config or not os.path.exists(config):
 		raise Exception("must specify a valid config file")
 
-	return run(config)
+	run(config)
 
 if __name__ == '__main__':
 	main()
