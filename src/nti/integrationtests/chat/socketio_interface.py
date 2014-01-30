@@ -14,13 +14,13 @@ import threading
 import collections
 from collections import OrderedDict, Mapping
 
+from nti.abydos.transports import SocketIOException
+from nti.abydos.transports import ConnectionClosedException
+
+from nti.abydos.transports.websocket import WebSocket
+from nti.abydos.transports.xhrpolling import XHRPollingSocket
+
 from nti.integrationtests.contenttypes import toExternalObject
-
-from nti.integrationtests.socketio import SocketIOException
-from nti.integrationtests.socketio import ConnectionClosedException
-
-from nti.integrationtests.socketio.websocket import WebSocket
-from nti.integrationtests.socketio.xhrpolling import XHRPollingSocket
 
 WS_ACK			 = b'6::'
 WS_CONNECT		 = b'1::'
