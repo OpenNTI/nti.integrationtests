@@ -10,6 +10,8 @@ logger = __import__('logging').getLogger(__name__)
 import six
 import collections
 
+from .. import toExternalObject
+
 def to_collection(items=None, factory=list):
     result = None
     if not items:

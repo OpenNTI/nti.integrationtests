@@ -7,9 +7,12 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from collections import OrderedDict
+import six
+import uuid
+import collections
 
 from . import protocol
+from . import toExternalObject
 from .. import alias, make_repr
 from .constants import DEFAULT_CHANNEL
 
@@ -109,25 +112,37 @@ class PostMessage(_Message):
 
 _PostMessage = PostMessage  # BWC
 
+def nonefy(s):
+	return None if s and str(s) == 'null' else s
+
+def create_message_body(msg):
+	if hasattr(msg, 'toDataServerObject'):
+		body = [msg.toDataServerObject()]
+	elif isinstance(msg, six.string_types):
+		body = [unicode(msg)]
+	elif isinstance(msg, (collections.Mapping, collections.Sequence)):
+		body = toExternalObject(msg)
+	else:
+		body = [toExternalObject(msg)]
+	return body
+
 class Client(object):
 
-	def __init__(self, transport=None, timeout=DEAULT_TIMEOUT, * args, **kwargs):
+	def __init__(self, username, transport=None, * args, **kwargs):
 		self.reset()
 
-		self.ws_sent = None
-		self.ws_recv = None
 		self.killed = False
 		self.heart_beats = 0
-		self.timeout = timeout
+		self.username = username
 		self.transport = transport
 		self.connected = getattr(self.transport, "connected", False)
 
 	def reset(self):
 		self.rooms = {}
 		self.sent_messages = []
-		self.recv_messages = OrderedDict()
-		self.shadowed_messages = OrderedDict()
-		self.moderated_messages = OrderedDict()
+		self.recv_messages = collections.OrderedDict()
+		self.shadowed_messages = collections.OrderedDict()
+		self.moderated_messages = collections.OrderedDict()
 
 	@property
 	def sent(self):
@@ -164,6 +179,16 @@ class Client(object):
 	def heartBeat(self):
 		self.connected = True
 		self.heart_beats += 1
+
+	def serverKill(self, args=None):
+		self.killed = True
+		self.connected = False
+
+	def connect(self):
+		self.connected = True
+
+	def disconnect(self):
+		self.connected = False
 
 	# ----
 
@@ -203,6 +228,73 @@ class Client(object):
 									  transport=self.transport)
 		return result
 
+	def postMessage(self, message, ContainerId, inReplyTo=None, recipients=None,
+					channel=None, transport=None, creator=None, **kwargs):
+
+		creator  = creator or self.username
+		message = create_message_body(message)
+		protocol.postMessage(message=message, ContainerId=ContainerId, channel=channel,
+							 inReplyTo=inReplyTo, recipients=recipients,
+							 transport=self.transport)
+
+		result = PostMessage(message=message, channel=channel, inReplyTo=inReplyTo,
+				 			 recipients=recipients, creator=creator,
+				 			 containerId=ContainerId, ID=unicode(uuid.uuid1()))
+		self.sent_messages.append(result)
+		return result
+
+
+	def chat_addOccupantToRoom(self, **kwargs):  # callback
+		pass
+
+	def chat_failedToEnterRoom(self, **kwargs):  # callback
+		ID = kwargs.get('ID')
+		result = self.rooms.pop(ID, None) if ID else None
+		return result
+
+	def setPresence(self, username=None, ContainerId=None, status=None,
+					show=None, Type=None, **kwargs):
+		show = show or 'chat'
+		Type = Type or 'available'
+		username = username or self.username
+		result = protocol.setPresence(username=username, ContainerId=ContainerId,
+									  show=show, Type=Type, status=status,
+									  transport=self.transport)
+		return result
+
+	def send_heartbeat(self):
+		result = protocol.send_heartbeat(self.transport)
+		return result
+
+	@classmethod
+	def _msg_params(cls, **kwargs):
+		return {'message'		: kwargs['Body'],
+				'ID'			: kwargs['ID'],
+				'containerId'	: kwargs['ContainerId'],
+				'creator'		: kwargs['Creator'],
+				'channel'		: kwargs.get('channel', DEFAULT_CHANNEL),
+				'lastModified'	: kwargs.get('Last Modified', 0),
+				'inReplyTo'		: nonefy(kwargs.get('inReplyTo', None)),
+				'recipients'	: nonefy(kwargs.get('recipients', None)) }
+
+	def chat_recvMessage(self, **kwargs):  # callback
+		d = self._msg_params(**kwargs)
+		message = RecvMessage(**d)
+		self.recv_messages[d['ID']] = message
+		return message
+
+	def chat_recvMessageForModeration(self, **kwargs):  # callback
+		d = self._msg_params(**kwargs)
+		message = RecvMessage(**d)
+		self.moderated_messages[d['ID']] = message
+		return message
+
+	def chat_recvMessageForShadow(self, **kwargs):  # callback
+		d = self._msg_params(**kwargs)
+		message = RecvMessage(**d)
+		self.shadowed_messages[d['ID']] = message
+		return message
+
 # 	def get_sent_messages(self, clear=False):
 # 		result = list(self.sent_messages)
 # 		if clear: self.sent_messages.clear()
@@ -223,16 +315,7 @@ class Client(object):
 # 		return result
 #
 # 	# ---- Callbacks ----
-#
-# 	def serverKill(self, args=None):
-# 		self.killed = True
-# 		self.connected = False
-#
-# 	def connect(self):
-# 		self.connected = True
-#
-# 	def disconnect(self):
-# 		self.connected = False
+
 #
 
 #
@@ -247,41 +330,10 @@ class Client(object):
 # 	def chat_presenceOfUserChangedTo(self, username, status):
 # 		pass
 #
-# 	def chat_addOccupantToRoom(self, **kwargs):
-# 		pass
+
+
 #
-# 	def chat_failedToEnterRoom(self, **kwargs):
-# 		pass
-#
-# 	def chat_postMessage(self, **kwargs):
-# 		d = dict(kwargs)
-# 		if not 'creator' in d:
-# 			d['creator'] = self.username
-# 		d['message_context'] = self.message_context
-# 		d['message'] = _create_message_body(kwargs['message'])
-# 		_postMessage(ws=self.ws, data_format=self.data_format, **d)
-#
-# 		post_msg = _PostMessage(**d)
-# 		self.sent_messages.append(post_msg)
-# 		return post_msg
-#
-# 	postMessage = chat_postMessage
-#
-# 	def chat_setPresence(self, **kwargs):
-# 		d = dict(kwargs)
-# 		d['message_context'] = self.message_context
-# 		if 'type' not in d:
-# 			d['type'] = 'available'
-# 		if 'show' not in d:
-# 			d['show'] = 'chat'
-# 		if 'username' not in d:
-# 			d['username'] = self.username
-# 		_setPresence(ws=self.ws, data_format=self.data_format, **d)
-#
-# 	setPresence = chat_setPresence
-#
-# 	def send_heartbeat(self):
-# 		_send_heartbeat(self.ws)
+
 #
 # 	# ---- ----- ----
 #
@@ -289,38 +341,7 @@ class Client(object):
 # 		pass
 #
 # 	# ---- ----- ----
-#
-# 	def _msg_params(self, **kwargs):
-# 		return {'message'		: kwargs['Body'],
-# 				'ID'			: kwargs['ID'],
-# 				'containerId'	: kwargs['ContainerId'],
-# 				'creator'		: kwargs['Creator'],
-# 				'channel'		: kwargs.get('channel', DEFAULT_CHANNEL),
-# 				'lastModified'	: kwargs.get('Last Modified', 0),
-# 				'inReplyTo'		: _nonefy(kwargs.get('inReplyTo', None)),
-# 				'recipients'	: _nonefy(kwargs.get('recipients', None)) }
-#
-# 	def chat_recvMessage(self, **kwargs):
-# 		d = self._msg_params(**kwargs)
-# 		message = _RecvMessage(**d)
-# 		self.recv_messages[d['ID']] = message
-# 		return message
-#
-# 	def chat_recvMessageForModeration(self, **kwargs):
-# 		d = self._msg_params(**kwargs)
-# 		message = _RecvMessage(**d)
-# 		self.moderated_messages[d['ID']] = message
-# 		return message
-#
-# 	def chat_recvMessageForShadow(self, **kwargs):
-# 		d = self._msg_params(**kwargs)
-# 		message = _RecvMessage(**d)
-# 		self.shadowed_messages[d['ID']] = message
-# 		return message
-#
-# 	recvMessage = chat_recvMessage
-# 	recvMessageForModeration = chat_recvMessageForModeration
-#
+
 # 	# ---- ----- ----
 #
 # 	def runLoop(self):
