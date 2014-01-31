@@ -9,6 +9,7 @@ logger = __import__('logging').getLogger(__name__)
 
 from collections import OrderedDict
 
+from . import protocol
 from .. import alias, make_repr
 from .constants import DEFAULT_CHANNEL
 
@@ -158,6 +159,31 @@ class Client(object):
 			if m.channel == channel:
 				yield m
 
+	# ---- 
+	
+	def enterRoom(self, Occupants=None, inReplyTo=None, references=None,
+			  	  RoomId=None, ContainerId=None, **kwargs):
+		result = protocol.enterRoom(Occupants=Occupants, inReplyTo=inReplyTo,
+									references=references, RoomId=RoomId,
+									ContainerI=ContainerId,
+									transport=self.transport)
+		return result
+
+	def chat_enteredRoom(self, **kwargs):  # callback
+		room = Room(**kwargs)
+		self.rooms[room.ID] = room
+		return room
+
+	def exitRoom(self, roomId):
+		if roomId in self.rooms:
+			result = protocol.exitRoom(roomId=roomId, transport=self.transport)
+			return result
+
+	def chat_exitedRoom(self, **kwargs):  # callback
+		ID = kwargs.get('ID')
+		result = self.rooms.pop(ID, None) if ID else None
+		return result
+
 # 	def get_sent_messages(self, clear=False):
 # 		result = list(self.sent_messages)
 # 		if clear: self.sent_messages.clear()
@@ -193,18 +219,6 @@ class Client(object):
 # 		self.connected = True
 # 		self.heart_beats += 1
 #
-# 	def enterRoom(self, **kwargs):
-# 		d = dict(kwargs)
-# 		d['data_format'] = self.data_format
-# 		d['message_context'] = self.message_context
-# 		return _enterRoom(self.ws, **d)
-#
-# 	def exitRoom(self, room_id):
-# 		if room_id in self.rooms:
-# 			_exitRoom(self.ws, room_id, self.data_format, message_context=self.message_context)
-# 			return self.rooms.pop(room_id, None)
-# 		else:
-# 			return None
 #
 # 	def makeModerated(self, containerId, flag=True):
 # 		_makeModerated(self.ws, containerId, flag, self.data_format, message_context=self.message_context)
@@ -215,8 +229,6 @@ class Client(object):
 # 	def shadowUsers(self, containerId, users):
 # 		_shadowUsers(self.ws, containerId, users, self.data_format, message_context=self.message_context)
 #
-# 	chat_exitRoom = exitRoom
-# 	chat_enterRoom = enterRoom
 # 	chat_shadowUsers = shadowUsers
 # 	chat_makeModerated = makeModerated
 # 	chat_approveMessage = approveMessages
@@ -237,16 +249,6 @@ class Client(object):
 #
 # 	def chat_failedToEnterRoom(self, **kwargs):
 # 		pass
-#
-# 	def chat_exitedRoom(self, **kwargs):
-# 		ID = kwargs.get('ID', kwargs.get('id', None))
-# 		result = self.rooms.pop(ID, None) if ID else None
-# 		return result
-#
-# 	def chat_enteredRoom(self, **kwargs):
-# 		room = _Room(**kwargs)
-# 		self.rooms[room.ID] = room
-# 		return room
 #
 # 	def chat_postMessage(self, **kwargs):
 # 		d = dict(kwargs)

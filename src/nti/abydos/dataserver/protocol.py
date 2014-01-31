@@ -111,8 +111,8 @@ def isApproveMessages(data):
 def isDataIncomingChange(data):
 	return isEvent(data, EVT_NOTICE_INCOMING_CHANGE)
 
-def exitRoom(ContainerId, transport=None, **kwargs):
-	d = {"name":EVT_EXIT_ROOM, "args":[ContainerId]}
+def exitRoom(roomId, transport=None, **kwargs):
+	d = {"name":EVT_EXIT_ROOM, "args":[roomId]}
 	msg = WS_BROADCAST + encode(d)
 	transport.send(msg) if transport else None
 	return msg
