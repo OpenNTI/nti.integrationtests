@@ -13,6 +13,8 @@ import inspect
 import numbers
 import collections
 
+import ZODB
+
 def toExternalObject(obj):
 
     def recall(obj):
@@ -34,3 +36,20 @@ def toExternalObject(obj):
         return result
 
     return recall(obj)
+
+def alias(prop_name, doc=None):
+    if doc is None:
+        doc = 'Alias for :attr:`' + prop_name + '`'
+    return property(lambda self: getattr(self, prop_name),
+                    lambda self, nv: setattr(self, prop_name, nv),
+                    doc=doc)
+
+def make_repr():
+    def __repr__(self):
+        try:
+            return "%s().__dict__.update( %s )" % (self.__class__.__name__, self.__dict__)
+        except ZODB.POSException.ConnectionStateError:
+            return '%s(Ghost)' % self.__class__.__name__
+        except (ValueError, LookupError) as e:
+            return '%s(%s)' % (self.__class__.__name__, e)
+    return __repr__
