@@ -111,14 +111,14 @@ def isApproveMessages(data):
 def isDataIncomingChange(data):
 	return isEvent(data, EVT_NOTICE_INCOMING_CHANGE)
 
-def exitRoom(transport, ContainerId):
+def exitRoom(ContainerId, transport=None, **kwargs):
 	d = {"name":EVT_EXIT_ROOM, "args":[ContainerId]}
 	msg = WS_BROADCAST + encode(d)
-	transport.send(msg)
+	transport.send(msg) if transport else None
 	return msg
 
-def enterRoom(transport, Occupants=None, inReplyTo=None, references=None,
-			  RoomId=None, ContainerId=None):
+def enterRoom(Occupants=None, inReplyTo=None, references=None,
+			  RoomId=None, ContainerId=None, transport=None, **kwargs):
 
 	assert ContainerId or RoomId, 'must specify either valid container id or room id'
 
@@ -140,11 +140,11 @@ def enterRoom(transport, Occupants=None, inReplyTo=None, references=None,
 
 	d = {"name":EVT_ENTER_ROOM, "args":[args]}
 	msg = WS_BROADCAST + encode(d)
-	transport.send(msg)
+	transport.send(msg) if transport else None
 	return msg
 
-def setPresence(transport, username, ContainerId=None, status=None,
-				show=None, Type=None, ** kwargs):
+def setPresence(username, ContainerId=None, status=None,
+				show=None, Type=None, transport=None, **kwargs):
 
 	args = {u"ContainerId": ContainerId,
 			u"show": show,
@@ -155,11 +155,11 @@ def setPresence(transport, username, ContainerId=None, status=None,
 
 	d = {"name":EVT_SET_PRESENCE, "args":[args]}
 	msg = WS_BROADCAST + encode(d)
-	transport.send(msg)
+	transport.send(msg) if transport else None
 	return msg
 
-def postMessage(transport, message, ContainerId=None, inReplyTo=None, recipients=None,
-				channel=None, **kwargs):
+def postMessage(message, ContainerId, inReplyTo=None, recipients=None,
+				channel=None, transport=None, **kwargs):
 
 	channel = channel or DEFAULT_CHANNEL
 	assert ContainerId, 'must specify a valid container'
@@ -176,33 +176,33 @@ def postMessage(transport, message, ContainerId=None, inReplyTo=None, recipients
 
 	d = {"name":EVT_POST_MESSAGE, "args":[args]}
 	msg = WS_BROADCAST + encode(d)
-	transport.send(msg)
+	transport.send(msg) if transport else None
 	return msg
 
-def makeModerated(transport, ContainerId, flag=True):
+def makeModerated(ContainerId, flag=True, transport=None, **kwargs):
 	d = {"name":EVT_MAKE_MODERATED, "args":[ContainerId, flag]}
 	msg = WS_BROADCAST + encode(d)
-	transport.send(msg)
+	transport.send(msg) if transport else None
 	return msg
 
-def approveMessages(transport, mids):
+def approveMessages(mids, transport=None):
 	mids = to_list(mids)
 	d = {"name":EVT_APPROVE_MSGS, "args":[mids]}
 	msg = WS_BROADCAST + encode(d)
-	transport.send(msg)
+	transport.send(msg) if transport else None
 	return msg
 
-def shadowUsers(transport, ContainerId, users):
+def shadowUsers(ContainerId, users, transport=None, **kwargs):
 	users = to_list(users)
 	d = {"name":EVT_SHADOW_USERS, "args":[ContainerId, users]}
 	msg = WS_BROADCAST + encode(d)
-	transport.send(msg)
+	transport.send(msg) if transport else None
 	return msg
 
-def disconnect(transport):
-	transport.send(WS_DISCONNECT)
+def disconnect(transport=None, **kwargs):
+	transport.send(WS_DISCONNECT) if transport else None
 	return WS_DISCONNECT
 
-def send_heartbeat(transport):
-	transport.heartbeat()
+def send_heartbeat(transport=None):
+	transport.heartbeat() if transport else None
 
