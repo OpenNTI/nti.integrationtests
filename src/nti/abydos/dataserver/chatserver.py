@@ -161,6 +161,12 @@ class Client(object):
 
 	# ---- 
 	
+	def heartBeat(self):
+		self.connected = True
+		self.heart_beats += 1
+
+	# ----
+
 	def enterRoom(self, Occupants=None, inReplyTo=None, references=None,
 			  	  RoomId=None, ContainerId=None, **kwargs):
 		result = protocol.enterRoom(Occupants=Occupants, inReplyTo=inReplyTo,
@@ -182,6 +188,19 @@ class Client(object):
 	def chat_exitedRoom(self, **kwargs):  # callback
 		ID = kwargs.get('ID')
 		result = self.rooms.pop(ID, None) if ID else None
+		return result
+
+	def makeModerated(self, ContainerId, flag=True):
+		result = protocol.makeModerated(ContainerId, flag, self.transport)
+		return result
+
+	def approveMessages(self, mids):
+		result = protocol.approveMessages(mids, self.transport)
+		return result
+
+	def shadowUsers(self, ContainerId, users):
+		result = protocol.shadowUsers(ContainerId=ContainerId, users=users,
+									  transport=self.transport)
 		return result
 
 # 	def get_sent_messages(self, clear=False):
@@ -215,23 +234,7 @@ class Client(object):
 # 	def disconnect(self):
 # 		self.connected = False
 #
-# 	def heartBeat(self):
-# 		self.connected = True
-# 		self.heart_beats += 1
-#
-#
-# 	def makeModerated(self, containerId, flag=True):
-# 		_makeModerated(self.ws, containerId, flag, self.data_format, message_context=self.message_context)
-#
-# 	def approveMessages(self, mids):
-# 		_approveMessages(self.ws, mids, self.data_format, message_context=self.message_context)
-#
-# 	def shadowUsers(self, containerId, users):
-# 		_shadowUsers(self.ws, containerId, users, self.data_format, message_context=self.message_context)
-#
-# 	chat_shadowUsers = shadowUsers
-# 	chat_makeModerated = makeModerated
-# 	chat_approveMessage = approveMessages
+
 #
 # 	# ---- ----- ----
 #
