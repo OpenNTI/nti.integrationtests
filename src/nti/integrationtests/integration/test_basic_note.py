@@ -7,6 +7,12 @@ __docformat__ = "restructuredtext en"
 #disable: accessing protected members, too many methods
 #pylint: disable=W0212,R0904
 
+from hamcrest import is_
+from hamcrest import is_not
+from hamcrest import has_length
+from hamcrest import assert_that
+from hamcrest import greater_than_or_equal_to
+
 import time
 import unittest
 from datetime import datetime
@@ -19,8 +25,6 @@ from nti.integrationtests.contenttypes import CanvasPolygonShape
 from nti.integrationtests.contenttypes import CanvasAffineTransform
 
 from nti.integrationtests.integration import container_of_length
-
-from hamcrest import (is_, is_not, assert_that, has_length)
 
 from nose.plugins.attrib import attr
 
@@ -60,7 +64,8 @@ class TestBasicNotes(DataServerTestCase):
 
 	def create_canvas(self):
 		transform = CanvasAffineTransform(a=0, b=0, c=0, d=0, tx=.25, ty=.25)
-		polygon = CanvasPolygonShape(sides=4, transform=transform, container=self.container)
+		polygon = CanvasPolygonShape(sides=4, transform=transform,
+									 container=self.container)
 		canvas = Canvas(shapeList=[polygon], container=self.container)
 		return self.ds.create_object(canvas)
 	
@@ -91,21 +96,27 @@ class TestBasicNotes(DataServerTestCase):
 		nids =[]
 		for x in range(1,5):
 			references = nids if x == 4 else None
-			created_note = self.ds.create_note(['note %s' % x], self.container, references=references)
+			created_note = self.ds.create_note(['note %s' % x], self.container,
+											   references=references)
 			nids.append(created_note['id'])
 		assert_that(created_note['references'], has_length(len(nids)-1))
 		
 	def test_sharedWith(self):		
-		created_note = self.ds.create_note(self.string, self.container, sharedWith=[self.target[0]])
+		created_note = self.ds.create_note(self.string, self.container,
+										   sharedWith=[self.target[0]])
 		assert_that(created_note['sharedWith'], is_([self.target[0]]))
 		
 	def test_note_title_indexing(self):
-		note = self.ds.create_note(u'The Asauchi breaks away to reveal Hollow Ichigo', self.container, title='At the palace of Oetsu')
+		note = self.ds.create_note(u'The Asauchi breaks away to reveal Hollow Ichigo',
+								   self.container, title='At the palace of Oetsu')
+
+		self.ds.process_hypatia(100, credentials=self.owner)
+
 		result = self.ds.search_user_content("Asauchi")
-		assert_that(result, container_of_length(1))
+		assert_that(result, container_of_length(greater_than_or_equal_to(1)))
 
 		result = self.ds.search_user_content("Oetsu")
-		assert_that(result, container_of_length(1))
+		assert_that(result, container_of_length(greater_than_or_equal_to(1)))
 
 		self.ds.delete_object(note)
 		result = self.ds.search_user_content("Asauchi")
@@ -115,7 +126,8 @@ class TestBasicNotes(DataServerTestCase):
 		assert_that(result, container_of_length(0))
 
 	def test_conditional_put(self):
-		note = self.ds.create_note(u'The man who stole the bankai', self.container, title='At the seretei')
+		note = self.ds.create_note(u'The man who stole the bankai', self.container,
+								   title='At the seretei')
 		note['body'] = ['Kill the captains with their stolen bankai']
 		headers = {'If-Unmodified-Since': 'Wed, 09 Oct 1973 15:07:09 GMT'}
 		try:
@@ -125,7 +137,8 @@ class TestBasicNotes(DataServerTestCase):
 			pass
 
 	def test_conditional_delete(self):
-		note = self.ds.create_note(u'Things that live together should die together', self.container, title='Stern ritter')
+		note = self.ds.create_note(u'Things that live together should die together',
+								   self.container, title='Stern ritter')
 		since = datetime.fromtimestamp(time.time() - 10000)
 		sdate = datetime_utils.serialize_date(since)
 		headers = {'If-Unmodified-Since': sdate}

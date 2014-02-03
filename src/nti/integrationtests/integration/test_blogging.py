@@ -7,6 +7,13 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
+from hamcrest import is_
+from hamcrest import none
+from hamcrest import not_none
+from hamcrest import has_entry
+from hamcrest import assert_that
+from hamcrest import greater_than_or_equal_to
+
 import os
 import random
 import unittest
@@ -15,7 +22,6 @@ from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.integration import contains
 
 from nose.tools import assert_raises
-from hamcrest import (assert_that, is_, not_none, has_entry, greater_than_or_equal_to, none)
 
 from nose.plugins.attrib import attr
 
@@ -30,9 +36,10 @@ class TestBlogging(DataServerTestCase):
 		self.ds.set_credentials(self.owner)
 
 	def test_create_post(self):
-		post = self.ds.create_blog_post('Shikai vs Bankai',
-										'No Zanpakuto in existence has a Shikai and a Bankai that use unrelated abilities',
-										tags=('shikai', 'bankai'))
+		post = self.ds.create_blog_post(
+						'Shikai vs Bankai',
+						'No Zanpakuto in existence has a Shikai and a Bankai that use unrelated abilities',
+						tags=('shikai', 'bankai'))
 		assert_that(post, not_none())
 		assert_that(post.description, is_('Shikai vs Bankai'))
 
@@ -43,7 +50,8 @@ class TestBlogging(DataServerTestCase):
 		assert_that(contents, contains(post))
 
 	def test_comment_post(self):
-		post = self.ds.create_blog_post('Zaraki Kenpachi', 'What is the name of the his Zanpakuto')
+		post = self.ds.create_blog_post('Zaraki Kenpachi',
+										'What is the name of the his Zanpakuto')
 		assert_that(post, not_none())
 
 		comment = self.ds.create_comment_post('Zanpakuto', 'Minazuki?', post)
@@ -67,7 +75,8 @@ class TestBlogging(DataServerTestCase):
 		assert_that(ps.body, is_(['A 10 time upgrade']))
 		assert_that(ps.sharedWith, is_([]))
 
-		post = self.ds.create_blog_post('Ichigo', 'A fake Shinigami?', sharedWith=[self.target[0]])
+		post = self.ds.create_blog_post('Ichigo', 'A fake Shinigami?',
+										sharedWith=[self.target[0]])
 		assert_that(post, not_none())
 		assert_that(post.sharedWith, is_([]))
 
@@ -83,7 +92,9 @@ class TestBlogging(DataServerTestCase):
 			self.ds.delete_object(ps)
 
 	def test_delete_post(self):
-		post = self.ds.create_blog_post('Isshin', 'At some point, he attempted to learn the Final Getsuga Tensho by facing his Zanpakuto Engetsu')
+		post = self.ds.create_blog_post(
+					'Isshin',
+					'At some point, he attempted to learn the Final Getsuga Tensho by facing his Zanpakuto Engetsu')
 		assert_that(post, not_none())
 		self.ds.delete_object(post)
 		data = self.ds.search_user_content("Engetsu")
@@ -109,6 +120,7 @@ class TestBlogging(DataServerTestCase):
 										'Begging her not to die Kenpachi screams out in rage as his opponent fades away',
 										tags=('yachiru', 'haori'))
 		assert_that(post, not_none())
+		self.ds.process_hypatia(100, credentials=self.owner)
 
 		data = self.ds.search_user_content("kenpachi")
 		assert_that(data, has_entry('Hit Count', greater_than_or_equal_to(1)))

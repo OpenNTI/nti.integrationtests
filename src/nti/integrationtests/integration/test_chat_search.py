@@ -34,7 +34,9 @@ class TestChatSearch(HostUserChatTest):
 		for u in users:
 			self.assert_(u.exception == None, "User %s caught exception '%s'" % (u.username, u.traceback))
 		
-		self.ds.set_credentials((self.user_one, self.default_user_password))
+		credentials = (self.user_one, self.default_user_password)
+		self.ds.process_hypatia(200, credentials=credentials)
+		self.ds.set_credentials(credentials)
 		
 		user_1_host_snippet = self._get_snippet(self.ds.search_user_content("town"))
 		user_1_user_snippet = self._get_snippet(self.ds.search_user_content("extreme"))

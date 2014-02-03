@@ -7,14 +7,16 @@ __docformat__ = "restructuredtext en"
 #disable: accessing protected members, too many methods
 #pylint: disable=W0212,R0904
 
+from hamcrest import is_
+from hamcrest import assert_that
+from hamcrest import greater_than_or_equal_to
+
 import time
 import unittest
 
 from nti.integrationtests import DataServerTestCase
 from nti.integrationtests.utils import generate_message
 from nti.integrationtests.integration import container_of_length
-
-from hamcrest import (assert_that, is_, greater_than_or_equal_to)
 
 from nose.plugins.attrib import attr
 
@@ -31,9 +33,11 @@ class TestBasicRedactions(DataServerTestCase):
 
 	def test_create_redaction(self):
 		st = generate_message()
-		created_obj =  self.ds.create_redaction(selectedText=st, replacementContent='redaction',
-												redactionExplanation='explanation', container=self.container,
-												 adapt=True)
+		created_obj = self.ds.create_redaction(selectedText=st,
+											   replacementContent='redaction',
+											   redactionExplanation='explanation',
+											   container=self.container,
+											   adapt=True)
 
 		assert_that(created_obj['selectedText'], is_(st))
 		assert_that(created_obj['replacementContent'], is_('redaction'))
@@ -41,11 +45,13 @@ class TestBasicRedactions(DataServerTestCase):
 		
 	def test_search_shared(self):
 		self.ds.set_credentials(self.owner)
-		redaction =  self.ds.create_redaction(selectedText='Zangetsu', replacementContent='Katen Kyokotsu',
-											  redactionExplanation='Sogyo no Kotowari', container=self.container,
+		redaction = self.ds.create_redaction(selectedText='Zangetsu',
+											  replacementContent='Katen Kyokotsu',
+											  redactionExplanation='Sogyo no Kotowari',
+											  container=self.container,
 											  adapt=True)
 		self.ds.share_object(redaction, self.target[0], adapt=True)
-		time.sleep(2)
+		self.ds.process_hypatia(100, credentials=self.owner)
 		
 		self.ds.set_credentials(self.target)
 		result = self.ds.search_user_content("Zangetsu")

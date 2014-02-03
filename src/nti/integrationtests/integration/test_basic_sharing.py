@@ -7,6 +7,10 @@ __docformat__ = "restructuredtext en"
 #disable: accessing protected members, too many methods
 #pylint: disable=W0212,R0904
 
+from hamcrest import is_
+from hamcrest import is_not
+from hamcrest import assert_that
+
 import time
 import uuid
 import unittest
@@ -17,8 +21,6 @@ from nti.integrationtests.integration import shared_with
 from nti.integrationtests.integration import contained_in
 from nti.integrationtests.integration import has_same_oid_as
 from nti.integrationtests.integration import container_of_length_greater_than_or_equal_to
-
-from hamcrest import (is_, assert_that, is_not)
 
 from nose.plugins.attrib import attr
 
@@ -48,7 +50,8 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(shared_obj, shared_with(self.target[0]))
 
 		# check that the user can now see it
-		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
+		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target,
+											  adapt=True)
 
 		assert_that(ugd, contains(shared_obj))
 
@@ -67,7 +70,8 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(shared_obj, shared_with(self.target[0]))
 
 		# check that the user can now see it
-		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
+		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target,
+											  adapt=True)
 
 		assert_that(ugd, is_not(contains(other_obj)))
 
@@ -78,8 +82,10 @@ class TestBasicSharing(DataServerTestCase):
 	def test_sharing_multiple_data(self):
 
 		# create the object to share
-		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
-		other_obj =  self.ds.create_note('A note not to share', self.container, adapt=True)
+		created_obj = self.ds.create_note('A note to share', self.container,
+										  adapt=True)
+		other_obj = self.ds.create_note('A note not to share', self.container,
+										adapt=True)
 
 		# do the actual sharing
 		shared_obj = self.ds.share_object(created_obj, self.target[0], adapt=True)
@@ -91,7 +97,8 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(shared_obj, shared_with(self.target[0]))
 
 		# check that the user can now see it
-		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
+		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target,
+											  adapt=True)
 		__traceback_info__ = ugd, created_obj, other_obj, shared_obj
 		assert_that(ugd, contains(other_obj))
 		assert_that(ugd, contains(created_obj))
@@ -131,7 +138,8 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(unshared_obj, is_not(shared_with(self.target[0])))
 
 		# check that the user can now see it
-		container = self.ds.get_user_generated_data(self.container, credentials=self.target)
+		container = self.ds.get_user_generated_data(self.container,
+													credentials=self.target)
 		assert_that(created_obj, is_not(contained_in(container)))
 			
 		try:
@@ -145,8 +153,11 @@ class TestBasicSharing(DataServerTestCase):
 	def test_revoke_selected_share(self):
 
 		# create the object to share
-		created_obj =  self.ds.create_note('A note to share', self.container, adapt=True)
-		other_obj =  self.ds.create_note('A note not to share', self.container, adapt=True)
+		created_obj = self.ds.create_note('A note to share', self.container,
+										  adapt=True)
+
+		other_obj = self.ds.create_note('A note not to share', self.container,
+										adapt=True)
 
 		# do the actual sharing
 		shared_obj1 = self.ds.share_object(created_obj, self.target[0], adapt=True)
@@ -162,7 +173,8 @@ class TestBasicSharing(DataServerTestCase):
 		assert_that(unshared_obj, is_not(shared_with(self.target[0])))
 
 		# check that the user can now see it
-		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
+		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target,
+											  adapt=True)
 
 		assert_that(ugd, contains(other_obj))
 		assert_that(ugd, is_not(contains(created_obj)))
@@ -188,7 +200,9 @@ class TestBasicSharing(DataServerTestCase):
 			self.fail("Expected 404 exception")
 
 		# Now it should no longer exist
-		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
+		ugd = self.ds.get_user_generated_data(self.container,
+											  credentials=self.target,
+											  adapt=True)
 
 		assert_that(ugd, is_not(contains(created_obj)))
 
@@ -199,12 +213,17 @@ class TestBasicSharing(DataServerTestCase):
 		shared_obj = None
 
 		try:
-			shared_obj = self.ds.share_object(created_obj, self.unauthorized_target[0], credentials=self.unauthorized_target, adapt=True)
+			shared_obj = self.ds.share_object(created_obj,
+											  self.unauthorized_target[0],
+											  credentials=self.unauthorized_target,
+											  adapt=True)
 		except Exception:
 			pass
 
 		# check that the user can not see it
-		ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
+		ugd = self.ds.get_user_generated_data(self.container,
+											  credentials=self.target,
+											  adapt=True)
 
 		assert_that(shared_obj, is_(None))
 		assert_that(ugd, is_not(contains(created_obj)))
@@ -226,7 +245,9 @@ class TestBasicSharing(DataServerTestCase):
 		#creates the variable ugd
 		ugd = None
 		try:
-			ugd = self.ds.get_user_generated_data(self.container, credentials=self.target, adapt=True)
+			ugd = self.ds.get_user_generated_data(self.container,
+												  credentials=self.target,
+												  adapt=True)
 		except Exception:
 			pass
 
@@ -236,7 +257,9 @@ class TestBasicSharing(DataServerTestCase):
 	def test_create_and_share_note(self):
 
 		# create the object to share
-		created_obj =  self.ds.create_note('A note to share', self.container, sharedWith=[self.owner[0], self.target[0]], adapt=True)
+		created_obj = self.ds.create_note('A note to share', self.container,
+										  sharedWith=[self.owner[0], self.target[0]],
+										  adapt=True)
 
 		assert_that(created_obj['body'][0], is_('A note to share'))
 		assert_that(created_obj['sharedWith'], is_([self.target[0]]))
@@ -247,7 +270,9 @@ class TestBasicSharing(DataServerTestCase):
 	def test_share_note_through_dict(self):
 
 		# create the object to share
-		created_obj =  self.ds.create_note('A note to share', self.container, sharedWith=[self.owner[0], self.target[0]], adapt=True)
+		created_obj = self.ds.create_note('A note to share', self.container,
+										   sharedWith=[self.owner[0], self.target[0]],
+										   adapt=True)
 
 		shared_obj = self.ds.share_object(created_obj, [self.owner[0], self.target[0]])
 		assert_that(shared_obj['sharedWith'], is_(['test.user.2@nextthought.com']))
@@ -258,6 +283,8 @@ class TestBasicSharing(DataServerTestCase):
 		self.ds.set_credentials(self.owner)
 		note = self.ds.create_note(msg, self.container, adapt=True)
 		note = self.ds.share_object(note, self.target[0], adapt=True)
+
+		self.ds.process_hypatia(100, credentials=self.owner)
 
 		to_search = 'Kurohitsugi'
 		self.ds.set_credentials(self.target)
@@ -283,6 +310,8 @@ class TestBasicSharing(DataServerTestCase):
 		note = self.ds.create_note(msg, self.container, adapt=True)
 		note = self.ds.share_object(note, [list_name], adapt=True)
 		
+		self.ds.process_hypatia(100, credentials=self.owner)
+
 		to_search = 'Hisagomaru'
 		self.ds.set_credentials(self.user_3)
 		result = self.ds.unified_search(to_search, self.container)
