@@ -16,8 +16,6 @@ from . import toExternalObject
 from .. import alias, make_repr
 from .constants import DEFAULT_CHANNEL
 
-DEAULT_TIMEOUT = 30
-
 class Room(object):
 
 	id = alias('ID')
@@ -295,115 +293,14 @@ class Client(object):
 		self.shadowed_messages[d['ID']] = message
 		return message
 
-# 	def get_sent_messages(self, clear=False):
-# 		result = list(self.sent_messages)
-# 		if clear: self.sent_messages.clear()
-# 		return result
-#
-# 	def get_received_messages(self, clear=False):
-# 		return self._get_and_clear(self.recv_messages, clear)
-#
-# 	def get_shadowed_messages(self, clear=False):
-# 		return self._get_and_clear(self.shadowed_messages, clear)
-#
-# 	def get_moderated_messages(self, clear=False):
-# 		return self._get_and_clear(self.moderated_messages, clear)
-#
-# 	def _get_and_clear(self, messages, clear=False):
-# 		result = list(messages.itervalues())
-# 		if clear: messages.clear()
-# 		return result
-#
-# 	# ---- Callbacks ----
+	def chat_roomMembershipChanged(self, room_info):  # callback
+		pass
 
-#
+	def chat_setPresenceOfUsersTo(self, username, presenceInfo):  # callback
+		pass
 
-#
-# 	# ---- ----- ----
-#
-# 	def chat_roomMembershipChanged(self, room_info):
-# 		pass
-#
-# 	def chat_setPresenceOfUsersTo(self, username, presenceInfo):
-# 		pass
-#
-# 	def chat_presenceOfUserChangedTo(self, username, status):
-# 		pass
-#
+	def chat_presenceOfUserChangedTo(self, username, status):  # callback
+		pass
 
-
-#
-
-#
-# 	# ---- ----- ----
-#
-# 	def data_noticeIncomingChange(self, change):
-# 		pass
-#
-# 	# ---- ----- ----
-
-# 	# ---- ----- ----
-#
-# 	def runLoop(self):
-# 		self.killed = False
-# 		try:
-# 			if not self.ws:
-# 				self.ws_connect()
-# 			else:
-# 				self.connected = getattr(self.ws, "connected", False)
-#
-# 			while self.connected or not self.killed:
-# 				self.nextEvent()
-# 		except ConnectionClosedException:
-# 			pass
-# 		finally:
-# 			self.ws_capture()
-#
-# 	def nextEvent(self):
-# 		return _next_event(self.ws, self, message_context=self.message_context)
-#
-# 	# ---- WebSocket ----
-#
-# 	def ws_connect(self):
-#
-# 		if self.ws_connected:
-# 			self.ws.close()
-#
-# 		self.ws = _ws_connect(self.host, self.port, username=self.username,
-# 							  password=self.password, timeout=self.timeout,
-# 							  is_secure=self.is_secure,
-# 							  transport=self.transport,
-# 							  message_context=self.message_context)
-#
-# 		self.connected = getattr(self.ws, "connected", False)
-#
-# 	def ws_close(self):
-# 		if self.ws_connected:
-# 			try:
-# 				_ws_disconnect(self.ws, message_context=self.message_context)
-# 				self.ws.close()
-# 			finally:
-# 				self.ws = None
-# 				self.connected = False
-#
-# 	def ws_capture(self, reset=True):
-# 		self.ws_sent = list(self.message_context.sent)
-# 		self.ws_recv = list(self.message_context.received)
-# 		if reset:
-# 			self.message_context.reset()
-#
-# 	def ws_capture_and_close(self, reset=True):
-# 		self.ws_capture(reset=reset)
-# 		self.ws_close()
-#
-# 	@property
-# 	def ws_connected(self):
-# 		return getattr(self.ws, "connected", False) if self.ws else False
-#
-# 	@property
-# 	def ws_last_recv(self):
-# 		return self.message_context.last_recv
-#
-# 	@property
-# 	def ws_last_sent(self):
-# 		return self.message_context.last_sent
+	def data_noticeIncomingChange(self, change):  # callback
+		pass
