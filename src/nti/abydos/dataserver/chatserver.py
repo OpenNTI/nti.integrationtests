@@ -128,7 +128,6 @@ class Client(object):
 
 	def __init__(self, username, transport=None, * args, **kwargs):
 		self.reset()
-
 		self.killed = False
 		self.heart_beats = 0
 		self.username = username
@@ -141,6 +140,7 @@ class Client(object):
 		self.recv_messages = collections.OrderedDict()
 		self.shadowed_messages = collections.OrderedDict()
 		self.moderated_messages = collections.OrderedDict()
+	clear = reset
 
 	@property
 	def sent(self):
