@@ -139,7 +139,8 @@ class TestFriendsSharing(DataServerTestCase):
 		friendsList = self.create_friends_list_with_name_and_friends(list_name, friendNames)
 		
 		note = self.ds.create_note(u'Shibari Benihime', container=str(uuid.uuid4()), sharedWith=[list_name])
-			
+		self.ds.process_hypatia(-1, credentials=self.owner)
+
 		for c in self.friends:
 			self.ds.set_credentials(c)
 			content = self.ds.search_user_content("Benihime")

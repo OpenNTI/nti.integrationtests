@@ -149,6 +149,7 @@ class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 		created_obj = self.ds.create_note(u'Zanjutsu Gokui', container=self.container, sharedWith=[self.list_name])
 		try:
 			assert_that(created_obj, shared_with([friendsList.ntiid]))
+			self.ds.process_hypatia(-1, credentials=self.owner)
 			
 			# all members can find note
 			for fc in self.friends:
