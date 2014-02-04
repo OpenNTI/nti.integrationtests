@@ -284,7 +284,7 @@ class TestBasicSharing(DataServerTestCase):
 		note = self.ds.create_note(msg, self.container, adapt=True)
 		note = self.ds.share_object(note, self.target[0], adapt=True)
 
-		self.ds.process_hypatia(100, credentials=self.owner)
+		self.ds.process_hypatia(-1, credentials=self.owner)
 
 		to_search = 'Kurohitsugi'
 		self.ds.set_credentials(self.target)
@@ -310,7 +310,7 @@ class TestBasicSharing(DataServerTestCase):
 		note = self.ds.create_note(msg, self.container, adapt=True)
 		note = self.ds.share_object(note, [list_name], adapt=True)
 		
-		self.ds.process_hypatia(100, credentials=self.owner)
+		self.ds.process_hypatia(-1, credentials=self.owner)
 
 		to_search = 'Hisagomaru'
 		self.ds.set_credentials(self.user_3)

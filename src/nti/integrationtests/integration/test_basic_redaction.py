@@ -51,7 +51,7 @@ class TestBasicRedactions(DataServerTestCase):
 											  container=self.container,
 											  adapt=True)
 		self.ds.share_object(redaction, self.target[0], adapt=True)
-		self.ds.process_hypatia(100, credentials=self.owner)
+		self.ds.process_hypatia(-1, credentials=self.owner)
 		
 		self.ds.set_credentials(self.target)
 		result = self.ds.search_user_content("Zangetsu")

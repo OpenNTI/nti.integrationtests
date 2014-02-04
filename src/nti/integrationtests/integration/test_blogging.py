@@ -120,7 +120,7 @@ class TestBlogging(DataServerTestCase):
 										'Begging her not to die Kenpachi screams out in rage as his opponent fades away',
 										tags=('yachiru', 'haori'))
 		assert_that(post, not_none())
-		self.ds.process_hypatia(100, credentials=self.owner)
+		self.ds.process_hypatia(-1, credentials=self.owner)
 
 		data = self.ds.search_user_content("kenpachi")
 		assert_that(data, has_entry('Hit Count', greater_than_or_equal_to(1)))

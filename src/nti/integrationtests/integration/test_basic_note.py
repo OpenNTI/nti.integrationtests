@@ -110,7 +110,7 @@ class TestBasicNotes(DataServerTestCase):
 		note = self.ds.create_note(u'The Asauchi breaks away to reveal Hollow Ichigo',
 								   self.container, title='At the palace of Oetsu')
 
-		self.ds.process_hypatia(100, credentials=self.owner)
+		self.ds.process_hypatia(-1, credentials=self.owner)
 
 		result = self.ds.search_user_content("Asauchi")
 		assert_that(result, container_of_length(greater_than_or_equal_to(1)))
