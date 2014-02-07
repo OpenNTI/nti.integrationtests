@@ -58,7 +58,7 @@ class TestStore(DataServerTestCase):
 
 	def _loop_test(self, purchase_id):
 		success = False
-		for _ in xrange(10):
+		for _ in xrange(30):
 			time.sleep(1)
 			purchase = self.ds.get_purchase_attempt(purchase_id)
 			assert_that(purchase, is_not(none()))
