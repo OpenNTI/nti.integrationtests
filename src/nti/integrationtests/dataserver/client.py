@@ -501,7 +501,7 @@ class DataserverClient(object):
 		rp = self.http_post(url, credentials, data)
 		if rp.status_code == 404:
 			return
-		assert_that(rp.status_code, is_(204),
+		assert_that(rp.status_code, is_(200),
 					'invalid status code processing hypatia content')
 
 	def get_user_object(self, user=None, credentials=None, adapt=True, **kwargs):
