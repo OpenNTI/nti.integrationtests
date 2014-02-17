@@ -496,7 +496,7 @@ class DataserverClient(object):
 	def process_hypatia(self, limit=None, credentials=None, **kwargs):
 		credentials = self._credentials_to_use(credentials)
 		# TODO: URL should be gotten from a collection
-		url = urljoin(self.endpoint, "/dataserver2/hypatia/@@process_hypatia_content")
+		url = urljoin(self.endpoint, "/dataserver2/hypatia/@@process_queue")
 		data = self.object_to_persist({"limit":limit}) if limit else None
 		rp = self.http_post(url, credentials, data)
 		if rp.status_code == 404:
