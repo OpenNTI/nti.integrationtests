@@ -122,10 +122,10 @@ class TestBlogging(DataServerTestCase):
 		assert_that(post, not_none())
 		self.ds.process_hypatia(-1, credentials=self.owner)
 
-		data = self.ds.search_user_content("kenpachi")
+		data = self.ds.search_user_content("yachiru")
 		assert_that(data, has_entry('Hit Count', greater_than_or_equal_to(1)))
 
-		data = self.ds.search_user_content("yachiru")
+		data = self.ds.search_user_content("kenpachi")
 		assert_that(data, has_entry('Hit Count', greater_than_or_equal_to(1)))
 
 	def test_posting_several_blogs(self):
