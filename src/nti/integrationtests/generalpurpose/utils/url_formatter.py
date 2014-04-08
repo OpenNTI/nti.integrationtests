@@ -6,7 +6,7 @@ $Id$
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
-import anyjson
+import simplejson as json
 import plistlib
 import cStringIO
 
@@ -24,34 +24,33 @@ class FormatFunctionality(object):
 	def urlFormat(self, URL, fmt):
 		return URL + '?format=' + fmt
 
-	def read(self):
+	def read(self, data):
 		pass
 
-	def write(self):
+	def write(self, data):
 		pass
-	
+
 class NoFormat(FormatFunctionality):
 
 	def formatURL(self, URL):
 		return URL
 
 	def write(self, data):
-		return anyjson.dumps(data)
+		return json.dumps(data)
 
 	def read(self, response):
-		return anyjson.loads(_content(response))
+		content = _content(response)
+		try:
+			return json.loads(content)
+		except ValueError:
+			return content
 
-class JsonFormat(FormatFunctionality):
+
+class JsonFormat(NoFormat):
 
 	def formatURL(self, URL):
 		return self.urlFormat(URL, 'json')
-	
-	def write(self, data):
-		return anyjson.dumps(data)
 
-	def read(self, response):
-		return anyjson.loads(_content(response))
-	
 class PlistFormat(FormatFunctionality):
 
 	def formatURL(self, URL):
