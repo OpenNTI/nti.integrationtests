@@ -36,7 +36,7 @@ class PostObject(BasicSeverOperation):
 
 			self.check_changed_last_modified_time(	preRequestTime=self.preRequestTime, collectionTime=self.lastModifiedCollection,
 													requestTime=self.lastModified)
-		except requests.exceptions.HTTPError, error:
+		except requests.exceptions.HTTPError as error:
 			response = getattr(error, 'response', None)
 			code = getattr(response, 'status_code', None)
 

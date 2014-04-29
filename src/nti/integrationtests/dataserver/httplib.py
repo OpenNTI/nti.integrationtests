@@ -21,7 +21,7 @@ def _http_error_logging(f):
 	def to_call(*args, **kwargs):
 		try:
 			return f(*args, **kwargs)
-		except requests.exceptions.HTTPError, http:
+		except requests.exceptions.HTTPError as http:
 			response = getattr(http, 'response', None)
 			_, _, tb = sys.exc_info()
 
@@ -35,7 +35,7 @@ def _http_error_logging(f):
 
 			raise http.__class__(message, response=response), None, tb
 
-		except requests.exceptions.RequestException, http:
+		except requests.exceptions.RequestException as http:
 
 			_, _, tb = sys.exc_info()
 
@@ -66,16 +66,19 @@ class RequestHttpLib(object):
 		if result is None:
 			result = self.sessions[credentials] = requests.Session()
 			result.auth = credentials
+			# provide a default content type (otherwise there is none set?)
+			# individual calls to post/put can override this
+			result.headers[str('content-type')] = str('application/json')
 		return result
 
 	def get_headers(self, rp):
 		result = rp.headers
 		return result
-	
+
 	def body(self, rp):
 		result = rp.content
 		return result
-	
+
 	def deserialize(self, rp):
 		result = rp.json()
 		return result
@@ -137,7 +140,7 @@ class DSRequestHttpLib(RequestHttpLib):
 		except:
 			pass
 		return None
-		
+
 	def _get_session(self, credentials=None):
 		s = super(DSRequestHttpLib, self)._get_session(credentials=credentials)
 		if not getattr(s, 'login', None):
@@ -160,7 +163,7 @@ class DSRequestHttpLib(RequestHttpLib):
 			finally:
 				setattr(s, 'login', True)
 		return s
-	
+
 	def do_session_close(self, s):
 		logout = getattr(s, 'logout', None)
 		if logout:
@@ -169,4 +172,3 @@ class DSRequestHttpLib(RequestHttpLib):
 			except:
 				pass
 		s.close()
-	
