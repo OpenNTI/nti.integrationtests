@@ -36,7 +36,8 @@ class XHRPollingSocket(SocketIOSocket):
 	def send(self, payload):
 		if isinstance( payload, unicode ):
 			payload = payload.encode( 'utf-8' )
-		r = requests.post(self.url, auth=self.auth, data=payload)
+		headers = {'content-type':'text/plain'}
+		r = requests.post(self.url, auth=self.auth, data=payload, headers=headers)
 		if r.status_code != 200:
 			raise XHRPollingSocketException(
 						"Could not post message '%s' to '%s'" % (payload, self.url))
