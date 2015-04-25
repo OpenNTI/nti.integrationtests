@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+import codecs
 from setuptools import setup, find_packages
 
 entry_points = {
@@ -15,12 +15,11 @@ setup(
 	author = 'NTI',
 	description = 'NextThought Dataserver Integration tests',
 	classifiers=[
-			"Development Status :: 2 - Pre-Alpha",
-			"Intended Audience :: Developers",
-			"Operating System :: OS Independent",
-			"Programming Language :: Python"
-		],
-
+		"Development Status :: 2 - Pre-Alpha",
+		"Intended Audience :: Developers",
+		"Operating System :: OS Independent",
+		"Programming Language :: Python"
+	],
 	install_requires = [
 		'setuptools',
 		'coverage',
@@ -29,11 +28,11 @@ setup(
 	],
 	extras_require = {
 		'PDF': ['pyobjc >= 2.5.1', 'pyobjc-core >= 2.5.1'] # Quartz is used for pdfs
-		},
+	},
 	packages = find_packages('src'),
 	package_dir = {'': 'src'},
 	include_package_data = True,
 	namespace_packages=['nti',],
 	zip_safe = False,
 	entry_points = entry_points
-	)
+)
