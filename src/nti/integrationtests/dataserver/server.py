@@ -8,6 +8,7 @@ $Id$
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
+import glob
 import os
 import sys
 import time
@@ -138,6 +139,14 @@ class DataserverProcess(object):
 				elapsed = elapsed + block_interval_seconds
 
 			if elapsed >= max_wait_secs:
+				print("===============\nFailed to start server; server logs follow.")
+				try:
+					for filename in glob.iglob(os.path.join(os.getenv('DATASERVER_DIR'), 'var', 'log', 'pserve-std*' )):
+						with open(filename, 'r') as f:
+							print(f.read())
+				except Exception:
+					logger.exception("Failed to print log")
+				print("===============\nDone with logs.")
 				raise Exception("Could not start data server")
 
 			if self.KEY_TEST_WAIT in os.environ:

@@ -19,11 +19,11 @@ from nti.integrationtests.dataserver import httplib
 
 class ServerRequest(object):
 
-	timeout = 30
+	timeout = 60
 
 	def __init__(self):
 		self.http = httplib.RequestHttpLib()
-		
+
 	def get(self, url, username, password):
 		credentials = (username, password)
 		return self.http.do_get(url, credentials, timeout=self.timeout)
