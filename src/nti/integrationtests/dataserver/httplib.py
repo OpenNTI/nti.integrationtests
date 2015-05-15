@@ -58,6 +58,8 @@ class _ResponseProxy(ProxyBase):
 
 class RequestHttpLib(object):
 
+	default_timeout = 60
+
 	def __init__(self):
 		self.sessions = {}
 
@@ -86,7 +88,7 @@ class RequestHttpLib(object):
 	@_http_error_logging
 	def do_get(self, url, credentials=None, **kwargs):
 		headers = kwargs.pop('headers', {})
-		timeout = kwargs.pop('timeout', 30)
+		timeout = kwargs.pop('timeout', self.default_timeout)
 		s = self._get_session(credentials)
 		rp = s.get(url, headers=headers, params=kwargs, timeout=timeout)
 		return _ResponseProxy(rp)
@@ -94,7 +96,7 @@ class RequestHttpLib(object):
 	@_http_error_logging
 	def do_post(self, url, credentials=None, data=None, **kwargs):
 		headers = kwargs.pop('headers', {})
-		timeout = kwargs.pop('timeout', 30)
+		timeout = kwargs.pop('timeout', self.default_timeout)
 		s = self._get_session(credentials)
 		rp = s.post(url, data=data, headers=headers, timeout=timeout)
 		return _ResponseProxy(rp)
@@ -102,7 +104,7 @@ class RequestHttpLib(object):
 	@_http_error_logging
 	def do_put(self, url, credentials, data=None, **kwargs):
 		headers = kwargs.pop('headers', {})
-		timeout = kwargs.pop('timeout', 30)
+		timeout = kwargs.pop('timeout', self.default_timeout)
 		s = self._get_session(credentials)
 		rp = s.put(url, data=data, headers=headers, timeout=timeout)
 		return _ResponseProxy(rp)
@@ -110,7 +112,7 @@ class RequestHttpLib(object):
 	@_http_error_logging
 	def do_delete(self, url, credentials, **kwargs):
 		headers = kwargs.pop('headers', {})
-		timeout = kwargs.pop('timeout', 30)
+		timeout = kwargs.pop('timeout', self.default_timeout)
 		s = self._get_session(credentials)
 		rp = s.delete(url, headers=headers, timeout=timeout)
 		return _ResponseProxy(rp)
