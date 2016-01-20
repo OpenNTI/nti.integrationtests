@@ -18,7 +18,7 @@ from nose.plugins.attrib import attr
 class TestBasicDevice(DataServerTestCase):
 	
 	name = 'deadbeef'
-	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
+	owner = ('test.user.1', DataServerTestCase.default_user_password)
 
 	def setUp(self):
 		super(TestBasicDevice, self).setUp()

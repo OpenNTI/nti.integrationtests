@@ -32,7 +32,7 @@ class BasicChatTest(DataServerTestCase):
 	@classmethod
 	def create_users(cls, max_users=10, create_friends_lists=False, ds_client=None):
 		for x in range(1, max_users):
-			name = 'test.user.%s@nextthought.com' % x
+			name = 'test.user.%s' % x
 			cls.user_names.append(name)
 
 		if create_friends_lists:
@@ -47,7 +47,7 @@ class BasicChatTest(DataServerTestCase):
 
 	@classmethod
 	def generate_user_name(self):
-		return '%s@nextthought.com' % str(uuid.uuid4()).split('-')[0]
+		return '%s' % str(uuid.uuid4()).split('-')[0]
 
 	@classmethod
 	def register_friends(cls, username, friends, password=DEFAULT_USER_PASSWORD, ds_client=None):

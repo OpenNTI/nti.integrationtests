@@ -28,8 +28,8 @@ from nose.plugins.attrib import attr
 @attr(level=3)
 class TestBlogging(DataServerTestCase):
 
-	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
-	target = ('test.user.2@nextthought.com', DataServerTestCase.default_user_password)
+	owner = ('test.user.1', DataServerTestCase.default_user_password)
+	target = ('test.user.2', DataServerTestCase.default_user_password)
 
 	def setUp(self):
 		super(TestBlogging, self).setUp()

@@ -19,8 +19,8 @@ from hamcrest import (assert_that, greater_than, is_not, is_)
 @attr(level=3)
 class TestLikeFavorite(DataServerTestCase):
 	
-	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
-	target = ('test.user.2@nextthought.com', DataServerTestCase.default_user_password)
+	owner = ('test.user.1', DataServerTestCase.default_user_password)
+	target = ('test.user.2', DataServerTestCase.default_user_password)
 
 	def setUp(self):
 		super(TestLikeFavorite, self).setUp()

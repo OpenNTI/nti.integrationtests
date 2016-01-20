@@ -41,8 +41,8 @@ class _User(BasicUser):
 @attr(level=5)
 class TestNotifications(DataServerTestCase):
 
-	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
-	target = ('test.user.2@nextthought.com', DataServerTestCase.default_user_password)
+	owner = ('test.user.1', DataServerTestCase.default_user_password)
+	target = ('test.user.2', DataServerTestCase.default_user_password)
 	
 	def setUp(self):
 		super(TestNotifications, self).setUp()

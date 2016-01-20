@@ -22,7 +22,7 @@ from nose.plugins.attrib import attr
 @attr(level=3)
 class TestQuizzes(DataServerTestCase):
 	
-	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
+	owner = ('test.user.1', DataServerTestCase.default_user_password)
 
 	def setUp(self):
 		super(TestQuizzes, self).setUp()

@@ -47,7 +47,7 @@ def get_env_vars():
 	host = os.environ.get('host', 'localhost')
 	port = int(os.environ.get('port', get_open_port()))
 	endpoint = "http://%s:%s/dataserver2" % (host, port)
-	username = os.environ.get('username', 'test.user.1@nextthought.com')
+	username = os.environ.get('username', 'test.user.1')
 	password = os.environ.get('password', 'temp001')
 	root_dir = os.environ.get('root_dir', tempfile.mktemp(prefix="ds.data.gpt.", dir="/tmp"))
 	use_coverage = os.environ.get('use_coverage', 'False').lower() == 'true'

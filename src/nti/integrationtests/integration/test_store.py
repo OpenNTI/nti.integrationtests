@@ -20,7 +20,7 @@ from hamcrest import (assert_that, is_, is_not, none)
 @attr(level=4)
 class TestStore(DataServerTestCase):
 
-	user_one = ('test.user.1@nextthought.com', 'temp001')
+	user_one = ('test.user.1', 'temp001')
 
 	@classmethod
 	def setUpClass(cls):

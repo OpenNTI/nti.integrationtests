@@ -24,7 +24,7 @@ class TestUserSearch(DataServerTestCase):
 		super(TestUserSearch, self).setUp()
 		self.prefix = 'test.user'
 		self.container = 'container-%s' % uuid.uuid1()
-		self.users = [('%s.%s@nextthought.com' % (self.prefix, r), self.default_user_password) for r in range(15,19)]
+		self.users = [('%s.%s' % (self.prefix, r), self.default_user_password) for r in range(15,19)]
 
 	def test_search_users(self):
 

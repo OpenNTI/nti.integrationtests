@@ -28,7 +28,7 @@ from hamcrest import (assert_that, is_, is_not, has_entry, greater_than_or_equal
 class TestDynamicFriendsLists(test_friends_lists.TestBasicFriendsLists,
 							  test_friends_sharing.TestFriendsSharing):
 	
-	outsider = ('test.user.8@nextthought.com', DataServerTestCase.default_user_password)
+	outsider = ('test.user.8', DataServerTestCase.default_user_password)
 	
 	def setUp(self):
 		super(TestDynamicFriendsLists, self).setUp()		

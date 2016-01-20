@@ -25,14 +25,14 @@ from hamcrest import (is_not, has_key, assert_that)
 @attr(level=3)
 class TestBasicFriendsLists(DataServerTestCase):
 
-	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
-	friend = ('test.user.3@nextthought.com',DataServerTestCase.default_user_password)
+	owner = ('test.user.1', DataServerTestCase.default_user_password)
+	friend = ('test.user.3',DataServerTestCase.default_user_password)
 
 	def setUp(self):
 		super(TestBasicFriendsLists, self).setUp()
 		self.ds.set_credentials(self.owner)
 		uid = str(uuid.uuid4()).split('-')[0]
-		self.list_name = '%s-%s@nextthought.com' % (uid, time.time())
+		self.list_name = '%s-%s' % (uid, time.time())
 
 	def create_friends_list_with_name_and_friends(self, name, friends):
 		return self.ds.create_friends_list_with_name_and_friends(name, friends)
@@ -62,7 +62,7 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 		
 	def test_can_delete_friendslist(self):
-		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
+		friends = ['test.user.5', 'test.user.6']
 		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
 		lists = self.ds.get_friends_lists()
@@ -76,7 +76,7 @@ class TestBasicFriendsLists(DataServerTestCase):
 		assert_that(lists, is_not(contains_friendslist(self.list_name)))
 
 	def test_can_create_friendslist_with_friends(self):
-		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
+		friends = ['test.user.5', 'test.user.6']
 		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
 		lists = self.ds.get_friends_lists()
@@ -88,7 +88,7 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 
 	def test_can_delete_from_friendslist(self):
-		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
+		friends = ['test.user.5', 'test.user.6']
 		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, friends)
 
 		lists = self.ds.get_friends_lists()
@@ -110,7 +110,7 @@ class TestBasicFriendsLists(DataServerTestCase):
 		self.ds.delete_object(createdlist)
 
 	def test_can_add_to_friendslists(self):
-		friends = ['test.user.5@nextthought.com', 'test.user.6@nextthought.com']
+		friends = ['test.user.5', 'test.user.6']
 		createdlist = self.create_friends_list_with_name_and_friends(self.list_name, [])
 
 		lists = self.ds.get_friends_lists()

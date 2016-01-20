@@ -20,9 +20,9 @@ from hamcrest import (assert_that, is_)
 @attr(level=3)
 class TestThreadedNotes(DataServerTestCase):
 
-	user_one = ('test.user.1@nextthought.com', 'temp001')
-	user_two = ('test.user.2@nextthought.com', 'temp001')
-	user_three = ('test.user.3@nextthought.com', 'temp001')
+	user_one = ('test.user.1', 'temp001')
+	user_two = ('test.user.2', 'temp001')
+	user_three = ('test.user.3', 'temp001')
 
 	def setUp(self):
 		super(TestThreadedNotes, self).setUp()

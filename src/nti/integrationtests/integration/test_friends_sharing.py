@@ -24,8 +24,8 @@ from hamcrest import ( assert_that, is_, has_entry, greater_than_or_equal_to)
 @attr(level=3)
 class TestFriendsSharing(DataServerTestCase):
 
-	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
-	friends = [('test.user.%s@nextthought.com' % r, DataServerTestCase.default_user_password) for r in xrange(2,4)]
+	owner = ('test.user.1', DataServerTestCase.default_user_password)
+	friends = [('test.user.%s' % r, DataServerTestCase.default_user_password) for r in xrange(2,4)]
 	note = 'A note to share'
 	
 	def setUp(self):

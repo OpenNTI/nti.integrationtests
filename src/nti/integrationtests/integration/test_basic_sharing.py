@@ -27,11 +27,11 @@ from nose.plugins.attrib import attr
 @attr(level=3)
 class TestBasicSharing(DataServerTestCase):
 
-	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
-	target = ('test.user.2@nextthought.com', DataServerTestCase.default_user_password)
-	user_3 = ('test.user.3@nextthought.com', DataServerTestCase.default_user_password)
+	owner = ('test.user.1', DataServerTestCase.default_user_password)
+	target = ('test.user.2', DataServerTestCase.default_user_password)
+	user_3 = ('test.user.3', DataServerTestCase.default_user_password)
 	
-	unauthorized_target = ('test.user.3@nextthought.com', 'incorrect')
+	unauthorized_target = ('test.user.3', 'incorrect')
 	noteToCreateAndShare = {'text': 'A note to share'}
 
 	def setUp(self):
@@ -275,7 +275,7 @@ class TestBasicSharing(DataServerTestCase):
 										   adapt=True)
 
 		shared_obj = self.ds.share_object(created_obj, [self.owner[0], self.target[0]])
-		assert_that(shared_obj['sharedWith'], is_(['test.user.2@nextthought.com']))
+		assert_that(shared_obj['sharedWith'], is_(['test.user.2']))
 
 	def test_search_direct_shared(self):
 		msg = 'Aizen using Hado #90: Kurohitsugi (Black Coffin).'
@@ -301,8 +301,8 @@ class TestBasicSharing(DataServerTestCase):
 	def test_search_friend_list_shared(self):
 
 		uid = str(uuid.uuid4()).split('-')[0]
-		list_name = '%s-%s@nextthought.com' % (uid, time.time())
-		friends = ['test.user.2@nextthought.com', 'test.user.3@nextthought.com']
+		list_name = '%s-%s' % (uid, time.time())
+		friends = ['test.user.2', 'test.user.3']
 		createdlist = self.ds.create_friends_list_with_name_and_friends(list_name, friends)
 
 		msg = 'Suzumebachi Hisagomaru'

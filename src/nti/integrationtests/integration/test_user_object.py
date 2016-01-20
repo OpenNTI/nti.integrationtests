@@ -20,8 +20,8 @@ from hamcrest import (assert_that, has_property, has_entry, is_, is_not)
 @attr(level=3)
 class TestUserObject(DataServerTestCase):
 
-	user_one = ('test.user.6@nextthought.com', DataServerTestCase.default_user_password)
-	user_two = ('test.user.7@nextthought.com', DataServerTestCase.default_user_password)
+	user_one = ('test.user.6', DataServerTestCase.default_user_password)
+	user_two = ('test.user.7', DataServerTestCase.default_user_password)
 
 	def setUp(self):
 		super(TestUserObject, self).setUp()
@@ -31,7 +31,7 @@ class TestUserObject(DataServerTestCase):
 	def test_create_user(self):
 		code =  str(uuid.uuid4()).split('-')[0]
 		username = u'u' + code
-		email = username + '@nextthought.com'
+		email = username + ''
 		password = 'mypassword'
 		realname = 'real ' + code
 		cap_realname = 'Real ' + code.capitalize() # Case is normalized by the DS

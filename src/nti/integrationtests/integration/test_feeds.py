@@ -25,8 +25,8 @@ from hamcrest import (assert_that, not_none, has_length, greater_than_or_equal_t
 @attr(level=3, type="feeds")
 class TestFeeds(DataServerTestCase):
 
-	owner = ('test.user.1@nextthought.com', DataServerTestCase.default_user_password)
-	target = ('test.user.2@nextthought.com', DataServerTestCase.default_user_password)
+	owner = ('test.user.1', DataServerTestCase.default_user_password)
+	target = ('test.user.2', DataServerTestCase.default_user_password)
 
 	def setUp(self):
 		super(TestFeeds, self).setUp()
