@@ -17,10 +17,11 @@ from hamcrest import instance_of
 import six
 import time
 import urllib
-import anyjson
 import warnings
 import collections
 from urlparse import urljoin
+
+import simplejson
 
 from nti.integrationtests.contenttypes import Note
 from nti.integrationtests.contenttypes import Post
@@ -627,7 +628,7 @@ class DataserverClient(object):
 
 	def create_stripe_token(self, data, credentials=None, **kwargs):
 		# prepare post data
-		data = anyjson.dumps(data)
+		data = simplejson.dumps(data)
 
 		# do post
 		href = 'store/create_stripe_token'
@@ -642,7 +643,7 @@ class DataserverClient(object):
 
 	def post_stripe_payment(self, data, credentials=None, **kwargs):
 		# prepare post data
-		data = anyjson.dumps(data)
+		data = simplejson.dumps(data)
 
 		# do post
 		credentials = self._credentials_to_use(credentials)
@@ -714,7 +715,7 @@ class DataserverClient(object):
 	def object_to_persist(self, obj):
 		if hasattr(obj, 'toDataServerObject'):
 			obj = obj.toDataServerObject()
-		result = anyjson.dumps(obj)
+		result = simplejson.dumps(obj)
 		return result
 
 	# ------------------------
@@ -867,7 +868,7 @@ class DataserverClient(object):
 			if v is None:
 				params.pop(k)
 
-		payload = anyjson.dumps(params)
+		payload = simplejson.dumps(params)
 		# FIXME: Get this from a link sent by the DS
 		href = "account.create"
 		url = urljoin(self.endpoint, href)
@@ -893,7 +894,7 @@ class DataserverClient(object):
 		# FIXME: Get this from a link sent by the DS
 		href = "account.preflight.create"
 		url = urljoin(self.endpoint, href)
-		rp = self.http_post(url, data=anyjson.dumps(data))
+		rp = self.http_post(url, data=simplejson.dumps(data))
 		assert_that(rp.status_code, is_(200),
 					'invalid status while user account creation preflight')
 		data = self.httplib.deserialize(rp)
