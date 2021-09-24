@@ -1,0 +1,12 @@
+
+# /
+/nti.integrationtests.egg-info
+/.noseids
+/.settings
+/.project
+/.pydevproject
+
+# /src/
+/src/.ropeproject
+/src/.coverage
+/src/nti.integrationtests.egg-info
