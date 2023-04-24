@@ -18,6 +18,7 @@ setup(
 		"Development Status :: 2 - Pre-Alpha",
 		"Intended Audience :: Developers",
 		"Operating System :: OS Independent",
+		"License :: OSI Approved :: Apache Software License"
 		"Programming Language :: Python"
 	],
 	install_requires = [
